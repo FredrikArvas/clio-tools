@@ -12,6 +12,7 @@ import os
 import re
 import time
 import logging
+import httpx
 from notion_client import Client
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,32 @@ def _get_client() -> Client:
     if not token:
         raise ValueError("NOTION_API_KEY (eller NOTION_TOKEN) saknas i miljövariabler")
     return Client(auth=token)
+
+
+def _query_database(db_id: str) -> list:
+    """
+    Direkt httpx-anrop mot Notion database query-endpunkten.
+    Kringgår notion-client SDK:s trasiga databases.query på Python 3.14.
+    Hanterar pagination automatiskt.
+    """
+    token = os.environ.get("NOTION_API_KEY") or os.environ.get("NOTION_TOKEN")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json",
+    }
+    url = f"https://api.notion.com/v1/databases/{db_id}/query"
+    results = []
+    body: dict = {}
+    while True:
+        resp = httpx.post(url, headers=headers, json=body, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        results.extend(data.get("results", []))
+        if not data.get("has_more"):
+            break
+        body["start_cursor"] = data["next_cursor"]
+    return results
 
 
 def _cached(key: str):
@@ -238,9 +265,7 @@ def get_database_as_text(db_id: str, label: str = "") -> str:
         return cached
 
     try:
-        client = _get_client()
-        response = client.databases.query(database_id=db_id)
-        pages = response.get("results", [])
+        pages = _query_database(db_id)
 
         if not pages:
             result = f"[{label or db_id}: tom databas]"
@@ -281,9 +306,7 @@ def get_project_index(db_id: str) -> list:
         return cached
 
     try:
-        client = _get_client()
-        response = client.databases.query(database_id=db_id)
-        pages = response.get("results", [])
+        pages = _query_database(db_id)
 
         index = []
         for page in pages:
@@ -303,7 +326,7 @@ def get_project_index(db_id: str) -> list:
         return index
 
     except Exception as e:
-        logger.error(f"Fel vid hämtning av projektindex: {e}")
+        logger.error(f"Fel vid hämtning av projektindex ({db_id}): {e}")
         return []
 
 
@@ -376,9 +399,7 @@ def get_all_context_cards(db_id: str) -> str:
         return cached
 
     try:
-        client = _get_client()
-        response = client.databases.query(database_id=db_id)
-        pages = response.get("results", [])
+        pages = _query_database(db_id)
 
         card_texts = []
         for page in pages:
@@ -459,6 +480,10 @@ def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -
 
 
 # ── Cache-hantering ───────────────────────────────────────────────────────────
+
+# Behörighetsmatris hanteras av clio-access paketet (clio-tools/clio-access/).
+# Se classifier._get_permission() och clio_access.AccessManager.
+
 
 def add_to_whitelist(page_id: str, email: str):
     """

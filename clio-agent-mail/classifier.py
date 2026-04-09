@@ -10,20 +10,20 @@ Säkerhetsmodell: vitlista + ämneskod är två oberoende lager.
 En ej vitlistad avsändare med rätt ämneskod får ändå bara standardsvar.
 """
 import re
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clio-tools" / "config"))
-from clio_utils import t, set_language
+from clio_core.utils import t, set_language
 
-CODE_AUTO = "[CLIO-AUTO]"
+CODE_AUTO  = "[CLIO-AUTO]"
 CODE_DRAFT = "[CLIO-DRAFT]"
+CODE_OBIT  = "[clio-obit]"   # case-insensitive match used below
 
-ACTION_AUTO_SEND = "AUTO_SEND"
+ACTION_AUTO_SEND         = "AUTO_SEND"
 ACTION_SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL"
-ACTION_STANDARD_REPLY = "STANDARD_REPLY"
-ACTION_FAQ_CHECK = "FAQ_CHECK"
+ACTION_STANDARD_REPLY    = "STANDARD_REPLY"
+ACTION_FAQ_CHECK         = "FAQ_CHECK"
+ACTION_SELF_QUERY        = "SELF_QUERY"
+ACTION_OBIT_IMPORT       = "OBIT_IMPORT"   # Sprint 3: returned watch-list CSV
 
 
 @dataclass
@@ -41,57 +41,113 @@ def extract_sender_email(sender: str) -> str:
     return sender.strip().lower()
 
 
+def _resolve_account_key(account: str, config) -> str:
+    """Mappar mottagar-adress till account_key via accounts-listan i config."""
+    accounts_raw = config.get("mail", "accounts", fallback="clio")
+    account_keys = [a.strip() for a in accounts_raw.split(",") if a.strip()]
+    account_lower = account.lower()
+    for key in account_keys:
+        user = config.get("mail", f"imap_user_{key}", fallback="").lower()
+        if user and user in account_lower:
+            return key
+    return account_keys[0] if account_keys else "clio"
+
+
+def _get_permission(sender_email: str, account_key: str, config) -> str:
+    """
+    Slår upp avsändarens behörighetsnivå för det aktuella kontot via clio-access.
+    Returnerar: "admin" | "write" | "coded" | "whitelisted" | "denied"
+    """
+    import sys
+    from pathlib import Path
+    # Lägg till clio-access i sys.path om det inte redan finns
+    _access_path = str(Path(__file__).parent.parent)
+    if _access_path not in sys.path:
+        sys.path.insert(0, _access_path)
+
+    from clio_access import AccessManager
+    am = AccessManager.from_config(config)
+    return am.get_level({"email": sender_email}, scope=account_key)
+
+
 def classify(mail_item, whitelist: set, config) -> Classification:
     """
     Regelmotor — returnerar Classification med action, reason och account_key.
 
     mail_item : MailItem
-    whitelist : set av lowercase e-postadresser (gäller enbart clio@)
+    whitelist : set av lowercase e-postadresser
     config    : ConfigParser med [mail]-sektion
-    """
-    clio_account = config.get("mail", "imap_user_clio").lower()
-    info_account = config.get("mail", "imap_user_info").lower()
-    account = mail_item.account.lower()
 
-    # ── info@ ────────────────────────────────────────────────────────────────
-    if account == info_account:
+    Behörighetsmodell (Sprint 2):
+      admin   → SELF_QUERY (alla kommandon, alla konton)
+      write   → SELF_QUERY på tillåtna konton
+      coded   → AUTO_SEND med kontextmedveten flagg
+      övriga  → vitlista-first som tidigare
+    """
+    info_account = config.get("mail", "imap_user_info", fallback="").lower()
+    account = mail_item.account.lower()
+    account_key = _resolve_account_key(account, config)
+    sender_email = extract_sender_email(mail_item.sender)
+
+    # ── info@ → FAQ-flöde (före behörighetscheck) ────────────────────────────
+    if info_account and account == info_account:
         return Classification(
             action=ACTION_FAQ_CHECK,
             reason=t("mail_reason_faq"),
             account_key="info",
         )
 
-    # ── clio@ ────────────────────────────────────────────────────────────────
-    if account == clio_account:
-        sender_email = extract_sender_email(mail_item.sender)
+    # ── Behörighetscheck ─────────────────────────────────────────────────────
+    perm = _get_permission(sender_email, account_key, config)
 
-        if sender_email not in whitelist:
-            return Classification(
-                action=ACTION_STANDARD_REPLY,
-                reason=t("mail_reason_not_whitelisted", sender=sender_email),
-                account_key="clio",
-            )
-
-        subject = mail_item.subject or ""
-
-        if CODE_DRAFT in subject:
-            return Classification(
-                action=ACTION_SEND_FOR_APPROVAL,
-                reason=t("mail_reason_draft", code=CODE_DRAFT),
-                account_key="clio",
-            )
-
-        # Vitlistad avsändare → AUTO_SEND oavsett ämneskod
-        # [CLIO-AUTO] i ämnesraden är frivilligt men stöds fortfarande
+    if perm in ("admin", "write"):
         return Classification(
-            action=ACTION_AUTO_SEND,
-            reason=t("mail_reason_auto"),
-            account_key="clio",
+            action=ACTION_SELF_QUERY,
+            reason=f"Permission: {perm}",
+            account_key=account_key,
         )
 
-    # ── Okänt konto — säker fallback ─────────────────────────────────────────
+    if perm == "coded":
+        # Kontextmedveten: behandlas som vitlistad men får #kodord-resolving
+        # (handlers._handle_auto_send injicerar NCC via get_knowledge_context)
+        return Classification(
+            action=ACTION_AUTO_SEND,
+            reason="Permission: coded",
+            account_key=account_key,
+        )
+
+    # ── Vitlista-first för övriga ────────────────────────────────────────────
+    if sender_email not in whitelist:
+        return Classification(
+            action=ACTION_STANDARD_REPLY,
+            reason=t("mail_reason_not_whitelisted", sender=sender_email),
+            account_key=account_key,
+        )
+
+    subject = mail_item.subject or ""
+
+    if CODE_DRAFT in subject:
+        return Classification(
+            action=ACTION_SEND_FOR_APPROVAL,
+            reason=t("mail_reason_draft", code=CODE_DRAFT),
+            account_key=account_key,
+        )
+
+    # [clio-obit] + CSV attachment → watchlist import
+    if CODE_OBIT.lower() in subject.lower():
+        csv_attached = any(
+            getattr(a, "filename", "").lower().endswith(".csv")
+            for a in getattr(mail_item, "attachments", [])
+        )
+        if csv_attached:
+            return Classification(
+                action=ACTION_OBIT_IMPORT,
+                reason="[clio-obit] subject with CSV attachment",
+                account_key=account_key,
+            )
+
     return Classification(
-        action=ACTION_STANDARD_REPLY,
-        reason=t("mail_reason_unknown_account", account=account),
-        account_key="clio",
+        action=ACTION_AUTO_SEND,
+        reason=t("mail_reason_auto"),
+        account_key=account_key,
     )
