@@ -1,0 +1,16 @@
+efternamn,fornamn,fodelsear,hemort,prioritet,kalla
+# Kopiera den här filen till <epost>.csv, t.ex. ulrika@arvas.se.csv
+# Ta bort kommentarsraderna (börjar med #) innan du kör run.py
+#
+# Fält:
+#   efternamn  — obligatoriskt
+#   fornamn    — obligatoriskt
+#   fodelsear  — tomt om okänt (obligatoriskt för prioritet "viktig")
+#   hemort     — tomt om okänt
+#   prioritet  — viktig | normal | bra_att_veta
+#   kalla      — manuell | gedcom | adressbok
+#
+# Exempel:
+# Frisk,Göran,1945,Haninge,viktig,manuell
+# Arvas,Christer,1942,,viktig,gedcom
+# Andersson,Lars,,Nacka,normal,adressbok
