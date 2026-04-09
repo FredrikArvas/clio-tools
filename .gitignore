@@ -1,0 +1,81 @@
+__pycache__/
+*.pyc
+*.pyo
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.env
+clio.config
+db/*.db
+db/*.sqlite
+clio-privfin/*.db
+clio-privfin/data/raw/
+*_OCR.pdf
+*_OCR.md
+*_OCR.txt
+*_TRANSKRIPT.md
+*_NARRAT.mp3
+*_NARRAT.wav
+*_VISION.md
+*_SAMPLES/
+config/piper-voices/*.onnx
+config/piper-voices/*.onnx.json
+config/voice-samples/*.mp3
+config/voice-samples/*.wav
+config/clio_state.json
+*.log
+Thumbs.db
+.DS_Store
+
+# clio-fetch output
+clio-fetch/output/
+
+# clio-emailfetch state
+clio-emailfetch/backup_state.json
+
+# clio-library state & logs
+clio-library/*_progress.json
+clio-library/notion_pages.json
+clio-library/notion_pages_progress.json
+clio-library/bokid_cache.json
+
+# clio-library data & import queue (lokal data, ska inte i git)
+clio-library/import/
+clio-library/*.csv
+clio-library/*.xlsx
+clio-library/*.json
+clio-library/_test_*
+clio-library/*.bkp
+
+# clio-library/runeberg data & debug-filer
+clio-library/runeberg/*.csv
+clio-library/runeberg/*.html
+
+# Test fixtures (generated)
+tests/fixtures/sample.*
+
+# Local Claude settings
+.claude/
+
+# Exiftool binaries (installeras lokalt)
+clio-vision/exiftool*/
+
+# Virtuella miljöer
+venv/
+venv-ollama/
+.venv/
+
+# Temporära Clio-filer
+_clio_tmp_*
+
+# Email-bilagor (genereras av clio-emailfetch, ska inte in i Git)
+attachments/
+
+# Zip-arkiv
+*.zip
+*.tar.gz
+
+# Installationsfiler
+*.exe

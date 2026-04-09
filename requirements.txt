@@ -1,0 +1,50 @@
+# clio-tools requirements
+# Installera med: pip install -r requirements.txt
+
+# ── Gemensamma ────────────────────────────────────────────────────────────────
+anthropic>=0.25.0       # Claude API (vision, research, narrate-rekommendation)
+python-dotenv>=1.0.0    # Läser .env
+
+# ── clio-library / clio-research ─────────────────────────────────────────────
+notion-client>=2.0.0    # Notion API-klient
+thefuzz>=0.19.0         # Fuzzy-matchning av boktitlar
+python-Levenshtein>=0.12.0  # Snabbar upp thefuzz
+openpyxl>=3.1.0         # Excel-generering och -läsning (build_library_excel)
+# Genererad 2026-04-02 baserad på faktiska imports i alla scripts.
+# Minimiversioner från clio_check.py REQUIRED-listan.
+
+# ── clio-docs ─────────────────────────────────────────────────────────────────
+ocrmypdf>=16.0.0        # OCR-pipeline (körs via subprocess -m ocrmypdf)
+pypdf>=4.0.0            # PDF-läsning
+pymupdf>=1.23.0         # PDF text-extraktion (importeras som fitz)
+
+# ── clio-vision ───────────────────────────────────────────────────────────────
+pyexiftool>=0.5.0       # Läser/skriver XMP-metadata i bilder
+
+# ── clio-transcribe ───────────────────────────────────────────────────────────
+faster-whisper>=1.0.0   # Whisper-transkribering (CPU och GPU)
+
+# ── clio-narrate ──────────────────────────────────────────────────────────────
+edge-tts>=6.0.0         # Microsoft Edge TTS (kräver internet)
+mutagen>=1.45.0         # ID3-taggning av MP3-filer
+python-docx>=0.8.11     # Läser .docx-filer (importeras som docx)
+
+# ── clio-docs + clio-vision (OCR-stöd) ───────────────────────────────────────
+Pillow>=10.0.0          # Bildbehandling (används av ocrmypdf och pytesseract)
+pytesseract>=0.3.10     # Python-wrapper för Tesseract OCR
+
+# ── clio-fetch ────────────────────────────────────────────────────────────────
+requests                # HTTP-klient för live URL-hämtning
+beautifulsoup4          # HTML-parsing
+lxml                    # HTML-parser-backend för beautifulsoup4
+chardet                 # Encoding-detektering (optional men rekommenderat)
+send2trash              # Flytta filer till papperskorgen (krävs för --clean)
+
+# ── clio-emailfetch ───────────────────────────────────────────────────────────
+keyring                 # Windows Credential Manager för IMAP-lösenord
+
+# ── Valfritt: Piper TTS (lokal röstsyntes i clio-narrate) ────────────────────
+# piper-tts            # Avkommentera om du vill använda Piper-motorn
+
+# ── Valfritt: GPU-stöd för faster-whisper ────────────────────────────────────
+# torch                # Avkommentera + kör: pip install torch --index-url https://download.pytorch.org/whl/cu121

@@ -1,0 +1,47 @@
+{
+  "_kommentar": "Regelmotor för kategorisering. Mönster är case-insensitive substring-match mot transaktionstext.",
+  "_version": "1.0",
+  "_datum": "2026-04-09",
+
+  "kategorier": [
+    {"cat_id": "bil-leasing",    "namn": "Billeasing",          "typ": "expense", "farg": "#4A6FA5"},
+    {"cat_id": "bil-lan",        "namn": "Billån",              "typ": "expense", "farg": "#4A6FA5"},
+    {"cat_id": "bil-trangsel",   "namn": "Trängselskatt",       "typ": "expense", "farg": "#7A6A4A"},
+    {"cat_id": "bil-infra",      "namn": "Infrastrukturavgift", "typ": "expense", "farg": "#7A6A4A"},
+    {"cat_id": "bil-parkering",  "namn": "Parkering",           "typ": "expense", "farg": "#7A6A4A"},
+    {"cat_id": "el-nat",         "namn": "El – nät (Vattenfall)","typ": "expense","farg": "#C8A84B"},
+    {"cat_id": "el-handel",      "namn": "El – handel (Godel)", "typ": "expense", "farg": "#C8A84B"},
+    {"cat_id": "media",          "namn": "Mediaprenumerationer","typ": "expense", "farg": "#2A3F6F"},
+    {"cat_id": "mat",            "namn": "Mat & livsmedel",     "typ": "expense", "farg": "#27622A"},
+    {"cat_id": "restaurang",     "namn": "Restaurang & café",   "typ": "expense", "farg": "#27622A"},
+    {"cat_id": "lon-fredrik",    "namn": "Lön Fredrik",         "typ": "income",  "farg": "#27622A"},
+    {"cat_id": "lon-ulrika",     "namn": "Lön Ulrika",          "typ": "income",  "farg": "#27622A"},
+    {"cat_id": "bilersattning",  "namn": "Bilersättning UA",    "typ": "income",  "farg": "#27622A"},
+    {"cat_id": "transfer-intern","namn": "Intern transfer",     "typ": "transfer","farg": "#8B6914"},
+    {"cat_id": "ignore",         "namn": "Ignorera",            "typ": "ignore",  "farg": "#EDE5D0"}
+  ],
+
+  "regler": [
+    {"monster": "AYVENS",              "cat_id": "bil-leasing",    "kommentar": "Ayvens billeasing"},
+    {"monster": "Lån: 1211-08-63544",  "cat_id": "bil-lan",        "kommentar": "Billån Danske Bank"},
+    {"monster": "TRÄNGSELSKA",         "cat_id": "bil-trangsel",   "kommentar": "Trängselskatt Stockholms stad"},
+    {"monster": "INFRASTRUKT",         "cat_id": "bil-infra",      "kommentar": "Infrastrukturavgift"},
+    {"monster": "STOCKHOLMS STADS PAR","cat_id": "bil-parkering",  "kommentar": "Parkering Stockholms stad"},
+    {"monster": "Vattenfall",          "cat_id": "el-nat",         "kommentar": "Vattenfall elnät"},
+    {"monster": "Godel",               "cat_id": "el-handel",      "kommentar": "Godel elhandel"},
+    {"monster": "Netflix",             "cat_id": "media",          "kommentar": "Netflix streaming"},
+    {"monster": "Spotify",             "cat_id": "media",          "kommentar": "Spotify musik"},
+    {"monster": "HBO",                 "cat_id": "media",          "kommentar": "HBO Max"},
+    {"monster": "Disney",              "cat_id": "media",          "kommentar": "Disney+"},
+    {"monster": "Viaplay",             "cat_id": "media",          "kommentar": "Viaplay"},
+    {"monster": "SVT",                 "cat_id": "media",          "kommentar": "SVT Play"},
+    {"monster": "Bilersättning UA",    "cat_id": "bilersattning",  "kommentar": "Ulrikas bilersättning"},
+    {"monster": "FA Extra till Bilkto","cat_id": "transfer-intern","kommentar": "Fredrik fyller på bilkonto"},
+    {"monster": "FA åter",             "cat_id": "transfer-intern","kommentar": "Fredrik återbetalning"},
+    {"monster": "Fa lån",              "cat_id": "transfer-intern","kommentar": "Internt lån FA"},
+    {"monster": "FA lån",              "cat_id": "transfer-intern","kommentar": "Internt lån FA"},
+    {"monster": "Till Fredriks Priv",  "cat_id": "transfer-intern","kommentar": "Transfer till Fredriks privatkonto"},
+    {"monster": "FA bil",              "cat_id": "transfer-intern","kommentar": "Intern bilkonto-transfer"},
+    {"monster": "FA åtbil",            "cat_id": "transfer-intern","kommentar": "Fredrik återbet bilkonto"}
+  ]
+}

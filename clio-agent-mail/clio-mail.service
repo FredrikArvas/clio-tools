@@ -1,0 +1,18 @@
+[Unit]
+Description=Clio Agent Mail — AI-driven mailhantering för Arvas International
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fredrik
+WorkingDirectory=/home/fredrik/clio-tools/clio-agent-mail
+ExecStart=/home/fredrik/clio-tools/clio-agent-mail/venv/bin/python main.py
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clio-mail
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+#!/bin/bash
+# clio-tools pre-commit hook
+# Körs automatiskt vid git commit.
+# Aktivera med: git config core.hooksPath .githooks
+set -e
+
+echo "=== clio-tools pre-commit ==="
+
+# Syntax-check av kritiska moduler
+echo "Syntax check..."
+python -m py_compile clio.py
+python -m py_compile config/clio_utils.py
+python -m py_compile config/clio_check.py
+python -m py_compile clio-docs/clio-docs-batch.py
+python -m py_compile clio-vision/clio_vision.py
+python -m py_compile clio-transcribe/clio-transcribe-batch.py
+python -m py_compile clio-narrate/clio-narrate-batch.py
+python -m py_compile clio-fetch/clio_fetch.py
+
+# Unit tests
+echo "Unit tests..."
+python tests/run_tests.py --unit
+
+echo "=== OK – commit godkänt ==="

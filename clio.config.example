@@ -1,0 +1,43 @@
+# clio.config.example
+# Kopiera till clio.config och fyll i dina värden.
+# Kör 'python clio.py setup' för guidad konfiguration.
+# OBS: API-nycklar hör hemma i .env — aldrig i denna fil.
+
+[user]
+name = "Ditt namn"
+language = "sv"
+
+[paths]
+# Sökväg till digikam4.db — lämna tomt om DigiKam inte används
+digikam_db = ""
+# Sökväg till exiftool-binären. "exiftool" fungerar om det finns i PATH.
+exiftool = "exiftool"
+# Sökväg till Tesseract. "tesseract" fungerar om det finns i PATH.
+tesseract = "tesseract"
+
+[notion]
+# ID för Notion-sidan som används som rot för Clio-projekt
+# Hitta det i Notion-URL:en: notion.so/<workspace>/<DETTA-ID>
+parent_page_id = ""
+
+[library]
+# Notion-databas-ID:n för Arvas Familjebibliotek
+# Hitta dem i Notion-URL:en för respektive databas
+bokregister_db = ""
+betyg_db = ""
+exemplar_db = ""
+
+[research]
+# Notion-databas-ID för personregistret (clio-research)
+personregister_db = ""
+# Sökväg till GEDCOM-fil (MyHeritage-export)
+gedcom_path = ""
+
+[emailfetch]
+# IMAP-inställningar för clio-emailfetch
+backup_dir = ""                      # Mapp där .eml-filer sparas
+imap_host = ""                       # T.ex. imap.one.com
+imap_port = 993
+service_name = "clio_emailfetch"     # Nyckel i Windows Credential Manager
+# Kommaseparerade konton: konto1@domain.se,konto2@domain.se
+accounts = ""

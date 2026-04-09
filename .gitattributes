@@ -1,0 +1,23 @@
+# Default: normalize to LF on commit, checkout as-is
+* text=auto
+
+# Shell scripts must keep LF (CRLF breaks shebang)
+*.sh text eol=lf
+.githooks/pre-commit text eol=lf
+
+# Python files: normalize to LF
+*.py text eol=lf
+
+# Markdown and JSON: normalize to LF
+*.md text eol=lf
+*.json text eol=lf
+
+# Binary files: no line ending conversion
+*.pdf binary
+*.mp3 binary
+*.wav binary
+*.jpg binary
+*.png binary
+*.onnx binary
+*.db binary
+*.sqlite binary
