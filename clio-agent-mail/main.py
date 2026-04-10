@@ -190,8 +190,8 @@ def main(argv=None):
         run_cycle(config, dry_run=args.dry_run)
         return
 
-    burst_interval = 60          # sekunder mellan polls efter aktivitet
-    burst_duration = 300         # sekunder burst-läget håller (5 min)
+    burst_interval = int(config.get("mail", "poll_interval_burst_seconds", fallback="15"))
+    burst_duration = int(config.get("mail", "poll_burst_duration_seconds", fallback="300"))
     night_interval = int(config.get("mail", "poll_interval_night_seconds", fallback="900"))
     night_start    = int(config.get("mail", "poll_night_start_hour", fallback="22"))
     night_end      = int(config.get("mail", "poll_night_end_hour",   fallback="6"))

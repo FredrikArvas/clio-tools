@@ -73,10 +73,11 @@ def _safe_filename(name: str) -> str:
     return name[:200] or "bilaga"
 
 
-def _folder_name(msg, date_prefix: str) -> str:
+def _folder_name(msg, date_prefix: str, short_id: str = "") -> str:
     """
-    Bygger ett läsbart mappnamn: {datum}_{avsändar-lokal}_{ämne-slug}
-    Exempel: 2026-04-08_carl.lindell_Analys-av-enkätundersökning
+    Bygger ett läsbart mappnamn: {datum}_{avsändar-lokal}_{ämne-slug}_{short_id}
+    Exempel: 2026-04-08_carl.lindell_Analys-av-enkätundersökning_3f9a2b1c8d4e
+    short_id används för säker rekonstruktion av bilagor från databasen.
     """
     # Avsändarens lokala del (före @)
     from_raw = msg.get("From", "")
@@ -103,6 +104,8 @@ def _folder_name(msg, date_prefix: str) -> str:
     base = f"{date_prefix}_{sender_local}"
     if subject_slug:
         base = f"{base}_{subject_slug}"
+    if short_id:
+        base = f"{base}_{short_id}"
     return base
 
 
@@ -116,7 +119,8 @@ def _save_attachments(msg, attachments_dir: Path, message_id: str) -> List[Attac
         return saved
 
     date_prefix = datetime.now().strftime("%Y-%m-%d")
-    base_name = _folder_name(msg, date_prefix)
+    short_id = re.sub(r"[^a-zA-Z0-9]", "", message_id)[-12:]
+    base_name = _folder_name(msg, date_prefix, short_id=short_id)
 
     # Räknare vid namnkrock på mappnivå
     folder = attachments_dir / base_name
@@ -203,10 +207,10 @@ def fetch_unseen(config, account_key: str) -> list:
     user = config.get("mail", f"imap_user_{account_key}")
     password = config.get("mail", f"imap_password_{account_key}")
 
-    attachments_dir = Path(config.get(
-        "mail", "attachments_dir",
-        fallback=str(Path(__file__).parent / "attachments")
-    ))
+    _raw_attachments = config.get("mail", "attachments_dir", fallback="attachments")
+    attachments_dir = Path(_raw_attachments)
+    if not attachments_dir.is_absolute():
+        attachments_dir = Path(__file__).parent / attachments_dir
 
     timeout = int(config.get("mail", "imap_timeout_seconds", fallback="30"))
 

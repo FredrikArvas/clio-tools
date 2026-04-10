@@ -521,14 +521,26 @@ def _reconstruct_mail_item(mail_data: dict, config):
     from imap_client import MailItem, AttachmentMeta, SUPPORTED_EXTENSIONS
 
     # Försök hitta sparade bilagor på disk
-    attachments_dir = Path(config.get("mail", "attachments_dir", fallback="attachments"))
+    _raw_attachments = config.get("mail", "attachments_dir", fallback="attachments")
+    attachments_dir = Path(_raw_attachments)
+    if not attachments_dir.is_absolute():
+        attachments_dir = Path(__file__).parent / _raw_attachments
     attachments = []
-    short_id = re.sub(r"[^a-zA-Z0-9]", "", mail_data["message_id"])[-16:]
-    date_prefix = mail_data.get("date_received", "")[:10].replace("-", "-")
-    # Sök efter matchande mapp
+    # short_id = sista 12 tecken av rensat message_id (nytt format från imap_client)
+    short_id = re.sub(r"[^a-zA-Z0-9]", "", mail_data["message_id"])[-12:]
+    # Fallback: matcha på datum + avsändar-lokal (gamla mappar saknar short_id)
+    sender_raw = _extract_email(mail_data.get("sender", ""))
+    sender_local = re.sub(r"[^a-zA-Z0-9åäöÅÄÖ.\-]", "", sender_raw.split("@")[0])[:20]
+    date_prefix = mail_data.get("date_received", "")[:10]
+    folder_prefix = f"{date_prefix}_{sender_local}" if date_prefix and sender_local else ""
+
     if attachments_dir.exists():
         for folder in attachments_dir.iterdir():
-            if folder.is_dir() and short_id in folder.name:
+            if not folder.is_dir():
+                continue
+            # Primär match: short_id i mappnamnet (nytt format)
+            # Fallback: datum+avsändare (gamla mappar)
+            if short_id in folder.name or (folder_prefix and folder.name.startswith(folder_prefix)):
                 for f in folder.iterdir():
                     if f.suffix.lower() in SUPPORTED_EXTENSIONS:
                         attachments.append(AttachmentMeta(
