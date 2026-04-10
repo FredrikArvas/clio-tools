@@ -11,6 +11,7 @@ clio.config
 db/*.db
 db/*.sqlite
 clio-privfin/*.db
+clio-agent-mail/state.db
 clio-privfin/data/raw/
 *_OCR.pdf
 *_OCR.md

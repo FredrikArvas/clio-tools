@@ -6,8 +6,7 @@ import logging
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "clio-tools" / "config"))
-from clio_utils import t, set_language
+from clio_core.utils import t, set_language
 
 import anthropic
 import attachments as att_module
@@ -127,6 +126,61 @@ Avsluta alltid med denna signatur, exakt som den är:
         model=MODEL,
         max_tokens=1000,
         messages=[{"role": "user", "content": content}],
+    )
+    return response.content[0].text.strip()
+
+
+def generate_holding_reply_for_unknown(mail_item, config) -> str:
+    """
+    Kort bekräftelsesvar till okänd avsändare.
+    Informerar om att de kommer att höras av — avslöjar inte systemets natur.
+    """
+    prompt = f"""Du är Clio, AI-medarbetare på Arvas International AB.
+
+Du har fått ett mail från en avsändare som inte finns i systemet ännu.
+Skriv ett kort, varmt bekräftelsesvar på svenska (2–3 meningar) som:
+- Bekräftar att mailet tagits emot
+- Informerar om att de kommer att höra av sig inom kort
+- Inte avslöjar att det är ett automatiserat system (signaturen hanterar det)
+
+Från: {mail_item.sender}
+Ämne: {mail_item.subject}
+
+Avsluta med denna signatur, exakt som den är:
+
+{SIGNATURE}"""
+
+    client = _get_client()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=200,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text.strip()
+
+
+def generate_self_query_reply(mail_item, config, knowledge: str = "") -> str:
+    """
+    Svarar på en direkt fråga från Fredrik.
+    Använder kunskapsbasen men är mer informell och direkt än externa svar.
+    """
+    knowledge_section = f"\n{knowledge}\n" if knowledge else ""
+    prompt = f"""Du är Clio, AI-medarbetare på Arvas International AB.
+Fredrik (din kollega och uppdragsgivare) mailar dig direkt med en fråga eller ett uppdrag.
+Svara direkt och hjälpsamt på svenska. Var konkret. Du behöver inte vara formell.
+Använd kunskapsbasen nedan om den är relevant.
+{knowledge_section}
+Fråga från Fredrik:
+Ämne: {mail_item.subject}
+{mail_item.body}
+
+Svara ovanför strecket — ingen signatur behövs."""
+
+    client = _get_client()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=1500,
+        messages=[{"role": "user", "content": prompt}],
     )
     return response.content[0].text.strip()
 

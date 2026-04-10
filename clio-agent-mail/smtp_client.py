@@ -56,6 +56,7 @@ def send_email(
         msg["CC"] = ", ".join(cc_addrs)
 
     msg.attach(MIMEText(body, "plain", "utf-8"))
+    msg.attach(MIMEText(_to_html(body), "html", "utf-8"))
 
     if dry_run:
         cc_str = f", CC: {', '.join(cc_addrs)}" if cc_addrs else ""
@@ -79,6 +80,33 @@ def send_email(
         raise
 
     _append_to_sent(config, from_account_key, raw_bytes)
+
+
+def _to_html(text: str) -> str:
+    """Konverterar plain text till enkel HTML med bevarad struktur."""
+    import html as html_lib
+    lines = text.splitlines()
+    out = ['<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#222;">']
+    for line in lines:
+        escaped = html_lib.escape(line)
+        if set(line.strip()) <= {"─", "━", "-", "=", " "} and len(line.strip()) >= 8:
+            out.append('<hr style="border:none;border-top:1px solid #ccc;margin:12px 0;">')
+        elif escaped.startswith("&gt; "):
+            out.append(
+                f'<blockquote style="margin:0 0 0 12px;padding:0 0 0 10px;'
+                f'border-left:3px solid #ccc;color:#555;">{escaped[5:]}</blockquote>'
+            )
+        elif escaped.startswith("&gt;"):
+            out.append(
+                f'<blockquote style="margin:0 0 0 12px;padding:0 0 0 10px;'
+                f'border-left:3px solid #ccc;color:#555;">{escaped[4:]}</blockquote>'
+            )
+        elif escaped == "":
+            out.append("<br>")
+        else:
+            out.append(f"<p style='margin:0 0 6px 0;'>{escaped}</p>")
+    out.append("</div>")
+    return "\n".join(out)
 
 
 def _append_to_sent(config, account_key: str, raw_bytes: bytes):

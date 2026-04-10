@@ -73,19 +73,57 @@ def _safe_filename(name: str) -> str:
     return name[:200] or "bilaga"
 
 
+def _folder_name(msg, date_prefix: str) -> str:
+    """
+    Bygger ett läsbart mappnamn: {datum}_{avsändar-lokal}_{ämne-slug}
+    Exempel: 2026-04-08_carl.lindell_Analys-av-enkätundersökning
+    """
+    # Avsändarens lokala del (före @)
+    from_raw = msg.get("From", "")
+    decoded_parts = decode_header(from_raw)
+    from_str = "".join(
+        p.decode(e or "utf-8", errors="replace") if isinstance(p, bytes) else p
+        for p, e in decoded_parts
+    )
+    addr_match = re.search(r"[\w.+\-]+@", from_str)
+    sender_local = addr_match.group(0).rstrip("@")[:20] if addr_match else "okand"
+    sender_local = re.sub(r"[^a-zA-Z0-9åäöÅÄÖ.\-]", "", sender_local)
+
+    # Ämne — ta bort Re:/Sv:/Fwd:-prefix, slug-ify
+    subject_raw = msg.get("Subject", "")
+    decoded_s = decode_header(subject_raw)
+    subject = "".join(
+        p.decode(e or "utf-8", errors="replace") if isinstance(p, bytes) else p
+        for p, e in decoded_s
+    )
+    subject = re.sub(r"^(Re|Sv|Fwd|VS|VB|AW)\s*:\s*", "", subject, flags=re.IGNORECASE).strip()
+    subject_slug = re.sub(r"[<>:\"/\\|?*\x00-\x1f]", "", subject)
+    subject_slug = re.sub(r"\s+", "-", subject_slug)[:30].strip("-")
+
+    base = f"{date_prefix}_{sender_local}"
+    if subject_slug:
+        base = f"{base}_{subject_slug}"
+    return base
+
+
 def _save_attachments(msg, attachments_dir: Path, message_id: str) -> List[AttachmentMeta]:
     """
     Extraherar och sparar bilagor från ett e-postmeddelande.
-    Skapar undermapp: attachments_dir / {datum}_{message_id_kort}/
+    Skapar undermapp: attachments_dir / {datum}_{avsändar-lokal}_{ämne-slug}/
     """
     saved = []
     if not msg.is_multipart():
         return saved
 
-    # Kort, filsystemssäkert ID ur message_id
-    short_id = re.sub(r"[^a-zA-Z0-9]", "", message_id)[-16:]
     date_prefix = datetime.now().strftime("%Y-%m-%d")
-    folder = attachments_dir / f"{date_prefix}_{short_id}"
+    base_name = _folder_name(msg, date_prefix)
+
+    # Räknare vid namnkrock på mappnivå
+    folder = attachments_dir / base_name
+    counter = 2
+    while folder.exists() and any(folder.iterdir()):
+        folder = attachments_dir / f"{base_name}_{counter}"
+        counter += 1
 
     for part in msg.walk():
         disposition = str(part.get("Content-Disposition", ""))
@@ -170,9 +208,11 @@ def fetch_unseen(config, account_key: str) -> list:
         fallback=str(Path(__file__).parent / "attachments")
     ))
 
+    timeout = int(config.get("mail", "imap_timeout_seconds", fallback="30"))
+
     items = []
     try:
-        conn = imaplib.IMAP4_SSL(host, port)
+        conn = imaplib.IMAP4_SSL(host, port, timeout=timeout)
         conn.login(user, password)
         conn.select("INBOX")
 

@@ -2,8 +2,13 @@
 state.py — SQLite-tillståndshantering för clio-agent-mail
 
 Tabeller:
-  mail       — varje inkommande mail med status
-  approvals  — väntande och besvarade godkännanden
+  mail                  — varje inkommande mail med status
+  approvals             — väntande och besvarade godkännanden
+  learned_replies       — Fredrik-godkända svar (few-shot)
+  flagged_notifications — VITLISTA/SVARTLISTA/BEHÅLL-ärenden
+  blacklist             — permanentblockerade adresser
+  partners              — kontakter/partners med språkpreferens
+                          (forward-compatible med clio-partnerdb)
 """
 import sqlite3
 from datetime import datetime
@@ -16,6 +21,7 @@ STATUS_PENDING = "PENDING"
 STATUS_SENT = "SENT"
 STATUS_FLAGGED = "FLAGGED"
 STATUS_REJECTED = "REJECTED"
+STATUS_WAITING = "WAITING"  # Väntar på Fredriks vitlistningsbeslut
 
 
 def get_connection(db_path=None):
@@ -97,6 +103,19 @@ def init_db(db_path=None):
                 email TEXT UNIQUE NOT NULL,
                 added_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS partners (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                email       TEXT UNIQUE NOT NULL,
+                name        TEXT,
+                language    TEXT,          -- 'sv','en','fr','de' etc. NULL = systemdefault
+                role        TEXT,          -- 'contact','admin','external' etc.
+                onboarded_at TEXT,         -- ISO datetime, NULL = ej onboardad
+                notes       TEXT,
+                external_id TEXT,          -- framtida clio-partnerdb sync-ID
+                created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+            );
         """)
         _migrate(conn)
 
@@ -142,6 +161,25 @@ def get_mail_id(message_id, db_path=None):
             "SELECT id FROM mail WHERE message_id = ?", (message_id,)
         ).fetchone()
         return row["id"] if row else None
+
+
+def get_mail_by_id(mail_id: int, db_path=None):
+    """Hämtar ett mail-objekt ur databasen via internt id. Returnerar dict eller None."""
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            "SELECT * FROM mail WHERE id = ?", (mail_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def get_waiting_mails_for_sender(sender_email: str, db_path=None) -> list:
+    """Hämtar alla mail med STATUS_WAITING från en given avsändare."""
+    with get_connection(db_path) as conn:
+        rows = conn.execute(
+            "SELECT * FROM mail WHERE status = ? AND sender LIKE ?",
+            (STATUS_WAITING, f"%{sender_email}%"),
+        ).fetchall()
+        return [dict(r) for r in rows]
 
 
 def save_approval(mail_id, draft, approval_message_id=None, fredrik_cc=None, db_path=None):
@@ -252,6 +290,79 @@ def is_blacklisted(email, db_path=None) -> bool:
         ).fetchone()
         return row is not None
 
+
+# ── Partners ──────────────────────────────────────────────────────────────────
+
+def get_partner(email: str, db_path=None) -> dict | None:
+    """Hämtar en partner ur databasen via e-postadress."""
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            "SELECT * FROM partners WHERE email = ?", (email.lower(),)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def upsert_partner(email: str, name: str = None, language: str = None,
+                   role: str = None, onboarded_at: str = None,
+                   notes: str = None, external_id: str = None,
+                   db_path=None) -> dict:
+    """
+    Skapar eller uppdaterar en partner. Returnerar det slutliga partner-objektet.
+    Befintliga fält skrivs inte över om inget nytt värde skickas (None = behåll).
+    """
+    now = datetime.utcnow().isoformat()
+    existing = get_partner(email, db_path)
+    if not existing:
+        with get_connection(db_path) as conn:
+            conn.execute(
+                """INSERT INTO partners
+                   (email, name, language, role, onboarded_at, notes, external_id,
+                    created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (email.lower(), name, language, role, onboarded_at,
+                 notes, external_id, now, now),
+            )
+    else:
+        updates = {
+            "name":         name         if name         is not None else existing["name"],
+            "language":     language     if language     is not None else existing["language"],
+            "role":         role         if role         is not None else existing["role"],
+            "onboarded_at": onboarded_at if onboarded_at is not None else existing["onboarded_at"],
+            "notes":        notes        if notes        is not None else existing["notes"],
+            "external_id":  external_id  if external_id  is not None else existing["external_id"],
+            "updated_at":   now,
+        }
+        with get_connection(db_path) as conn:
+            conn.execute(
+                """UPDATE partners SET name=?, language=?, role=?, onboarded_at=?,
+                   notes=?, external_id=?, updated_at=? WHERE email=?""",
+                (updates["name"], updates["language"], updates["role"],
+                 updates["onboarded_at"], updates["notes"], updates["external_id"],
+                 updates["updated_at"], email.lower()),
+            )
+    return get_partner(email, db_path)
+
+
+def get_partner_language(email: str, config, db_path=None) -> str:
+    """
+    Returnerar språkkod för en partner.
+    Prioritet: partners.language → config default_language → 'sv'
+    """
+    partner = get_partner(email, db_path)
+    if partner and partner.get("language"):
+        return partner["language"]
+    return config.get("mail", "default_language", fallback="sv")
+
+
+def get_all_partners(db_path=None) -> list:
+    """Returnerar alla partners, sorterade på e-post."""
+    with get_connection(db_path) as conn:
+        return [dict(r) for r in conn.execute(
+            "SELECT * FROM partners ORDER BY email"
+        ).fetchall()]
+
+
+# ── Insikter ──────────────────────────────────────────────────────────────────
 
 def get_all_mail_for_insights(limit: int = 200, db_path=None) -> list:
     """Returnerar mail-data för insiktsanalys (inga brödtexter — bara metadata)."""
