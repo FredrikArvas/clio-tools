@@ -8,15 +8,28 @@ Built by Fredrik Arvas / Arvas International AB together with Clio (Claude, Anth
 
 ## Quick start
 
+**Ny installation**
 ```powershell
 git clone https://github.com/FredrikArvas/clio-tools.git
 cd clio-tools
-pip install -r requirements.txt
-python clio.py setup          # guided setup — creates clio.config and .env
-python clio.py                # start the main menu
+python clio-install/install.py --venv --yes --check
+# Fyll i ANTHROPIC_API_KEY i .env när installern är klar
 ```
 
-Already have `clio.config` and `.env` from another machine? Run `python clio.py setup` and choose the copy option — it will show you exactly which files to bring over.
+**Flytta från en befintlig maskin**
+```powershell
+# På den gamla maskinen — exportera inställningar
+python clio-install/env_transfer.py --export
+# Kopiera clio-env-transfer.zip manuellt till nya maskinen
+
+# På nya maskinen
+git clone https://github.com/FredrikArvas/clio-tools.git
+cd clio-tools
+python clio-install/env_transfer.py --import clio-env-transfer.zip
+python clio-install/install.py --venv --yes --check
+```
+
+Se `clio-install/README.md` för fullständig dokumentation.
 
 Run `python config/clio_check.py` for a full dependency check with auto-fix for pip packages.
 

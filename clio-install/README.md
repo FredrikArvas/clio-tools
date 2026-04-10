@@ -2,16 +2,55 @@
 
 Installationsscript och avinstallationsscript för clio-tools-ekosystemet.
 
-## Användning
+---
+
+## Maskinöverflyttning
+
+### Från-maskin (befintlig installation)
 
 ```powershell
-# Från clio-tools-roten
+# 1. Exportera .env och clio.config krypterat
+python clio-install/env_transfer.py --export
+# → sparar clio-env-transfer.zip på Skrivbordet
+
+# 2. Kopiera zip manuellt till målmaskinen (USB, nätverksdelning m.m.)
+```
+
+### Till-maskin (ny maskin med befintliga inställningar)
+
+```powershell
+# 1. Klona repot
+git clone https://github.com/FredrikArvas/clio-tools.git
+cd clio-tools
+
+# 2. Importera .env och clio.config från zip
+python clio-install/env_transfer.py --import clio-env-transfer.zip
+
+# 3. Installera och verifiera
+python clio-install/install.py --venv --yes --check
+```
+
+### Ny installation (ingen zip att importera)
+
+```powershell
+# 1. Klona repot
+git clone https://github.com/FredrikArvas/clio-tools.git
+cd clio-tools
+
+# 2. Installera och verifiera
+python clio-install/install.py --venv --yes --check
+# → .env-stub skapas automatiskt — fyll i ANTHROPIC_API_KEY manuellt
+```
+
+---
+
+## Övriga kommandon
+
+```powershell
+# Interaktiv installation (frågar vid varje steg)
 python clio-install/install.py
 
-# Med auto-bekräftelse (agent-läge)
-python clio-install/install.py --yes
-
-# Torrkörning — se vad som skulle göras
+# Torrkörning — se vad som skulle göras utan att installera
 python clio-install/install.py --dry-run
 
 # Avinstallera (läser install_log.json)
