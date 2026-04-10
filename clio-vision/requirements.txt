@@ -1,0 +1,12 @@
+anthropic>=0.25.0
+python-dotenv>=1.0.0
+Pillow>=10.0.0
+pyexiftool>=0.5.0
+
+# Shared clio utilities — installera ett av alternativen:
+#
+# Lokal utveckling (monorepo):
+#   pip install -e ../clio-core
+#
+# Dela med kompisar (GitHub):
+#   pip install "clio-core @ git+https://github.com/DITT_KONTO/clio-tools.git#subdirectory=clio-core"

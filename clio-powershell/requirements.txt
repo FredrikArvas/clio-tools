@@ -1,0 +1,6 @@
+# clio-powershell/requirements.txt
+# clio-powershell är en konfigurationsguide (inga Python-scripts).
+# Inga externa Python-paket krävs.
+#
+# Systemkrav: PowerShell 5.x (inbyggt i Windows 10/11)
+#             PowerShell 7+: winget install Microsoft.PowerShell

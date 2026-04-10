@@ -1,0 +1,6 @@
+# clio-partnerdb/requirements.txt
+python-gedcom>=1.0.0    # GEDCOM-import och -export
+
+# clio-core (delat bibliotek):
+#   pip install -e ../clio-core        (lokal utveckling)
+#   pip install -e ./clio-core         (från repo-roten)

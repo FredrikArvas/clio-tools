@@ -1,0 +1,6 @@
+# clio-core/requirements.txt
+# clio-core använder enbart Python stdlib — inga externa paket krävs.
+#
+# Installera clio-core självt:
+#   pip install -e ./clio-core        (lokal utveckling)
+#   pip install -e ../clio-core       (från ett delprogram)

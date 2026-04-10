@@ -1,0 +1,12 @@
+edge-tts>=6.0.0
+mutagen>=1.45.0
+python-docx>=0.8.11
+python-dotenv>=1.0.0
+
+# Shared clio utilities — installera ett av alternativen:
+#
+# Lokal utveckling (monorepo):
+#   pip install -e ../clio-core
+#
+# Dela med kompisar (GitHub):
+#   pip install "clio-core @ git+https://github.com/DITT_KONTO/clio-tools.git#subdirectory=clio-core"

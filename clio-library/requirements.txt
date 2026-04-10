@@ -1,0 +1,11 @@
+notion-client>=2.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Shared clio utilities — installera ett av alternativen:
+#
+# Lokal utveckling (monorepo):
+#   pip install -e ../clio-core
+#
+# Dela med kompisar (GitHub):
+#   pip install "clio-core @ git+https://github.com/DITT_KONTO/clio-tools.git#subdirectory=clio-core"

@@ -1,0 +1,3 @@
+# clio-install/requirements.txt
+# install.py och uninstall.py använder enbart Python stdlib.
+# Inga externa paket krävs för att köra installationsscripten.

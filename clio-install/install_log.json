@@ -1,0 +1,316 @@
+{
+  "install_date": "2026-04-10T10:20:56",
+  "installer_version": "1.1",
+  "machine": "DESKTOP-JK11FR0",
+  "python_version": "3.14.3",
+  "actions": [
+    {
+      "timestamp": "2026-04-10T10:20:57",
+      "component": "python",
+      "type": "system",
+      "action": "verified",
+      "status": "OK",
+      "error_code": null,
+      "version": "3.14.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:20:57",
+      "component": "git",
+      "type": "system",
+      "action": "verified",
+      "status": "OK",
+      "error_code": null,
+      "version": "git version 2.53.0.windows.2"
+    },
+    {
+      "timestamp": "2026-04-10T10:20:57",
+      "component": "exiftool",
+      "type": "system",
+      "action": "verified",
+      "status": "OK",
+      "error_code": null,
+      "version": "13.54"
+    },
+    {
+      "timestamp": "2026-04-10T10:20:57",
+      "component": "ollama",
+      "type": "system",
+      "action": "verified",
+      "status": "OK",
+      "error_code": null,
+      "version": "ollama version is 0.20.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:20:58",
+      "component": "tesseract",
+      "type": "system",
+      "action": "winget_failed",
+      "status": "FAILED",
+      "error_code": "E_WINGET_FAILED"
+    },
+    {
+      "timestamp": "2026-04-10T10:20:58",
+      "component": "digikam",
+      "type": "system",
+      "action": "winget_failed",
+      "status": "FAILED",
+      "error_code": "E_WINGET_FAILED"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:16",
+      "component": "anthropic",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "0.93.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:19",
+      "component": "python-dotenv",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.2.2"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:21",
+      "component": "notion-client",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "3.0.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:25",
+      "component": "thefuzz",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "0.22.1"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:27",
+      "component": "python-Levenshtein",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "0.27.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:21:31",
+      "component": "openpyxl",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "3.1.5"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:02",
+      "component": "ocrmypdf",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "17.4.1"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:06",
+      "component": "pypdf",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "6.9.2"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:10",
+      "component": "pymupdf",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.27.2.2"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:11",
+      "component": "Pillow",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "12.2.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:13",
+      "component": "pytesseract",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "0.3.13"
+    },
+    {
+      "timestamp": "2026-04-10T10:22:15",
+      "component": "pyexiftool",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "0.5.6"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:17",
+      "component": "faster-whisper",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.2.1"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:24",
+      "component": "edge-tts",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "7.2.8"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:29",
+      "component": "mutagen",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.47.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:32",
+      "component": "python-docx",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.2.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:35",
+      "component": "requests",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "2.33.1"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:38",
+      "component": "beautifulsoup4",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "4.14.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:40",
+      "component": "lxml",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "6.0.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:43",
+      "component": "chardet",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "7.4.1"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:45",
+      "component": "send2trash",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "2.1.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:49",
+      "component": "keyring",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "25.7.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:50",
+      "component": "pyyaml",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "6.0.3"
+    },
+    {
+      "timestamp": "2026-04-10T10:23:53",
+      "component": "python-gedcom",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.1.0"
+    },
+    {
+      "timestamp": "2026-04-10T10:24:02",
+      "component": "clio-core",
+      "type": "pip",
+      "action": "installed",
+      "status": "OK",
+      "error_code": null,
+      "version": "1.0.0",
+      "path": "C:\\Users\\Fredrik Arvas\\Documents\\git\\clio-tools\\clio-core"
+    }
+  ],
+  "path_changes": [],
+  "pip_installed": [
+    "anthropic==0.93.0",
+    "python-dotenv==1.2.2",
+    "notion-client==3.0.0",
+    "thefuzz==0.22.1",
+    "python-Levenshtein==0.27.3",
+    "openpyxl==3.1.5",
+    "ocrmypdf==17.4.1",
+    "pypdf==6.9.2",
+    "pymupdf==1.27.2.2",
+    "Pillow==12.2.0",
+    "pytesseract==0.3.13",
+    "pyexiftool==0.5.6",
+    "faster-whisper==1.2.1",
+    "edge-tts==7.2.8",
+    "mutagen==1.47.0",
+    "python-docx==1.2.0",
+    "requests==2.33.1",
+    "beautifulsoup4==4.14.3",
+    "lxml==6.0.3",
+    "chardet==7.4.1",
+    "send2trash==2.1.0",
+    "keyring==25.7.0",
+    "pyyaml==6.0.3",
+    "python-gedcom==1.1.0",
+    "clio-core==1.0.0",
+    "clio-core @ C:\\Users\\Fredrik Arvas\\Documents\\git\\clio-tools\\clio-core"
+  ],
+  "venv": "C:\\temp\\clio-timing-test"
+}

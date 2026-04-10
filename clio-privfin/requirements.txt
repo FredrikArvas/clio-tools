@@ -1,0 +1,4 @@
+# clio-privfin/requirements.txt
+# clio-privfin använder enbart Python stdlib — inga externa paket krävs.
+#
+# Moduler som används: sqlite3, json, argparse, re, pathlib, hashlib, datetime
