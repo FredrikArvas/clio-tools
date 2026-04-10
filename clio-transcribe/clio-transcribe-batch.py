@@ -24,17 +24,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 
-import sys as _sys
-_config_path = str(Path(__file__).parent.parent / "config")
-if _config_path not in _sys.path:
-    _sys.path.insert(0, _config_path)
-try:
-    from clio_utils import has_non_ascii, t
-    _UTILS_AVAILABLE = True
-except ImportError:
-    _UTILS_AVAILABLE = False
-    def has_non_ascii(s): return bool(re.search(r'[^\x00-\x7F]', s))
-    def t(key, **kwargs): return key
+from clio_core.utils import has_non_ascii, t
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 

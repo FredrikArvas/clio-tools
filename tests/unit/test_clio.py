@@ -21,7 +21,6 @@ from unittest.mock import patch, MagicMock
 
 ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "config"))
 
 import clio
 

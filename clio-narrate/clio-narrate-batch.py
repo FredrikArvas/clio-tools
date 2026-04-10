@@ -27,18 +27,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 
-import sys as _sys
-_config_path = str(Path(__file__).parent.parent / "config")
-if _config_path not in _sys.path:
-    _sys.path.insert(0, _config_path)
-try:
-    from clio_utils import sanitize_filename, has_non_ascii, t
-    _UTILS_AVAILABLE = True
-except ImportError:
-    _UTILS_AVAILABLE = False
-    def sanitize_filename(s): return s
-    def has_non_ascii(s): return bool(re.search(r'[^\x00-\x7F]', s))
-    def t(key, **kwargs): return key
+from clio_core.utils import sanitize_filename, has_non_ascii, t
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -397,7 +386,7 @@ def voice_test(engine: str, voices: list, speed: str,
     print(f"  Saved to: {sample_dir.name}/")
 
     for voice_id, voice_name in voices:
-        safe_name = sanitize_filename(voice_name) if _UTILS_AVAILABLE else voice_name.replace(" ", "_")
+        safe_name = sanitize_filename(voice_name)
         out = sample_dir / f"{safe_name}.mp3"
         print(f"  Generating: {voice_name}...")
 

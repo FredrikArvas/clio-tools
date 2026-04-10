@@ -14,7 +14,6 @@ import tempfile
 import shutil
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "config"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "clio-docs"))
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
@@ -73,11 +72,11 @@ class TestFindPdfs(unittest.TestCase):
 class TestHasNonAscii(unittest.TestCase):
 
     def test_swedish_path_triggers_temp(self):
-        from clio_utils import has_non_ascii
+        from clio_core.utils import has_non_ascii
         self.assertTrue(has_non_ascii("/Users/fredr/Göteborg/file.pdf"))
 
     def test_ascii_path_no_temp(self):
-        from clio_utils import has_non_ascii
+        from clio_core.utils import has_non_ascii
         self.assertFalse(has_non_ascii("/Users/fredr/Documents/file.pdf"))
 
 

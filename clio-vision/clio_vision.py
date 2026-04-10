@@ -44,17 +44,7 @@ try:
 except ImportError:
     pass  # python-dotenv not installed; fall back to os.environ
 
-import sys as _sys
-_config_path = str(Path(__file__).parent.parent / "config")
-if _config_path not in _sys.path:
-    _sys.path.insert(0, _config_path)
-try:
-    from clio_utils import sanitize_filename, t
-    _UTILS_AVAILABLE = True
-except ImportError:
-    _UTILS_AVAILABLE = False
-    def sanitize_filename(s): return s
-    def t(key, **kwargs): return key
+from clio_core.utils import sanitize_filename, t
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -190,13 +180,28 @@ def warmup_ollama(model: str = OLLAMA_MODEL, retries: int = 5, wait: int = 15) -
 
     for attempt in range(1, retries + 1):
         try:
+            log.info(f"Ollama: laddar {model} i RAM (kan ta 30–60s på CPU)...")
             req = urllib.request.Request(
                 "http://localhost:11434/api/generate",
                 data=payload,
                 headers={"Content-Type": "application/json"},
             )
+            import threading, datetime as _dt
+            _done = threading.Event()
+            def _clock():
+                start = _dt.datetime.now()
+                while not _done.is_set():
+                    elapsed = int((_dt.datetime.now() - start).total_seconds())
+                    now = _dt.datetime.now().strftime("%H:%M:%S")
+                    print(f"\r  ⏳ {now}  ({elapsed}s)   ", end="", flush=True)
+                    _done.wait(1)
+                print("\r" + " " * 30 + "\r", end="", flush=True)
+            t = threading.Thread(target=_clock, daemon=True)
+            t.start()
             with urllib.request.urlopen(req, timeout=300) as resp:
                 resp.read()
+            _done.set()
+            t.join()
             log.info("Ollama model pre-loaded.")
             return True
         except urllib.error.HTTPError as e:
@@ -239,9 +244,25 @@ def analyze_with_ollama(image_file: Path, model: str = OLLAMA_MODEL) -> tuple:
             headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(req, timeout=300) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
+            raw = resp.read().decode("utf-8")
 
-        text = result.get("response", "").strip()
+        # Ollama returnerar ibland NDJSON (ett JSON-objekt per rad) trots stream=False.
+        # Försök single-parse först; faller tillbaka på rad-för-rad-ackumulering.
+        try:
+            result = json.loads(raw)
+            text = result.get("response", "").strip()
+        except json.JSONDecodeError:
+            parts = []
+            for line in raw.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    chunk = json.loads(line)
+                    parts.append(chunk.get("response", ""))
+                except json.JSONDecodeError:
+                    pass
+            text = "".join(parts).strip()
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             data = json.loads(match.group())
@@ -403,7 +424,9 @@ def write_vision_metadata(image_file: Path, data: dict):
 
 def build_md(image_file: Path, data: dict, digikam: dict, analysis_date: str, date_warnings: list = None) -> str:
     def _str_list(items):
-        """Coerce list items to strings (Ollama may return dicts instead of strings)."""
+        """Coerce list items to strings (Ollama may return dicts, ints, or other non-list types)."""
+        if not isinstance(items, (list, tuple)):
+            return []  # Ollama returnerade int/str/None istället för lista — ignorera
         result = []
         for item in items:
             if isinstance(item, str):
@@ -557,17 +580,6 @@ def parse_args(argv=None):
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main(argv=None):
-    # Miljökontroll — tyst om OK, sys.exit(1) med felmeddelande om något saknas
-    try:
-        import sys as _sys
-        _root = Path(__file__).parent.parent
-        if str(_root) not in _sys.path:
-            _sys.path.insert(0, str(_root))
-        from clio_env import check_environment
-        check_environment()
-    except ImportError:
-        pass  # clio_env saknas under bootstrapping
-
     args = parse_args(argv)
 
     input_folder = Path(args.folder)

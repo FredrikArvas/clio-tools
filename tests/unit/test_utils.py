@@ -14,8 +14,7 @@ import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "config"))
-from clio_utils import sanitize_filename, has_non_ascii, propose_rename, t, set_language
+from clio_core.utils import sanitize_filename, has_non_ascii, propose_rename, t, set_language
 
 
 class TestSanitizeFilename(unittest.TestCase):

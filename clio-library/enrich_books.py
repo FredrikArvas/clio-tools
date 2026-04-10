@@ -28,8 +28,7 @@ import urllib.request
 from pathlib import Path
 
 # ─── Banner ────────────────────────────────────────────────────────────────────
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from clio_banner import print_banner
+from clio_core.banner import print_banner
 print_banner("Berikning")
 
 # ─── .ENV LOADER ──────────────────────────────────────────

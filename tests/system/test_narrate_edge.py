@@ -13,8 +13,6 @@ import tempfile
 import shutil
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "config"))
-
 import importlib.util
 spec = importlib.util.spec_from_file_location(
     "clio_narrate",

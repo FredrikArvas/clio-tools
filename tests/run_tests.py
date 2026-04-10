@@ -25,7 +25,6 @@ from pathlib import Path
 logging.disable(logging.CRITICAL)
 
 ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "config"))
 sys.path.insert(0, str(ROOT / "tests" / "unit"))
 sys.path.insert(0, str(ROOT / "tests" / "system"))
 

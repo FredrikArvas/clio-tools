@@ -23,16 +23,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 
-import sys as _sys
-_config_path = str(Path(__file__).parent.parent / "config")
-if _config_path not in _sys.path:
-    _sys.path.insert(0, _config_path)
-try:
-    from clio_utils import propose_rename, sanitize_filename, has_non_ascii
-    _UTILS_AVAILABLE = True
-except ImportError:
-    _UTILS_AVAILABLE = False
-    def has_non_ascii(s): return bool(re.search(r'[^\x00-\x7F]', s))
+from clio_core.utils import propose_rename, sanitize_filename, has_non_ascii
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -254,8 +245,7 @@ def main():
         return
 
     # Filename sanitation
-    if _UTILS_AVAILABLE:
-        to_rename = [(f, sanitize_filename(f.name)) for f in pdfs
+    to_rename = [(f, sanitize_filename(f.name)) for f in pdfs
                      if f.name != sanitize_filename(f.name)]
         if to_rename:
             print(f"\n{len(to_rename)} file(s) have names that should be sanitized:")
