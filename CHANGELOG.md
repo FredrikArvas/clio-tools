@@ -6,6 +6,19 @@ Format: [version] – date – description
 
 ---
 
+## [2.1.1] – 2026-04-11
+
+### Fixed
+- Moved repo from `Documents\git\clio-tools` to `git\clio-tools` (root user folder)
+- Updated PowerShell profile: `clio` function now points to new path
+- Reinstalled `clio-core` as editable install in all three Python environments:
+  - System Python 3.14
+  - `venv-ollama` (Python 3.12, used by clio-vision)
+  - `clio-install/.venv`
+- Updated Windows User PATH in registry to new location
+
+---
+
 ## [2.1.0] – 2026-03-29
 
 ### Added
