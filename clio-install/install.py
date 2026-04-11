@@ -79,6 +79,7 @@ PIP_PACKAGES: list[tuple[str, str, str, str]] = [
     ("keyring",        "keyring>=24.0.0",              "keyring",            "keyring"),
     ("yaml",           "pyyaml>=6.0",                  "pyyaml",             "pyyaml"),
     ("gedcom",         "python-gedcom>=1.0.0",         "python-gedcom",      "python-gedcom"),
+    ("playwright",     "playwright>=1.40.0",            "playwright",         "playwright"),
 ]
 
 # ── Systemprogram (kategori C) ────────────────────────────────────────────────
@@ -665,6 +666,41 @@ def _maybe_pull_llava(log: dict, args: argparse.Namespace) -> None:
                     error_code=E_USER_DEFERRED)
 
 
+def _maybe_install_playwright_chromium(log: dict, args: argparse.Namespace) -> None:
+    """Kör 'playwright install chromium' om playwright är installerat men chromium saknas."""
+    try:
+        import importlib.util
+        if not importlib.util.find_spec("playwright"):
+            return
+        # Kolla om chromium redan finns
+        result = subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium", "--dry-run"],
+            capture_output=True, text=True, timeout=10
+        )
+        if "Install location" not in result.stdout:
+            return  # redan installerat eller okänt läge
+        # Fråga användaren
+        if args.yes:
+            print("       playwright: kör 'playwright install chromium' manuellt (~150 MB)")
+            _log_action(log, "playwright-chromium", "system", "deferred", "WAIT",
+                        error_code=E_USER_DEFERRED)
+            return
+        ans = _ask("       → Ladda ned Playwright Chromium (~150 MB)? [j/N]: ",
+                   default="N", auto_yes=False)
+        if ans == "j" and not args.dry_run:
+            print("       Installerar Chromium...")
+            subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"])
+            _log_action(log, "playwright-chromium", "system", "installed", "OK")
+        elif ans == "j" and args.dry_run:
+            print("       (dry-run) playwright install chromium")
+        else:
+            print("       → Hoppar över. Kör: python -m playwright install chromium")
+            _log_action(log, "playwright-chromium", "system", "deferred", "WAIT",
+                        error_code=E_USER_DEFERRED)
+    except Exception:
+        pass
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Steg 2 — pip-paket
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1050,6 +1086,7 @@ def main(argv=None) -> int:
         return 1
 
     s2 = step2_pip(log, args)
+    _maybe_install_playwright_chromium(log, args)
     s3 = step3_clio_core(log, args)
 
     # ── Mät diskdelta ─────────────────────────────────────────────────────────

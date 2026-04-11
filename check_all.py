@@ -18,6 +18,7 @@ MODULES = [
     "clio-docs",
     "clio-transcribe",
     "clio-narrate",
+    "clio-audio-edit",
     "clio-library",
     "clio-research",
     "clio-fetch",

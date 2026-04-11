@@ -8,14 +8,22 @@ Format: [version] – date – description
 
 ## [2.1.1] – 2026-04-11
 
-### Fixed
-- Moved repo from `Documents\git\clio-tools` to `git\clio-tools` (root user folder)
-- Updated PowerShell profile: `clio` function now points to new path
-- Reinstalled `clio-core` as editable install in all three Python environments:
-  - System Python 3.14
-  - `venv-ollama` (Python 3.12, used by clio-vision)
-  - `clio-install/.venv`
-- Updated Windows User PATH in registry to new location
+### Changed
+- `clio.py` delad i sex moduler för att hålla varje fil under ~300 rader (helt läsbar utan gissning):
+  - `clio_menu.py` — färger, BackToMenu, _input, state-hantering, show_menu, select_folder
+  - `clio_run_research.py` — GEDCOM-navigering (_scan_ged_files, select_gedcom, _search_gedcom_persons, _gedcom_has_asterisk, _pick_person) + run_research
+  - `clio_run_mail.py` — mail-helpers (_mail_whitelist, _mail_log, _mail_insights) + run_mail
+  - `clio_run_privfin.py` — privatekonomi-helpers (_privfin_db_status, _privfin_scan_folder, _privfin_ask_account_meta) + run_privfin
+  - `clio_run_obit.py` — run_obit
+  - `clio_runners.py` — run_tool, run_submenu, run_setup, run_check, export_source_zip, _python_for
+- `clio.py` är nu en tunn launcher (~240 rader): .env-laddning, __version__, TOOLS-register och main()-loop
+- `tests/unit/test_clio.py` uppdaterad med nya import-sökvägar och patch-targets:
+  - `import clio` → `import clio_menu`, `import clio_run_research`, `import clio_runners`
+  - patch-targets uppdaterade till respektive modul (t.ex. `clio_run_research.select_gedcom`)
+
+### Rationale
+clio.py var 1841 rader / ~70 KB — för stort för att läsas i ett kontextfönster. Med delningen ryms varje
+modul helt i ett Read-anrop, vilket eliminerar gissningar vid framtida ändringar.
 
 ---
 

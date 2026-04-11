@@ -1,0 +1,8 @@
+faster-whisper>=1.0.0
+anthropic
+ffmpeg-python
+python-dotenv>=1.0.0
+
+# ffmpeg-binären måste också finnas i PATH:
+# Windows: https://ffmpeg.org/download.html → lägg till i PATH
+# Verifiera: ffmpeg -version

@@ -181,8 +181,7 @@ def main(argv=None):
 
     config = load_config()
 
-    if not args.dry_run:
-        state.init_db()
+    state.init_db()
 
     interval = int(config.get("mail", "poll_interval_seconds", fallback="300"))
 
