@@ -230,6 +230,36 @@ TOOLS = [
         "needs_folder": False,
         "custom_runner": True,
     },
+    {
+        "nr":           13,
+        "name":         "clio-rag",
+        "desc":         "Lokal RAG — indexera böcker/dokument, sök med Claude (Qdrant)",
+        "status":       "active",
+        "needs_folder": False,
+        "submenu": [
+            {
+                "nr":           1,
+                "name":         "ingest",
+                "desc":         "Importera PDF-dokument till RAG-indexet (Qdrant + Docling)",
+                "script":       ROOT / "clio-rag" / "ingest.py",
+                "needs_folder": True,
+            },
+            {
+                "nr":           2,
+                "name":         "query",
+                "desc":         "Sök i RAG-indexet med Claude",
+                "script":       ROOT / "clio-rag" / "query.py",
+                "needs_folder": False,
+            },
+            {
+                "nr":           3,
+                "name":         "export-index",
+                "desc":         "Exportera RAG-index till fil",
+                "script":       ROOT / "clio-rag" / "export_index.py",
+                "needs_folder": False,
+            },
+        ],
+    },
 ]
 
 # ── Importer från moduler ─────────────────────────────────────────────────────

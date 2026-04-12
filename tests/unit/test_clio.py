@@ -270,17 +270,21 @@ class TestRunResearchBackToMenu(unittest.TestCase):
             with patch("builtins.input", return_value="0"):
                 clio_run_research.run_research(self.tool, {})
 
-    def test_backtomenu_from_syfte_in_mode1(self):
+    def test_mode1_completes_with_empty_syfte(self):
         with patch("clio_run_research.select_gedcom", return_value=self._tmp):
             with patch("clio_run_research._pick_person", return_value="@I1@"):
                 with patch("clio_run_research._gedcom_has_asterisk", return_value=False):
-                    with patch("builtins.input", side_effect=["1", "0"]):
-                        clio_run_research.run_research(self.tool, {})
+                    with patch("clio_run_research.save_state"):
+                        with patch("subprocess.run"):
+                            with patch("builtins.input", side_effect=["1", "", "", ""]):
+                                clio_run_research.run_research(self.tool, {})
 
-    def test_backtomenu_from_surname_in_mode2(self):
+    def test_mode2_completes_with_empty_surname(self):
         with patch("clio_run_research.select_gedcom", return_value=self._tmp):
-            with patch("builtins.input", side_effect=["2", "0"]):
-                clio_run_research.run_research(self.tool, {})
+            with patch("clio_run_research.save_state"):
+                with patch("subprocess.run"):
+                    with patch("builtins.input", side_effect=["2", "", "", "", ""]):
+                        clio_run_research.run_research(self.tool, {})
 
     def test_backtomenu_from_review_id_in_mode4(self):
         with patch("clio_run_research.select_gedcom", return_value=self._tmp):
