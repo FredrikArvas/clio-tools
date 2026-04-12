@@ -17,6 +17,12 @@ import os
 import sys
 from pathlib import Path
 
+# Sätt UTF-8 på stdout/stderr så att box-tecken och unicode fungerar i Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 # Ladda .env så att alla subtools ärver API-nycklar
 _env_file = Path(__file__).parent / ".env"
 if _env_file.exists():
