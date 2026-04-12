@@ -165,6 +165,126 @@ def check_dependencies() -> None:
 
 
 # ---------------------------------------------------------------------------
+# "Vad härnäst?"-meny — visas efter transkribering/annotering
+# ---------------------------------------------------------------------------
+
+def _after_menu(audio_path, annotated_path, parse_cut_list, apply_cuts, save_cutlog,
+                args, audio_files, folder):
+    """
+    Visas efter att en fil transkriberats/annoterats.
+    Låter användaren applicera klipp, välja ny fil, eller avsluta.
+    """
+    while True:
+        _section("Vad vill du göra härnäst?", [
+            f"{_YEL}1{_NRM}  Applicera klipp på {audio_path.name}",
+            f"{_YEL}2{_NRM}  Välj en ny fil",
+            f"{_GRY}0{_NRM}  Avsluta",
+        ])
+        val = input("Välj: ").strip()
+
+        if val == "0":
+            print("\n[OK]  Hej då.")
+            sys.exit(0)
+
+        elif val == "1":
+            if not annotated_path.exists():
+                print(f"[FEL] Manuset finns inte: {annotated_path}")
+                continue
+            cuts        = parse_cut_list(annotated_path)
+            output_path = audio_path.with_stem(audio_path.stem + "_edited")
+            cutlog_path = audio_path.with_stem(audio_path.stem + "_cutlog").with_suffix(".txt")
+            apply_cuts(audio_path, cuts, output_path)
+            save_cutlog(cuts, cutlog_path)
+            # Visa menyn igen så man kan välja ny fil efteråt
+            continue
+
+        elif val == "2":
+            # Starta om från filval (eller mappval om inget folder)
+            if folder and folder.is_dir():
+                _restart_from_file(folder, args)
+            else:
+                _restart_from_folder(args)
+            return
+
+        else:
+            print("  Ogiltigt val.")
+
+
+def _process_file(audio_path: Path, args, folder) -> None:
+    """
+    Kör ett ljud genom pipelinen med smart cache-kontroll:
+      - _annotated.txt finns  → hoppa direkt till after_menu
+      - _transcript.txt finns → hoppa till annotering
+      - inget finns           → kör hela flödet
+    """
+    from transcribe import transcribe, segments_to_text, save_transcript
+    from annotate   import annotate_with_claude, save_annotated
+    from editor     import parse_cut_list, apply_cuts, save_cutlog
+
+    stem            = audio_path.stem
+    transcript_path = audio_path.with_stem(stem + "_transcript").with_suffix(".txt")
+    annotated_path  = audio_path.with_stem(stem + "_annotated").with_suffix(".txt")
+
+    # Steg 1: transkribera — hoppa om transkript eller annoterat redan finns
+    if annotated_path.exists() or transcript_path.exists():
+        print(f"\n[OK]  Transkript finns redan — hoppar över transkribering.")
+    else:
+        segments = transcribe(audio_path, model_size=args.model, language=args.language)
+        save_transcript(segments, transcript_path)
+
+    # Steg 2: annotera — hoppa om annoterat manus redan finns
+    if annotated_path.exists():
+        print(f"[OK]  Annoterat manus finns redan: {annotated_path.name}")
+    elif args.no_claude:
+        print(f"\n[OK]  --no-claude: Lägg till klippmarkeringar manuellt i {transcript_path.name}")
+        print(f"      Format: [KLIPP_START: HH:MM:SS | KLIPP_SLUT: HH:MM:SS]")
+    else:
+        transcript_text = transcript_path.read_text(encoding="utf-8")
+        annotated_text  = annotate_with_claude(transcript_text, args.profile)
+        save_annotated(annotated_text, annotated_path)
+
+    manus = annotated_path if annotated_path.exists() else transcript_path
+    _after_menu(audio_path, manus, parse_cut_list, apply_cuts, save_cutlog, args, None, folder)
+
+
+def _restart_from_file(folder, args):
+    """Visar filmenyn igen i samma mapp."""
+    while True:
+        selection = select_audio_file(folder)
+        if selection is None:
+            _restart_from_folder(args)
+            return
+        audio_files = selection if isinstance(selection, list) else [selection]
+        for audio_path in audio_files:
+            if audio_path.exists():
+                _process_file(audio_path, args, folder)
+        return
+
+
+def _restart_from_folder(args):
+    """Går tillbaka till mappval och börjar om."""
+    from state import save_last_folder
+
+    while True:
+        folder = select_folder()
+        if not folder or not folder.is_dir():
+            print("[FEL] Ingen giltig mapp.")
+            sys.exit(1)
+        save_last_folder(str(folder))
+        selection = select_audio_file(folder)
+        if selection is not None:
+            break
+
+    audio_files = selection if isinstance(selection, list) else [selection]
+    for audio_path in audio_files:
+        if audio_path.exists():
+            _process_file(audio_path, args, folder)
+        _after_menu(audio_path, annotated_path, parse_cut_list, apply_cuts, save_cutlog,
+                    args, audio_files, folder)
+        return
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -202,9 +322,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args   = parser.parse_args(argv)
 
-    from state import save_last_folder
-    from transcribe import transcribe, segments_to_text, save_transcript
-    from annotate import annotate_with_claude, save_annotated
+    from state  import save_last_folder
     from editor import parse_cut_list, apply_cuts, save_cutlog
 
     if args.list_profiles:
@@ -232,6 +350,7 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(0)
 
     # Interaktivt mappval om --input saknas
+    folder = None
     if not args.input:
         while True:
             folder = select_folder()
@@ -256,25 +375,7 @@ def main(argv: list[str] | None = None) -> None:
         if not audio_path.exists():
             print(f"[FEL] Filen finns inte: {audio_path}")
             continue
-
-        stem            = audio_path.stem
-        transcript_path = audio_path.with_stem(stem + "_transcript").with_suffix(".txt")
-        annotated_path  = audio_path.with_stem(stem + "_annotated").with_suffix(".txt")
-
-        segments = transcribe(audio_path, model_size=args.model, language=args.language)
-        save_transcript(segments, transcript_path)
-
-        if args.no_claude:
-            print("\n[OK]  --no-claude: Lägg till klippmarkeringar manuellt i transkriptet.")
-            print(f"      Format: [KLIPP_START: HH:MM:SS | KLIPP_SLUT: HH:MM:SS]")
-            print(f"      Kör sedan: python clio-audio-edit.py --apply {transcript_path} --input {audio_path}")
-            continue
-
-        transcript_text = segments_to_text(segments)
-        annotated_text  = annotate_with_claude(transcript_text, args.profile)
-        save_annotated(annotated_text, annotated_path)
-
-    print("\n[OK]  Klart. Granska manuset och kör sedan --apply.")
+        _process_file(audio_path, args, folder)
 
 
 if __name__ == "__main__":

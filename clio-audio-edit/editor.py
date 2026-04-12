@@ -3,11 +3,40 @@ editor.py — ffmpeg-klippning för clio-audio-edit.
 Parsning av klipplista från annoterat manus och tillämpning via ffmpeg.
 """
 
+import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
 from transcribe import format_timestamp
+
+
+def _ffmpeg_bin() -> str:
+    """Returnerar sökväg till ffmpeg-binären, med explicit fallback."""
+    found = shutil.which("ffmpeg")
+    if found:
+        return found
+    # Vanliga Windows-platser
+    candidates = [
+        r"C:\Program Files\digiKam\ffmpeg.EXE",
+        r"C:\ffmpeg\bin\ffmpeg.exe",
+        r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
+    ]
+    for c in candidates:
+        if Path(c).exists():
+            return c
+    raise FileNotFoundError(
+        "ffmpeg hittades inte. Lägg till ffmpeg i PATH eller verifiera installationen."
+    )
+
+
+def _set_ffmpeg_env() -> None:
+    """Sätter PATH-miljövariabel så att ffmpeg-python hittar binären."""
+    exe = _ffmpeg_bin()
+    bin_dir = str(Path(exe).parent)
+    if bin_dir not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
 
 
 # ---------------------------------------------------------------------------
@@ -60,19 +89,31 @@ def cuts_to_keep_segments(cuts: list[tuple[float, float]], total_duration: float
 # ---------------------------------------------------------------------------
 
 def get_duration(audio_path: Path) -> float:
-    """Hämtar ljudfilens längd i sekunder via ffmpeg."""
-    import ffmpeg
-    probe = ffmpeg.probe(str(audio_path))
-    return float(probe["format"]["duration"])
+    """Hämtar ljudfilens längd i sekunder via ffmpeg -i (kräver inte ffprobe)."""
+    import subprocess, re
+    exe = _ffmpeg_bin()
+    result = subprocess.run(
+        [exe, "-i", str(audio_path)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    output = result.stdout.decode("utf-8", errors="ignore")
+    m = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", output)
+    if not m:
+        raise RuntimeError(f"Kunde inte läsa längd från: {audio_path}")
+    h, m_, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+    return h * 3600 + m_ * 60 + s
 
 
 def apply_cuts(audio_path: Path, cuts: list[tuple[float, float]], output_path: Path) -> None:
     """
-    Klipper ljudfilen med ffmpeg.
+    Klipper ljudfilen med ffmpeg via concat-demuxer (explicit sökväg, ingen ffmpeg-python).
     Behåller de segment som INTE är i klipplistan.
     """
-    import ffmpeg
+    import subprocess
+    import tempfile
 
+    exe           = _ffmpeg_bin()
     total         = get_duration(audio_path)
     keep_segments = cuts_to_keep_segments(cuts, total)
 
@@ -83,74 +124,37 @@ def apply_cuts(audio_path: Path, cuts: list[tuple[float, float]], output_path: P
         print("[FEL] Inga segment att behålla — avbryter.")
         sys.exit(1)
 
-    try:
-        (
-            ffmpeg
-            .filter(
-                [ffmpeg.input(str(audio_path), ss=s, to=e) for s, e in keep_segments],
-                "concat",
-                n=len(keep_segments),
-                v=0,
-                a=1,
-            )
-            .output(str(output_path))
-            .overwrite_output()
-            .run(quiet=True)
-        )
-    except Exception:
-        print("       (Försöker alternativ klippmetod...)")
-        _apply_cuts_concat(audio_path, keep_segments, output_path)
-        return
+    # Bygg concat-lista med inpoint/outpoint — inga tempfiler per segment
+    temp_dir    = Path(tempfile.mkdtemp())
+    concat_file = temp_dir / "concat.txt"
+    lines = ["ffconcat version 1.0"]
+    for start, end in keep_segments:
+        lines.append(f"file '{str(audio_path).replace(chr(92), '/')}'")
+        lines.append(f"inpoint {start:.3f}")
+        lines.append(f"outpoint {end:.3f}")
+    concat_file.write_text("\n".join(lines), encoding="utf-8")
+
+    cmd = [
+        exe, "-y",
+        "-f", "concat", "-safe", "0",
+        "-i", str(concat_file),
+        "-c", "copy",
+        str(output_path),
+    ]
+
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    concat_file.unlink()
+    temp_dir.rmdir()
+
+    if result.returncode != 0:
+        err = result.stdout.decode("utf-8", errors="ignore")
+        raise RuntimeError(f"ffmpeg misslyckades:\n{err[-800:]}")
 
     kept_duration = sum(e - s for s, e in keep_segments)
     removed       = total - kept_duration
     print(f"       Klippt längd:       {format_timestamp(kept_duration)}")
     print(f"       Borttaget:          {format_timestamp(removed)} ({removed/total*100:.0f}%)")
     print(f"\n[OK]  Sparat: {output_path.name}")
-
-
-def _apply_cuts_concat(audio_path: Path, keep_segments: list[tuple[float, float]], output_path: Path) -> None:
-    """
-    Fallback-klippning via tempfiler + concat-lista.
-    Används om filter_complex-metoden misslyckas.
-    """
-    import ffmpeg
-    import tempfile
-
-    temp_dir      = Path(tempfile.mkdtemp())
-    segment_files = []
-
-    for i, (start, end) in enumerate(keep_segments):
-        seg_path = temp_dir / f"seg_{i:04d}.wav"
-        (
-            ffmpeg
-            .input(str(audio_path), ss=start, to=end)
-            .output(str(seg_path), acodec="pcm_s16le")
-            .overwrite_output()
-            .run(quiet=True)
-        )
-        segment_files.append(seg_path)
-
-    concat_list = temp_dir / "concat.txt"
-    with open(concat_list, "w") as f:
-        for seg in segment_files:
-            f.write(f"file '{seg}'\n")
-
-    (
-        ffmpeg
-        .input(str(concat_list), format="concat", safe=0)
-        .output(str(output_path), acodec="pcm_s16le")
-        .overwrite_output()
-        .run(quiet=True)
-    )
-
-    for seg in segment_files:
-        seg.unlink()
-    concat_list.unlink()
-    temp_dir.rmdir()
-
-    total = sum(e - s for s, e in keep_segments)
-    print(f"[OK]  Sparat: {output_path.name} ({format_timestamp(total)})")
 
 
 def save_cutlog(cuts: list[tuple[float, float]], output_path: Path) -> None:
