@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -64,14 +65,26 @@ def menu_select(title: str, choices: list[str], back: bool = True) -> str | None
         result = questionary.select(title, choices=opts, style=_CLIO_STYLE).ask()
         return None if result in (None, _BACK) else result
 
-    # Fallback
+    # Fallback — detektera om val redan har inbyggda prefix ("1.", "c.", osv.)
+    _PREFIX_RE = re.compile(r"^\s*([a-z0-9]+)\.\s", re.IGNORECASE)
+    prefixes = [m.group(1) if (m := _PREFIX_RE.match(c)) else None for c in choices]
+    use_embedded = all(p is not None for p in prefixes)
+
     print(f"\n{BLD}{title}{NRM}")
     for i, c in enumerate(choices, 1):
-        print(f"  {i}. {c}")
+        if use_embedded:
+            print(f"  {c}")          # val har redan "1.", "c." etc. — visa som de är
+        else:
+            print(f"  {i}. {c}")    # val utan prefix — lägg till sekventiellt index
     if back:
         print(f"  0. {_BACK}")
     raw = input("\nVal: ").strip()
     if raw == "0" or raw == "":
+        return None
+    if use_embedded:
+        for c, p in zip(choices, prefixes):
+            if p and p.lower() == raw.lower():
+                return c
         return None
     if raw.isdigit() and 1 <= int(raw) <= len(choices):
         return choices[int(raw) - 1]
