@@ -264,41 +264,29 @@ TOOLS = [
 
 # ── Importer från moduler ─────────────────────────────────────────────────────
 
-from clio_menu    import load_state, show_menu, menu_select
+from clio_menu    import load_state, show_menu, _input, BackToMenu
 from clio_runners import run_tool, run_submenu, run_setup, run_check, export_source_zip
 
-# ── Menyval ───────────────────────────────────────────────────────────────────
+# ── Dispatch ──────────────────────────────────────────────────────────────────
 
-def _build_choices(tools: list) -> list[str]:
-    choices = [f"{tool['nr']}. {tool['name']} — {tool['desc']}" for tool in tools]
-    choices += [
-        "c. Kontrollera miljön",
-        "e. Exportera källkod (ZIP)",
-        "q. Avsluta",
-    ]
-    return choices
-
-
-def _dispatch(choice: str, tools: list, state: dict) -> bool:
+def _dispatch(raw: str, tools: list, state: dict) -> bool:
     """Returnerar False om loopen ska avslutas."""
-    if choice.startswith("q."):
+    val = raw.strip().lower()
+    if val in ("q", "quit", "exit"):
         print(t("menu_goodbye"))
         return False
-    if choice.startswith("c."):
+    if val == "c":
         run_check()
-    elif choice.startswith("e."):
+    elif val == "e":
         export_source_zip()
-    else:
-        try:
-            nr = int(choice.split(".")[0])
-            match = next((tool for tool in tools if tool["nr"] == nr), None)
-            if match:
-                if "submenu" in match:
-                    run_submenu(match, state)
-                else:
-                    run_tool(match, state)
-        except (ValueError, IndexError):
-            pass
+    elif val.isdigit():
+        nr = int(val)
+        match = next((tool for tool in tools if tool["nr"] == nr), None)
+        if match:
+            if "submenu" in match:
+                run_submenu(match, state)
+            else:
+                run_tool(match, state)
     return True
 
 
@@ -318,10 +306,13 @@ def main(argv=None):
 
     while True:
         show_menu(state, TOOLS, __version__, print_banner=_print_banner)
-        choice = menu_select(t("menu_select"), _build_choices(TOOLS), back=False)
-        if choice is None:
+        try:
+            raw = _input(t("menu_select") + " ")
+        except (BackToMenu, KeyboardInterrupt):
             continue
-        if not _dispatch(choice, TOOLS, state):
+        if not raw.strip():
+            continue
+        if not _dispatch(raw, TOOLS, state):
             break
 
 
