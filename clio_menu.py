@@ -31,6 +31,22 @@ try:
 except ImportError:
     _HAS_QUESTIONARY = False
 
+# ── ANSI-hjälpare ────────────────────────────────────────────────────────────
+
+_ANSI_RE = re.compile(r"\033\[[0-9;]*m")
+
+def _vlen(s: str) -> int:
+    """Synlig teckenlängd utan ANSI-escape-koder."""
+    return len(_ANSI_RE.sub("", s))
+
+def _rpad(s: str, width: int) -> str:
+    """Paddar en ANSI-dekorerad sträng till synlig bredd."""
+    return s + " " * max(0, width - _vlen(s))
+
+def _trunc(s: str, maxlen: int) -> str:
+    """Trunkerar ren sträng och lägger till … om den är för lång."""
+    return s if len(s) <= maxlen else s[: maxlen - 1] + "…"
+
 # ── Colors ────────────────────────────────────────────────────────────────────
 
 GRN = "\033[92m"
@@ -193,6 +209,29 @@ def clear() -> None:
     os.system("cls" if sys.platform == "win32" else "clear")
 
 
+def _tool_lines(tool: dict | None, state: dict, last_run: str | None,
+                col_w: int) -> tuple[str, str, str]:
+    """Bygger tre rader (namn, beskrivning, status) för ett verktyg, paddade till col_w."""
+    if tool is None:
+        return " " * col_w, " " * col_w, " " * col_w
+
+    color  = GRN if tool.get("status") == "active" else GRY
+    marker = f" {YEL}◀{NRM}" if tool["name"] == last_run else ""
+    nr_s   = f"{tool['nr']}."
+
+    runs   = state.get("runs", {}).get(tool["name"], [])
+    if runs:
+        st = f"{GRN}Last: {runs[-1].get('date', '')}{NRM}"
+    else:
+        st = f"{GRY}Never run{NRM}"
+
+    l1 = f"  {color}{nr_s:>3}{NRM} {BLD}{tool['name']}{NRM}{marker}"
+    l2 = f"     {GRY}{_trunc(tool['desc'], 30)}{NRM}"
+    l3 = f"     {st}"
+
+    return _rpad(l1, col_w), _rpad(l2, col_w), _rpad(l3, col_w)
+
+
 def show_menu(state: dict, tools: list, version: str,
               print_banner=None) -> None:
     clear()
@@ -205,19 +244,27 @@ def show_menu(state: dict, tools: list, version: str,
     print()
 
     last_run = state.get("last_run", None)
+    COL, SEP = 38, "  "
 
-    for tool in tools:
-        color  = GRN if tool["status"] == "active" else GRY
-        marker = f" {YEL}◀{NRM}" if tool["name"] == last_run else ""
-        print(f"  {color}{tool['nr']}.{NRM} {BLD}{tool['name']}{NRM}{marker}")
-        print(f"     {tool['desc']}")
-        print(f"     {tool_status(tool, state)}")
+    # Para ihop verktyg: udda index → vänster, jämna → höger
+    lefts  = tools[0::2]
+    rights = tools[1::2]
+    pairs  = list(zip(lefts, rights))
+    if len(tools) % 2:
+        pairs.append((tools[-1], None))
+
+    for L, R in pairs:
+        l1, l2, l3 = _tool_lines(L, state, last_run, COL)
+        r1, r2, r3 = _tool_lines(R, state, last_run, COL)
+        print(l1 + SEP + r1)
+        print(l2 + SEP + r2)
+        print(l3 + SEP + r3)
         print()
 
-    print(f"  {YEL}c.{NRM} Kontrollera miljön (clio_check)")
-    print(f"  {YEL}e.{NRM} Exportera källkod (ZIP för Claude chat)")
-    print(f"  {YEL}q.{NRM} Avsluta\n")
-    print(f"{'─' * 56}")
+    print(f"  {YEL}c.{NRM} Kontrollera miljön   "
+          f"  {YEL}e.{NRM} Exportera källkod   "
+          f"  {YEL}q.{NRM} Avsluta\n")
+    print(f"{'─' * 78}")
 
 
 def select_folder(tool_name: str, state: dict) -> str | None:
