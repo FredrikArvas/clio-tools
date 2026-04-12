@@ -16,6 +16,7 @@ from clio_menu import (
     BackToMenu, _input,
     GRN, YEL, GRY, BLD, NRM,
     save_state, clear,
+    menu_select, menu_confirm, menu_text, menu_pause,
 )
 
 try:
@@ -30,28 +31,27 @@ def run_obit(tool: dict, state: dict) -> None:
     """Custom launcher för clio-agent-obit."""
     obit_root = ROOT / "clio-agent-obit"
 
+    _CHOICES = [
+        "1.  Kör bevakning        (dry-run, skickar inget)",
+        "2.  Kör bevakning        (skarpt läge, skickar mail)",
+        "3.  Kontrollera beroenden",
+        "4.  Importera GEDCOM     (→ watchlist)",
+        "5.  Importera adressbok  (→ watchlist)",
+        "6.  Sondera ny källa     (discover.py probe)",
+        "7.  Bjud in bevakare     (skicka mall via mail)",
+        "8.  Visa bevakningslista (sammanfattning)",
+        "9.  Exportera bevakningslista (CSV)",
+        "10. Visa relationsgraf   (HTML i webbläsaren)",
+    ]
+
     while True:
         clear()
         print(f"\n{BLD}  clio-agent-obit  —  Dödsannonsbevakning{NRM}")
-        print(f"{'─' * 56}")
-        print(f"  {GRN}1.{NRM} Kör bevakning        (dry-run, skickar inget)")
-        print(f"  {GRN}2.{NRM} Kör bevakning         (skarpt läge, skickar mail)")
-        print(f"  {GRN}3.{NRM} Kontrollera beroenden (check_deps.py)")
-        print(f"  {GRN}4.{NRM} Importera GEDCOM      (→ watchlist)")
-        print(f"  {GRN}5.{NRM} Importera adressbok   (→ watchlist)")
-        print(f"  {GRN}6.{NRM} Sondera ny källa      (discover.py probe)")
-        print(f"  {GRN}7.{NRM} Bjud in bevakare      (skicka mall via mail)")
-        print(f"  {GRN}8.{NRM} Visa bevakningslista  (sammanfattning per bevakare)")
-        print(f"  {GRN}9.{NRM} Exportera bevakningslista  (CSV till valfri mapp)")
-        print(f"  {GRN}10.{NRM} Visa relationsgraf         (HTML i webbläsaren)")
-        print(f"\n  {YEL}0.{NRM} Tillbaka")
-        print(f"{'─' * 56}")
-        try:
-            mode = _input("\nVal: ").strip()
-        except BackToMenu:
+        print(f"{'─' * 56}\n")
+        choice = menu_select("Välj:", _CHOICES)
+        if choice is None:
             return
-        if mode == "0":
-            return
+        mode = choice.split(".")[0].strip()
 
         print(f"\n{'─' * 40}")
         start = datetime.now()
@@ -77,9 +77,10 @@ def run_obit(tool: dict, state: dict) -> None:
 
             elif mode == "4":
                 last_ged = state.get("obit_gedcom_path", "")
-                prompt = (f"  Sökväg till .ged-fil eller mapp [{last_ged}]: "
-                          if last_ged else "  Sökväg till .ged-fil eller mapp: ")
-                ged = input(prompt).strip().strip('"') or last_ged
+                ged = menu_text("  Sökväg till .ged-fil eller mapp", default=last_ged)
+                if not ged:
+                    continue
+                ged = ged.strip('"')
                 ged_path = Path(ged)
                 if ged_path.is_dir():
                     state["obit_gedcom_path"] = str(ged_path)
@@ -87,41 +88,33 @@ def run_obit(tool: dict, state: dict) -> None:
                     ged_files = sorted(ged_path.glob("*.ged"))
                     if not ged_files:
                         print("  Inga .ged-filer hittades i mappen.")
-                        input(t("menu_continue"))
+                        menu_pause()
                         continue
-                    print()
-                    for i, f in enumerate(ged_files, 1):
-                        print(f"  {GRN}{i}.{NRM} {f.name}")
-                    print()
-                    try:
-                        pick = int(input(f"  Välj fil [1-{len(ged_files)}]: ").strip())
-                        ged_path = ged_files[pick - 1]
-                    except (ValueError, IndexError):
-                        print("  Ogiltigt val.")
-                        input(t("menu_continue"))
+                    picked = menu_select("  Välj .ged-fil:", [f.name for f in ged_files])
+                    if not picked:
                         continue
+                    ged_path = ged_path / picked
                 elif not ged_path.is_file():
                     print(f"  Filen hittades inte: {ged}")
-                    input(t("menu_continue"))
+                    menu_pause()
                     continue
                 last_owner = state.get("obit_last_owner", "")
-                owner_prompt = (f"  Bevakare [{last_owner}]: "
-                                if last_owner else "  Bevakare (e-post, t.ex. fredrik@arvas.se): ")
-                owner = ""
-                while "@" not in owner:
-                    owner = input(owner_prompt).strip() or last_owner
-                    if "@" not in owner:
-                        print("  Ange en giltig e-postadress.")
+                owner = menu_text("  Bevakare (e-post)", default=last_owner) or last_owner
+                if "@" not in owner:
+                    print("  Ange en giltig e-postadress.")
+                    menu_pause()
+                    continue
                 state["obit_last_owner"] = owner
                 save_state(state)
-                ego = input(f"  Centralperson [Enter = {owner}]: ").strip()
-                print(f"\n  Djupnivå:")
-                print(f"    1  Partner + föräldrar  (standard)")
-                print(f"    2  + Syskon + mor/farföräldrar")
-                print(f"    3  + Syskonbarn + föräldrars syskon")
-                print(f"    F  Alla levande i trädet (fullständig)\n")
-                depth_input = input("  Djup [1]: ").strip().lower() or "1"
-                dry = input("  Dry-run? [J/n]: ").strip().lower()
+                ego = menu_text(f"  Centralperson (lämna tomt = {owner})", default="") or ""
+                depth_choice = menu_select("  Djupnivå:", [
+                    "1 — Partner + föräldrar  (standard)",
+                    "2 — + Syskon + mor/farföräldrar",
+                    "3 — + Syskonbarn + föräldrars syskon",
+                    "F — Alla levande i trädet (fullständig)",
+                ]) or "1 — Partner + föräldrar  (standard)"
+                depth_input = depth_choice[0].lower()
+                dry = menu_confirm("  Dry-run?", default=True)
                 cmd = [sys.executable, str(obit_root / "watchlist" / "import_gedcom.py"),
                        "--gedcom", str(ged_path), "--owner", owner]
                 if ego:
@@ -130,36 +123,40 @@ def run_obit(tool: dict, state: dict) -> None:
                     cmd.append("--full")
                 else:
                     cmd += ["--depth", depth_input if depth_input in ("1", "2", "3") else "1"]
-                if dry != "n":
+                if dry:
                     cmd.append("--dry-run")
                 subprocess.run(cmd, text=True, errors="replace")
 
             elif mode == "5":
-                contacts = input("  Sökväg till adressbok-CSV: ").strip().strip('"')
-                owner = input("  Bevakare (e-post, t.ex. fredrik@arvas.se): ").strip()
-                dry = input("  Dry-run? [J/n]: ").strip().lower()
+                contacts = menu_text("  Sökväg till adressbok-CSV")
+                if not contacts:
+                    continue
+                owner = menu_text("  Bevakare (e-post)") or ""
+                dry = menu_confirm("  Dry-run?", default=True)
                 cmd = [sys.executable, str(obit_root / "watchlist" / "import_contacts.py"),
-                       "--contacts", contacts, "--owner", owner]
-                if dry != "n":
+                       "--contacts", contacts.strip('"'), "--owner", owner]
+                if dry:
                     cmd.append("--dry-run")
                 subprocess.run(cmd, text=True, errors="replace")
 
             elif mode == "6":
-                url = input("  URL att sondera: ").strip()
-                name_arg = input("  Namn för ny källa (Enter = lägg inte till): ").strip()
+                url = menu_text("  URL att sondera")
+                if not url:
+                    continue
+                name_arg = menu_text("  Namn för ny källa (lämna tomt = lägg inte till)", default="") or ""
                 cmd = [sys.executable, str(obit_root / "sources" / "discover.py"), "probe", url]
                 if name_arg:
                     cmd += ["--add", name_arg]
                 subprocess.run(cmd, text=True, errors="replace")
 
             elif mode == "7":
-                to_name  = input("  Mottagarens fullständiga namn: ").strip()
-                to_email = input("  Mottagarens e-post: ").strip()
-                dry = input("  Dry-run (förhandsgranska utan att skicka)? [J/n]: ").strip().lower()
+                to_name  = menu_text("  Mottagarens fullständiga namn") or ""
+                to_email = menu_text("  Mottagarens e-post") or ""
+                dry = menu_confirm("  Dry-run (förhandsgranska utan att skicka)?", default=True)
                 cmd = [sys.executable,
                        str(obit_root / "watchlist" / "send_invitation.py"),
                        "--to-name", to_name, "--to-email", to_email]
-                if dry != "n":
+                if dry:
                     cmd.append("--dry-run")
                 subprocess.run(cmd, text=True, errors="replace")
 
@@ -203,22 +200,22 @@ def run_obit(tool: dict, state: dict) -> None:
                     for i, f in enumerate(files, 1):
                         print(f"    {GRN}{i}.{NRM} {f.stem}")
                     print(f"    {GRN}A.{NRM} Alla")
-                    pick = input("\n  Välj [A]: ").strip().lower() or "a"
-                    if pick == "a":
+                    export_choices = ["A. Alla"] + [f"{i}. {f.stem}" for i, f in enumerate(files, 1)]
+                    picked = menu_select("  Välj lista:", export_choices) or "A. Alla"
+                    if picked.startswith("A."):
                         to_export = files
                     else:
                         try:
-                            to_export = [files[int(pick) - 1]]
+                            to_export = [files[int(picked.split(".")[0]) - 1]]
                         except (ValueError, IndexError):
-                            print("  Ogiltigt val.")
-                            input(t("menu_continue"))
                             continue
                     last_export = state.get("obit_export_path", str(Path.home() / "Desktop"))
-                    dest = input(f"  Exportmapp [{last_export}]: ").strip().strip('"') or last_export
+                    dest = menu_text("  Exportmapp", default=last_export) or last_export
+                    dest = dest.strip('"')
                     dest_path = Path(dest)
                     if not dest_path.exists():
                         print(f"  Mappen finns inte: {dest}")
-                        input(t("menu_continue"))
+                        menu_pause()
                         continue
                     state["obit_export_path"] = str(dest_path)
                     save_state(state)
@@ -236,42 +233,30 @@ def run_obit(tool: dict, state: dict) -> None:
                 ged_files = sorted(Path(ged_dir).glob("*.ged")) if ged_dir else []
                 if not ged_files:
                     print("  Ingen GEDCOM-mapp känd — kör val 4 först för att ange mapp.")
-                    input(t("menu_continue"))
+                    menu_pause()
                     continue
-                print(f"\n  Välj .ged-fil:")
-                for i, f in enumerate(ged_files, 1):
-                    print(f"    {GRN}{i}.{NRM} {f.name}")
-                try:
-                    pick = int(input(f"\n  Val [1]: ").strip() or "1")
-                    ged_path = ged_files[pick - 1]
-                except (ValueError, IndexError):
-                    print("  Ogiltigt val.")
-                    input(t("menu_continue"))
+                picked_ged = menu_select("  Välj .ged-fil:", [f.name for f in ged_files])
+                if not picked_ged:
                     continue
+                ged_path = Path(ged_dir) / picked_ged
                 last_owner = state.get("obit_last_owner", "")
-                owner_prompt = (f"  Bevakare [{last_owner}]: "
-                                if last_owner else "  Bevakare (e-post): ")
-                owner = input(owner_prompt).strip() or last_owner
+                owner = menu_text("  Bevakare (e-post)", default=last_owner) or last_owner
                 if "@" not in owner:
                     print("  Ange en giltig e-postadress.")
-                    input(t("menu_continue"))
+                    menu_pause()
                     continue
-                print(f"\n  Djup (antal relationsnivåer från dig):")
-                print(f"    1  Partner + föräldrar")
-                print(f"    2  + Syskon + mor/farföräldrar  (standard)")
-                print(f"    3  + Syskonbarn + föräldrars syskon")
-                depth = input("  Djup [2]: ").strip() or "2"
+                depth_choice = menu_select("  Djup:", [
+                    "1 — Partner + föräldrar",
+                    "2 — + Syskon + mor/farföräldrar  (standard)",
+                    "3 — + Syskonbarn + föräldrars syskon",
+                ]) or "2 — + Syskon + mor/farföräldrar  (standard)"
+                depth = depth_choice[0]
                 cmd = [sys.executable,
                        str(obit_root / "watchlist" / "graph.py"),
                        "--gedcom", str(ged_path),
                        "--owner", owner,
                        "--depth", depth if depth in ("1", "2", "3") else "2"]
                 subprocess.run(cmd, text=True, errors="replace")
-
-            else:
-                print("Ogiltigt val.")
-                input(t("menu_continue"))
-                continue
 
         except KeyboardInterrupt:
             print("\n(Avbruten av användaren)")
@@ -281,4 +266,4 @@ def run_obit(tool: dict, state: dict) -> None:
         elapsed = (datetime.now() - start).seconds
         print(f"\n{'─' * 40}")
         print(t("run_done", s=elapsed))
-        input(t("menu_continue"))
+        menu_pause()

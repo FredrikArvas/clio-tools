@@ -19,6 +19,7 @@ from clio_menu import (
     BackToMenu, _input,
     GRN, YEL, GRY, BLD, NRM,
     save_state, clear,
+    menu_select, menu_confirm, menu_text, menu_pause,
 )
 
 try:
@@ -71,21 +72,15 @@ def _privfin_ask_account_meta(fil: Path, konton: dict) -> tuple[str, str, str] |
     if account_id and account_id in konton:
         namn, agare, typ = konton[account_id]
         print(f"    Konto känt: {BLD}{namn}{NRM}  [{agare}, {typ}]")
-        ans = _input("    Använd dessa uppgifter? [J/n] (0=tillbaka): ").strip().lower()
-        if ans in ("", "j"):
+        if menu_confirm("    Använd dessa uppgifter?", default=True):
             return namn, agare, typ
 
-    konto = _input("    Kontonamn (0=tillbaka): ").strip()
+    konto = menu_text("    Kontonamn")
     if not konto:
         return None
 
-    print(f"    Ägare: 1=Fredrik  2=Ulrika  3=Gemensamt")
-    agare_val = _input("    Ägare [1]: ").strip() or "1"
-    agare = {"1": "Fredrik", "2": "Ulrika", "3": "Gemensamt"}.get(agare_val, "Fredrik")
-
-    print(f"    Typ: 1=checking  2=savings  3=credit  4=loan")
-    typ_val = _input("    Kontotyp [1]: ").strip() or "1"
-    typ = {"1": "checking", "2": "savings", "3": "credit", "4": "loan"}.get(typ_val, "checking")
+    agare = menu_select("    Ägare", ["Fredrik", "Ulrika", "Gemensamt"]) or "Fredrik"
+    typ   = menu_select("    Kontotyp", ["checking", "savings", "credit", "loan"]) or "checking"
 
     return konto, agare, typ
 
@@ -108,21 +103,22 @@ def run_privfin(tool: dict, state: dict) -> None:
         ("manad",           "Transaktioner per månad"),
     ]
 
+    _CHOICES = ["1. Importera kontoutdrag  (mapp eller enstaka fil)"] + [
+        f"{i}. {desc}" for i, (_, desc) in enumerate(RAPPORT_KOMMANDON, 2)
+    ]
+
     while True:
         clear()
         print(f"\n{BLD}  clio-privfin  —  Privatekonomi{NRM}")
-        print(f"{'─' * 56}")
-        print(f"  {GRN}1.{NRM} Importera kontoutdrag  (mapp eller enstaka fil)")
-        print()
-        for i, (cmd, desc) in enumerate(RAPPORT_KOMMANDON, 2):
-            print(f"  {GRN}{i}.{NRM} {desc}")
-        print(f"\n  {YEL}0.{NRM} Tillbaka\n")
-        print(f"{'─' * 56}")
+        print(f"{'─' * 56}\n")
 
-        try:
-            val = _input("Val: ").strip()
-        except BackToMenu:
+        choice = menu_select("Välj:", _CHOICES)
+        if choice is None:
             return
+        try:
+            val = choice.split(".")[0].strip()
+        except (IndexError, AttributeError):
+            continue
 
         if val == "1":
             # ── Välj mapp eller fil ───────────────────────────────────
@@ -131,22 +127,24 @@ def run_privfin(tool: dict, state: dict) -> None:
                 if last_folder:
                     short = ("..." + last_folder[-45:]) if len(last_folder) > 48 else last_folder
                     print(f"\nSenaste mapp: {YEL}{short}{NRM}")
-                    ans = _input("Använd samma mapp? [J/n/ny sökväg] (0=tillbaka): ").strip()
-                    if ans.lower() in ("", "j"):
+                    if menu_confirm("Använd samma mapp?", default=True):
                         src_path = Path(last_folder)
-                    elif ans == "0":
-                        raise BackToMenu()
                     else:
-                        src_path = Path(ans.strip('"'))
+                        raw = menu_text("Ny mapp eller fil")
+                        if not raw:
+                            continue
+                        src_path = Path(raw.strip('"'))
                 else:
-                    raw = _input("Mapp eller fil (0=tillbaka): ").strip().strip('"')
-                    src_path = Path(raw)
+                    raw = menu_text("Mapp eller fil")
+                    if not raw:
+                        continue
+                    src_path = Path(raw.strip('"'))
             except BackToMenu:
                 continue
 
             if not src_path.exists():
                 print(f"{GRY}Sökvägen hittades inte: {src_path}{NRM}")
-                input(t("menu_continue"))
+                menu_pause()
                 continue
 
             if src_path.is_file():
@@ -157,7 +155,7 @@ def run_privfin(tool: dict, state: dict) -> None:
                 folder_str = str(src_path)
                 if not filer:
                     print(f"{GRY}Inga XML/CSV-filer hittades i mappen.{NRM}")
-                    input(t("menu_continue"))
+                    menu_pause()
                     continue
 
             state["privfin_import_folder"] = folder_str
@@ -247,17 +245,15 @@ def run_privfin(tool: dict, state: dict) -> None:
 
             state["last_run"] = tool["name"]
             save_state(state)
-            input(t("menu_continue"))
+            menu_pause()
 
         elif val.isdigit() and 2 <= int(val) <= len(RAPPORT_KOMMANDON) + 1:
             rapport_cmd, _ = RAPPORT_KOMMANDON[int(val) - 2]
             extra_args = []
 
             if rapport_cmd == "manad":
-                try:
-                    manad = _input("Månad (YYYY-MM, tomt=innevarande, 0=tillbaka): ").strip()
-                except BackToMenu:
-                    continue
+                manad = menu_text("Månad (YYYY-MM, lämna tomt = innevarande)",
+                                  default=date.today().strftime("%Y-%m"))
                 manad = manad or date.today().strftime("%Y-%m")
                 extra_args = [manad]
 
@@ -269,7 +265,4 @@ def run_privfin(tool: dict, state: dict) -> None:
             )
             state["last_run"] = tool["name"]
             save_state(state)
-            input(t("menu_continue"))
-
-        elif val == "0":
-            return
+            menu_pause()

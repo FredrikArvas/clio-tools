@@ -4,6 +4,7 @@
 # ── Gemensamma ────────────────────────────────────────────────────────────────
 anthropic>=0.25.0       # Claude API (vision, research, narrate-rekommendation)
 python-dotenv>=1.0.0    # Läser .env
+questionary>=2.0.0      # Piltangentmenyer (TUI-standard för alla runners)
 
 # ── clio-library / clio-research ─────────────────────────────────────────────
 notion-client>=2.0.0    # Notion API-klient

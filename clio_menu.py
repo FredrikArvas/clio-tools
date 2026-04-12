@@ -1,6 +1,13 @@
 """
 clio_menu.py
 Färger, navigationshjälpare, state-hantering och menyvisning för clio-tools.
+
+Ny TUI-standard (questionary):
+  menu_select(title, choices)  → piltangentmeny, None = ← Tillbaka
+  menu_confirm(question)       → Ja/Nej
+  menu_text(prompt, validate)  → fritext, None = avbryt
+
+Äldre API (_input, BackToMenu) behålls under migrering.
 """
 
 from __future__ import annotations
@@ -16,6 +23,13 @@ try:
 except ImportError:
     def t(key, **kwargs): return key
 
+try:
+    import questionary
+    from questionary import Style
+    _HAS_QUESTIONARY = True
+except ImportError:
+    _HAS_QUESTIONARY = False
+
 # ── Colors ────────────────────────────────────────────────────────────────────
 
 GRN = "\033[92m"
@@ -25,7 +39,76 @@ BLU = "\033[94m"
 BLD = "\033[1m"
 NRM = "\033[0m"
 
-# ── Navigation ────────────────────────────────────────────────────────────────
+# ── Questionary TUI-standard ──────────────────────────────────────────────────
+
+_CLIO_STYLE = Style([
+    ("qmark",       "fg:cyan bold"),
+    ("question",    "bold"),
+    ("answer",      "fg:green bold"),
+    ("pointer",     "fg:cyan bold"),
+    ("highlighted", "fg:cyan bold"),
+    ("selected",    "fg:green"),
+    ("instruction", "fg:gray"),
+]) if _HAS_QUESTIONARY else None
+
+_BACK = "← Tillbaka"
+
+
+def menu_select(title: str, choices: list[str], back: bool = True) -> str | None:
+    """Piltangentmeny. Returnerar valt värde eller None (← Tillbaka / avbryt).
+
+    Faller tillbaka på numrerad input() om questionary saknas.
+    """
+    if _HAS_QUESTIONARY:
+        opts = list(choices) + ([_BACK] if back else [])
+        result = questionary.select(title, choices=opts, style=_CLIO_STYLE).ask()
+        return None if result in (None, _BACK) else result
+
+    # Fallback
+    print(f"\n{BLD}{title}{NRM}")
+    for i, c in enumerate(choices, 1):
+        print(f"  {i}. {c}")
+    if back:
+        print(f"  0. {_BACK}")
+    raw = input("\nVal: ").strip()
+    if raw == "0" or raw == "":
+        return None
+    if raw.isdigit() and 1 <= int(raw) <= len(choices):
+        return choices[int(raw) - 1]
+    return None
+
+
+def menu_confirm(question: str, default: bool = True) -> bool:
+    """Ja/Nej-fråga. Returnerar bool."""
+    if _HAS_QUESTIONARY:
+        result = questionary.confirm(question, default=default, style=_CLIO_STYLE).ask()
+        return bool(result)
+    ans = input(f"{question} [{'J/n' if default else 'j/N'}]: ").strip().lower()
+    if ans == "":
+        return default
+    return ans in ("j", "ja", "y", "yes")
+
+
+def menu_text(prompt: str, default: str = "", validate=None) -> str | None:
+    """Fritext-prompt. Returnerar None om användaren lämnar tomt utan default."""
+    if _HAS_QUESTIONARY:
+        kwargs = {"style": _CLIO_STYLE}
+        if default:
+            kwargs["default"] = default
+        if validate:
+            kwargs["validate"] = validate
+        result = questionary.text(prompt, **kwargs).ask()
+        return result if result else None
+    raw = input(f"{prompt}" + (f" [{default}]" if default else "") + ": ").strip()
+    return raw or default or None
+
+
+def menu_pause(msg: str = "Tryck Enter för att fortsätta...") -> None:
+    """Pausar och väntar på Enter. Konsekvent i hela TUI:n."""
+    input(f"\n{GRY}{msg}{NRM}")
+
+
+# ── Navigation (äldre API — behålls under migrering) ─────────────────────────
 
 class BackToMenu(Exception):
     """Kastas när användaren skriver 0 i en aktiv prompt — återgår till huvudmenyn."""

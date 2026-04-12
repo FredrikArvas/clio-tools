@@ -234,8 +234,43 @@ TOOLS = [
 
 # ── Importer från moduler ─────────────────────────────────────────────────────
 
-from clio_menu    import load_state, show_menu
+from clio_menu    import load_state, show_menu, menu_select
 from clio_runners import run_tool, run_submenu, run_setup, run_check, export_source_zip
+
+# ── Menyval ───────────────────────────────────────────────────────────────────
+
+def _build_choices(tools: list) -> list[str]:
+    choices = [f"{tool['nr']}. {tool['name']} — {tool['desc']}" for tool in tools]
+    choices += [
+        "c. Kontrollera miljön",
+        "e. Exportera källkod (ZIP)",
+        "q. Avsluta",
+    ]
+    return choices
+
+
+def _dispatch(choice: str, tools: list, state: dict) -> bool:
+    """Returnerar False om loopen ska avslutas."""
+    if choice.startswith("q."):
+        print(t("menu_goodbye"))
+        return False
+    if choice.startswith("c."):
+        run_check()
+    elif choice.startswith("e."):
+        export_source_zip()
+    else:
+        try:
+            nr = int(choice.split(".")[0])
+            match = next((tool for tool in tools if tool["nr"] == nr), None)
+            if match:
+                if "submenu" in match:
+                    run_submenu(match, state)
+                else:
+                    run_tool(match, state)
+        except (ValueError, IndexError):
+            pass
+    return True
+
 
 # ── Huvudloop ─────────────────────────────────────────────────────────────────
 
@@ -253,28 +288,11 @@ def main(argv=None):
 
     while True:
         show_menu(state, TOOLS, __version__, print_banner=_print_banner)
-        choice = input(t("menu_select")).strip().lower()
-
-        if choice == "q":
-            print(t("menu_goodbye"))
+        choice = menu_select(t("menu_select"), _build_choices(TOOLS), back=False)
+        if choice is None:
+            continue
+        if not _dispatch(choice, TOOLS, state):
             break
-        elif choice == "c":
-            run_check()
-        elif choice == "e":
-            export_source_zip()
-        elif choice == "setup":
-            run_setup()
-        else:
-            try:
-                nr = int(choice)
-                match = next((tool for tool in TOOLS if tool["nr"] == nr), None)
-                if match:
-                    if "submenu" in match:
-                        run_submenu(match, state)
-                    else:
-                        run_tool(match, state)
-            except ValueError:
-                pass
 
 
 if __name__ == "__main__":

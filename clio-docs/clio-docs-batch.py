@@ -247,25 +247,25 @@ def main():
     # Filename sanitation
     to_rename = [(f, sanitize_filename(f.name)) for f in pdfs
                      if f.name != sanitize_filename(f.name)]
-        if to_rename:
-            print(f"\n{len(to_rename)} file(s) have names that should be sanitized:")
+    if to_rename:
+        print(f"\n{len(to_rename)} file(s) have names that should be sanitized:")
+        for original, new_name in to_rename:
+            print(f"  {original.name}")
+            print(f"→ {new_name}")
+        answer = input("\nRename according to suggestion? [n/J]: ").strip().lower()
+        if answer == "j":
             for original, new_name in to_rename:
-                print(f"  {original.name}")
-                print(f"→ {new_name}")
-            answer = input("\nRename according to suggestion? [n/J]: ").strip().lower()
-            if answer == "j":
-                for original, new_name in to_rename:
-                    new_path = original.parent / new_name
-                    try:
-                        original.rename(new_path)
-                        log.info(f"Renamed: {original.name} → {new_name}")
-                    except PermissionError:
-                        log.warning(f"Cannot rename {original.name} – file is locked (Dropbox?). Continuing with original name.")
-                pdfs = find_pdfs(input_folder, recursive=False)
-                if extra > 0 and len(find_pdfs(input_folder, recursive=True)) > len(pdfs):
-                    pdfs = find_pdfs(input_folder, recursive=True)
-            else:
-                print("Filenames unchanged. Note: files with special characters may cause errors.")
+                new_path = original.parent / new_name
+                try:
+                    original.rename(new_path)
+                    log.info(f"Renamed: {original.name} → {new_name}")
+                except PermissionError:
+                    log.warning(f"Cannot rename {original.name} – file is locked (Dropbox?). Continuing with original name.")
+            pdfs = find_pdfs(input_folder, recursive=False)
+            if extra > 0 and len(find_pdfs(input_folder, recursive=True)) > len(pdfs):
+                pdfs = find_pdfs(input_folder, recursive=True)
+        else:
+            print("Filenames unchanged. Note: files with special characters may cause errors.")
 
     ocr_date    = datetime.now().strftime("%Y-%m-%d")
     log.info(f"clio-docs-batch v{__version__}")

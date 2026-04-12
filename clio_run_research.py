@@ -14,6 +14,7 @@ from clio_menu import (
     BackToMenu, _input,
     GRN, YEL, GRY, BLD, NRM,
     save_state,
+    menu_select, menu_confirm, menu_text, menu_pause,
 )
 
 try:
@@ -172,27 +173,31 @@ def run_research(tool: dict, state: dict) -> None:
     """Custom launcher för clio-research — hämtar GEDCOM-fil, läge och parametrar."""
     if not tool["script"].exists():
         print(f"\nScript saknas: {tool['script']}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     try:
         gedcom = select_gedcom(state)
         if not gedcom:
             print("\nIngen GEDCOM-fil vald.")
-            input(t("menu_continue"))
+            menu_pause()
             return
 
         if not Path(gedcom).exists():
             print(f"\nFilen hittades inte: {gedcom}")
-            input(t("menu_continue"))
+            menu_pause()
             return
 
-        print(f"\n── Läge {'─' * 45}")
-        print(f"  1. Analysera person   (enskild → Notion)")
-        print(f"  2. Batch              (flera personer → Notion)")
-        print(f"  3. Granskningsstatus  (visa väntande kort)")
-        print(f"  4. Godkänn            (markera granskningskort som klart)")
-        mode = _input("\nLäge [1] (0=tillbaka): ").strip() or "1"
+        _LAGE_CHOICES = [
+            "1. Analysera person   (enskild → Notion)",
+            "2. Batch              (flera personer → Notion)",
+            "3. Granskningsstatus  (visa väntande kort)",
+            "4. Godkänn            (markera granskningskort som klart)",
+        ]
+        lage = menu_select("Välj läge:", _LAGE_CHOICES)
+        if lage is None:
+            return
+        mode = lage[0]  # "1", "2", "3" eller "4"
 
         cmd = [sys.executable, str(tool["script"])]
 
@@ -200,44 +205,40 @@ def run_research(tool: dict, state: dict) -> None:
             person_id = _pick_person(gedcom)
             if not person_id:
                 print("Person-ID krävs.")
-                input(t("menu_continue"))
+                menu_pause()
                 return
 
             possibly_living = _gedcom_has_asterisk(gedcom, person_id)
             if possibly_living:
                 print(f"\n  {YEL}⚠ Personen kan vara levande — syfte krävs som GDPR-grund{NRM}")
-                print(f"  {GRY}Legitima syften t.ex.:{NRM}")
-                print(f"  {GRY}  • Söker om mig själv (eget medgivande){NRM}")
-                print(f"  {GRY}  • Familjeminnet / genealogi (t.ex. guldboda-75){NRM}")
-                print(f"  {GRY}  • Valberedning inom förening (offentlig roll){NRM}")
-                print(f"  {GRY}  • Annat — ange fritext, sparas som GDPR-grund{NRM}")
-                while True:
-                    syfte = _input("  Syfte (obligatoriskt, 0=tillbaka): ").strip()
-                    if syfte:
-                        break
-                    print(f"  {YEL}Syfte måste anges för levande person.{NRM}")
+                print(f"  {GRY}Exempel: familjeminnet, guldboda-75, eget medgivande{NRM}")
+                syfte = None
+                while not syfte:
+                    syfte = menu_text("  Syfte (obligatoriskt)")
+                    if not syfte:
+                        print(f"  {YEL}Syfte måste anges för levande person.{NRM}")
             else:
-                syfte = _input("Syfte/etikett (valfritt, t.ex. guldboda-75, 0=tillbaka): ").strip()
+                syfte = menu_text("Syfte/etikett (valfritt, t.ex. guldboda-75)", default="")
 
-            dry  = _input("Dry-run — visa utan att spara till Notion? [J/n] (0=tillbaka): ").strip().lower()
+            dry = menu_confirm("Dry-run — visa utan att spara till Notion?", default=True)
             cmd += ["--gedcom-id", person_id, "--gedcom-file", gedcom]
             if syfte:
                 cmd += ["--syfte", syfte]
             if possibly_living:
                 cmd += ["--levande", "ja"]
-            if dry != "n":
+            if dry:
                 cmd.append("--dry-run")
 
         elif mode == "2":
-            surname = _input("Filtrera på efternamn (tomt=alla, 0=tillbaka): ").strip()
-            syfte   = _input("Syfte/etikett (valfritt, 0=tillbaka): ").strip()
-            dry     = _input("Dry-run — visa utan att spara till Notion? [J/n] (0=tillbaka): ").strip().lower()
+            surname = menu_text("Filtrera på efternamn (lämna tomt = alla)", default="") or ""
+            syfte   = menu_text("Syfte/etikett (valfritt)", default="") or ""
+            dry     = menu_confirm("Dry-run — visa utan att spara till Notion?", default=True)
             cmd    += ["--batch", "--gedcom-file", gedcom]
             if surname:
                 cmd += ["--filter-surname", surname]
             if syfte:
                 cmd += ["--syfte", syfte]
-            if dry != "n":
+            if dry:
                 cmd.append("--dry-run")
 
         elif mode == "3":
@@ -251,7 +252,7 @@ def run_research(tool: dict, state: dict) -> None:
             )
             print(status_result.stdout)
             if "Inga väntande" in status_result.stdout:
-                input(t("menu_continue"))
+                menu_pause()
                 return
             val = _input("Välj nummer att godkänna (0=tillbaka): ").strip()
             if not val or not val.isdigit():
@@ -259,8 +260,6 @@ def run_research(tool: dict, state: dict) -> None:
             cmd += ["--approve", val]
 
         else:
-            print("Ogiltigt val.")
-            input(t("menu_continue"))
             return
 
     except BackToMenu:
@@ -286,4 +285,4 @@ def run_research(tool: dict, state: dict) -> None:
     elapsed = (datetime.now() - start).seconds
     print(f"\n{'─' * 40}")
     print(t("run_done", s=elapsed))
-    input(t("menu_continue"))
+    menu_pause()

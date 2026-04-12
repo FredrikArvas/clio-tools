@@ -24,6 +24,7 @@ from clio_menu import (
     GRN, YEL, GRY, BLD, NRM,
     load_state, save_state, register_run,
     select_folder, clear,
+    menu_select, menu_confirm, menu_text, menu_pause,
 )
 from clio_run_research import run_research
 from clio_run_mail     import run_mail
@@ -72,7 +73,7 @@ def run_tool(tool: dict, state: dict) -> None:
 
     if not tool["script"].exists():
         print(f"\nScript missing: {tool['script']}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     folder = None
@@ -83,13 +84,13 @@ def run_tool(tool: dict, state: dict) -> None:
             return
         if not folder:
             print(t("no_folder_selected"))
-            input("\nPress Enter to continue...")
+            menu_pause()
             return
 
         folder_path = Path(folder)
         if not folder_path.is_dir():
             print(f"\nFolder not found: {folder}")
-            input("\nPress Enter to continue...")
+            menu_pause()
             return
 
     try:
@@ -125,31 +126,25 @@ def run_tool(tool: dict, state: dict) -> None:
     except Exception:
         pass
 
-    input(t("menu_continue"))
+    menu_pause()
 
 
 def run_submenu(tool: dict, state: dict) -> None:
     """Visar undermeny för ett tool med submenu-lista."""
+    choices = [f"{item['nr']}. {item['name']} — {item['desc']}" for item in tool["submenu"]]
     while True:
         clear()
         print(f"\n{BLD}  {tool['name']}  —  {tool['desc']}{NRM}")
-        print(f"{'─' * 56}")
-        print()
-        for item in tool["submenu"]:
-            print(f"  {GRN}{item['nr']}.{NRM} {BLD}{item['name']}{NRM}")
-            print(f"     {item['desc']}")
-            print()
-        print(f"  {YEL}0.{NRM} Tillbaka\n")
-        print(f"{'─' * 56}")
-        choice = input(t("menu_select")).strip().lower()
-        if choice == "0":
+        print(f"{'─' * 56}\n")
+        choice = menu_select("Välj:", choices)
+        if choice is None:
             return
         try:
-            nr = int(choice)
+            nr = int(choice.split(".")[0])
             match = next((i for i in tool["submenu"] if i["nr"] == nr), None)
             if match:
                 run_tool(match, state)
-        except ValueError:
+        except (ValueError, IndexError):
             pass
 
 
@@ -168,40 +163,35 @@ def run_setup() -> None:
     if config_file.exists(): existing.append("clio.config")
     if env_file.exists():    existing.append(".env")
     if existing:
-        print(f"  Befintliga filer hittades: {', '.join(existing)}")
-        ans = input("  Skriv över dem? [j/N]: ").strip().lower()
-        if ans != "j":
+        print(f"\n  Befintliga filer hittades: {', '.join(existing)}")
+        if not menu_confirm("  Skriv över dem?", default=False):
             print("\n  Setup avbruten. Befintliga filer är oförändrade.")
-            input("\nTryck Enter för att fortsätta...")
+            menu_pause()
             return
 
-    print()
-    ans = input("  Har du clio.config och .env från en befintlig installation? [j/N]: ").strip().lower()
-    if ans == "j":
+    if menu_confirm("\n  Har du clio.config och .env från en befintlig installation?", default=False):
         print()
         print("  Kopiera dina filer manuellt:")
         print(f"    1. clio.config  →  {config_file}")
         print(f"    2. .env         →  {env_file}")
         print()
         print("  Kör sedan 'python clio.py' för att starta.")
-        input("\nTryck Enter för att fortsätta...")
+        menu_pause()
         return
 
     print()
-    print("  Ny installation — svara på frågorna nedan.")
-    print("  (Tryck Enter för standardvärde / hoppa över)\n")
+    print("  Ny installation — svara på frågorna nedan.\n")
 
-    name     = input("  Ditt namn: ").strip() or "Clio-användare"
-    lang_in  = input("  Språk [sv/en, standard: sv]: ").strip().lower()
-    language = lang_in if lang_in in ("sv", "en") else "sv"
-    digikam  = input("  Sökväg till digikam4.db (Enter = hoppa över): ").strip()
-    exiftool = input("  Sökväg till exiftool (Enter = 'exiftool' i PATH): ").strip() or "exiftool"
+    name     = menu_text("  Ditt namn", default="Clio-användare") or "Clio-användare"
+    language = menu_select("  Språk", ["sv — Svenska", "en — English"]) or "sv — Svenska"
+    language = language[:2]
+    digikam  = menu_text("  Sökväg till digikam4.db (lämna tomt = hoppa över)", default="") or ""
+    exiftool = menu_text("  Sökväg till exiftool", default="exiftool") or "exiftool"
 
     print()
     print("  Notion parent page ID")
     print("  (Hitta det i Notion-URL:en: notion.so/.../DETTA-ID)")
-    print("  (Lämna tomt om du inte använder Notion)")
-    notion_page = input("  Notion page ID: ").strip()
+    notion_page = menu_text("  Notion page ID (lämna tomt = hoppa över)", default="") or ""
 
     print()
     print("  Anthropic API-nyckel")
@@ -245,18 +235,18 @@ parent_page_id = "{notion_page}"
         print("  [OK] Miljökontrollen OK")
     except SystemExit:
         print("  (Se felmeddelande ovan — åtgärda och kör 'python clio.py' igen)")
-        input("\nTryck Enter för att fortsätta...")
+        menu_pause()
         return
 
     print()
     print("  Setup klar. Kör 'python clio.py' för att starta.")
-    input("\nTryck Enter för att fortsätta...")
+    menu_pause()
 
 
 def run_check() -> None:
     print()
     subprocess.run([sys.executable, str(CONFIG_DIR / "clio_check.py")])
-    input("\nTryck Enter för att fortsätta...")
+    menu_pause()
 
 
 def export_source_zip() -> None:
@@ -277,7 +267,7 @@ def export_source_zip() -> None:
 
     if result.returncode != 0:
         print(f"  Fel: {result.stderr.strip() or 'git archive misslyckades'}")
-        input("\nTryck Enter för att fortsätta...")
+        menu_pause()
         return
 
     size_kb = out.stat().st_size // 1024
@@ -285,4 +275,4 @@ def export_source_zip() -> None:
     print(f"  Storlek: {size_kb} KB")
     print()
     print(f"  {GRY}Ladda upp filen till Claude chat för att diskutera källkoden.{NRM}")
-    input("\nTryck Enter för att fortsätta...")
+    menu_pause()

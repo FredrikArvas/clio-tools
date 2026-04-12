@@ -18,6 +18,7 @@ from clio_menu import (
     BackToMenu, _input,
     GRN, YEL, GRY, BLD, NRM,
     save_state,
+    menu_select, menu_text, menu_pause,
 )
 
 try:
@@ -33,7 +34,7 @@ def _mail_whitelist(tool: dict, state: dict) -> None:
     cfg_path = tool["script"].parent / "clio.config"
     if not cfg_path.exists():
         print(f"\n{GRY}clio.config hittades inte: {cfg_path}{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     cfg = configparser.ConfigParser()
@@ -41,16 +42,13 @@ def _mail_whitelist(tool: dict, state: dict) -> None:
     page_id = cfg.get("mail", "whitelist_notion_page_id", fallback="")
     if not page_id:
         print(f"\n{GRY}whitelist_notion_page_id saknas i clio.config{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
-    try:
-        addr = _input("\nE-postadress att vitlista (0=tillbaka): ").strip().lower()
-    except BackToMenu:
-        return
+    addr = menu_text("\nE-postadress att vitlista") or ""
     if not addr or "@" not in addr:
         print(f"{GRY}Ogiltig adress.{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     env_root = tool["script"].parent.parent / ".env"
@@ -66,7 +64,7 @@ def _mail_whitelist(tool: dict, state: dict) -> None:
     notion_token = os.environ.get("NOTION_API_KEY") or os.environ.get("NOTION_TOKEN")
     if not notion_token:
         print(f"\n{GRY}NOTION_API_KEY / NOTION_TOKEN saknas i .env{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     try:
@@ -85,7 +83,7 @@ def _mail_whitelist(tool: dict, state: dict) -> None:
         print(f"\n{GRN}✓ {addr} tillagd i vitlistan.{NRM}")
     except Exception as e:
         print(f"\n{GRY}Fel: {e}{NRM}")
-    input(t("menu_continue"))
+    menu_pause()
 
 
 def _mail_log(tool: dict, state: dict) -> None:
@@ -93,7 +91,7 @@ def _mail_log(tool: dict, state: dict) -> None:
     db_path = tool["script"].parent / "state.db"
     if not db_path.exists():
         print(f"\n{GRY}state.db hittades inte — inget mail har hanterats ännu.{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     status_color = {
@@ -136,37 +134,33 @@ def _mail_log(tool: dict, state: dict) -> None:
             idx = f"[{i}]" if numbered else "   "
             print(f"  {idx} {date_s:<17} {sender_s:<28} {subject_s:<22} {col}{label}{NRM}")
 
-    print(f"\n{BLD}Maillogg — visa:{NRM}")
-    print(f"  {GRN}1.{NRM} Väntar på åtgärd  (default)")
-    print(f"  {GRN}2.{NRM} Alla")
-    print(f"  {GRN}3.{NRM} Skickade")
-    print(f"  {GRN}4.{NRM} Flaggade / avvisade")
-    try:
-        f_choice = _input("\nVal [1]: ").strip() or "1"
-    except BackToMenu:
+    _FILTER_CHOICES = [
+        "1. Väntar på åtgärd  (standard)",
+        "2. Alla",
+        "3. Skickade",
+        "4. Flaggade / avvisade",
+    ]
+    f_choice = menu_select("Maillogg — visa:", _FILTER_CHOICES)
+    if f_choice is None:
         return
-
     filter_map = {"1": "WAITING", "2": None, "3": "SENT", "4": "FLAGGED"}
-    status_filter = filter_map.get(f_choice, "WAITING")
+    status_filter = filter_map.get(f_choice[0], "WAITING")
 
-    try:
-        n_input = _input("Antal att visa [20]: ").strip()
-    except BackToMenu:
-        return
-    n = int(n_input) if n_input.isdigit() else 20
+    n_raw = menu_text("Antal att visa", default="20") or "20"
+    n = int(n_raw) if n_raw.isdigit() else 20
 
     try:
         con = sqlite3.connect(str(db_path))
         rows = _load(con, status_filter, n)
     except Exception as e:
         print(f"\n{GRY}Fel vid läsning av databas: {e}{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     if not rows:
         print(f"\n  {GRY}(inga mail med detta filter){NRM}")
         con.close()
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     numbered = (status_filter == "WAITING")
@@ -179,14 +173,10 @@ def _mail_log(tool: dict, state: dict) -> None:
 
     if not numbered:
         con.close()
-        input(t("menu_continue"))
+        menu_pause()
         return
 
-    try:
-        sel = _input("\nVälj mail för åtgärd (Enter=avsluta): ").strip()
-    except BackToMenu:
-        con.close()
-        return
+    sel = menu_text("\nVälj mail för åtgärd (nummer, Enter=avsluta)") or ""
     if not sel.isdigit() or not (1 <= int(sel) <= len(rows)):
         con.close()
         return
@@ -205,14 +195,15 @@ def _mail_log(tool: dict, state: dict) -> None:
         print(f"{GRY}[...]{NRM}")
     print(f"\n{BLD}{'─' * 60}{NRM}")
 
-    print(f"  {GRN}V{NRM} — Vitlista  (nästa poll skickar svar)")
-    print(f"  {GRN}S{NRM} — Svartlista")
-    print(f"  {GRN}B{NRM} — Behåll olistad (hållsvaret är redan skickat)")
-    try:
-        action = _input("\nÅtgärd [V/S/B] (Enter=avbryt): ").strip().upper()
-    except BackToMenu:
+    action_choice = menu_select("\nÅtgärd:", [
+        "V — Vitlista  (nästa poll skickar svar)",
+        "S — Svartlista",
+        "B — Behåll olistad (hållsvaret är redan skickat)",
+    ])
+    if action_choice is None:
         con.close()
         return
+    action = action_choice[0].upper()
 
     cfg_path = tool["script"].parent / "clio.config"
     cfg = configparser.ConfigParser()
@@ -280,7 +271,7 @@ def _mail_log(tool: dict, state: dict) -> None:
             print(f"{GRY}Fel: {e}{NRM}")
 
     con.close()
-    input(t("menu_continue"))
+    menu_pause()
 
 
 def _mail_insights(tool: dict, state: dict) -> None:
@@ -289,7 +280,7 @@ def _mail_insights(tool: dict, state: dict) -> None:
     cfg_path = script_dir / "clio.config"
     if not cfg_path.exists():
         print(f"\n{GRY}clio.config hittades inte.{NRM}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
     cfg = configparser.ConfigParser()
@@ -331,7 +322,7 @@ def _mail_insights(tool: dict, state: dict) -> None:
     except Exception as e:
         print(f"{GRY}Fel: {e}{NRM}")
     print(f"{'─' * 56}")
-    input(t("menu_continue"))
+    menu_pause()
 
 
 # ── Launcher ──────────────────────────────────────────────────────────────────
@@ -340,26 +331,23 @@ def run_mail(tool: dict, state: dict) -> None:
     """Custom launcher för clio-agent-mail."""
     if not tool["script"].exists():
         print(f"\nScript saknas: {tool['script']}")
-        input(t("menu_continue"))
+        menu_pause()
         return
 
-    try:
-        print(f"\n{BLD}  clio-agent-mail{NRM}")
-        print(f"{'─' * 56}")
-        print(f"  {GRN}1.{NRM} Starta daemon      (pollar kontinuerligt var 5 min)")
-        print(f"  {GRN}2.{NRM} Kör ett pass nu    (--once, avslutar efteråt)")
-        print(f"  {GRN}3.{NRM} Dry-run             (--dry-run, skickar inget)")
-        print(f"  {GRN}4.{NRM} Vitlista            (lägg till adress i Notion)")
-        print(f"  {GRN}5.{NRM} Maillogg            (senaste hanterade mail)")
-        print(f"  {GRN}6.{NRM} Insiktsanalys       (analysera mönster + förutsäg frågor)")
-        print(f"\n  {YEL}0.{NRM} Tillbaka")
-        print(f"{'─' * 56}")
-        mode = _input("\nVal [1] (0=tillbaka): ").strip() or "1"
-    except BackToMenu:
-        return
+    _MAIL_CHOICES = [
+        "1. Starta daemon      (pollar kontinuerligt var 5 min)",
+        "2. Kör ett pass nu    (--once, avslutar efteråt)",
+        "3. Dry-run            (--dry-run, skickar inget)",
+        "4. Vitlista           (lägg till adress i Notion)",
+        "5. Maillogg           (senaste hanterade mail)",
+        "6. Insiktsanalys      (analysera mönster + förutsäg frågor)",
+    ]
 
-    if mode == "0":
+    choice = menu_select("clio-agent-mail:", _MAIL_CHOICES)
+    if choice is None:
         return
+    mode = choice[0]
+
     if mode == "4":
         _mail_whitelist(tool, state)
         return
@@ -382,8 +370,6 @@ def run_mail(tool: dict, state: dict) -> None:
         cmd += ["--dry-run", "--once"]
         label = "dry-run"
     else:
-        print("Ogiltigt val.")
-        input(t("menu_continue"))
         return
 
     state["last_run"] = tool["name"]
@@ -401,4 +387,4 @@ def run_mail(tool: dict, state: dict) -> None:
     elapsed = (datetime.now() - start).seconds
     print(f"\n{'─' * 40}")
     print(t("run_done", s=elapsed))
-    input(t("menu_continue"))
+    menu_pause()

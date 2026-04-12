@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# clio-tools pre-push hook
+# Körs automatiskt vid git push.
+# Aktivera med: git config core.hooksPath .githooks
+#
+# Utan --strict: varningar (⚠️) visas men blockerar inte.
+# Lägg till --strict nedan när questionary-migrering är klar.
+
+set -e
+
+echo "=== clio-tools pre-push QC ==="
+python clio_qc.py
+echo "=== Push godkänt ==="
