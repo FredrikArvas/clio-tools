@@ -160,7 +160,7 @@ def _append_block(page_id: str, text: str, token: str) -> None:
             "paragraph": {"rich_text": [{"type": "text", "text": {"content": text}}]},
         }]
     }
-    resp = httpx.post(url, headers=_headers(token), json=body, timeout=30)
+    resp = httpx.patch(url, headers=_headers(token), json=body, timeout=30)
     resp.raise_for_status()
 
 
