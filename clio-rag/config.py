@@ -15,12 +15,12 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
-# Notion
-NOTION_TOKEN = os.getenv("NOTION_TOKEN", "")
-
 # Sök .env i clio-rag/, annars ett steg upp (clio-tools/)
 _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
+
+# Notion — läses efter load_dotenv
+NOTION_TOKEN = os.getenv("NOTION_TOKEN", "")
 
 # ---------------------------------------------------------------------------
 # Qdrant
