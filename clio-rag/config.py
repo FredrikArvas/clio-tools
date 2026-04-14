@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
+# Notion
+NOTION_TOKEN = os.getenv("NOTION_TOKEN", "")
+
 # Sök .env i clio-rag/, annars ett steg upp (clio-tools/)
 _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
@@ -24,7 +27,11 @@ load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env",
 # ---------------------------------------------------------------------------
 QDRANT_HOST      = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT      = int(os.getenv("QDRANT_PORT", "6333"))
-COLLECTION_NAME  = "clio_books"
+COLLECTION_NAME      = "clio_books"
+NCC_COLLECTION_NAME  = "clio_ncc"
+
+# Notion-sida med alla NCC:er som child-pages
+NCC_PARENT_PAGE_ID   = "33467666d98a816db2c0d30cb97206a3"  # Clio Context — Mall & Projektöversikt
 
 # ---------------------------------------------------------------------------
 # Modeller
@@ -120,7 +127,7 @@ def get_qdrant_client() -> QdrantClient:
 
 
 def create_collection() -> None:
-    """Skapar Qdrant-collection om den inte redan finns."""
+    """Skapar clio_books-collection om den inte redan finns."""
     client = get_qdrant_client()
     existing = {c.name for c in client.get_collections().collections}
     if COLLECTION_NAME not in existing:
@@ -131,6 +138,20 @@ def create_collection() -> None:
         print(f"[config] Skapade collection: {COLLECTION_NAME} ({EMBEDDING_DIM} dim, cosine)")
     else:
         print(f"[config] Collection finns redan: {COLLECTION_NAME}")
+
+
+def create_ncc_collection() -> None:
+    """Skapar clio_ncc-collection om den inte redan finns."""
+    client = get_qdrant_client()
+    existing = {c.name for c in client.get_collections().collections}
+    if NCC_COLLECTION_NAME not in existing:
+        client.create_collection(
+            collection_name=NCC_COLLECTION_NAME,
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
+        )
+        print(f"[config] Skapade collection: {NCC_COLLECTION_NAME} ({EMBEDDING_DIM} dim, cosine)")
+    else:
+        print(f"[config] Collection finns redan: {NCC_COLLECTION_NAME}")
 
 
 def is_local_available() -> bool:

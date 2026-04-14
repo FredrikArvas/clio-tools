@@ -27,7 +27,7 @@ from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 import config
 from config import (
-    COLLECTION_NAME, EMBEDDING_MODEL, LLM_MODEL,
+    COLLECTION_NAME, NCC_COLLECTION_NAME, EMBEDDING_MODEL, LLM_MODEL,
     get_qdrant_client, is_local_available,
 )
 
@@ -38,11 +38,20 @@ load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env",
 # Systempromt till Claude
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT_BOOKS = """\
 Du är en hjälpsam assistent som svarar på frågor om böcker.
 Du får ett antal textpassager från böcker och en fråga.
 Svara på frågan baserat enbart på de givna passagerna.
 Ange alltid källhänvisning i formatet [Boktitel, s. X–Y] direkt efter varje påstående.
+Om informationen inte finns i passagerna, säg det tydligt.
+Svara på svenska om inte frågan ställs på annat språk.
+"""
+
+SYSTEM_PROMPT_NCC = """\
+Du är en hjälpsam assistent som svarar på frågor om tidigare beslut, resonemang och projektkontext.
+Du får ett antal textpassager från Notion Context Cards (NCC) och en fråga.
+Svara på frågan baserat enbart på de givna passagerna.
+Ange alltid källhänvisning i formatet [NCC-titel] direkt efter varje påstående.
 Om informationen inte finns i passagerna, säg det tydligt.
 Svara på svenska om inte frågan ställs på annat språk.
 """
@@ -58,17 +67,22 @@ def embed_query(text: str) -> list[float]:
     return resp.data[0].embedding
 
 
-def search_qdrant(vector: list[float], top_k: int = 5, book_filter: str | None = None) -> list:
+def search_qdrant(
+    vector: list[float],
+    top_k: int = 5,
+    title_filter: str | None = None,
+    collection: str = COLLECTION_NAME,
+) -> list:
     client = get_qdrant_client()
 
     filt = None
-    if book_filter:
+    if title_filter:
         filt = Filter(must=[
-            FieldCondition(key="title", match=MatchValue(value=book_filter))
+            FieldCondition(key="title", match=MatchValue(value=title_filter))
         ])
 
     response = client.query_points(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection,
         query=vector,
         limit=top_k,
         with_payload=True,
@@ -77,31 +91,35 @@ def search_qdrant(vector: list[float], top_k: int = 5, book_filter: str | None =
     return response.points
 
 
-def format_context(hits: list) -> str:
+def format_context(hits: list, is_ncc: bool = False) -> str:
     """Bygger context-strängen som skickas till Claude."""
     parts: list[str] = []
     for i, hit in enumerate(hits, 1):
-        p    = hit.payload
-        title      = p.get("title", "Okänd bok")
-        page_start = p.get("ext_page_start", 0)
-        page_end   = p.get("ext_page_end", 0)
+        p          = hit.payload
+        title      = p.get("title", "Okänd")
         summary    = p.get("summary", "")
-        if page_start and page_end and page_start != page_end:
-            source = f"{title}, s. {page_start}–{page_end}"
-        elif page_start:
-            source = f"{title}, s. {page_start}"
-        else:
+        if is_ncc:
             source = title
+        else:
+            page_start = p.get("ext_page_start", 0)
+            page_end   = p.get("ext_page_end", 0)
+            if page_start and page_end and page_start != page_end:
+                source = f"{title}, s. {page_start}–{page_end}"
+            elif page_start:
+                source = f"{title}, s. {page_start}"
+            else:
+                source = title
         parts.append(f"[Passage {i} — {source}]\n{summary}")
     return "\n\n".join(parts)
 
 
-def ask_claude(question: str, context: str) -> str:
+def ask_claude(question: str, context: str, is_ncc: bool = False) -> str:
     client  = anthropic.Anthropic()
+    system  = SYSTEM_PROMPT_NCC if is_ncc else SYSTEM_PROMPT_BOOKS
     message = client.messages.create(
         model      = LLM_MODEL,
         max_tokens = 1024,
-        system     = SYSTEM_PROMPT,
+        system     = system,
         messages   = [
             {
                 "role":    "user",
@@ -112,21 +130,25 @@ def ask_claude(question: str, context: str) -> str:
     return message.content[0].text
 
 
-def print_sources(hits: list) -> None:
+def print_sources(hits: list, is_ncc: bool = False) -> None:
     print("\n--- Källor ---")
     for hit in hits:
-        p  = hit.payload
-        title      = p.get("title", "?")
-        page_start = p.get("ext_page_start", 0)
-        page_end   = p.get("ext_page_end", 0)
-        score      = round(hit.score, 3)
-        if page_start and page_end and page_start != page_end:
-            pages = f"s. {page_start}–{page_end}"
-        elif page_start:
-            pages = f"s. {page_start}"
+        p     = hit.payload
+        title = p.get("title", "?")
+        score = round(hit.score, 3)
+        if is_ncc:
+            url = p.get("ext_notion_url", "")
+            print(f"  [{score}] {title}  {url}")
         else:
-            pages = "sida okänd"
-        print(f"  [{score}] {title}, {pages}")
+            page_start = p.get("ext_page_start", 0)
+            page_end   = p.get("ext_page_end", 0)
+            if page_start and page_end and page_start != page_end:
+                pages = f"s. {page_start}–{page_end}"
+            elif page_start:
+                pages = f"s. {page_start}"
+            else:
+                pages = "sida okänd"
+            print(f"  [{score}] {title}, {pages}")
 
 
 def maybe_offer_original(hits: list) -> None:
@@ -145,11 +167,13 @@ def maybe_offer_original(hits: list) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="clio-rag: fråga mot boksamlingen")
-    parser.add_argument("--q",         required=True, help="Fråga")
-    parser.add_argument("--top",       type=int, default=5, help="Antal chunks (default 5)")
-    parser.add_argument("--book",      help="Filtrera på boktitel")
-    parser.add_argument("--no-source", action="store_true", help="Visa inte källförteckning")
+    parser = argparse.ArgumentParser(description="clio-rag: fråga mot böcker eller NCC")
+    parser.add_argument("--q",          required=True, help="Fråga")
+    parser.add_argument("--top",        type=int, default=5, help="Antal chunks (default 5)")
+    parser.add_argument("--book",       help="Filtrera på boktitel (clio_books)")
+    parser.add_argument("--ncc",        action="store_true", help="Sök i clio_ncc istället för clio_books")
+    parser.add_argument("--collection", help="Välj collection direkt (override av --ncc)")
+    parser.add_argument("--no-source",  action="store_true", help="Visa inte källförteckning")
     args = parser.parse_args()
 
     question = args.q.strip()
@@ -157,25 +181,37 @@ def main() -> None:
         print("FEL: Frågan får inte vara tom.")
         sys.exit(1)
 
+    # Välj collection
+    if args.collection:
+        collection = args.collection
+    elif args.ncc:
+        collection = NCC_COLLECTION_NAME
+    else:
+        collection = COLLECTION_NAME
+
+    is_ncc = collection == NCC_COLLECTION_NAME
+
     print(f"\nFråga: {question}")
+    print(f"Collection: {collection}")
     print("Söker …")
 
     vector  = embed_query(question)
-    hits    = search_qdrant(vector, top_k=args.top, book_filter=args.book)
+    hits    = search_qdrant(vector, top_k=args.top, title_filter=args.book, collection=collection)
 
     if not hits:
-        print("Inga träffar i clio_books. Är collection indexerad?")
+        print(f"Inga träffar i {collection}. Är collection indexerad?")
         sys.exit(0)
 
-    context = format_context(hits)
-    answer  = ask_claude(question, context)
+    context = format_context(hits, is_ncc=is_ncc)
+    answer  = ask_claude(question, context, is_ncc=is_ncc)
 
     print(f"\n{answer}")
 
     if not args.no_source:
-        print_sources(hits)
+        print_sources(hits, is_ncc=is_ncc)
 
-    maybe_offer_original(hits)
+    if not is_ncc:
+        maybe_offer_original(hits)
 
 
 if __name__ == "__main__":

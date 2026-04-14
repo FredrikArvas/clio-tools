@@ -103,6 +103,14 @@ class LocationPayload:
 # ---------------------------------------------------------------------------
 
 @dataclass
+class NccExt:
+    notion_page_id:   str
+    notion_url:       str
+    last_edited_time: str           # ISO 8601 — används för re-indexeringscheck
+    parent_page_id:   Optional[str] = None
+
+
+@dataclass
 class BookExt:
     author:           str
     year:             int
@@ -137,26 +145,19 @@ class FullPayload:
 
         loc_d = asdict(self.location)
         loc_d["storage_tier"] = self.location.storage_tier.value
-        # Prefix location-fält för att undvika kollisioner
         for k, v in loc_d.items():
             d[f"loc_{k}"] = v
 
         ext_d = asdict(self.ext)
-        ext_d["copyright_status"] = self.ext.copyright_status.value
-        ext_d["access_origin"]    = self.ext.access_origin.value
+        # Generisk enum-konvertering — fungerar för BookExt och NccExt
         for k, v in ext_d.items():
-            d[f"ext_{k}"] = v
+            d[f"ext_{k}"] = v.value if isinstance(v, Enum) else v
 
         return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "FullPayload":
         """Återskapa FullPayload från Qdrant-payload-dict."""
-        loc_keys = {"storage_tier", "cloud_path", "local_path",
-                    "local_available", "file_size_bytes", "checksum_sha256"}
-        ext_keys = {"author", "year", "page_start", "page_end",
-                    "copyright_status", "access_origin", "shareable", "isbn", "publisher"}
-
         core_d = {k: v for k, v in d.items()
                   if not k.startswith("loc_") and not k.startswith("ext_")}
         loc_d  = {k[4:]: v for k, v in d.items() if k.startswith("loc_")}
@@ -166,6 +167,12 @@ class FullPayload:
                                if k in CorePayload.__dataclass_fields__})
         loc  = LocationPayload(**{k: v for k, v in loc_d.items()
                                    if k in LocationPayload.__dataclass_fields__})
-        ext  = BookExt(**{k: v for k, v in ext_d.items()
-                           if k in BookExt.__dataclass_fields__})
+
+        content_type = core_d.get("content_type", "book")
+        if content_type == ContentType.NCC or content_type == "ncc":
+            ext = NccExt(**{k: v for k, v in ext_d.items()
+                             if k in NccExt.__dataclass_fields__})
+        else:
+            ext = BookExt(**{k: v for k, v in ext_d.items()
+                              if k in BookExt.__dataclass_fields__})
         return cls(core=core, location=loc, ext=ext)
