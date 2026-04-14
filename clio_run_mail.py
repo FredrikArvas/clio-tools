@@ -29,6 +29,26 @@ except ImportError:
 
 # ── Hjälpfunktioner ───────────────────────────────────────────────────────────
 
+def _python_for(script: Path) -> str:
+    """
+    Returnerar Python-tolken för att köra ett givet skript.
+    Föredrar venv-Python (ROOT_DIR/venv/bin/python) om den finns —
+    annars sys.executable.
+
+    Behövs på servern där clio.py körs med system-Python men
+    clio-agent-mail har dependencies enbart i venv.
+    """
+    root = script.parent.parent
+    for candidate in (
+        root / "venv" / "bin" / "python",
+        root / "venv" / "bin" / "python3",
+        root / ".venv" / "bin" / "python",
+        root / ".venv" / "bin" / "python3",
+    ):
+        if candidate.exists():
+            return str(candidate)
+    return sys.executable
+
 def _mail_whitelist(tool: dict, state: dict) -> None:
     """Lägg till e-postadress i Notion-vitlistan för clio@."""
     cfg_path = tool["script"].parent / "clio.config"
@@ -325,7 +345,7 @@ def _mail_insights(tool: dict, state: dict) -> None:
                 pass
 
     cmd = [
-        sys.executable, "-c",
+        _python_for(tool["script"]), "-c",
         (
             "import sys; sys.path.insert(0, r'" + str(script_dir) + "'); "
             "import configparser, os; "
@@ -392,7 +412,7 @@ def run_mail(tool: dict, state: dict) -> None:
         _mail_admin(tool, state)
         return
 
-    cmd = [sys.executable, str(tool["script"])]
+    cmd = [_python_for(tool["script"]), str(tool["script"])]
     label = ""
 
     if mode == "1":
