@@ -31,6 +31,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).parent
 ROOT_DIR = BASE_DIR.parent
 
+# Gör clio_core tillgängligt även när skriptet körs med system-Python
+# (t.ex. via clio.py som använder sys.executable — inte alltid venv-Python)
+_clio_core_path = ROOT_DIR / "clio-core"
+if str(_clio_core_path) not in sys.path:
+    sys.path.insert(0, str(_clio_core_path))
+
 # Ladda root-.env först (ANTHROPIC_API_KEY, NOTION_API_KEY)
 # sedan modul-.env (IMAP_PASSWORD_CLIO, IMAP_PASSWORD_INFO) — override=True
 # så att modul-specifika värden vinner om samma nyckel skulle finnas i båda.
