@@ -180,7 +180,7 @@ def main(argv=None) -> None:
         print(f"  Nivå      : {YEL}uppgraderas till 'coded' (nuv: {current_level}){NRM}")
     print(f"{BLD}{'─' * 56}{NRM}")
 
-    confirm = input("Spara till Notion? (j/n): ").strip().lower()
+    confirm = input("Spara till Notion? (J/n): ").strip().lower()
     if confirm not in ("j", "y", "ja", "yes"):
         print(f"\n{GRY}Avbruten.{NRM}")
         return
