@@ -494,15 +494,39 @@ def _cmd_prompt(mail_item, config) -> CommandResult:
             is_reasoning=True,
         )
 
-    # Hämta avsändarens tillåtna kodord-scope
+    # Hämta avsändarens tillåtna kodord-scope (user-nivå)
     from classifier import extract_sender_email
     from clio_access import AccessManager
+    from helpers import _account_key_for
     _sender = extract_sender_email(mail_item.sender)
     _am = AccessManager.from_config(config)
-    _allowed = _am.get_kodord_scope({"email": _sender})
+    _user_scope = _am.get_kodord_scope({"email": _sender})
+
+    # Hämta brevlådans kodord-scope
+    _account_key = _account_key_for(mail_item.account, config)
+    _account_scope = notion_client.load_account_scope(_account_key)
+
+    # Effektivt scope = restriktivast av user-scope och account-scope
+    if _user_scope is None:
+        _allowed = _account_scope
+    elif _account_scope is None:
+        _allowed = _user_scope
+    else:
+        _allowed = [k for k in _user_scope if k in _account_scope]
 
     # Extrahera #kodord
     kodord_list = _parse_kodord(instruction)
+
+    # Kontrollera mot brevlådans scope — explicit fel om out-of-scope
+    if _account_scope is not None and kodord_list:
+        out_of_scope = [k for k in kodord_list if k not in _account_scope]
+        if out_of_scope:
+            return CommandResult(
+                f"Kodordet {', '.join('#' + k for k in out_of_scope)} hanteras inte av "
+                f"denna brevlåda ({_account_key}@). Kontakta Fredrik.",
+                is_reasoning=True,
+            )
+
     matched_projs, not_found = _resolve_nccs(kodord_list, config, allowed_kodord=_allowed) if kodord_list else ([], [])
 
     # Inget #kodord alls → be om förtydligande

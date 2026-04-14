@@ -1,0 +1,10 @@
+{
+  "_comment": "Per-brevlåda kodord-scope. Tom lista = alla kodord tillåtna. Lista med kodord = bara dessa tillåtna.",
+  "clio": [],
+  "info": [],
+  "krut": [],
+  "gtff": [],
+  "gtk": ["gtk"],
+  "gsf": ["gsf"],
+  "vimla": []
+}

@@ -8,10 +8,12 @@ Context Cards: sidor länkade i databasens Context Card URL-kolumn
 
 Allt cachas i 15 minuter för att minska API-anrop.
 """
+import json
 import os
 import re
 import time
 import logging
+from pathlib import Path
 import httpx
 from notion_client import Client
 
@@ -80,6 +82,52 @@ def _url_to_page_id(url: str) -> str:
         pid = match.group(1)
         return f"{pid[:8]}-{pid[8:12]}-{pid[12:16]}-{pid[16:20]}-{pid[20:]}"
     return ""
+
+
+# ── Brevlåde-scope ───────────────────────────────────────────────────────────
+
+_SCOPES_FILE = Path(__file__).parent / "account_scopes.json"
+
+
+def load_account_scope(account_key: str) -> list[str] | None:
+    """
+    Returnerar tillåtna kodord för en brevlåda från account_scopes.json.
+
+    → None         om account_key saknas eller har tom lista (= alla tillåtna)
+    → ["gtk", ...]  om specifika kodord är konfigurerade för brevlådan
+    """
+    try:
+        with open(_SCOPES_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        scope = data.get(account_key, [])
+        return scope if scope else None
+    except Exception:
+        return None
+
+
+def save_account_scope(account_key: str, kodord: list[str]) -> None:
+    """Sparar scope för en brevlåda i account_scopes.json."""
+    try:
+        data: dict = {}
+        if _SCOPES_FILE.exists():
+            with open(_SCOPES_FILE, encoding="utf-8") as f:
+                data = json.load(f)
+        data[account_key] = kodord
+        with open(_SCOPES_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Fel vid sparning av account_scopes.json: {e}")
+        raise
+
+
+def get_all_account_scopes() -> dict:
+    """Returnerar hela account_scopes.json som dict (exkl. _comment-nyckel)."""
+    try:
+        with open(_SCOPES_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+        return {k: v for k, v in data.items() if not k.startswith("_")}
+    except Exception:
+        return {}
 
 
 # ── Vitlista ──────────────────────────────────────────────────────────────────
@@ -330,7 +378,12 @@ def get_project_index(db_id: str) -> list:
         return []
 
 
-def get_relevant_context_cards(db_id: str, mail_subject: str, mail_body: str) -> str:
+def get_relevant_context_cards(
+    db_id: str,
+    mail_subject: str,
+    mail_body: str,
+    allowed_kodord: list[str] | None = None,
+) -> str:
     """
     Matchar mailinnehållet mot projektkodord (primärt) och projektnamn (fallback).
     Kodord är precisa och korta — t.ex. 'ssf', 'peter', 'aiab'.
@@ -358,6 +411,10 @@ def get_relevant_context_cards(db_id: str, mail_subject: str, mail_body: str) ->
         words = [w for w in re.split(r"[\s\-/×]+", name) if len(w) >= 3]
         if any(re.search(r'\b' + re.escape(w) + r'\b', needle) for w in words):
             matched.append(proj)
+
+    # Filtrera mot brevlådans scope
+    if allowed_kodord is not None:
+        matched = [p for p in matched if p["kodord"] in allowed_kodord]
 
     if not matched:
         return ""
@@ -388,15 +445,19 @@ def get_relevant_context_cards(db_id: str, mail_subject: str, mail_body: str) ->
     return "\n\n---\n\n".join(parts)
 
 
-def get_all_context_cards(db_id: str) -> str:
+def get_all_context_cards(db_id: str, allowed_kodord: list[str] | None = None) -> str:
     """
     Hämtar alla Context Card-sidor länkade i databasens Context Card URL-kolumn.
     Varje kort cachas individuellt. Returnerar kombinerad text.
+
+    allowed_kodord: om satt, hämtas bara kort för dessa kodord (brevlåde-scope).
     """
     cache_key = f"context_cards:{db_id}"
-    cached = _cached(cache_key)
-    if cached is not None:
-        return cached
+    # Hoppa över top-level-cachen vid filtrering — per-sida cachen är fortfarande varm
+    if allowed_kodord is None:
+        cached = _cached(cache_key)
+        if cached is not None:
+            return cached
 
     try:
         pages = _query_database(db_id)
@@ -408,6 +469,11 @@ def get_all_context_cards(db_id: str) -> str:
             sfar = _prop_value(props.get("Sfär", {}))
             status = _prop_value(props.get("Status", {}))
             context_url = _prop_value(props.get("Context Card URL", {}))
+            kodord = _prop_value(props.get("Kodord", {})).lower().strip()
+
+            # Filtrera mot brevlådans scope
+            if allowed_kodord is not None and kodord not in allowed_kodord:
+                continue
 
             if not context_url:
                 continue
@@ -422,7 +488,8 @@ def get_all_context_cards(db_id: str) -> str:
                 card_texts.append(f"{header}\n{page_text}")
 
         result = "\n\n---\n\n".join(card_texts)
-        _store(cache_key, result)
+        if allowed_kodord is None:
+            _store(cache_key, result)
         logger.info(f"Context Cards hämtade: {len(card_texts)} kort")
         return result
 
@@ -431,7 +498,12 @@ def get_all_context_cards(db_id: str) -> str:
         return ""
 
 
-def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -> str:
+def get_knowledge_context(
+    config,
+    mail_subject: str = "",
+    mail_body: str = "",
+    account_key: str = "",
+) -> str:
     """
     Hämtar och sammanfogar kunskapskällor konfigurerade i clio.config.
 
@@ -439,6 +511,8 @@ def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -
       → bara Context Cards för matchande projekt hämtas
 
     Annars laddas alla Context Cards (fallback, t.ex. vid test eller oklar kontext).
+
+    account_key: om satt, filtreras Context Cards mot brevlådans scope (account_scopes.json).
 
     Format: knowledge_notion_db_ids = db_id:Visningsnamn, db_id2:Namn2
     """
@@ -449,6 +523,9 @@ def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -
     db_entries = [e.strip() for e in raw.split(",") if e.strip()]
     if not db_entries:
         return ""
+
+    # Ladda brevlådans scope (None = alla kodord tillåtna)
+    account_scope = load_account_scope(account_key) if account_key else None
 
     blocks = []
     for entry in db_entries:
@@ -464,10 +541,12 @@ def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -
             blocks.append(db_text)
 
         if mail_subject or mail_body:
-            cards_text = get_relevant_context_cards(db_id, mail_subject, mail_body)
+            cards_text = get_relevant_context_cards(
+                db_id, mail_subject, mail_body, allowed_kodord=account_scope
+            )
             source = "relevanta"
         else:
-            cards_text = get_all_context_cards(db_id)
+            cards_text = get_all_context_cards(db_id, allowed_kodord=account_scope)
             source = "alla"
 
         if cards_text:

@@ -156,7 +156,8 @@ def _handle_self_query(mail_item, clf, config, dry_run: bool):
     else:
         # Fri fråga — AI-svar med kunskapsbas
         knowledge = notion_client.get_knowledge_context(
-            config, mail_subject=mail_item.subject, mail_body=mail_item.body
+            config, mail_subject=mail_item.subject, mail_body=mail_item.body,
+            account_key=clf.account_key,
         )
         reply_text = reply_module.generate_self_query_reply(mail_item, config, knowledge=knowledge)
         logger.info(f"Self-query AI reply generated for {to_addr}")
@@ -276,7 +277,8 @@ def _handle_auto_send(mail_item, clf, config, dry_run: bool):
         "Avsändaren är vitlistad och förväntar sig ett direkt svar utan mänsklig granskning."
     )
     knowledge = notion_client.get_knowledge_context(
-        config, mail_subject=mail_item.subject, mail_body=mail_item.body
+        config, mail_subject=mail_item.subject, mail_body=mail_item.body,
+        account_key=clf.account_key,
     )
     examples = state.get_learned_replies(limit=5)
     reply_text = reply_module.generate_reply(
@@ -307,7 +309,8 @@ def _handle_approval(mail_item, clf, config, dry_run: bool):
         "En människa (Fredrik) kommer att granska det innan det skickas."
     )
     knowledge = notion_client.get_knowledge_context(
-        config, mail_subject=mail_item.subject, mail_body=mail_item.body
+        config, mail_subject=mail_item.subject, mail_body=mail_item.body,
+        account_key=clf.account_key,
     )
     examples = state.get_learned_replies(limit=5)
     draft = reply_module.generate_reply(
@@ -605,7 +608,8 @@ def _process_waiting_mails(sender_email: str, config):
         try:
             mail_item = _reconstruct_mail_item(mail_data, config)
             knowledge = notion_client.get_knowledge_context(
-                config, mail_subject=mail_item.subject, mail_body=mail_item.body
+                config, mail_subject=mail_item.subject, mail_body=mail_item.body,
+                account_key=_account_key_for(mail_item.account, config),
             )
             examples = state.get_learned_replies(limit=5)
             reply_text = reply_module.generate_reply(

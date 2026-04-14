@@ -78,6 +78,105 @@ def _load_env_and_config() -> tuple[str, configparser.ConfigParser]:
     return token, cfg
 
 
+def _admin_account_scopes(cfg) -> None:
+    """
+    TUI för att hantera per-brevlåda kodord-scope (account_scopes.json).
+
+    Visar alla konfigurerade konton med deras nuvarande scope,
+    låter adminen välja ett konto och uppdatera dess kodord-lista.
+    """
+    import notion_data as nd
+
+    db_raw = cfg.get("mail", "knowledge_notion_db_ids", fallback="")
+    if not db_raw:
+        print(f"\n{RED}Fel: knowledge_notion_db_ids saknas i clio.config{NRM}")
+        return
+
+    db_id = db_raw.split(",")[0].split(":")[0].strip()
+
+    # Hämta projektlista och nuvarande scopes
+    print(f"\n{GRY}Hämtar projekt och brevlåde-scopes...{NRM}")
+    projects = nd.get_project_index(db_id)
+    scopes = nd.get_all_account_scopes()
+
+    if not scopes:
+        print(f"\n{GRY}(account_scopes.json är tom eller saknas){NRM}")
+        return
+
+    print(f"\n{BLD}=== BREVLÅDE-SCOPE ==={NRM}\n")
+    accounts = sorted(scopes.keys())
+    for i, acct in enumerate(accounts, 1):
+        s = scopes[acct]
+        scope_str = ", ".join(f"#{k}" for k in s) if s else f"{GRN}(alla){NRM}"
+        print(f"  {CYN}{i:>3}.{NRM}  {acct}@   {scope_str}")
+
+    sel = input(f"\nVälj brevlåda (nummer, Enter=avsluta): ").strip()
+    if not sel:
+        return
+    if not sel.isdigit() or not (1 <= int(sel) <= len(accounts)):
+        print(f"{GRY}Ogiltigt val.{NRM}")
+        return
+
+    selected_account = accounts[int(sel) - 1]
+    current_scope: list[str] = scopes[selected_account]
+
+    print(f"\n{BLD}{'─' * 56}")
+    print(f"  Brevlåda  : {selected_account}@")
+    scope_display = ", ".join(f"#{k}" for k in current_scope) if current_scope else "(alla / obegränsad)"
+    print(f"  Scope     : {scope_display}")
+    print(f"{'─' * 56}{NRM}")
+
+    if not projects:
+        print(f"\n{GRY}(inga projekt hittades){NRM}")
+        return
+
+    print(f"\n{BLD}Tillgängliga projekt:{NRM}")
+    print(f"  {GRY}{'Nr':>4}  {'Kodord':<14} {'Namn'}{NRM}")
+    print(f"  {GRY}{'─' * 52}{NRM}")
+    for i, p in enumerate(projects, 1):
+        kw       = f"#{p['kodord']}" if p.get("kodord") else "—"
+        name     = p.get("name", "")
+        selected = f" {GRN}✓{NRM}" if p.get("kodord") in current_scope else ""
+        print(f"  {CYN}{i:>4}.{NRM}  {kw:<14} {name}{selected}")
+
+    print(f"\n  {GRY}Format: 1,2 | 1-3 | all | Enter=alla (obegränsad){NRM}")
+    sel2 = input("Välj projekt för denna brevlåda: ").strip()
+
+    if not sel2:
+        # Tom inmatning = ta bort alla begränsningar
+        chosen_kodord = []
+        print(f"\n{GRY}(ingen begränsning — brevlådan ser alla projekt){NRM}")
+    else:
+        selected_indices = _parse_selection(sel2, len(projects))
+        if not selected_indices:
+            print(f"\n{GRY}Ogiltigt val — inga projekt valda.{NRM}")
+            return
+        chosen_kodord = [projects[i]["kodord"] for i in selected_indices if projects[i].get("kodord")]
+
+    # Bekräfta
+    print(f"\n{BLD}{'─' * 56}")
+    print(f"  Brevlåda  : {selected_account}@")
+    if chosen_kodord:
+        print(f"  Scope     : {', '.join('#' + k for k in chosen_kodord)}")
+    else:
+        print(f"  Scope     : {GRN}(alla / obegränsad){NRM}")
+    print(f"{BLD}{'─' * 56}{NRM}")
+
+    confirm = input("Spara? (J/n): ").strip().lower()
+    if confirm not in ("j", "y", "ja", "yes", ""):
+        print(f"\n{GRY}Avbruten.{NRM}")
+        return
+
+    try:
+        nd.save_account_scope(selected_account, chosen_kodord)
+        if chosen_kodord:
+            print(f"\n{GRN}✓ Scope uppdaterat: {selected_account}@ → {', '.join('#' + k for k in chosen_kodord)}{NRM}\n")
+        else:
+            print(f"\n{GRN}✓ Scope uppdaterat: {selected_account}@ → (alla projekt){NRM}\n")
+    except Exception as e:
+        print(f"\n{RED}Fel vid sparning: {e}{NRM}")
+
+
 def main(argv=None) -> None:
     token, cfg = _load_env_and_config()
 
@@ -93,9 +192,17 @@ def main(argv=None) -> None:
         print(f"\n{RED}Fel: whitelist_notion_page_id saknas i clio.config{NRM}")
         return
 
-    # ── STEG 1: Lista whitelistade användare ──────────────────────────────────
     print(f"\n{BLD}=== BEHÖRIGHETSADMIN — clio-agent-mail ==={NRM}\n")
-    print(f"{GRY}Hämtar whitelistade användare från Notion...{NRM}")
+    print(f"  {CYN}1.{NRM}  Hantera kodord-scope per användare")
+    print(f"  {CYN}2.{NRM}  Hantera brevlåde-scope (account_scopes.json)")
+    menu_sel = input(f"\nVälj (1/2, Enter=1): ").strip()
+
+    if menu_sel == "2":
+        _admin_account_scopes(cfg)
+        return
+
+    # ── STEG 1: Lista whitelistade användare ──────────────────────────────────
+    print(f"\n{GRY}Hämtar whitelistade användare från Notion...{NRM}")
 
     import notion_data as nd
     whitelist = sorted(nd.get_whitelist(wl_page))
