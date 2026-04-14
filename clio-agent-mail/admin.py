@@ -172,16 +172,31 @@ def main(argv=None) -> None:
 
     chosen_kodord = [projects[i]["kodord"] for i in selected_indices if projects[i].get("kodord")]
 
-    # ── STEG 3: Bekräfta + spara ──────────────────────────────────────────────
+    # ── STEG 3: Skrivrätt (:rw) ───────────────────────────────────────────────
+    current_write: list[str] = current.get("kodord_write", [])
+
+    print(f"\n{BLD}Skrivrätt — vilka projekt ska användaren kunna uppdatera?{NRM}")
+    for i, k in enumerate(chosen_kodord, 1):
+        mark = f"  {GRN}[rw]{NRM}" if k in current_write else ""
+        print(f"  {CYN}{i:>3}.{NRM}  #{k}{mark}")
+    print(f"\n  {GRY}Format: 1,2 | all | Enter=ingen skrivrätt{NRM}")
+    sel3 = input("Skrivrätt för: ").strip()
+
+    write_indices = _parse_selection(sel3, len(chosen_kodord)) if sel3 else []
+    chosen_write = [chosen_kodord[i] for i in write_indices]
+
+    # ── STEG 4: Bekräfta + spara ──────────────────────────────────────────────
     print(f"\n{BLD}{'─' * 56}")
     print(f"  Användare : {selected_email}")
-    print(f"  Ny kodord : {', '.join(f'#{k}' for k in chosen_kodord)}")
+    for k in chosen_kodord:
+        perm = f"{GRN}:rw{NRM}" if k in chosen_write else f"{GRY}:r {NRM}"
+        print(f"  #{k:<14} {perm}")
     if current_level not in ("coded", "admin", "write") and chosen_kodord:
         print(f"  Nivå      : {YEL}uppgraderas till 'coded' (nuv: {current_level}){NRM}")
     print(f"{BLD}{'─' * 56}{NRM}")
 
     confirm = input("Spara till Notion? (J/n): ").strip().lower()
-    if confirm not in ("j", "y", "ja", "yes"):
+    if confirm not in ("j", "y", "ja", "yes", ""):
         print(f"\n{GRY}Avbruten.{NRM}")
         return
 
@@ -198,9 +213,15 @@ def main(argv=None) -> None:
             selected_email,
             level=new_level,
             kodord_scope=chosen_kodord,
+            kodord_write=chosen_write,
         )
+        r_only = [k for k in chosen_kodord if k not in chosen_write]
         print(f"\n{GRN}✓ Behörighet uppdaterad för {selected_email}.{NRM}")
-        print(f"  Nivå: {new_level} | Kodord: {', '.join(f'#{k}' for k in chosen_kodord)}\n")
+        if r_only:
+            print(f"  Läs:   {', '.join(f'#{k}' for k in r_only)}")
+        if chosen_write:
+            print(f"  Skriv: {', '.join(f'#{k}' for k in chosen_write)}")
+        print()
     except Exception as e:
         print(f"\n{RED}Fel vid sparning: {e}{NRM}")
 

@@ -106,16 +106,31 @@ def fetch_matrix(page_id: str, token: str) -> dict:
             if tg_raw and re.fullmatch(r"\d+", tg_raw):
                 tg_id = int(tg_raw)
 
-            kodord_scope = (
-                [k.strip() for k in scope_raw.split(",") if k.strip()]
-                if scope_raw else []
-            )
+            # Parsa kodord_scope: "iaf:r,capssf:rw" → scope=["iaf","capssf"], write=["capssf"]
+            # Bakåtkompatibelt: "iaf,capssf" (utan suffix) → bara läsrätt
+            kodord_scope: list[str] = []
+            kodord_write: list[str] = []
+            if scope_raw:
+                for k in scope_raw.split(","):
+                    k = k.strip()
+                    if not k:
+                        continue
+                    if ":" in k:
+                        name, _, perm = k.partition(":")
+                        name = name.strip()
+                        if name:
+                            kodord_scope.append(name)
+                            if perm.strip() == "rw":
+                                kodord_write.append(name)
+                    else:
+                        kodord_scope.append(k)  # inget suffix = :r
 
             entry = {
                 "level": level,
                 "accounts": accounts,
                 "telegram_id": tg_id,
                 "kodord_scope": kodord_scope,
+                "kodord_write": kodord_write,
             }
             emails[email] = entry
             if tg_id:
@@ -131,10 +146,19 @@ def _build_row(
     accounts: list[str],
     tg_id: str,
     kodord_scope: list[str],
+    kodord_write: list[str] | None = None,
 ) -> str:
-    """Bygger en pipe-separerad permission-rad."""
+    """
+    Bygger en pipe-separerad permission-rad.
+    kodord_write: de kodord som ska ha :rw (övriga i scope får :r).
+    """
     acc_str = ",".join(accounts) if accounts else "*"
-    scope_str = ",".join(kodord_scope) if kodord_scope else ""
+    if kodord_scope:
+        write_set = set(kodord_write) if kodord_write else set()
+        parts = [f"{k}:rw" if k in write_set else f"{k}:r" for k in kodord_scope]
+        scope_str = ",".join(parts)
+    else:
+        scope_str = ""
     return f"{email} | {level} | {acc_str} | {tg_id} | {scope_str}"
 
 
@@ -172,6 +196,7 @@ def update_user_permission(
     level: str | None = None,
     accounts: list[str] | None = None,
     kodord_scope: list[str] | None = None,
+    kodord_write: list[str] | None = None,
 ) -> bool:
     """
     Uppdaterar eller lägger till en rad i permission-matrisen i Notion.
@@ -218,13 +243,32 @@ def update_user_permission(
                         acc_raw = current["accounts_str"]
                         new_acc = [] if acc_raw in ("*", "") else [a.strip() for a in acc_raw.split(",") if a.strip()]
                     new_tg = current["tg_id"]
+                    # Beräkna ny scope och write-lista
                     if kodord_scope is not None:
                         new_scope = kodord_scope
                     else:
+                        # Återskapa scope från lagrad sträng (strip :r/:rw-suffix)
                         s = current["scope_str"]
-                        new_scope = [k.strip() for k in s.split(",") if k.strip()] if s else []
+                        new_scope = []
+                        for k in (s.split(",") if s else []):
+                            k = k.strip()
+                            if k:
+                                new_scope.append(k.partition(":")[0].strip() if ":" in k else k)
 
-                    line = _build_row(email, new_lvl, new_acc, new_tg, new_scope)
+                    if kodord_write is not None:
+                        new_write = kodord_write
+                    else:
+                        # Återskapa write-lista från lagrad sträng
+                        s = current["scope_str"]
+                        new_write = []
+                        for k in (s.split(",") if s else []):
+                            k = k.strip()
+                            if ":" in k:
+                                name, _, perm = k.partition(":")
+                                if perm.strip() == "rw":
+                                    new_write.append(name.strip())
+
+                    line = _build_row(email, new_lvl, new_acc, new_tg, new_scope, new_write)
                     changed = True
                     found_block_id = block["id"]
                     found_block_type = block.get("type", "paragraph")
@@ -240,7 +284,8 @@ def update_user_permission(
     new_acc = accounts if accounts is not None else []
     new_tg = ""
     new_scope = kodord_scope if kodord_scope is not None else []
-    new_line = _build_row(email, new_lvl, new_acc, new_tg, new_scope)
+    new_write = kodord_write if kodord_write is not None else []
+    new_line = _build_row(email, new_lvl, new_acc, new_tg, new_scope, new_write)
     _append_block(page_id, new_line, token)
     logger.info(f"[clio-access] Ny behörighetsrad tillagd för {email}")
     return True

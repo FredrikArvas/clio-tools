@@ -19,6 +19,7 @@ from pathlib import Path
 
 import state
 import classifier
+import commands
 import smtp_client
 import notion_data as notion_client
 import faq as faq_module
@@ -245,6 +246,31 @@ def _handle_faq(mail_item, clf, config, dry_run: bool):
 
 
 def _handle_auto_send(mail_item, clf, config, dry_run: bool):
+    # Kontrollera om det är ett /update-kommando från en skrivbehörig coded-användare
+    cmd = commands.resolve_command(mail_item.subject)
+    if cmd == "update":
+        result = commands.dispatch("update", mail_item, config)
+        sender = _extract_email(mail_item.sender)
+        if not dry_run:
+            smtp_client.send_email(
+                config=config,
+                from_account_key="clio",
+                to_addr=sender,
+                subject=f"Re: {mail_item.subject}",
+                body=result.reply_body + _quote_original(mail_item),
+                reply_to_message_id=mail_item.message_id,
+            )
+            for outbound in result.outbound:
+                smtp_client.send_email(
+                    config=config,
+                    from_account_key=outbound.from_account_key,
+                    to_addr=outbound.to_addr,
+                    subject=outbound.subject,
+                    body=outbound.body,
+                )
+            state.update_status(mail_item.message_id, state.STATUS_SENT)
+        return
+
     context = (
         "Detta är ett [CLIO-AUTO]-mail. "
         "Avsändaren är vitlistad och förväntar sig ett direkt svar utan mänsklig granskning."

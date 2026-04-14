@@ -44,6 +44,8 @@ COMMAND_MAP: dict[str, list[str]] = {
     "onboarding": ["onboarding", "welcome", "välkommen", "bienvenue", "willkommen"],
     "prompt":     ["prompt", "instruera", "instruct", "instruktion", "send", "skicka"],
     "language":   ["language", "språk", "langue", "sprache", "lang"],
+    # Dolt kommando: visas bara i /manual för användare med :rw-behörighet
+    "update":     ["update", "uppdatera", "opdater", "aktualisieren"],
 }
 
 # Kommandon som kräver admin-behörighet
@@ -659,6 +661,101 @@ def _cmd_obit_import(mail_item, config) -> CommandResult:
     return CommandResult(receipt)
 
 
+def _cmd_update(mail_item, config) -> CommandResult:
+    """
+    Appendar brödtexten till ett projekts context card i Notion.
+
+    Kräver att avsändaren har :rw-behörighet på det angivna kodordet.
+    Kommandot är dolt — visas bara i /manual för behöriga användare.
+
+    Ämne: update #kodord
+    Brödtext: text att lägga till i context card-sidan
+    """
+    from classifier import extract_sender_email
+    from clio_access import AccessManager
+
+    sender_email = extract_sender_email(mail_item.sender)
+    am = AccessManager.from_config(config)
+    write_scope = am.get_kodord_write_scope({"email": sender_email})
+
+    # Extrahera #kodord ur ämnesraden
+    kodord_list = _parse_kodord(mail_item.subject)
+    if not kodord_list:
+        return CommandResult(
+            "Inget #kodord angivet i ämnesraden.\n"
+            "Exempel: update #capssf",
+            is_reasoning=True,
+        )
+
+    # Kontrollera behörighet
+    if write_scope is not None:
+        unauthorized = [k for k in kodord_list if k not in write_scope]
+        if unauthorized:
+            return CommandResult(
+                f"Du har inte skrivbehörighet för: {', '.join('#' + k for k in unauthorized)}\n"
+                "Kontakta Fredrik om du behöver skrivåtkomst.",
+                is_reasoning=True,
+            )
+
+    # Slå upp projektet
+    matched, not_found = _resolve_nccs(kodord_list, config, allowed_kodord=write_scope)
+    if not matched:
+        unknown = ', '.join('#' + k for k in not_found)
+        return CommandResult(
+            f"Okänt kodord: {unknown}\n"
+            "Skicka 'list' för att se tillgängliga kodord.",
+            is_reasoning=True,
+        )
+
+    body_text = (mail_item.body or "").strip()
+    if not body_text:
+        return CommandResult(
+            "Brödtexten är tom — inget att lägga till.",
+            is_reasoning=True,
+        )
+
+    # Uppdatera varje matchat projekt
+    updated = []
+    notify_lines = []
+    for proj in matched:
+        page_id = proj.get("page_id", "")
+        if not page_id:
+            continue
+        notion_client.append_to_context_card(page_id, body_text, author=sender_email)
+        updated.append(proj["name"])
+        preview = body_text[:200] + ("…" if len(body_text) > 200 else "")
+        notify_lines.append(
+            f"#{proj['kodord']} — {proj['name']}\n{preview}"
+        )
+
+    if not updated:
+        return CommandResult(
+            "Hittade inga context cards att uppdatera (saknar page_id).",
+            is_reasoning=True,
+        )
+
+    # Avisering till Fredrik
+    notify_addr = config.get("mail", "notify_address", fallback="")
+    outbound = []
+    if notify_addr:
+        notify_body = (
+            f"Context card uppdaterat av {sender_email}:\n\n"
+            + "\n\n---\n\n".join(notify_lines)
+        )
+        outbound.append(OutboundMail(
+            to_addr=notify_addr,
+            subject=f"[CLIO-INFO] Context card uppdaterat: {', '.join('#' + p['kodord'] for p in matched)}",
+            body=notify_body,
+            from_account_key="clio",
+        ))
+
+    names = ", ".join(updated)
+    return CommandResult(
+        f"Context card uppdaterat för: {names}\nTack!",
+        outbound=outbound,
+    )
+
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 
 _HANDLERS = {
@@ -673,6 +770,7 @@ _HANDLERS = {
     "language":    _cmd_language,
     "onboarding":  _cmd_onboarding,
     "prompt":      _cmd_prompt,
+    "update":      _cmd_update,         # Dolt — skrivrätt per kodord (:rw)
     "obit_import": _cmd_obit_import,   # Sprint 3 — routed by ACTION_OBIT_IMPORT
 }
 

@@ -485,6 +485,36 @@ def get_knowledge_context(config, mail_subject: str = "", mail_body: str = "") -
 # Se classifier._get_permission() och clio_access.AccessManager.
 
 
+def append_to_context_card(page_id: str, text: str, author: str = "") -> None:
+    """
+    Appendar ett nytt stycke i slutet av en context card-sida i Notion.
+    Används av /update-kommandot för att låta skrivbehöriga användare uppdatera projektkort.
+
+    page_id : Notion-sidans ID (från projekt-indexets page_id-fält)
+    text    : Brödtexten att lägga till
+    author  : Avsändarens e-post (visas som inledning i stycket)
+    """
+    try:
+        client = _get_client()
+        content = f"[{author}]: {text.strip()}" if author else text.strip()
+        client.blocks.children.append(
+            block_id=page_id,
+            children=[{
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [{"type": "text", "text": {"content": content}}]
+                }
+            }]
+        )
+        # Rensa sidcachen så nästa läsning hämtar uppdaterad text
+        _cache.pop(f"page:{page_id}", None)
+        logger.info(f"Context card uppdaterad: {page_id} av {author or '?'}")
+    except Exception as e:
+        logger.error(f"Fel vid uppdatering av context card {page_id}: {e}")
+        raise
+
+
 def add_to_whitelist(page_id: str, email: str):
     """
     Lägger till en e-postadress i Notion-vitlistan och rensar den lokala cachen

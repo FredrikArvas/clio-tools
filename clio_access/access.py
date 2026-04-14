@@ -172,6 +172,24 @@ class AccessManager:
             return []
         return entry.get("accounts", [])
 
+    def get_kodord_write_scope(self, identity: dict, scope: str = "") -> list[str] | None:
+        """
+        Returnerar listan av kodord som användaren har skrivrätt (:rw) till.
+
+        → None      om användaren är admin/write (inga begränsningar)
+        → []        om inga kodord har skrivrätt
+        → ["capssf", ...]  om specifika kodord är skrivbara
+        """
+        level = self.get_level(identity, scope)
+        if level in ("admin", "write"):
+            return None  # full access
+
+        entry = self._resolve(identity)
+        if not entry:
+            return []
+
+        return entry.get("kodord_write", [])
+
     def get_kodord_scope(self, identity: dict, scope: str = "") -> list[str] | None:
         """
         Returnerar listan av tillåtna kodord för identiteten.
