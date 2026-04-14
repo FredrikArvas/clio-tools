@@ -172,6 +172,26 @@ class AccessManager:
             return []
         return entry.get("accounts", [])
 
+    def get_kodord_scope(self, identity: dict, scope: str = "") -> list[str] | None:
+        """
+        Returnerar listan av tillåtna kodord för identiteten.
+
+        → None          om användaren är admin/write (inga begränsningar)
+        → []            om scope är tom men behörighet finns (bör inte hända)
+        → ["ssf", ...]  om specifika kodord är tillåtna
+        → None          om kodord_scope är tom (= alla tillåtna)
+        """
+        level = self.get_level(identity, scope)
+        if level in ("admin", "write"):
+            return None  # inga begränsningar
+
+        entry = self._resolve(identity)
+        if not entry:
+            return None
+
+        scope_list = entry.get("kodord_scope", [])
+        return scope_list if scope_list else None  # tom lista = alla
+
     def invalidate_cache(self) -> None:
         """Tvingar nästa anrop att hämta färsk data från Notion."""
         self._cache.invalidate("matrix")

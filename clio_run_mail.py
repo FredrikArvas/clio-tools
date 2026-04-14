@@ -274,6 +274,36 @@ def _mail_log(tool: dict, state: dict) -> None:
     menu_pause()
 
 
+def _mail_admin(tool: dict, state: dict) -> None:
+    """Startar behörighetsadmin TUI för clio-agent-mail."""
+    script_dir = tool["script"].parent
+    admin_script = script_dir / "admin.py"
+    if not admin_script.exists():
+        print(f"\n{GRY}admin.py hittades inte: {admin_script}{NRM}")
+        menu_pause()
+        return
+
+    for env_file in (script_dir.parent / ".env", script_dir / ".env"):
+        if env_file.exists():
+            try:
+                from dotenv import load_dotenv as _ld
+                _ld(env_file, override=False)
+            except ImportError:
+                pass
+
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("admin", str(admin_script))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.main()
+    except KeyboardInterrupt:
+        print(f"\n{GRY}(Avbruten){NRM}")
+    except Exception as e:
+        print(f"\n{GRY}Fel: {e}{NRM}")
+    menu_pause()
+
+
 def _mail_insights(tool: dict, state: dict) -> None:
     """Kör insiktsanalys och visar resultatet i TUI."""
     script_dir = tool["script"].parent
@@ -341,6 +371,7 @@ def run_mail(tool: dict, state: dict) -> None:
         "4. Vitlista           (lägg till adress i Notion)",
         "5. Maillogg           (senaste hanterade mail)",
         "6. Insiktsanalys      (analysera mönster + förutsäg frågor)",
+        "7. Behörighetsadmin   (hantera kodord-scope per användare)",
     ]
 
     choice = menu_select("clio-agent-mail:", _MAIL_CHOICES)
@@ -356,6 +387,9 @@ def run_mail(tool: dict, state: dict) -> None:
         return
     if mode == "6":
         _mail_insights(tool, state)
+        return
+    if mode == "7":
+        _mail_admin(tool, state)
         return
 
     cmd = [sys.executable, str(tool["script"])]

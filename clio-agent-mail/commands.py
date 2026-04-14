@@ -146,10 +146,17 @@ def _parse_kodord(text: str) -> list[str]:
     return [m.lower() for m in re.findall(r"#(\w+)", text)]
 
 
-def _resolve_nccs(kodord_list: list[str], config) -> tuple[list[dict], list[str]]:
+def _resolve_nccs(
+    kodord_list: list[str],
+    config,
+    allowed_kodord: list[str] | None = None,
+) -> tuple[list[dict], list[str]]:
     """
     Slår upp kodord mot Projektmasterlistan.
     Returnerar (matchade projekt-dicts, ej hittade kodord).
+
+    allowed_kodord: om satt, filtreras matchningar till bara dessa kodord.
+    None = inga begränsningar (admin/write).
     """
     raw = config.get("mail", "knowledge_notion_db_ids", fallback="")
     db_entries = [e.strip() for e in raw.split(",") if e.strip()]
@@ -164,7 +171,10 @@ def _resolve_nccs(kodord_list: list[str], config) -> tuple[list[dict], list[str]
     for kw in kodord_list:
         proj = next((p for p in index if p["kodord"] == kw), None)
         if proj:
-            matched.append(proj)
+            if allowed_kodord is None or kw in allowed_kodord:
+                matched.append(proj)
+            else:
+                not_found.append(kw)  # kodord finns men är ej tillåtet för denna användare
         else:
             not_found.append(kw)
     return matched, not_found
@@ -482,9 +492,16 @@ def _cmd_prompt(mail_item, config) -> CommandResult:
             is_reasoning=True,
         )
 
+    # Hämta avsändarens tillåtna kodord-scope
+    from classifier import extract_sender_email
+    from clio_access import AccessManager
+    _sender = extract_sender_email(mail_item.sender)
+    _am = AccessManager.from_config(config)
+    _allowed = _am.get_kodord_scope({"email": _sender})
+
     # Extrahera #kodord
     kodord_list = _parse_kodord(instruction)
-    matched_projs, not_found = _resolve_nccs(kodord_list, config) if kodord_list else ([], [])
+    matched_projs, not_found = _resolve_nccs(kodord_list, config, allowed_kodord=_allowed) if kodord_list else ([], [])
 
     # Inget #kodord alls → be om förtydligande
     if not kodord_list:
