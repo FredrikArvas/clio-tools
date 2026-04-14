@@ -313,8 +313,8 @@ def ingest_ncc_page(
 
     print(f"\n[ncc] {title}")
 
-    # Re-indexeringskontroll
-    if not force:
+    # Re-indexeringskontroll (ej i dry-run — Qdrant är None då)
+    if not force and not dry_run:
         indexed_at = get_indexed_at(qdrant, source_id)
         if not needs_reindex(last_edited, indexed_at):
             print(f"  {_GRY}→ oförändrad sedan {indexed_at[:10]}, hoppar{_NRM}")
