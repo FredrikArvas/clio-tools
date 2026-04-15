@@ -1,0 +1,8 @@
+# clio-agent-job — pip-beroenden
+feedparser>=6.0
+anthropic>=0.25
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# clio-core installeras separat (delas av alla clio-moduler):
+#   pip install -e ../clio-core

@@ -1,0 +1,19 @@
+# clio-agent-job — konfiguration (icke-secrets)
+# Secrets (ANTHROPIC_API_KEY, SMTP_PASSWORD) läggs i .env
+
+# Matchningströskel — artiklar med match_score >= threshold triggar rapport
+threshold: 50
+
+# Claude-modell för signalanalys (haiku = billigare för daglig bulk)
+model: claude-haiku-4-5-20251001
+
+smtp:
+  host: mail.misshosting.com
+  port: 465
+  use_ssl: true
+  use_starttls: false
+  user: clio@arvas.international
+  password_env: IMAP_PASSWORD_CLIO   # Samma env-var som clio-agent-mail använder
+
+notify:
+  from_addr: clio@arvas.international

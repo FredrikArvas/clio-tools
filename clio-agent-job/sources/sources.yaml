@@ -1,0 +1,79 @@
+version: 1
+
+# Nyhetskällor för clio-agent-job — förändringssignalbevakning
+# adapter: module_name.ClassName (relativt sources/-mappen)
+# Sätt enabled: false för att pausa en källa utan att ta bort den
+
+sources:
+
+  - name: Di — Näringsliv
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://www.di.se/rss
+      name: Di
+
+  - name: Dagens Samhälle — Offentlig sektor
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://www.dagenssamhalle.se/rss
+      name: Dagens Samhälle
+
+  - name: Upphandling24 — LOU-upphandlingar
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://upphandling24.se/feed/
+      name: Upphandling24
+
+  - name: Computer Sweden — IT och digitalisering
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://computersweden.se/feed/rss/
+      name: Computer Sweden
+
+  - name: Dagens Arena — Fackligt och offentlig sektor
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://www.dagensarena.se/feed/
+      name: Dagens Arena
+
+  - name: MFN — Nordiska börsbolags pressreleaser
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://mfn.se/all/rss.xml
+      name: MFN
+
+  - name: SAP News — Global SAP-nyheter och migrationsavtal
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://news.sap.com/feed/
+      name: SAP News
+
+  - name: Realtid — Svensk finans och bolagsnyheter
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://www.realtid.se/feed
+      name: Realtid
+
+  - name: IT-Branschen — Svensk IT-industri
+    enabled: true
+    adapter: source_rss.RssSource
+    config:
+      url: https://itbranschen.com/feed/
+      name: IT-Branschen
+
+  # Breakit: ingen fungerande publik RSS hittad 2026-04-15
+  # Alternativt: scrapers.breakit.se eller manuell inmatning via [clio-job]-tagg
+  - name: Breakit — Startup och investering
+    enabled: false
+    adapter: source_rss.RssSource
+    config:
+      url: https://www.breakit.se/feed/articles
+      name: Breakit

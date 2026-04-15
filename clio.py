@@ -237,6 +237,15 @@ TOOLS = [
         "custom_runner": True,
     },
     {
+        "nr":           14,
+        "name":         "clio-agent-job",
+        "desc":         "Jobbsökning — förändringssignaler och karriärmöjligheter",
+        "script":       ROOT / "clio-agent-job" / "run.py",
+        "status":       "active",
+        "needs_folder": False,
+        "custom_runner": True,
+    },
+    {
         "nr":           13,
         "name":         "clio-rag",
         "desc":         "Lokal RAG — indexera böcker/dokument, sök med Claude (Qdrant)",

@@ -1,0 +1,49 @@
+# Richards kandidatprofil — primär testanvändare för clio-agent-job
+# Genererad 2026-04-15 baserat på ADD avsnitt 3
+
+name: Richard Anderberg
+email: "richard.anderberg@live.com"           # Fyll i Richards e-postadress
+language: sv
+
+role: Senior rådgivare, programledning och transformation
+seniority: Senior / Executive
+geography: Stockholm
+hybrid_ok: true
+
+background:
+  - Digital transformation och förändringsledning
+  - Offentlig sektor — Arbetsförmedlingen (9 år)
+  - Konsult och startup (SafeHarbour, Connecta, Acando)
+  - Programledning, LOU, agila metoder, portföljledning
+
+education:
+  - MBA-IT, Handelshögskolan
+  - M.Sc.EE, KTH
+
+target_roles:
+  - Interim programledare
+  - Förändringsstrateg (konsult)
+  - Organisationsutveckling vid digital transformation
+  - AI-enablement
+  - Förvärvsintegration
+
+# Förändringssignaler som är relevanta för denna profil
+signal_keywords:
+  - ny GD
+  - ny IT-chef
+  - ny CDO
+  - digitaliseringsprogram
+  - digital transformation
+  - förvärv
+  - integration
+  - omorganisation
+  - varsel
+  - ny styrning
+  - investeringsrunda
+  - Series A
+  - Series B
+  - offentlig upphandling
+  - LOU
+  - programledning
+  - förändringsledning
+  - interim
