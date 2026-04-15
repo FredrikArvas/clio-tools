@@ -197,27 +197,101 @@ def _admin_language(sender_email: str, config) -> str:
 # ── Kommandohanterare ─────────────────────────────────────────────────────────
 
 def _cmd_list(mail_item, config) -> CommandResult:
-    """Returnerar alla projekt + kodord från Projektmasterlistan."""
+    """
+    Returnerar projektlistan från Projektmasterlistan.
+
+    Filtrering:
+    - Exkluderar status 'Saknas' för alla användare
+    - Tillämpar account-scope (account_scopes.json)
+    - Tillämpar user-scope (coded-användare ser bara sina kodord)
+
+    Visning:
+    - Grupperas per sfär
+    - admin/write: ✓/– NCC-indikator per projekt
+    - coded/whitelisted: bara #kodord + projektnamn
+    """
+    from collections import OrderedDict
+    from classifier import extract_sender_email
+    from clio_access import AccessManager
+    from helpers import _account_key_for
+
     raw = config.get("mail", "knowledge_notion_db_ids", fallback="")
     db_entries = [e.strip() for e in raw.split(",") if e.strip()]
     if not db_entries:
-        return CommandResult("No project database configured.")
+        return CommandResult("Ingen projektdatabas konfigurerad.")
 
     db_id = db_entries[0].split(":")[0].strip()
     index = notion_client.get_project_index(db_id)
-
     if not index:
-        return CommandResult("Project list is empty or unavailable.")
+        return CommandResult("Projektlistan är tom eller otillgänglig.")
 
-    sep = "─" * 40
-    lines = [f"Projects ({len(index)})", sep]
-    for proj in index:
-        kw   = f"#{proj['kodord']:<12}" if proj["kodord"] else " " * 13
-        name = proj["name"]
-        stat = proj["status"]
-        lines.append(f"{kw} {name}" + (f"  [{stat}]" if stat else ""))
-    lines.append(sep)
-    lines.append("Tip: use #kodord in /prompt to load project context.")
+    # Bestäm access-nivå
+    sender_email = extract_sender_email(mail_item.sender)
+    am = AccessManager.from_config(config)
+    level = am.get_level({"email": sender_email})
+    is_privileged = level in ("admin", "write")
+
+    # Effektivt scope = skärning av user-scope och account-scope
+    user_scope = am.get_kodord_scope({"email": sender_email})
+    account_key = _account_key_for(mail_item.account, config)
+    account_scope = notion_client.load_account_scope(account_key)
+
+    if user_scope is None:
+        effective_scope = account_scope
+    elif account_scope is None:
+        effective_scope = user_scope
+    else:
+        effective_scope = [k for k in user_scope if k in account_scope]
+
+    # Filtrera: ta bort "Saknas", tillämpa scope, kräv kodord
+    STATUS_HIDDEN = {"saknas"}
+    STATUS_ORDER  = {"bekräftad": 0, "pågående": 1, "osäker": 2}
+
+    filtered = [
+        p for p in index
+        if p.get("kodord")
+        and p.get("status", "").lower() not in STATUS_HIDDEN
+        and (effective_scope is None or p["kodord"] in effective_scope)
+    ]
+
+    if not filtered:
+        return CommandResult("Inga tillgängliga projekt.")
+
+    # Gruppera per sfär (behåll Notion-ordning)
+    groups: OrderedDict[str, list] = OrderedDict()
+    for proj in filtered:
+        sfar = (proj.get("sfar") or "").strip() or "Övrigt"
+        if sfar not in groups:
+            groups[sfar] = []
+        groups[sfar].append(proj)
+
+    # Sortera inom varje sfär: bekräftad → pågående → osäker → övrigt
+    for projs in groups.values():
+        projs.sort(key=lambda p: STATUS_ORDER.get(p.get("status", "").lower(), 9))
+
+    # ── Bygg utdata ───────────────────────────────────────────────────────────
+    KW = 14   # kolumnbredd för #kodord
+    NM = 30   # max tecken för projektnamn
+
+    scope_note = " — dina projekt" if effective_scope is not None else ""
+    lines = [f"Projekt ({len(filtered)}){scope_note}", "═" * 46]
+
+    for sfar, projs in groups.items():
+        lines.append(f"\n{sfar}")
+        for proj in projs:
+            kw   = f"#{proj['kodord']}"
+            name = proj.get("name", "")
+            name = name[:NM] + ("…" if len(name) > NM else "")
+            if is_privileged:
+                ncc = "✓" if proj.get("page_id") else "–"
+                lines.append(f"  {ncc}  {kw:<{KW}} {name}")
+            else:
+                lines.append(f"  {kw:<{KW}} {name}")
+
+    lines.append("\n" + "═" * 46)
+    if is_privileged:
+        lines.append("✓ = Context Card finns   – = saknas ännu")
+    lines.append("Tip: /prompt #kodord för att inkludera projektkort.")
 
     return CommandResult("\n".join(lines))
 
