@@ -37,6 +37,7 @@ UNIT_SUITES = {
     "fetch":      "test_fetch",
     "clio":       "test_clio",
     "research":   "test_research",
+    "obit":       "test_obit",
 }
 
 SYSTEM_SUITES = {
