@@ -2,7 +2,7 @@
 # Secrets (ANTHROPIC_API_KEY, SMTP_PASSWORD) läggs i .env
 
 # Matchningströskel — artiklar med match_score >= threshold triggar rapport
-threshold: 25
+threshold: 50
 
 # Claude-modell för signalanalys (haiku = billigare för daglig bulk)
 model: claude-haiku-4-5-20251001
