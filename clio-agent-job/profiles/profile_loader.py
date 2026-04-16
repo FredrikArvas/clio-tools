@@ -36,10 +36,7 @@ def load_profile(path: Optional[Path] = None) -> dict:
     if not isinstance(data, dict):
         raise ValueError(f"Ogiltig profilfil (förväntade YAML-dict): {profile_path}")
 
-    if data.get("profile_type") == "recruiter":
-        required = ["name", "target_candidate"]
-    else:
-        required = ["name", "role", "target_roles"]
+    required = ["name", "role", "target_roles"]
     missing = [k for k in required if k not in data]
     if missing:
         raise ValueError(f"Profil saknar obligatoriska fält: {missing}")

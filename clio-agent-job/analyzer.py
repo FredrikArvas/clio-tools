@@ -25,54 +25,7 @@ try:
 except ImportError:
     _HAS_ANTHROPIC = False
 
-# Rekryterarläge — prompt för att hitta signaler om VAR kandidater kan bli öppna
-_RECRUITER_PROMPT_TEMPLATE = """\
-DU ÄR: Strategisk rekryteringsanalytiker specialiserad på passiv kandidatidentifiering.
-
-REKRYTERINGSPROFIL:
-Vi söker: {target_role}
-Karaktäristika: {characteristics}
-Målbranscher: {industries}
-Triggertyper vi letar efter: {trigger_signals}
-
-ARTIKEL:
-Titel: {title}
-Källa: {source}
-Datum: {published}
-Innehåll: {body_snippet}
-
-UPPDRAG:
-Bedöm om artikeln indikerar att senior SAP-personal på ett namngivet företag
-kan bli öppen för jobbbyte inom 6 månader — INTE om de söker aktivt nu.
-
-1. Identifiera om artikeln nämner ett specifikt företag med förändring som
-   kan göra deras SAP-kompetens överflödig eller oattraktiv (0–100).
-2. Förändringen ska vara: plattformsbyte, outsourcing, varsel, förvärv av
-   icke-SAP-bolag, tvingad S/4HANA-migration, CIO-byte, besparingspaket.
-3. Om match >= 50: ange vilket företag, vilken typ av SAP-personal som
-   berörs, och när de troligen börjar söka (tidslinje).
-4. Rekommendera åtgärd: kontakta_nu / bevaka_3mån / bevaka_6mån / avstå.
-5. Kontakttips: vem att kontakta och hur (UTAN att nämna konfidentiell kund).
-
-Om ingen relevant signal: svara INGEN_SIGNAL.
-
-Svara ALLTID på svenska. Svara ALLTID i JSON:
-{{
-  "signal_type": "plattformsbyte | outsourcing | varsel | förvärv | s4hana_migration | cio_byte | besparingspaket | övrigt",
-  "signal_strength": "svag|medel|stark",
-  "match_score": int,
-  "target_company": str,
-  "match_reason": str,
-  "candidate_profile": str,
-  "estimated_timeline": str,
-  "potential_roles": [str],
-  "recommended_action": "kontakta_nu|bevaka_3man|bevaka_6man|avsta",
-  "contact_hint": str
-}}
-Om INGEN_SIGNAL: {{"signal_type": "ingen", "match_score": 0}}
-"""
-
-# Jobbsökarläge — prompt-mall (ADD avsnitt 9)
+# Jobbsökarläge — prompt-mall
 _PROMPT_TEMPLATE = """\
 DU ÄR: Strategisk arbetsmarknadsanalytiker och karriärcoach.
 
@@ -129,26 +82,6 @@ def _profile_to_text(profile: dict) -> str:
     return "\n".join(lines)
 
 
-def _build_recruiter_prompt(article: "Article", profile: dict) -> str:
-    """Rekryterarläge — bygger prompt från rekryterarprofil."""
-    tc = profile.get("target_candidate", {})
-    triggers = profile.get("trigger_signals", {})
-    high = triggers.get("high_value", [])
-    medium = triggers.get("medium_value", [])
-    all_triggers = ", ".join(high[:4]) + (f" | {', '.join(medium[:2])}" if medium else "")
-
-    return _RECRUITER_PROMPT_TEMPLATE.format(
-        target_role=tc.get("role", ""),
-        characteristics=", ".join(tc.get("characteristics", [])[:3]),
-        industries=", ".join(profile.get("target_industries", [])[:5]),
-        trigger_signals=all_triggers,
-        title=article.title,
-        source=article.source,
-        published=article.published_str(),
-        body_snippet=article.body_snippet or "(ingen snippet)",
-    )
-
-
 @dataclass
 class AnalysisResult:
     article_id: str
@@ -180,22 +113,19 @@ def analyze(
     if not key:
         raise ValueError("ANTHROPIC_API_KEY saknas i miljövariablerna")
 
-    if profile.get("profile_type") == "recruiter":
-        prompt = _build_recruiter_prompt(article, profile)
-    else:
-        profil_text = _profile_to_text(profile)
-        prompt = _PROMPT_TEMPLATE.format(
-            profil_text=profil_text,
-            title=article.title,
-            source=article.source,
-            published=article.published_str(),
-            body_snippet=article.body_snippet or "(ingen snippet tillgänglig)",
-        )
+    profil_text = _profile_to_text(profile)
+    prompt = _PROMPT_TEMPLATE.format(
+        profil_text=profil_text,
+        title=article.title,
+        source=article.source,
+        published=article.published_str(),
+        body_snippet=article.body_snippet or "(ingen snippet tillgänglig)",
+    )
 
     client = anthropic.Anthropic(api_key=key)
 
     try:
-        max_tok = 1024 if profile.get("profile_type") == "recruiter" else 512
+        max_tok = 512
         message = client.messages.create(
             model=model,
             max_tokens=max_tok,
