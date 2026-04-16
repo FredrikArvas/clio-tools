@@ -8,16 +8,19 @@ Delar infrastruktur med clio-agent-mail:
   - Kopia sparas automatiskt i IMAP Skickat-mappen
 
 Beroende: kräver att clio-agent-mail/ finns som syskonmapp i clio-tools/.
+Notera: importerar bara smtp_client — inte main.py (undviker tunga handlers-importer).
 """
 
 from __future__ import annotations
 
+import configparser
+import os
 import sys
 from pathlib import Path
 
-_BASE_DIR  = Path(__file__).parent
-_ROOT_DIR  = _BASE_DIR.parent
-_MAIL_DIR  = _ROOT_DIR / "clio-agent-mail"
+_BASE_DIR = Path(__file__).parent
+_ROOT_DIR = _BASE_DIR.parent
+_MAIL_DIR = _ROOT_DIR / "clio-agent-mail"
 
 if not _MAIL_DIR.exists():
     raise ImportError(
@@ -29,15 +32,36 @@ if str(_MAIL_DIR) not in sys.path:
     sys.path.insert(0, str(_MAIL_DIR))
 
 # Ladda clio-agent-mails .env så att IMAP_PASSWORD_CLIO finns i environ
-# innan load_config() anropas (den injicerar lösenordet i config-objektet)
 try:
     from dotenv import load_dotenv as _load_dotenv
     _load_dotenv(_MAIL_DIR / ".env", override=False)
 except ImportError:
     pass
 
-from main import load_config      # noqa: E402
-import smtp_client                # noqa: E402
+import smtp_client  # noqa: E402  (från clio-agent-mail via sys.path ovan)
+
+
+def _load_mail_config() -> configparser.ConfigParser:
+    """
+    Minimal kopia av load_config() från clio-agent-mail/main.py.
+    Läser clio.config och injicerar lösenord från miljövariabler.
+    Importerar inte main.py (undviker hela handlers/notion-kedjan).
+    """
+    config = configparser.ConfigParser(interpolation=None)
+    config_path = _MAIL_DIR / "clio.config"
+    if not config_path.exists():
+        raise FileNotFoundError(f"clio.config saknas: {config_path}")
+    config.read(str(config_path), encoding="utf-8")
+
+    if config.has_section("mail"):
+        accounts_raw = config.get("mail", "accounts", fallback="clio,info")
+        account_keys = [a.strip() for a in accounts_raw.split(",") if a.strip()]
+        for key in set(account_keys + ["info"]):
+            env_key = f"IMAP_PASSWORD_{key.upper()}"
+            val = os.environ.get(env_key)
+            if val:
+                config.set("mail", f"imap_password_{key}", val)
+    return config
 
 
 def send_report(
@@ -52,7 +76,7 @@ def send_report(
     dry_run=True: skriver ut rapporten men skickar inget.
     Returnerar True vid lyckat skick (eller dry_run).
     """
-    config = load_config()
+    config = _load_mail_config()
 
     smtp_client.send_email(
         config,
