@@ -36,8 +36,8 @@ for _p in [str(_BASE_DIR), str(_SOURCES_DIR), str(_ROOT_DIR), str(_ROOT_DIR / "c
 # Ladda .env
 try:
     from dotenv import load_dotenv
-    load_dotenv(_ROOT_DIR / ".env", override=True)
-    load_dotenv(_BASE_DIR / ".env", override=True)
+    load_dotenv(_ROOT_DIR / ".env")          # root clio-tools/.env (prioritet)
+    load_dotenv(_BASE_DIR / ".env")          # lokal fallback (standalone)
 except ImportError:
     pass
 

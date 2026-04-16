@@ -39,7 +39,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-load_dotenv(override=True)
+_BASE_DIR = Path(os.path.dirname(__file__))
+load_dotenv(_BASE_DIR.parent / ".env")          # root clio-tools/.env (prioritet)
+load_dotenv(_BASE_DIR / ".env")                  # lokal fallback (standalone)
 
 # ── partnerdb ─────────────────────────────────────────────────────────────────
 _PARTNERDB_PATH = os.path.join(os.path.dirname(__file__), "..", "clio-partnerdb")

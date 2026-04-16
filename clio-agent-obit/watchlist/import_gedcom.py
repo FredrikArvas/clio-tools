@@ -20,7 +20,7 @@ import sys
 _PARTNERDB = os.path.join(os.path.dirname(__file__), "..", "..", "clio-partnerdb")
 sys.path.insert(0, _PARTNERDB)
 
-from import_gedcom import main  # noqa: F401 — re-exported for menu integration
+from import_gedcom import main, _to_utf8_tempfile  # noqa: F401 — re-exported for menu integration
 
 
 if __name__ == "__main__":

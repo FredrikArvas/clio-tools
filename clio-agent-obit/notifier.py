@@ -24,8 +24,11 @@ from email.mime.text import MIMEText
 from typing import Optional
 
 import yaml
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(override=True)
+_BASE_DIR = Path(os.path.dirname(__file__))
+load_dotenv(_BASE_DIR.parent / ".env")          # root clio-tools/.env (prioritet)
+load_dotenv(_BASE_DIR / ".env")                  # lokal fallback (standalone)
 
 from matcher import Match
 
