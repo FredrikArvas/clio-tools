@@ -17,3 +17,6 @@ smtp:
 
 notify:
   from_addr: clio@arvas.international
+
+# Admin — CC på onboarding-mail + Reply-To på alla rapporter
+admin_email: fredrik@arvas.se

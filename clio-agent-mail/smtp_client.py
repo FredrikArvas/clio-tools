@@ -26,6 +26,7 @@ def send_email(
     cc_addrs: list = None,
     dry_run: bool = False,
     html_body: str = None,
+    reply_to_addr: str = None,
 ):
     """
     Skickar ett mail via SMTP.
@@ -50,6 +51,8 @@ def send_email(
 
     if message_id:
         msg["Message-ID"] = message_id
+    if reply_to_addr:
+        msg["Reply-To"] = reply_to_addr
     if reply_to_message_id:
         msg["In-Reply-To"] = reply_to_message_id
         msg["References"] = reply_to_message_id

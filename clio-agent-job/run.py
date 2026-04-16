@@ -66,6 +66,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="Visa senaste körningssummering och avsluta")
     p.add_argument("--verbose", "-v", action="store_true",
                    help="Visa detaljer om varje artikel (även icke-matchande)")
+    p.add_argument("--onboard", action="store_true",
+                   help="Skicka onboarding-mail och avsluta (hoppar över analys)")
     return p.parse_args(argv)
 
 
@@ -73,6 +75,7 @@ def run(
     dry_run: bool = False,
     profile_path: Path | None = None,
     verbose: bool = False,
+    force_onboard: bool = False,
 ) -> int:
     """
     Kör en komplett bevakningscykel.
@@ -81,10 +84,11 @@ def run(
     from sources.registry import load_sources
     from source_base import SourceError  # samma modul som source_rss.py använder
     from profiles.profile_loader import load_profile, profile_summary
-    from state import is_seen, mark_seen, log_run, last_run_summary
+    from state import is_seen, mark_seen, log_run, last_run_summary, is_onboarded, mark_onboarded
     from analyzer import analyze
     from reporter import build_report, MatchedArticle
-    from notifier import send_report
+    from notifier import send_report, send_onboarding
+    from onboarding import build_onboarding_mail
 
     cfg = _load_cfg()
     threshold: int = int(cfg.get("threshold", 50))
@@ -101,6 +105,21 @@ def run(
     if not candidate_email and not dry_run:
         print("[FEL] Kandidatens e-postadress saknas i profilen (fält: email).", file=sys.stderr)
         return -1
+
+    # Onboarding — skicka välkomstmail vid första körningen (eller --onboard)
+    is_recruiter = profile.get("profile_type") == "recruiter"
+    if not is_recruiter and (force_onboard or not is_onboarded(candidate_email)):
+        print(f"[clio-job] Skickar onboarding-mail till {candidate_email}...")
+        ob_subject, ob_text, ob_html = build_onboarding_mail(profile)
+        try:
+            send_onboarding(ob_subject, ob_text, ob_html, candidate_email, dry_run=dry_run)
+            if not dry_run:
+                mark_onboarded(candidate_email)
+                print(f"[clio-job] Onboarding skickat och markerat.")
+        except Exception as e:
+            print(f"[VARNING] Onboarding-mail misslyckades: {e}", file=sys.stderr)
+        if force_onboard:
+            return 0
 
     print(f"[clio-job] Profil: {profile_summary(profile)}")
     print(f"[clio-job] Tröskel: {threshold}  |  Modell: {model}")
@@ -208,6 +227,7 @@ def main(argv=None) -> None:
         dry_run=args.dry_run,
         profile_path=args.profile,
         verbose=args.verbose,
+        force_onboard=args.onboard,
     )
     sys.exit(0 if result >= 0 else 1)
 

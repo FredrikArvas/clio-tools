@@ -13,6 +13,11 @@ from pathlib import Path
 _DB_PATH = Path(__file__).parent / "state.db"
 
 _DDL = """
+CREATE TABLE IF NOT EXISTS onboarded_profiles (
+    email       TEXT PRIMARY KEY,
+    onboarded_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS seen_articles (
     article_id  TEXT PRIMARY KEY,
     url         TEXT NOT NULL,
@@ -84,6 +89,23 @@ def log_run(
             (datetime.utcnow().isoformat(),
              articles_fetched, articles_new, articles_matched,
              mail_sent, int(dry_run)),
+        )
+        conn.commit()
+
+
+def is_onboarded(email: str, db_path: Path = _DB_PATH) -> bool:
+    with _connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT 1 FROM onboarded_profiles WHERE email = ?", (email,)
+        ).fetchone()
+        return row is not None
+
+
+def mark_onboarded(email: str, db_path: Path = _DB_PATH) -> None:
+    with _connect(db_path) as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO onboarded_profiles (email, onboarded_at) VALUES (?, ?)",
+            (email, datetime.utcnow().isoformat()),
         )
         conn.commit()
 

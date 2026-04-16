@@ -64,6 +64,20 @@ def _load_mail_config() -> configparser.ConfigParser:
     return config
 
 
+def _admin_email() -> str:
+    """Hämtar admin_email från clio-agent-job/config.yaml (Reply-To och CC)."""
+    try:
+        import yaml
+        cfg_path = _BASE_DIR / "config.yaml"
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as fh:
+                cfg = yaml.safe_load(fh) or {}
+            return cfg.get("admin_email", "")
+    except ImportError:
+        pass
+    return ""
+
+
 def send_report(
     subject: str,
     body_text: str,
@@ -77,6 +91,7 @@ def send_report(
     Returnerar True vid lyckat skick (eller dry_run).
     """
     config = _load_mail_config()
+    admin = _admin_email()
 
     smtp_client.send_email(
         config,
@@ -85,6 +100,33 @@ def send_report(
         subject=subject,
         body=body_text,
         html_body=body_html,
+        reply_to_addr=admin or None,
+        dry_run=dry_run,
+    )
+
+    return True
+
+
+def send_onboarding(
+    subject: str,
+    body_text: str,
+    body_html: str,
+    to_addr: str,
+    dry_run: bool = False,
+) -> bool:
+    """Skickar onboarding-mail med CC till admin."""
+    config = _load_mail_config()
+    admin = _admin_email()
+
+    smtp_client.send_email(
+        config,
+        from_account_key="clio",
+        to_addr=to_addr,
+        subject=subject,
+        body=body_text,
+        html_body=body_html,
+        reply_to_addr=admin or None,
+        cc_addrs=[admin] if admin and admin != to_addr else None,
         dry_run=dry_run,
     )
 
