@@ -45,29 +45,59 @@ MAX_BIRTH_YEAR = 2010
 
 # ── Encoding fix ──────────────────────────────────────────────────────────────
 
+def _fix_level_jumps(lines: list[str]) -> list[str]:
+    """Fix GEDCOM level violations (line N+1 more than one level above line N)."""
+    fixed = []
+    prev_level = 0
+    repairs = 0
+    for line in lines:
+        stripped = line.rstrip("\r\n")
+        parts = stripped.split(" ", 1)
+        try:
+            level = int(parts[0])
+        except (ValueError, IndexError):
+            fixed.append(line)
+            continue
+        if level > prev_level + 1:
+            level = prev_level + 1
+            parts[0] = str(level)
+            stripped = " ".join(parts)
+            repairs += 1
+        prev_level = level
+        fixed.append(stripped + "\n")
+    if repairs:
+        print(f"[import_gedcom] Fixed {repairs} GEDCOM level violation(s)")
+    return fixed
+
+
 def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
     """Return (path, is_temp). If file is already UTF-8, returns original path."""
+    content = None
     try:
         with open(gedcom_path, encoding="utf-8-sig") as f:
-            f.read()
-        return gedcom_path, False
+            content = f.read()
     except UnicodeDecodeError:
         pass
-    for enc in ("cp1252", "latin-1"):
-        try:
-            with open(gedcom_path, encoding=enc) as f:
-                content = f.read()
-            tmp = tempfile.NamedTemporaryFile(
-                mode="w", encoding="utf-8", suffix=".ged",
-                delete=False, prefix="clio_gedcom_",
-            )
-            tmp.write(content)
-            tmp.close()
-            print(f"[import_gedcom] Converted {enc} → utf-8")
-            return tmp.name, True
-        except UnicodeDecodeError:
-            continue
-    raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
+    if content is None:
+        for enc in ("cp1252", "latin-1"):
+            try:
+                with open(gedcom_path, encoding=enc) as f:
+                    content = f.read()
+                print(f"[import_gedcom] Converted {enc} → utf-8")
+                break
+            except UnicodeDecodeError:
+                continue
+    if content is None:
+        raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
+
+    lines = _fix_level_jumps(content.splitlines(keepends=True))
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", suffix=".ged",
+        delete=False, prefix="clio_gedcom_",
+    )
+    tmp.writelines(lines)
+    tmp.close()
+    return tmp.name, True
 
 
 # ── GEDCOM helpers ────────────────────────────────────────────────────────────
