@@ -25,6 +25,7 @@ def send_email(
     message_id: str = None,
     cc_addrs: list = None,
     dry_run: bool = False,
+    html_body: str = None,
 ):
     """
     Skickar ett mail via SMTP.
@@ -56,7 +57,7 @@ def send_email(
         msg["CC"] = ", ".join(cc_addrs)
 
     msg.attach(MIMEText(body, "plain", "utf-8"))
-    msg.attach(MIMEText(_to_html(body), "html", "utf-8"))
+    msg.attach(MIMEText(html_body if html_body else _to_html(body), "html", "utf-8"))
 
     if dry_run:
         cc_str = f", CC: {', '.join(cc_addrs)}" if cc_addrs else ""
