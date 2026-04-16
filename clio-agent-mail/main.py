@@ -21,6 +21,7 @@ import configparser
 import io as _io
 import logging
 import os
+import signal
 import sys
 import time
 from datetime import datetime as _dt
@@ -160,6 +161,30 @@ def run_cycle(config, dry_run: bool = False) -> bool:
     return len(mail_items) > 0
 
 
+# ── PID-lås (förhindrar dubbla instanser) ─────────────────────────────────────
+
+_PID_FILE = Path("/tmp/clio-mail.pid")
+
+
+def _acquire_pid_lock() -> bool:
+    """Returnerar True om vi fick låset, False om en annan instans redan kör."""
+    if _PID_FILE.exists():
+        try:
+            existing_pid = int(_PID_FILE.read_text().strip())
+            # Kolla om processen faktiskt kör
+            os.kill(existing_pid, 0)
+            return False  # Processen lever — avbryt
+        except (ProcessLookupError, ValueError):
+            # Inaktuell PID-fil — ta bort och fortsätt
+            _PID_FILE.unlink(missing_ok=True)
+    _PID_FILE.write_text(str(os.getpid()))
+    return True
+
+
+def _release_pid_lock():
+    _PID_FILE.unlink(missing_ok=True)
+
+
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 
 def main(argv=None):
@@ -185,6 +210,14 @@ def main(argv=None):
 
     _set_log_level(args.debug)
 
+    # Förhindra dubbla instanser (gäller bara loop-läge, inte --once/--dry-run)
+    if not args.once and not args.dry_run:
+        if not _acquire_pid_lock():
+            logger.warning("clio-agent-mail körs redan (se /tmp/clio-mail.pid). Avslutar.")
+            sys.exit(0)
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(sig, lambda s, f: (_release_pid_lock(), sys.exit(0)))
+
     config = load_config()
 
     state.init_db()
@@ -194,6 +227,7 @@ def main(argv=None):
     if args.once or args.dry_run:
         run_cycle(config, dry_run=args.dry_run)
         return
+
 
     burst_interval = int(config.get("mail", "poll_interval_burst_seconds", fallback="15"))
     burst_duration = int(config.get("mail", "poll_burst_duration_seconds", fallback="300"))
@@ -232,6 +266,8 @@ def main(argv=None):
             sleep_time = base_interval
             logger.debug(f"Mode: {mode_label} — next poll in {sleep_time}s")
         time.sleep(sleep_time)
+
+    _release_pid_lock()
 
 
 if __name__ == "__main__":
