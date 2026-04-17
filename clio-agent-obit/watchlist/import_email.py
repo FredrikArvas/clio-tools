@@ -1,19 +1,19 @@
 """
-watchlist/import_email.py — Import a returned watch-list CSV into partnerdb.
+watchlist/import_email.py — Import a returned watch-list (CSV or XLSX) into partnerdb.
 
-Called by clio-agent-mail when a [clio-obit] reply arrives with a CSV attachment.
+Called by clio-agent-mail when a [clio-obit] reply arrives with a CSV or XLSX attachment.
 clio-agent-obit owns this logic; clio-agent-mail only triggers it.
 
 Security: sender must be in obit_import.whitelist (config.yaml).
           clio-agent-mail's own whitelist is a separate, independent layer.
 
 Usage:
-    python import_email.py --csv /tmp/ulrika.csv --owner ulrika@arvas.se
-    python import_email.py --csv /tmp/ulrika.csv --owner ulrika@arvas.se --dry-run
+    python import_email.py --csv /tmp/ulrika.xlsx --owner ulrika@arvas.se
+    python import_email.py --csv /tmp/ulrika.csv  --owner ulrika@arvas.se --dry-run
 
 Returns (stdout):
     A receipt text suitable for sending back to the owner.
-    Exit 0 = OK, exit 1 = rejected (not whitelisted or bad CSV).
+    Exit 0 = OK, exit 1 = rejected (not whitelisted or bad file).
 """
 
 from __future__ import annotations
@@ -176,7 +176,7 @@ def run(csv_path: str, owner_email: str,
         return False, msg
 
     if not os.path.exists(csv_path):
-        return False, f"CSV file not found: {csv_path}"
+        return False, f"File not found: {csv_path}"
 
     if dry_run:
         entries = load_watchlist(csv_path)
@@ -194,9 +194,10 @@ def run(csv_path: str, owner_email: str,
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(
-        description="Import a returned [clio-obit] CSV into partnerdb"
+        description="Import a returned [clio-obit] CSV or XLSX attachment into partnerdb"
     )
-    p.add_argument("--csv",   required=True, help="Path to CSV attachment")
+    p.add_argument("--csv",   required=True,
+                   help="Path to attachment (.csv or .xlsx)")
     p.add_argument("--owner", required=True, help="Sender email (watch list owner)")
     p.add_argument("--dry-run", action="store_true")
     return p.parse_args(argv)

@@ -32,14 +32,22 @@ def load_watchlist_from_db(owner_email: str,
 
 def load_watchlist(path: str) -> list[WatchlistEntry]:
     """
-    Load from CSV (legacy / testing path).
+    Load from CSV or XLSX (legacy / testing path).
+    Dispatches on file extension: .xlsx → load_watchlist_xlsx, else CSV.
     Used by test_runner.py and for round-trip verification.
     """
-    VALID_PRIORITIES = {"viktig", "normal", "bra_att_veta"}
-
-    entries: list[WatchlistEntry] = []
     if not os.path.exists(path):
         raise FileNotFoundError(f"Watch list not found: {path}")
+
+    if path.lower().endswith(".xlsx"):
+        return load_watchlist_xlsx(path)
+    return _load_watchlist_csv(path)
+
+
+def _load_watchlist_csv(path: str) -> list[WatchlistEntry]:
+    """Load from CSV."""
+    VALID_PRIORITIES = {"viktig", "normal", "bra_att_veta"}
+    entries: list[WatchlistEntry] = []
 
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(line for line in f if not line.lstrip().startswith("#"))
@@ -51,6 +59,45 @@ def load_watchlist(path: str) -> list[WatchlistEntry]:
             except Exception as e:
                 print(f"[watchlist] Warning row {i}: {e} — skipping")
 
+    return entries
+
+
+def load_watchlist_xlsx(path: str) -> list[WatchlistEntry]:
+    """
+    Load from an xlsx file created by send_invitation.py.
+    Layout: row 1 = info text, row 2 = headers, row 3+ = data.
+    Skips rows where both efternamn and fornamn are empty.
+    """
+    import openpyxl  # soft dependency — only needed for xlsx path
+
+    VALID_PRIORITIES = {"viktig", "normal", "bra_att_veta"}
+    entries: list[WatchlistEntry] = []
+
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    ws = wb["Bevakningslista"]
+
+    rows = list(ws.iter_rows(values_only=True))
+    if len(rows) < 3:
+        return entries  # nothing to import
+
+    # Row index 1 (0-based) = headers
+    raw_headers = [str(h).strip().lower() if h else "" for h in rows[1]]
+    EXPECTED = {"efternamn", "fornamn", "fodelsear", "hemort", "prioritet", "kalla"}
+    if not EXPECTED.issubset(set(raw_headers)):
+        print(f"[watchlist] xlsx: unexpected header row — {raw_headers}")
+        return entries
+
+    for i, row in enumerate(rows[2:], start=3):
+        row_dict = {raw_headers[c]: (str(v).strip() if v is not None else "")
+                    for c, v in enumerate(row) if c < len(raw_headers)}
+        try:
+            entry = _parse_csv_row(row_dict, i, VALID_PRIORITIES)
+            if entry:
+                entries.append(entry)
+        except Exception as e:
+            print(f"[watchlist] Warning xlsx row {i}: {e} — skipping")
+
+    wb.close()
     return entries
 
 
