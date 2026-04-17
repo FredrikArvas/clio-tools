@@ -8,8 +8,8 @@ smtp:
   port: 465
   use_ssl: true            # SSL från start (port 465). Sätt false + use_starttls: true för 587.
   use_starttls: false
-  user: clio@arvas.international
-  password_env: SMTP_PASSWORD   # Nyckelnamnet i .env där lösenordet hämtas
+  user: fredrik@arvas.international
+  password_env: IMAP_PASSWORD_FREDRIK   # Nyckelnamnet i .env där lösenordet hämtas
 
 notify:
   to: fredrik@arvas.se          # Fallback om watchlist-filnamnet inte är en giltig e-post
