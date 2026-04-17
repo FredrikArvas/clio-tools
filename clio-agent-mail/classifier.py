@@ -97,6 +97,20 @@ def classify(mail_item, whitelist: set, config) -> Classification:
             account_key="info",
         )
 
+    # ── [clio-obit] — prioriteras före behörighetscheck (gäller alla avsändare) ──
+    subject_early = mail_item.subject or ""
+    if CODE_OBIT.lower() in subject_early.lower():
+        obit_attached = any(
+            getattr(a, "filename", "").lower().endswith((".csv", ".xlsx"))
+            for a in getattr(mail_item, "attachments", [])
+        )
+        if obit_attached:
+            return Classification(
+                action=ACTION_OBIT_IMPORT,
+                reason="[clio-obit] subject with watchlist attachment",
+                account_key=account_key,
+            )
+
     # ── Behörighetscheck ─────────────────────────────────────────────────────
     perm = _get_permission(sender_email, account_key, config)
 
