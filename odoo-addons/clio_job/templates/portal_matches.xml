@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Matchningshistorik — portal -->
+  <template id="portal_matches" name="Clio Job — Matchningshistorik">
+    <t t-call="portal.portal_layout">
+      <t t-call="portal.portal_record_layout">
+        <t t-set="card_header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Matchningshistorik</h5>
+            <a href="/my/clio-job" class="btn btn-sm btn-outline-secondary">← Min profil</a>
+          </div>
+        </t>
+        <t t-set="card_body">
+          <t t-if="not matches">
+            <div class="alert alert-info">
+              Inga signaler har skickats ännu. Clio bevakar nyhetsflöden dagligen och
+              meddelar dig när relevanta förändringssignaler hittas.
+            </div>
+          </t>
+          <t t-if="matches">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Rubrik</th>
+                  <th>Signaltyp</th>
+                  <th>Poäng</th>
+                  <th>Åtgärd</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-foreach="matches" t-as="m">
+                  <tr>
+                    <td><t t-esc="m.sent_at and m.sent_at.strftime('%Y-%m-%d') or '—'"/></td>
+                    <td>
+                      <t t-if="m.article_url">
+                        <a t-att-href="m.article_url" target="_blank" rel="noopener">
+                          <t t-esc="m.article_title or m.article_url"/>
+                        </a>
+                      </t>
+                      <t t-else="">
+                        <t t-esc="m.article_title or '—'"/>
+                      </t>
+                    </td>
+                    <td><t t-esc="m.signal_type or '—'"/></td>
+                    <td><t t-esc="m.match_score"/></td>
+                    <td><t t-esc="m.recommended_action or '—'"/></td>
+                  </tr>
+                </t>
+              </tbody>
+            </table>
+          </t>
+        </t>
+      </t>
+    </t>
+  </template>
+
+</odoo>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy (admin: alla matchningar) -->
+  <record id="view_clio_job_match_tree" model="ir.ui.view">
+    <field name="name">clio.job.match.tree</field>
+    <field name="model">clio.job.match</field>
+    <field name="arch" type="xml">
+      <tree create="false">
+        <field name="sent_at" string="Skickad"/>
+        <field name="profile_id" string="Kandidat"/>
+        <field name="article_title" string="Rubrik"/>
+        <field name="signal_type" string="Signaltyp"/>
+        <field name="match_score" string="Poäng"/>
+        <field name="recommended_action" string="Åtgärd"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_clio_job_match_form" model="ir.ui.view">
+    <field name="name">clio.job.match.form</field>
+    <field name="model">clio.job.match</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="profile_id"/>
+            <field name="sent_at"/>
+            <field name="match_score"/>
+            <field name="signal_type"/>
+            <field name="recommended_action"/>
+            <field name="article_title"/>
+            <field name="article_url" widget="url"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Menypost -->
+  <record id="action_clio_job_match" model="ir.actions.act_window">
+    <field name="name">Clio Job — Matchningshistorik</field>
+    <field name="res_model">clio.job.match</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+</odoo>

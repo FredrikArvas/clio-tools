@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Portal: kandidaten ser och redigerar bara sin egen profil -->
+  <record id="rule_clio_job_profile_portal" model="ir.rule">
+    <field name="name">clio.job.profile — portal-åtkomst (egna poster)</field>
+    <field name="model_id" ref="model_clio_job_profile"/>
+    <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    <field name="perm_read"   eval="True"/>
+    <field name="perm_write"  eval="True"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+  </record>
+
+  <!-- Portal: kandidaten ser bara sina egna matchningar (skrivskyddat) -->
+  <record id="rule_clio_job_match_portal" model="ir.rule">
+    <field name="name">clio.job.match — portal-åtkomst (egna poster)</field>
+    <field name="model_id" ref="model_clio_job_match"/>
+    <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    <field name="domain_force">[('profile_id.partner_id', '=', user.partner_id.id)]</field>
+    <field name="perm_read"   eval="True"/>
+    <field name="perm_write"  eval="False"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+  </record>
+
+</odoo>

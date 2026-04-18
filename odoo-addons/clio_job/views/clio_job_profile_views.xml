@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_clio_job_profile_tree" model="ir.ui.view">
+    <field name="name">clio.job.profile.tree</field>
+    <field name="model">clio.job.profile</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="partner_id"/>
+        <field name="role"/>
+        <field name="seniority"/>
+        <field name="geography"/>
+        <field name="match_count" string="Matchningar"/>
+        <field name="active" optional="hide"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_clio_job_profile_form" model="ir.ui.view">
+    <field name="name">clio.job.profile.form</field>
+    <field name="model">clio.job.profile</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group string="Kontakt">
+            <field name="partner_id"/>
+            <field name="report_email" placeholder="Lämna tomt → används partner-e-posten"/>
+            <field name="active"/>
+          </group>
+
+          <group string="Profil">
+            <field name="role" placeholder="Nuvarande jobbtitel eller roll"/>
+            <field name="seniority" placeholder='T.ex. "Senior / Executive"'/>
+            <field name="geography" placeholder='T.ex. "Stockholm"'/>
+            <field name="hybrid_ok"/>
+          </group>
+
+          <notebook>
+            <page string="Bakgrund &amp; Utbildning">
+              <group>
+                <field name="background"
+                       placeholder="Karriärhistorik — en post per rad"
+                       nolabel="1"
+                       widget="text"/>
+              </group>
+              <group>
+                <field name="education"
+                       placeholder="Utbildningar — en post per rad"
+                       nolabel="1"
+                       widget="text"/>
+              </group>
+            </page>
+
+            <page string="Bevakningsinställningar">
+              <group>
+                <field name="target_roles"
+                       placeholder="Målroller — en per rad"
+                       nolabel="1"
+                       widget="text"/>
+              </group>
+              <group>
+                <field name="signal_keywords"
+                       placeholder="Nyckelord — ett per rad (t.ex. ny GD, förvärv)"
+                       nolabel="1"
+                       widget="text"/>
+              </group>
+            </page>
+
+            <page string="Matchningshistorik">
+              <field name="match_ids" nolabel="1">
+                <tree create="false" delete="false">
+                  <field name="sent_at" string="Skickad"/>
+                  <field name="article_title" string="Rubrik"/>
+                  <field name="signal_type" string="Signaltyp"/>
+                  <field name="match_score" string="Poäng"/>
+                  <field name="recommended_action" string="Åtgärd"/>
+                  <field name="article_url" string="URL"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Menypost -->
+  <record id="action_clio_job_profile" model="ir.actions.act_window">
+    <field name="name">Clio Job — Profiler</field>
+    <field name="res_model">clio.job.profile</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+</odoo>

@@ -1,0 +1,5 @@
+# Tunn Odoo-stub för Richard Anderberg.
+# Profildata hämtas från clio.job.profile i Odoo via email-match.
+# Kräver: ODOO_URL, ODOO_DB, ODOO_USER, ODOO_PASSWORD i .env
+source: odoo
+email: richard.anderberg@live.com

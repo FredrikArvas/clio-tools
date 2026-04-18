@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_job_profile_user,clio.job.profile user,model_clio_job_profile,,1,0,0,0
+access_clio_job_profile_admin,clio.job.profile admin,model_clio_job_profile,base.group_system,1,1,1,1
+access_clio_job_profile_portal,clio.job.profile portal,model_clio_job_profile,base.group_portal,1,1,0,0
+access_clio_job_match_user,clio.job.match user,model_clio_job_match,,1,0,0,0
+access_clio_job_match_admin,clio.job.match admin,model_clio_job_match,base.group_system,1,1,1,1
+access_clio_job_match_portal,clio.job.match portal,model_clio_job_match,base.group_portal,1,0,0,0
