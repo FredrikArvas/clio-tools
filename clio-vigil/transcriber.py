@@ -22,6 +22,7 @@ Körning (separat från pipeline — GPU-intensiv):
 
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -104,6 +105,29 @@ def _download_url(url: str, output_path: Path) -> bool:
         return False
 
 
+def _make_slug(text: str, max_len: int = 20) -> str:
+    """Normaliserar text till URL-säkert slug, t.ex. 'Från UFO till UAP' → 'fran-ufo-till-uap'."""
+    text = text.lower()
+    # Svenska tecken → ascii
+    text = text.replace("å", "a").replace("ä", "a").replace("ö", "o")
+    text = text.replace("é", "e").replace("ü", "u").replace("ñ", "n")
+    # Allt som inte är a-z/0-9 → bindestreck
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    # Trunkera och ta bort avslutande bindestreck
+    return text[:max_len].rstrip("-")
+
+
+def _audio_filename(item: dict) -> str:
+    """Bygger läsbart filnamn: {source_slug}_{id}_{date}.mp3"""
+    source = item.get("source_name") or "okand"
+    slug   = _make_slug(source)
+    date   = (item.get("published_at") or "")[:10].replace("-", "")
+    if not date:
+        date = "nodatum"
+    return f"{slug}_{item['id']}_{date}.mp3"
+
+
 def download_audio(item: dict) -> Optional[Path]:
     """
     Laddar ned audio för ett bevakningsobjekt.
@@ -114,7 +138,7 @@ def download_audio(item: dict) -> Optional[Path]:
     source_type = item["source_type"]
     url         = item["url"]
 
-    output_path = AUDIO_DIR / f"vigil_{item_id}.mp3"
+    output_path = AUDIO_DIR / _audio_filename(item)
 
     if source_type == "youtube":
         logger.info(f"Laddar ned YouTube-audio: {url[:70]}")
