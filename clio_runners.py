@@ -110,6 +110,8 @@ def run_tool(tool: dict, state: dict) -> None:
     start = datetime.now()
 
     cmd = [_python_for(tool["script"]), str(tool["script"])]
+    if tool.get("args"):
+        cmd.extend(tool["args"])
     if folder:
         cmd.append(folder)
 
