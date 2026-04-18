@@ -338,6 +338,22 @@ TOOLS = [
                 "args":         ["--list-queued"],
                 "needs_folder": False,
             },
+            {
+                "nr":           8,
+                "name":         "välj",
+                "desc":         "Välj vilka avsnitt som ska transkriberas härnäst",
+                "script":       ROOT / "clio-vigil" / "main.py",
+                "args":         ["--pick"],
+                "needs_folder": False,
+            },
+            {
+                "nr":           9,
+                "name":         "rensa",
+                "desc":         "Rensa kön och återställ tillstånd",
+                "script":       ROOT / "clio-vigil" / "main.py",
+                "args":         ["--clear-queue"],
+                "needs_folder": False,
+            },
         ],
     },
 ]
