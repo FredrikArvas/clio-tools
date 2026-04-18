@@ -65,6 +65,10 @@ def pip_install(package: str, quiet: bool = True) -> bool:
     if quiet:
         cmd.append("-q")
     result = subprocess.run(cmd, capture_output=True)
+    if result.returncode != 0 and OS == "linux":
+        # Ubuntu 23.04+ blockerar pip utan --break-system-packages
+        cmd_bsp = cmd + ["--break-system-packages"]
+        result = subprocess.run(cmd_bsp, capture_output=True)
     return result.returncode == 0
 
 # ── Manual install instructions ───────────────────────────────────────────────
@@ -122,6 +126,11 @@ def check_pip_packages(auto_fix: bool = False) -> bool:
         ("pypdf",         "4.0.0"),
         ("pymupdf",       "1.23.0"),
         ("faster-whisper","1.0.0"),
+        ("yt-dlp",        "2024.1.0"),
+        ("feedparser",    "6.0.0"),
+        ("qdrant-client", "1.7.0"),
+        ("openai",        "1.0.0"),
+        ("pyyaml",        "6.0.0"),
         ("edge-tts",      "6.0.0"),
         ("mutagen",       "1.45.0"),
         ("python-docx",   "0.8.11"),
