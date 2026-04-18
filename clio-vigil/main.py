@@ -162,19 +162,158 @@ def print_queued(conn, domain: str = None) -> None:
         )
 
 
+def pick_items(conn, domain: str = None) -> None:
+    """
+    Interaktiv väljare: visa köade objekt och låt användaren
+    boosta valda till toppen av kön (priority_score = 999).
+    """
+    query = """
+        SELECT v.id, v.domain, v.title, v.source_name,
+               v.priority_score, v.duration_seconds, v.source_maturity,
+               v.published_at
+        FROM vigil_items v
+        WHERE v.state IN ('queued', 'filtered_in')
+        {}
+        ORDER BY v.priority_score DESC
+    """.format("AND v.domain = ?" if domain else "")
+
+    params = (domain,) if domain else ()
+    rows = conn.execute(query, params).fetchall()
+
+    if not rows:
+        print("Inga objekt i kö.")
+        return
+
+    print(f"\n📋 Välj objekt att prioritera ({len(rows)} i kö)")
+    print("─" * 72)
+    for i, row in enumerate(rows, 1):
+        dur = f"{row['duration_seconds']//60}min" if row['duration_seconds'] else "?min"
+        date = (row['published_at'] or "")[:10]
+        title = (row['title'] or "—")[:42]
+        print(f"  {i:>3}. [{row['domain']}] {title:<42} {dur:>6}  {date}  {row['source_name'][:20]}")
+
+    print("─" * 72)
+    print("  Ange nummer (t.ex. 1,3,5 eller 1-5 eller 'alla') — Enter = avbryt")
+
+    raw = input("  Val: ").strip().lower()
+    if not raw:
+        print("  Avbröts.")
+        return
+
+    selected_indices = set()
+    if raw == "alla":
+        selected_indices = set(range(len(rows)))
+    else:
+        for part in raw.split(","):
+            part = part.strip()
+            if "-" in part:
+                try:
+                    a, b = part.split("-", 1)
+                    selected_indices.update(range(int(a) - 1, int(b)))
+                except ValueError:
+                    pass
+            else:
+                try:
+                    selected_indices.add(int(part) - 1)
+                except ValueError:
+                    pass
+
+    selected = [rows[i] for i in sorted(selected_indices) if 0 <= i < len(rows)]
+    if not selected:
+        print("  Inga giltiga val.")
+        return
+
+    # Boosta valda till toppen (priority_score 999) och sätt state = queued
+    for row in selected:
+        conn.execute(
+            "UPDATE vigil_items SET priority_score = 999, state = 'queued' WHERE id = ?",
+            (row["id"],)
+        )
+        conn.execute(
+            """INSERT OR REPLACE INTO transcription_queue (item_id, priority_score, queued_at)
+               VALUES (?, 999, datetime('now'))""",
+            (row["id"],)
+        )
+        print(f"  ✓ Prioriterad: {(row['title'] or '—')[:60]}")
+    conn.commit()
+    print(f"\n  {len(selected)} objekt boostad till toppen av kön.")
+
+
+def clear_queue(conn, domain: str = None, state: str = None) -> None:
+    """
+    Rensar kön genom att återställa objekt till 'discovered'.
+    domain: begränsa till domän. state: begränsa till ett tillstånd.
+    """
+    print("\n🗑️  Rensa kö")
+    print("─" * 50)
+
+    state_filter = state or "queued"
+    query_info = """
+        SELECT state, COUNT(*) as n FROM vigil_items
+        WHERE state IN ('queued','filtered_in','transcribed','indexed')
+        {}
+        GROUP BY state ORDER BY state
+    """.format("AND domain = ?" if domain else "")
+    params = (domain,) if domain else ()
+    rows = conn.execute(query_info, params).fetchall()
+
+    if not rows:
+        print("  Ingenting att rensa.")
+        return
+
+    print("  Nuvarande tillstånd:")
+    for r in rows:
+        print(f"    {r['state']:<20} {r['n']} objekt")
+
+    print()
+    print("  Vad vill du rensa?")
+    print("    1. Bara kön (queued → discovered)")
+    print("    2. Allt utom indexerade (queued+filtered_in → discovered)")
+    print("    3. Allt — börja helt om (alla → discovered)")
+    print("    q. Avbryt")
+
+    val = input("  Val: ").strip().lower()
+
+    if val == "1":
+        states_to_reset = ["queued"]
+    elif val == "2":
+        states_to_reset = ["queued", "filtered_in", "transcribed"]
+    elif val == "3":
+        states_to_reset = ["queued", "filtered_in", "transcribed", "indexed", "notified"]
+    else:
+        print("  Avbröts.")
+        return
+
+    placeholders = ",".join("?" * len(states_to_reset))
+    domain_clause = "AND domain = ?" if domain else ""
+    params_reset = states_to_reset + ([domain] if domain else [])
+
+    conn.execute(
+        f"UPDATE vigil_items SET state='discovered', priority_score=NULL, "
+        f"transcript_path=NULL, whisper_segment=NULL "
+        f"WHERE state IN ({placeholders}) {domain_clause}",
+        params_reset
+    )
+    conn.execute("DELETE FROM transcription_queue")
+    conn.commit()
+    print(f"  ✓ Klar. Kör '--run' för att filtrera om.")
+
+
 def _interactive_menu():
     """Interaktiv meny för clio-vigil (används när inga CLI-argument ges)."""
     conn = init_db()
 
     MENU = [
-        ("1", "Samla in",       "--run"),
-        ("2", "Transkribera",   "--transcribe"),
-        ("3", "Summera",        "--summarize"),
-        ("4", "Indexera (RAG)", "--index"),
-        ("5", "Digest-mail",    "--digest"),
-        ("6", "Statistik",      "--stats"),
-        ("7", "Visa kö",        "--list-queued"),
-        ("q", "Tillbaka",       None),
+        ("1", "Samla in",              "--run"),
+        ("2", "Transkribera",          "--transcribe"),
+        ("3", "Summera",               "--summarize"),
+        ("4", "Indexera (RAG)",        "--index"),
+        ("5", "Digest-mail",           "--digest"),
+        ("6", "Statistik",             "--stats"),
+        ("7", "Visa kö",               "--list-queued"),
+        ("8", "Välj att transkribera", "--pick"),
+        ("9", "Rensa kö",              "--clear-queue"),
+        ("q", "Tillbaka",              None),
     ]
 
     while True:
@@ -247,6 +386,10 @@ def _interactive_menu():
                 print_stats(conn)
             elif flag == "--list-queued":
                 print_queued(conn)
+            elif flag == "--pick":
+                pick_items(conn)
+            elif flag == "--clear-queue":
+                clear_queue(conn)
         except KeyboardInterrupt:
             print("\n(Avbruten)")
 
@@ -266,7 +409,9 @@ def main():
     parser.add_argument("--digest",      action="store_true", help="Skicka daglig digest-mail")
     parser.add_argument("--full",        action="store_true", help="Kör hela pipeline: run+transcribe+summarize+index+digest")
     parser.add_argument("--stats",       action="store_true", help="Visa tillståndsstatistik")
-    parser.add_argument("--list-queued", action="store_true", help="Lista transkriptionskön")
+    parser.add_argument("--list-queued",  action="store_true", help="Lista transkriptionskön")
+    parser.add_argument("--pick",         action="store_true", help="Välj objekt att prioritera i kön")
+    parser.add_argument("--clear-queue",  action="store_true", help="Rensa kön (återställ tillstånd)")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
@@ -289,6 +434,12 @@ def main():
 
     elif args.list_queued:
         print_queued(conn, args.domain)
+
+    elif args.pick:
+        pick_items(conn, args.domain)
+
+    elif args.clear_queue:
+        clear_queue(conn, args.domain)
 
     elif args.run or args.full:
         domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]
