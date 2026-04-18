@@ -1,20 +1,20 @@
 {
-  "install_date": "2026-04-10T10:20:56",
+  "install_date": "2026-04-10T20:54:56",
   "installer_version": "1.1",
-  "machine": "DESKTOP-JK11FR0",
-  "python_version": "3.14.3",
+  "machine": "FA_Elitebook2",
+  "python_version": "3.14.4",
   "actions": [
     {
-      "timestamp": "2026-04-10T10:20:57",
+      "timestamp": "2026-04-10T20:54:58",
       "component": "python",
       "type": "system",
       "action": "verified",
       "status": "OK",
       "error_code": null,
-      "version": "3.14.3"
+      "version": "3.14.4"
     },
     {
-      "timestamp": "2026-04-10T10:20:57",
+      "timestamp": "2026-04-10T20:54:58",
       "component": "git",
       "type": "system",
       "action": "verified",
@@ -23,264 +23,270 @@
       "version": "git version 2.53.0.windows.2"
     },
     {
-      "timestamp": "2026-04-10T10:20:57",
+      "timestamp": "2026-04-10T20:54:58",
       "component": "exiftool",
       "type": "system",
       "action": "verified",
       "status": "OK",
       "error_code": null,
-      "version": "13.54"
+      "version": "Could not find C:\\Windows\\SYSTEM32\\exiftool_files\\perl5*.dll"
     },
     {
-      "timestamp": "2026-04-10T10:20:57",
+      "timestamp": "2026-04-10T20:55:10",
       "component": "ollama",
       "type": "system",
-      "action": "verified",
-      "status": "OK",
-      "error_code": null,
-      "version": "ollama version is 0.20.3"
+      "action": "deferred",
+      "status": "WAIT",
+      "error_code": "E_USER_DEFERRED"
     },
     {
-      "timestamp": "2026-04-10T10:20:58",
+      "timestamp": "2026-04-10T20:55:12",
       "component": "tesseract",
       "type": "system",
-      "action": "winget_failed",
-      "status": "FAILED",
-      "error_code": "E_WINGET_FAILED"
+      "action": "deferred",
+      "status": "WAIT",
+      "error_code": "E_USER_DEFERRED"
     },
     {
-      "timestamp": "2026-04-10T10:20:58",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "digikam",
       "type": "system",
-      "action": "winget_failed",
-      "status": "FAILED",
-      "error_code": "E_WINGET_FAILED"
+      "action": "deferred",
+      "status": "WAIT",
+      "error_code": "E_USER_DEFERRED"
     },
     {
-      "timestamp": "2026-04-10T10:21:16",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "anthropic",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "0.93.0"
     },
     {
-      "timestamp": "2026-04-10T10:21:19",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "python-dotenv",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.2.2"
     },
     {
-      "timestamp": "2026-04-10T10:21:21",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "notion-client",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "3.0.0"
     },
     {
-      "timestamp": "2026-04-10T10:21:25",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "thefuzz",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "0.22.1"
     },
     {
-      "timestamp": "2026-04-10T10:21:27",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "python-Levenshtein",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "0.27.3"
     },
     {
-      "timestamp": "2026-04-10T10:21:31",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "openpyxl",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "3.1.5"
     },
     {
-      "timestamp": "2026-04-10T10:22:02",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "ocrmypdf",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "17.4.1"
     },
     {
-      "timestamp": "2026-04-10T10:22:06",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "pypdf",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
-      "version": "6.9.2"
+      "version": "6.10.0"
     },
     {
-      "timestamp": "2026-04-10T10:22:10",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "pymupdf",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.27.2.2"
     },
     {
-      "timestamp": "2026-04-10T10:22:11",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "Pillow",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "12.2.0"
     },
     {
-      "timestamp": "2026-04-10T10:22:13",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "pytesseract",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "0.3.13"
     },
     {
-      "timestamp": "2026-04-10T10:22:15",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "pyexiftool",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "0.5.6"
     },
     {
-      "timestamp": "2026-04-10T10:23:17",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "faster-whisper",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.2.1"
     },
     {
-      "timestamp": "2026-04-10T10:23:24",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "edge-tts",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "7.2.8"
     },
     {
-      "timestamp": "2026-04-10T10:23:29",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "mutagen",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.47.0"
     },
     {
-      "timestamp": "2026-04-10T10:23:32",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "python-docx",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.2.0"
     },
     {
-      "timestamp": "2026-04-10T10:23:35",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "requests",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "2.33.1"
     },
     {
-      "timestamp": "2026-04-10T10:23:38",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "beautifulsoup4",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "4.14.3"
     },
     {
-      "timestamp": "2026-04-10T10:23:40",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "lxml",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "6.0.3"
     },
     {
-      "timestamp": "2026-04-10T10:23:43",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "chardet",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "7.4.1"
     },
     {
-      "timestamp": "2026-04-10T10:23:45",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "send2trash",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "2.1.0"
     },
     {
-      "timestamp": "2026-04-10T10:23:49",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "keyring",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "25.7.0"
     },
     {
-      "timestamp": "2026-04-10T10:23:50",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "pyyaml",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "6.0.3"
     },
     {
-      "timestamp": "2026-04-10T10:23:53",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "python-gedcom",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
       "version": "1.1.0"
     },
     {
-      "timestamp": "2026-04-10T10:24:02",
+      "timestamp": "2026-04-10T20:55:20",
       "component": "clio-core",
       "type": "pip",
-      "action": "installed",
+      "action": "verified",
       "status": "OK",
       "error_code": null,
-      "version": "1.0.0",
-      "path": "C:\\Users\\Fredrik Arvas\\Documents\\git\\clio-tools\\clio-core"
+      "version": "1.0.0"
+    },
+    {
+      "timestamp": "2026-04-10T20:55:20",
+      "component": "ANTHROPIC_API_KEY",
+      "type": "env",
+      "action": "stub_created",
+      "status": "WAIT",
+      "error_code": "E_USER_DEFERRED"
     }
   ],
   "path_changes": [],
@@ -292,7 +298,7 @@
     "python-Levenshtein==0.27.3",
     "openpyxl==3.1.5",
     "ocrmypdf==17.4.1",
-    "pypdf==6.9.2",
+    "pypdf==6.10.0",
     "pymupdf==1.27.2.2",
     "Pillow==12.2.0",
     "pytesseract==0.3.13",
@@ -309,8 +315,6 @@
     "keyring==25.7.0",
     "pyyaml==6.0.3",
     "python-gedcom==1.1.0",
-    "clio-core==1.0.0",
-    "clio-core @ C:\\Users\\Fredrik Arvas\\Documents\\git\\clio-tools\\clio-core"
-  ],
-  "venv": "C:\\temp\\clio-timing-test"
+    "clio-core==1.0.0"
+  ]
 }
