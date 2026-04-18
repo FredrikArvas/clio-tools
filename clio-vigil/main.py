@@ -162,6 +162,99 @@ def print_queued(conn, domain: str = None) -> None:
         )
 
 
+def _interactive_menu():
+    """Interaktiv meny för clio-vigil (används när inga CLI-argument ges)."""
+    conn = init_db()
+
+    MENU = [
+        ("1", "Samla in",       "--run"),
+        ("2", "Transkribera",   "--transcribe"),
+        ("3", "Summera",        "--summarize"),
+        ("4", "Indexera (RAG)", "--index"),
+        ("5", "Digest-mail",    "--digest"),
+        ("6", "Statistik",      "--stats"),
+        ("7", "Visa kö",        "--list-queued"),
+        ("q", "Tillbaka",       None),
+    ]
+
+    while True:
+        # Hämta snabbstatistik för rubrikraden
+        all_stats = stats(conn)
+        total    = sum(all_stats.values())
+        queued   = all_stats.get("queued", 0)
+        indexed  = all_stats.get("indexed", 0)
+
+        print("\n")
+        print("─" * 58)
+        print(f"  🔭 clio-vigil   {total} objekt  |  {queued} i kö  |  {indexed} indexerade")
+        print("─" * 58)
+        for key, label, _ in MENU:
+            if key == "q":
+                print(f"  {'q':>2}.  {label}")
+            else:
+                print(f"  {key:>2}.  {label}")
+        print("─" * 58)
+
+        try:
+            val = input("  Välj: ").strip().lower()
+        except (KeyboardInterrupt, EOFError):
+            break
+
+        if val == "q" or val == "":
+            break
+
+        match = next((m for m in MENU if m[0] == val), None)
+        if not match:
+            print("  Ogiltigt val.")
+            continue
+
+        _, label, flag = match
+        if flag is None:
+            break
+
+        print(f"\nStartar {label}...")
+        print("─" * 40)
+
+        # Bygg args och kör via samma parser-logik
+        sys.argv = [sys.argv[0], flag]
+        conn.close()
+        conn = init_db()
+
+        try:
+            if flag == "--run":
+                for domain_id in get_all_domains():
+                    try:
+                        run_pipeline(conn, domain_id)
+                    except Exception as e:
+                        logger.error(f"Pipeline-fel [{domain_id}]: {e}", exc_info=True)
+            elif flag == "--transcribe":
+                from transcriber import run_transcription_queue
+                counts = run_transcription_queue(conn)
+                print(f"\n✓ {counts['completed']} klara, {counts['preempted']} preempterade, {counts['failed']} misslyckade")
+            elif flag == "--summarize":
+                from summarizer import run_summarizer
+                counts = run_summarizer(conn)
+                print(f"\n✓ {counts['done']} klara, {counts['failed']} misslyckade")
+            elif flag == "--index":
+                from indexer import run_indexer
+                counts = run_indexer(conn)
+                print(f"\n✓ {counts['indexed']} indexerade, {counts['failed']} misslyckade")
+            elif flag == "--digest":
+                from notifier import run_digest
+                counts = run_digest(conn)
+                print(f"\n✓ {counts['items']} objekt i digest")
+            elif flag == "--stats":
+                print_stats(conn)
+            elif flag == "--list-queued":
+                print_queued(conn)
+        except KeyboardInterrupt:
+            print("\n(Avbruten)")
+
+        input("\nTryck Enter för att fortsätta...")
+
+    conn.close()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="clio-vigil — mediebevakning och intelligence-pipeline"
@@ -186,7 +279,7 @@ def main():
         args.digest, args.full, args.stats, args.list_queued,
     ])
     if not any_action:
-        parser.print_help()
+        _interactive_menu()
         sys.exit(0)
 
     conn = init_db()
