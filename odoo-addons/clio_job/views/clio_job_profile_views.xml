@@ -39,32 +39,28 @@
 
           <notebook>
             <page string="Bakgrund &amp; Utbildning">
-              <group>
+              <group string="Karriärhistorik">
                 <field name="background"
-                       placeholder="Karriärhistorik — en post per rad"
-                       nolabel="1"
-                       widget="text"/>
+                       placeholder="En post per rad"
+                       nolabel="1"/>
               </group>
-              <group>
+              <group string="Utbildning">
                 <field name="education"
-                       placeholder="Utbildningar — en post per rad"
-                       nolabel="1"
-                       widget="text"/>
+                       placeholder="En post per rad"
+                       nolabel="1"/>
               </group>
             </page>
 
             <page string="Bevakningsinställningar">
-              <group>
+              <group string="Målroller">
                 <field name="target_roles"
-                       placeholder="Målroller — en per rad"
-                       nolabel="1"
-                       widget="text"/>
+                       placeholder="En roll per rad"
+                       nolabel="1"/>
               </group>
-              <group>
+              <group string="Signalnyckelord">
                 <field name="signal_keywords"
-                       placeholder="Nyckelord — ett per rad (t.ex. ny GD, förvärv)"
-                       nolabel="1"
-                       widget="text"/>
+                       placeholder="Ett nyckelord per rad (t.ex. ny GD, förvärv)"
+                       nolabel="1"/>
               </group>
             </page>
 
