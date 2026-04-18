@@ -81,6 +81,105 @@ def get_all_domains() -> list[str]:
 # Pipeline
 # ---------------------------------------------------------------------------
 
+def pick_source(conn) -> None:
+    """
+    Interaktiv källväljare: visa alla konfigurerade källor,
+    låt användaren välja vilka som ska hämtas in och filtreras.
+    """
+    # Samla alla källor från alla domäner
+    all_sources = []
+    for domain_id in get_all_domains():
+        try:
+            config = load_domain_config(domain_id)
+        except Exception:
+            continue
+        for src in config.get("sources", {}).get("rss", []):
+            all_sources.append({
+                "domain": domain_id,
+                "type": "rss",
+                "name": src.get("name", src["url"]),
+                "url": src["url"],
+                "config": config,
+                "src": src,
+            })
+        for src in config.get("sources", {}).get("youtube", []):
+            all_sources.append({
+                "domain": domain_id,
+                "type": "youtube",
+                "name": src.get("name", src.get("channel_id", "?")),
+                "url": src.get("channel_id", ""),
+                "config": config,
+                "src": src,
+            })
+
+    if not all_sources:
+        print("Inga källor konfigurerade.")
+        return
+
+    print(f"\n📡 Välj källa att hämta in ({len(all_sources)} konfigurerade)")
+    print("─" * 72)
+    for i, s in enumerate(all_sources, 1):
+        icon = "🎙" if s["type"] == "rss" else "▶"
+        print(f"  {i:>3}. {icon} [{s['domain']}] {s['name']}")
+    print("─" * 72)
+    print("  Ange nummer (t.ex. 1,3,5 eller 2-6 eller 'alla') — Enter = avbryt")
+
+    raw = input("  Val: ").strip().lower()
+    if not raw:
+        print("  Avbröts.")
+        return
+
+    selected_indices = set()
+    if raw == "alla":
+        selected_indices = set(range(len(all_sources)))
+    else:
+        for part in raw.split(","):
+            part = part.strip()
+            if "-" in part:
+                try:
+                    a, b = part.split("-", 1)
+                    selected_indices.update(range(int(a) - 1, int(b)))
+                except ValueError:
+                    pass
+            else:
+                try:
+                    selected_indices.add(int(part) - 1)
+                except ValueError:
+                    pass
+
+    selected = [all_sources[i] for i in sorted(selected_indices) if 0 <= i < len(all_sources)]
+    if not selected:
+        print("  Inga giltiga val.")
+        return
+
+    # Gruppera valda källor per domän och bygg filtrerade configs
+    from collections import defaultdict
+    by_domain = defaultdict(lambda: {"rss": [], "youtube": []})
+    for s in selected:
+        by_domain[s["domain"]][s["type"]].append(s["src"])
+
+    total_new = 0
+    total_queued = 0
+    for domain_id, sources in by_domain.items():
+        config = load_domain_config(domain_id)
+        # Bygg filtrerad config med bara valda källor
+        filtered_config = {**config, "sources": sources}
+
+        print(f"\n  Hämtar [{domain_id}]...")
+        rss_counts = collect_rss(conn, filtered_config)
+        yt_counts  = collect_youtube(conn, filtered_config)
+        new = rss_counts["discovered"] + yt_counts["discovered"]
+        total_new += new
+        print(f"  → {new} nya objekt")
+
+        # Kör filter på nya discovered
+        filter_counts = run_filter(conn, config)
+        total_queued += filter_counts["filtered_in"]
+        print(f"  → {filter_counts['filtered_in']} köade, {filter_counts['filtered_out']} filtrerade bort")
+
+    print(f"\n  ✓ Totalt: {total_new} nya objekt, {total_queued} i kö")
+
+
 def run_pipeline(conn, domain_id: str) -> None:
     """Kör collect → filter → queue för en domän."""
     logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
@@ -313,6 +412,7 @@ def _interactive_menu():
         ("7", "Visa kö",               "--list-queued"),
         ("8", "Välj att transkribera", "--pick"),
         ("9", "Rensa kö",              "--clear-queue"),
+        ("s", "Välj källa att hämta",  "--pick-source"),
         ("q", "Tillbaka",              None),
     ]
 
@@ -390,6 +490,8 @@ def _interactive_menu():
                 pick_items(conn)
             elif flag == "--clear-queue":
                 clear_queue(conn)
+            elif flag == "--pick-source":
+                pick_source(conn)
         except KeyboardInterrupt:
             print("\n(Avbruten)")
 
@@ -412,6 +514,7 @@ def main():
     parser.add_argument("--list-queued",  action="store_true", help="Lista transkriptionskön")
     parser.add_argument("--pick",         action="store_true", help="Välj objekt att prioritera i kön")
     parser.add_argument("--clear-queue",  action="store_true", help="Rensa kön (återställ tillstånd)")
+    parser.add_argument("--pick-source",  action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
@@ -422,7 +525,7 @@ def main():
     any_action = any([
         args.run, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
-        args.pick, args.clear_queue,
+        args.pick, args.clear_queue, args.pick_source,
     ])
     if not any_action:
         _interactive_menu()
@@ -441,6 +544,9 @@ def main():
 
     elif args.clear_queue:
         clear_queue(conn, args.domain)
+
+    elif args.pick_source:
+        pick_source(conn)
 
     elif args.run or args.full:
         domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]

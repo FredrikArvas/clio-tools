@@ -354,6 +354,14 @@ TOOLS = [
                 "args":         ["--clear-queue"],
                 "needs_folder": False,
             },
+            {
+                "nr":           10,
+                "name":         "källa",
+                "desc":         "Välj vilken källa (podcast/kanal) som ska hämtas in",
+                "script":       ROOT / "clio-vigil" / "main.py",
+                "args":         ["--pick-source"],
+                "needs_folder": False,
+            },
         ],
     },
 ]
