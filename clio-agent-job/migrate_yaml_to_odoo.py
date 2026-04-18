@@ -67,8 +67,10 @@ def migrate_profile(env, data: dict, dry_run: bool) -> None:
             partner = {"id": None, "clio_job_profile_ids": []}
         else:
             pid = Partner.create({"name": name, "email": email, "is_company": False})
-            partner = {"id": pid, "clio_job_profile_ids": []}
-            print(f"  Partner skapad: ID {pid}")
+            # pyodoo-connect returnerar OdooRecordset — extrahera int-id
+            pid_int = pid.id if hasattr(pid, "id") else int(pid)
+            partner = {"id": pid_int, "clio_job_profile_ids": []}
+            print(f"  Partner skapad: ID {pid_int}")
 
     # --- Sätt clio_job_watch = True ---
     if partner["id"] and not partner.get("clio_job_watch"):
@@ -106,7 +108,8 @@ def migrate_profile(env, data: dict, dry_run: bool) -> None:
         if dry_run:
             print(f"  [DRY-RUN] Skulle skapa ny clio.job.profile")
         else:
-            new_id = Profile.create(profile_vals)
+            rec = Profile.create(profile_vals)
+            new_id = rec.id if hasattr(rec, "id") else int(rec)
             print(f"  Profil skapad (ID {new_id})")
 
 
