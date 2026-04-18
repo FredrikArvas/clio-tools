@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="group_clio_kandidat" model="res.groups">
+    <field name="name">Clio Kandidat</field>
+    <field name="category_id" ref="base.module_category_hidden"/>
+    <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    <field name="comment">
+      Intern användare med begränsad åtkomst — kan bara läsa och redigera
+      sin egna Clio Job-profil och se sina egna matchningar.
+    </field>
+  </record>
+
+</odoo>
