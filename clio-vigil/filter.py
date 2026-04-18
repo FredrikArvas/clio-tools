@@ -81,10 +81,21 @@ def run_filter(conn, domain_config: dict) -> dict:
         (domain_id,)
     ).fetchall()
 
+    scored = []
     for row in rows:
         text = f"{row['title'] or ''} {row['description'] or ''}"
         score = keyword_score(text, keywords)
+        scored.append((row["id"], row["title"], score))
 
+    # Batch-uppdatera scores i en transaktion
+    conn.executemany(
+        "UPDATE vigil_items SET relevance_score = ? WHERE id = ?",
+        [(score, item_id) for item_id, _, score in scored]
+    )
+    conn.commit()
+
+    # Tillståndsövergångar och kö (en transaktion per item men utan extra commits)
+    for item_id, title, score in scored:
         if score >= threshold:
             new_state = "filtered_in"
             counts["filtered_in"] += 1
@@ -92,26 +103,19 @@ def run_filter(conn, domain_config: dict) -> dict:
             new_state = "filtered_out"
             counts["filtered_out"] += 1
 
-        # Spara score och övergå tillstånd
-        conn.execute(
-            "UPDATE vigil_items SET relevance_score = ? WHERE id = ?",
-            (score, row["id"])
-        )
-        conn.commit()
-        transition(conn, row["id"], new_state)
+        transition(conn, item_id, new_state)
 
-        # Beräkna prioritetstal för filtered_in-objekt
         if new_state == "filtered_in":
-            prio = update_priority(conn, row["id"])
-            # Lägg i kö direkt
-            transition(conn, row["id"], "queued")
+            prio = update_priority(conn, item_id)
+            transition(conn, item_id, "queued")
             conn.execute(
-                """INSERT INTO transcription_queue (item_id, priority_score, queued_at)
+                """INSERT OR IGNORE INTO transcription_queue (item_id, priority_score, queued_at)
                    VALUES (?, ?, datetime('now'))""",
-                (row["id"], prio)
+                (item_id, prio)
             )
-            conn.commit()
-            logger.debug(f"Item {row['id']} köad med prio {prio:.3f}: {row['title'][:50]}")
+            logger.debug(f"Item {item_id} köad med prio {prio:.3f}: {(title or '')[:50]}")
+
+    conn.commit()
 
     logger.info(
         f"Filter klar [{domain_id}]: "
