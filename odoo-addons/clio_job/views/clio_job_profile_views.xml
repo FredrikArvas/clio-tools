@@ -39,12 +39,12 @@
 
           <notebook>
             <page string="Bakgrund &amp; Utbildning">
-              <group string="Karriärhistorik">
+              <group string="Karriärhistorik" col="1">
                 <field name="background"
                        placeholder="En post per rad"
                        nolabel="1"/>
               </group>
-              <group string="Utbildning">
+              <group string="Utbildning" col="1">
                 <field name="education"
                        placeholder="En post per rad"
                        nolabel="1"/>
@@ -52,12 +52,12 @@
             </page>
 
             <page string="Bevakningsinställningar">
-              <group string="Målroller">
+              <group string="Målroller" col="1">
                 <field name="target_roles"
                        placeholder="En roll per rad"
                        nolabel="1"/>
               </group>
-              <group string="Signalnyckelord">
+              <group string="Signalnyckelord" col="1">
                 <field name="signal_keywords"
                        placeholder="Ett nyckelord per rad (t.ex. ny GD, förvärv)"
                        nolabel="1"/>
