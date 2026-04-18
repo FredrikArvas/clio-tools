@@ -422,6 +422,7 @@ def main():
     any_action = any([
         args.run, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
+        args.pick, args.clear_queue,
     ])
     if not any_action:
         _interactive_menu()
