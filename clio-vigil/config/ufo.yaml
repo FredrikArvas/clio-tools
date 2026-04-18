@@ -1,0 +1,169 @@
+# clio-vigil — domänkonfiguration: UFO/UAP
+# =========================================
+# MVP-konfiguration (YAML). Migreras till Odoo i Release 1.5.
+#
+# Källmognad: tidig | etablerad | akademisk
+# Påverkar sortering i digest och Odoo-vy — blockerar INTE insamling.
+#
+# Relevanströskel: 0.0–1.0
+# Objekt under tröskeln → filtered_out (sparas men transkriberas ej)
+
+name: UFO/UAP
+domain_id: ufo
+chroma_collection: vigil_ufo
+transcription_profile: ufo_content
+relevance_threshold: 0.40
+
+# Seedord för MVP-filter.
+# Mognar via onboarding-dialog i Release 1.5 (RLHF-logik).
+keywords:
+  primary:
+    - ufo
+    - uap
+    - disclosure
+    - non-human intelligence
+    - nhi
+    - non-human
+    - craft
+    - pentagon uap
+    - congress uap
+    - citizen hearing
+    - extraterrestrial
+  secondary:
+    - skinwalker
+    - roswell
+    - crash retrieval
+    - legacy program
+    - whistleblower
+    - david grusch
+    - karl nell
+    - lue elizondo
+    - christopher mellon
+    - nde
+    - near-death
+    - channeling
+    - channeled
+    - starseed
+    - bashar
+    - darryl anka
+    - roger gotthardsson
+    - ancient astronauts
+    - forntida astronauter
+    - contact experience
+    - consciousness
+    - orb
+    - pleiadian
+    - plejaderna
+    - sirius
+    - arcturian
+    - lyran
+    - andromeda
+    - star system
+    - galactic
+    - galaktisk
+    - civilization
+    - civilisation
+    - dimension
+    - frequency
+    - vibration
+    - channeled message
+    - fifth dimension
+
+# RSS-källor
+# weight: multiplikator för prioritetstal (1.0 = neutral)
+sources:
+  rss:
+    # Mysteriumet: domän nere 2026-04-18, kontrollera ny URL
+    # - url: https://mysteriumet.se/feed
+    #   name: Mysteriumet
+    #   maturity: tidig
+    #   weight: 0.8
+
+    - url: https://thedebrief.org/feed
+      name: The Debrief
+      maturity: etablerad
+      weight: 1.2
+
+    - url: https://www.politico.com/rss/politicopicks.xml
+      name: Politico (UAP-filter)
+      maturity: etablerad
+      weight: 1.0
+
+    # Podcasts (RSS hämtade via Apple Podcasts API 2026-04-18)
+    - url: https://anchor.fm/s/e8906f58/podcast/rss
+      name: Från UFO till UAP (En verklighet i förändring)
+      maturity: etablerad
+      weight: 1.2
+
+    - url: https://audioboom.com/channels/5024014.rss
+      name: That UFO Podcast
+      maturity: etablerad
+      weight: 1.1
+
+    - url: https://feed.podbean.com/forntidaastronauter/feed.xml
+      name: Forntida Astronauter
+      maturity: tidig
+      weight: 0.9
+
+    - url: https://anchor.fm/s/bb765a14/podcast/rss
+      name: 1-2-3 Öppna ögonen!
+      maturity: tidig
+      weight: 0.7
+
+    - url: https://anchor.fm/s/624b0dcc/podcast/rss
+      name: UFO Bortom Rimligt Tvivel
+      maturity: tidig
+      weight: 0.9
+
+    - url: https://feeds.acast.com/public/shows/6504cc9ee923310011cedb6f
+      name: The ASHUA Podcast
+      maturity: tidig
+      weight: 0.8
+
+  # YouTube-kanaler — @handle-format (robustare än kanal-ID)
+  youtube_channels:
+    - channel_id: "@theblackvault"
+      name: The Black Vault
+      maturity: tidig
+      weight: 0.9
+
+    - channel_id: "@JeremyCorbell"
+      name: Weaponized (Jeremy Corbell)
+      maturity: tidig
+      weight: 1.0
+
+    - channel_id: "@SkywatcherHQ"
+      name: Skywatcher
+      maturity: tidig
+      weight: 1.1
+
+    - channel_id: "@CitizenHearing"
+      name: Citizen Hearing on UFO Disclosure
+      maturity: etablerad
+      weight: 1.2
+
+    - channel_id: "@BasharChanneledbyDarrylAnka"
+      name: Bashar (Darryl Anka)
+      maturity: tidig
+      weight: 0.9
+
+    - channel_id: "@ASHUA-and-The-Vibrancy-Club"
+      name: ASHUA & The Vibrancy Club
+      maturity: tidig
+      weight: 0.8
+
+    - channel_id: "@bastalivet"
+      name: Bästa livet (NDE/medvetande, svenska)
+      maturity: tidig
+      weight: 0.8
+
+  # Webb-crawling (Release 2)
+  # - url: https://www.archiveoftheunknown.com
+  #   name: Archive for the Unknown (Norrköping)
+  #   maturity: etablerad
+  #   weight: 1.1
+  #   crawl_depth: 2
+
+# Transkription
+max_priority_duration_minutes: 90   # Objekt över denna längd får reducerat prioritetstal
+whisper_model: medium               # tiny | base | small | medium | large-v3

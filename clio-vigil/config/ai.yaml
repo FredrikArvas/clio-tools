@@ -1,0 +1,61 @@
+# clio-vigil — domänkonfiguration: AI-nyheter & modeller
+# =========================================================
+# Bevakar AI-utveckling, nya modeller, forskning och samhällspåverkan.
+# Fokus: svenska och engelska podcasts, nyheter.
+
+name: AI-nyheter
+domain_id: ai
+chroma_collection: vigil_ai
+transcription_profile: swedish_news
+relevance_threshold: 0.35
+
+keywords:
+  primary:
+    - ai
+    - artificiell intelligens
+    - artificial intelligence
+    - llm
+    - language model
+    - gpt
+    - claude
+    - gemini
+    - openai
+    - anthropic
+    - machine learning
+    - deep learning
+    - neural network
+  secondary:
+    - agent
+    - automation
+    - agi
+    - multimodal
+    - fine-tuning
+    - transformer
+    - diffusion
+    - generative
+    - generativ
+    - mistral
+    - llama
+    - benchmark
+    - reasoning
+    - inference
+    - alignment
+    - safety
+
+sources:
+  rss:
+    - url: https://anchor.fm/s/fa52e900/podcast/rss
+      name: Veckans AI
+      maturity: etablerad
+      weight: 1.2
+
+    - url: https://anchor.fm/s/d7cf21a0/podcast/rss
+      name: Generativet
+      maturity: etablerad
+      weight: 1.1
+
+  youtube_channels: []
+
+# Transkription
+max_priority_duration_minutes: 60
+whisper_model: medium

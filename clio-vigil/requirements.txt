@@ -1,0 +1,19 @@
+# clio-vigil — beroenden
+# MVP-beroenden (pip install -r requirements.txt)
+
+feedparser>=6.0.0       # RSS-insamling
+yt-dlp>=2024.1.0        # YouTube metadata och audio
+pyyaml>=6.0             # Domänkonfiguration
+
+# Transkription (Claude Code installerar när transcriber.py byggs)
+# openai-whisper>=20231117
+# ffmpeg-python>=0.2.0
+
+# RAG (delar instans med clio-books — redan installerat)
+# chromadb>=0.4.0
+
+# Odoo-integration (redan i clio_odoo/)
+# pyodoo-connect
+
+# Notifiering (redan i clio-agent-mail)
+# används via befintlig IMAP-setup

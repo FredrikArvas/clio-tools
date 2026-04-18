@@ -87,3 +87,7 @@ attachments/
 
 # Installationsfiler
 *.exe
+
+# clio-vigil runtime data (DB, audio, transcripts)
+clio-vigil/data/
+clio-vigil/.env
