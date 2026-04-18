@@ -95,6 +95,32 @@ def collect_rss(conn, domain_config: dict) -> dict:
                 description = _extract_description(entry)
                 published_at = _normalize_time(entry)
 
+                # Extrahera enclosure-URL (faktisk audio-fil för podcasts)
+                enclosure_url = None
+                if hasattr(entry, "enclosures") and entry.enclosures:
+                    enc = entry.enclosures[0]
+                    enclosure_url = enc.get("href") or enc.get("url")
+                if not enclosure_url:
+                    for link in getattr(entry, "links", []):
+                        if link.get("rel") == "enclosure":
+                            enclosure_url = link.get("href")
+                            break
+
+                # Extrahera duration (iTunes-tagg på poddar)
+                duration_seconds = None
+                itunes_dur = getattr(entry, "itunes_duration", None)
+                if itunes_dur:
+                    try:
+                        parts = str(itunes_dur).split(":")
+                        if len(parts) == 3:
+                            duration_seconds = int(parts[0])*3600 + int(parts[1])*60 + int(parts[2])
+                        elif len(parts) == 2:
+                            duration_seconds = int(parts[0])*60 + int(parts[1])
+                        else:
+                            duration_seconds = int(parts[0])
+                    except Exception:
+                        pass
+
                 item_id = upsert_item(
                     conn,
                     url=item_url,
@@ -106,9 +132,11 @@ def collect_rss(conn, domain_config: dict) -> dict:
                     title=title,
                     description=description,
                     published_at=published_at,
+                    duration_seconds=duration_seconds,
                     raw_metadata=json.dumps({
                         "feed_url": url,
                         "feed_title": feed.feed.get("title", ""),
+                        "enclosure_url": enclosure_url,
                     })
                 )
 
