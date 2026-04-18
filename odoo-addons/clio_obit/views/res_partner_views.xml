@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy for clio.partner.link -->
+  <record id="view_clio_partner_link_tree" model="ir.ui.view">
+    <field name="name">clio.partner.link.tree</field>
+    <field name="model">clio.partner.link</field>
+    <field name="arch" type="xml">
+      <tree create="false" delete="false">
+        <field name="relation_label" string="Relation"/>
+        <field name="to_partner_id" string="Person"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Lagg till Clio-flik pa res.partner-formularet -->
+  <record id="view_partner_form_clio_obit" model="ir.ui.view">
+    <field name="name">res.partner.form.clio_obit</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+
+      <notebook position="inside">
+        <page string="Clio Obit" name="clio_obit">
+
+          <group string="Dodsannonsbevakning">
+            <field name="clio_obit_watch"/>
+            <field name="clio_obit_priority" invisible="not clio_obit_watch"/>
+            <field name="clio_family_role"/>
+          </group>
+
+          <field name="clio_link_ids" string="Familjerelationer" nolabel="1"/>
+
+        </page>
+      </notebook>
+
+    </field>
+  </record>
+
+</odoo>
