@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS transcription_queue (
 def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """Initierar databasen och returnerar en anslutning."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=30)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
     conn.commit()
