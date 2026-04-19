@@ -76,8 +76,13 @@ def _transcript_to_text(transcript_path: str, max_chars: int = MAX_TRANSCRIPT_CH
     raw = path.read_text(encoding="utf-8").strip()
     if not raw:
         raise ValueError(f"Tom transkriptfil (avbruten körning?): {path}")
-    segments: list[dict] = json.loads(raw)
-    full_text = " ".join(s["text"] for s in segments if s.get("text"))
+
+    # JSON = audio-segment (Whisper), annars ren text (PDF/webb-import)
+    try:
+        segments: list[dict] = json.loads(raw)
+        full_text = " ".join(s["text"] for s in segments if s.get("text"))
+    except (json.JSONDecodeError, TypeError):
+        full_text = raw
 
     if len(full_text) <= max_chars:
         return full_text
