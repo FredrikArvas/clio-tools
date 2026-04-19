@@ -73,7 +73,7 @@ def _send_smtp(to: str, subject: str, body: str, html: str = None) -> bool:
     msg.attach(MIMEText(html or _plain_to_html(body), "html", "utf-8"))
 
     try:
-        with smtplib.SMTP_SSL(_SMTP_HOST, _SMTP_PORT) as server:
+        with smtplib.SMTP_SSL(_SMTP_HOST, _SMTP_PORT, timeout=10) as server:
             server.login(_SMTP_USER, _SMTP_PASS)
             server.sendmail(_SMTP_USER, [to], msg.as_bytes())
         logger.info(f"Mail skickat direkt via SMTP: → {to} | {subject[:60]}")
