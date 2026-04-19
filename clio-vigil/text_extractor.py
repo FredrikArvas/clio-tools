@@ -70,7 +70,8 @@ def _detect_type(url: str) -> str:
 # ---------------------------------------------------------------------------
 
 def _extract_pdf_from_url(url: str) -> Optional[str]:
-    """Laddar ned PDF från URL och extraherar text via pymupdf."""
+    """Laddar ned PDF från URL till tempfil och extraherar text via pymupdf."""
+    import tempfile
     try:
         import fitz  # pymupdf
     except ImportError:
@@ -85,20 +86,21 @@ def _extract_pdf_from_url(url: str) -> Optional[str]:
         logger.error(f"Kunde inte ladda ned PDF: {e}")
         return None
 
+    # Spara till tempfil — pymupdf läser mer stabilt från fil än bytes-stream
     try:
-        doc  = fitz.open(stream=pdf_bytes, filetype="pdf")
-        pages = []
-        for i, page in enumerate(doc, 1):
-            text = page.get_text("text").strip()
-            if text:
-                pages.append(f"[Sida {i}]\n{text}")
-        doc.close()
-        full_text = "\n\n".join(pages)
-        logger.info(f"PDF extraherad: {len(doc)} sidor, {len(full_text):,} tecken")
-        return full_text
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            tmp.write(pdf_bytes)
+            tmp_path = tmp.name
+
+        return _extract_pdf_from_file(Path(tmp_path))
     except Exception as e:
         logger.error(f"PDF-extraktion misslyckades: {e}")
         return None
+    finally:
+        try:
+            Path(tmp_path).unlink(missing_ok=True)
+        except Exception:
+            pass
 
 
 def _extract_pdf_from_file(path: Path) -> Optional[str]:
