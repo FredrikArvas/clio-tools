@@ -25,10 +25,7 @@ Körning:
 
 import logging
 import os
-import smtplib
 from datetime import datetime, timezone
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Optional
 
@@ -39,13 +36,10 @@ from orchestrator import init_db, transition
 logger = logging.getLogger(__name__)
 
 _here = Path(__file__).parent
-load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
+load_dotenv(_here.parent / ".env")
+load_dotenv(_here / ".env", override=True)
 
-SMTP_HOST   = os.getenv("SMTP_HOST", "")
-SMTP_PORT   = int(os.getenv("SMTP_PORT", "465"))
-SMTP_USER   = os.getenv("SMTP_USER", "clio@arvas.se")
-SMTP_PASS   = os.getenv("SMTP_PASSWORD", "")
-DIGEST_TO   = os.getenv("DIGEST_TO", "fredrik@arvas.se")
+DIGEST_TO = os.getenv("DIGEST_TO", "fredrik@arvas.se")
 
 # ---------------------------------------------------------------------------
 # Hämta objekt för digest
@@ -178,51 +172,14 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
 
 def send_digest(subject: str, plain: str, html: str,
                 dry_run: bool = False) -> bool:
-    """Skickar digest-mail via clio-agent-mail smtp_client. Returnerar True vid lyckat sändning."""
+    """Skickar digest-mail via clio_core.mail. Returnerar True vid lyckat sändning."""
     if dry_run:
         logger.info(f"[DRY-RUN] Skulle skicka: {subject}")
         print(f"\n{'='*60}\n{plain}\n{'='*60}")
         return True
 
-    # Använd clio-agent-mails smtp_client som har fungerande konfiguration
-    import sys
-    import configparser
-    from pathlib import Path
-
-    agent_mail_dir = Path(__file__).parent.parent / "clio-agent-mail"
-    if str(agent_mail_dir) not in sys.path:
-        sys.path.insert(0, str(agent_mail_dir))
-
-    try:
-        import smtp_client
-
-        config = configparser.ConfigParser()
-        config.read(agent_mail_dir / "clio.config")
-
-        # Läs lösenord från clio-agent-mail .env
-        from dotenv import load_dotenv
-        load_dotenv(agent_mail_dir / ".env", override=False)
-        imap_pass = os.getenv("IMAP_PASSWORD_CLIO", "")
-        if not imap_pass:
-            raise EnvironmentError("IMAP_PASSWORD_CLIO saknas i clio-agent-mail/.env")
-
-        # Injicera lösenord i config (smtp_client läser från config)
-        config.set("mail", "imap_password_clio", imap_pass)
-
-        smtp_client.send_email(
-            config=config,
-            from_account_key="clio",
-            to_addr=DIGEST_TO,
-            subject=subject,
-            body=plain,
-            html_body=html,
-        )
-        logger.info(f"Digest skickad via clio-agent-mail: clio → {DIGEST_TO} | {subject}")
-        return True
-
-    except Exception as e:
-        logger.error(f"SMTP-fel via clio-agent-mail: {e}")
-        return False
+    from clio_core import mail
+    return mail.send(DIGEST_TO, subject, plain, html)
 
 
 # ---------------------------------------------------------------------------
