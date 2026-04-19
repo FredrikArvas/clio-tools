@@ -206,9 +206,13 @@ def extract(url: str, item_id: int, source_name: str = "",
 
     word_count = len(text.split())
 
-    # Extrahera rubrik från första raden om möjligt
-    first_line = text.split("\n")[0].strip()
-    title = first_line if len(first_line) < 120 else ""
+    # Extrahera rubrik: för PDF — ta från URL-filnamnet, för webb — första raden
+    if source_type == "pdf":
+        raw_name = url.rstrip("/").split("/")[-1].replace(".pdf", "").replace("_", " ").replace("-", " ")
+        title = raw_name[:100]
+    else:
+        first_line = text.split("\n")[0].strip()
+        title = first_line if len(first_line) < 120 else ""
 
     logger.info(f"Text sparad: {filename} ({word_count:,} ord)")
 
