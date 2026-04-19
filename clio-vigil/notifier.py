@@ -196,7 +196,7 @@ def send_digest(subject: str, plain: str, html: str,
     msg.attach(MIMEText(html,  "html",  "utf-8"))
 
     try:
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15) as server:
             server.ehlo()
             server.login(SMTP_USER, SMTP_PASS)
             server.sendmail(SMTP_USER, [DIGEST_TO], msg.as_bytes())
