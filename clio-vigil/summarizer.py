@@ -73,7 +73,10 @@ def _transcript_to_text(transcript_path: str, max_chars: int = MAX_TRANSCRIPT_CH
     if not path.exists():
         raise FileNotFoundError(f"Transkript saknas: {path}")
 
-    segments: list[dict] = json.loads(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8").strip()
+    if not raw:
+        raise ValueError(f"Tom transkriptfil (avbruten körning?): {path}")
+    segments: list[dict] = json.loads(raw)
     full_text = " ".join(s["text"] for s in segments if s.get("text"))
 
     if len(full_text) <= max_chars:
@@ -173,10 +176,15 @@ def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20) -> d
 
     counts = {"done": 0, "failed": 0}
     for row in rows:
-        result = summarize_item(conn, row["id"])
-        if result:
-            counts["done"] += 1
-        else:
+        try:
+            result = summarize_item(conn, row["id"])
+            if result:
+                counts["done"] += 1
+            else:
+                counts["failed"] += 1
+        except (ValueError, FileNotFoundError) as e:
+            logger.warning(f"Hoppar över item {row['id']}: {e}")
+            transition(conn, row["id"], "discovered")
             counts["failed"] += 1
 
     return counts
