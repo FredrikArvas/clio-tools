@@ -25,6 +25,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# Windows/Python 3.14: tvinga IPv4 DNS (misslyckas annars med IPv6 link-local)
+import sys as _sys, socket as _socket
+if _sys.platform == "win32":
+    _orig_gai = _socket.getaddrinfo
+    def _ipv4_gai(host, port, family=0, type=0, proto=0, flags=0):
+        if family == 0:
+            family = _socket.AF_INET
+        return _orig_gai(host, port, family, type, proto, flags)
+    _socket.getaddrinfo = _ipv4_gai
+
 BASE_DIR = Path(__file__).parent
 ROOT_DIR = BASE_DIR.parent
 
