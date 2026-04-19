@@ -17,23 +17,23 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_SERVICE_URL = os.getenv("CLIO_MAIL_SERVICE_URL", "http://127.0.0.1:7100")
-_AGENT_MAIL  = Path(__file__).parent.parent.parent / "clio-agent-mail"
+_AGENT_MAIL = Path(__file__).parent.parent.parent / "clio-agent-mail"
 
 
 def send(to: str, subject: str, body: str, html: str = None) -> bool:
     """Skickar mail via HTTP-relä om tillgängligt, annars smtp_client direkt."""
-    if _try_service(to, subject, body, html):
+    service_url = os.getenv("CLIO_MAIL_SERVICE_URL", "http://127.0.0.1:7100")
+    if _try_service(service_url, to, subject, body, html):
         return True
     logger.info("Mail-relä ej nåbart — försöker smtp_client direkt")
     return _try_smtp_client(to, subject, body, html)
 
 
-def _try_service(to, subject, body, html) -> bool:
+def _try_service(service_url, to, subject, body, html) -> bool:
     try:
         import requests as _requests
         r = _requests.post(
-            f"{_SERVICE_URL}/send",
+            f"{service_url}/send",
             json={"to": to, "subject": subject, "body": body, "html": html},
             timeout=5,
         )
