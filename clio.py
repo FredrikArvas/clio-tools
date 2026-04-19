@@ -362,6 +362,14 @@ TOOLS = [
                 "args":         ["--pick-source"],
                 "needs_folder": False,
             },
+            {
+                "nr":           11,
+                "name":         "importera",
+                "desc":         "Importera webb-sida eller PDF via URL",
+                "script":       ROOT / "clio-vigil" / "main.py",
+                "args":         ["--import-url"],
+                "needs_folder": False,
+            },
         ],
     },
 ]

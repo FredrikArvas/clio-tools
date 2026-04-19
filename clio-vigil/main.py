@@ -38,7 +38,7 @@ _socket.getaddrinfo = _ipv4_getaddrinfo
 
 import yaml
 
-from orchestrator import init_db, stats, domain_stats
+from orchestrator import init_db, stats, domain_stats, upsert_item, transition
 from filter import run_filter
 from collectors.rss_collector import collect_rss
 from collectors.youtube_collector import collect_youtube
@@ -80,6 +80,72 @@ def get_all_domains() -> list[str]:
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
+
+def import_url(conn, url: str, domain: str) -> None:
+    """
+    Manuell import av en webb-sida eller PDF-URL.
+    Extraherar text direkt, hoppar över transkriptionskön,
+    lägger in som 'transcribed' redo för summera + indexera.
+    """
+    from text_extractor import extract
+    from datetime import datetime, timezone
+
+    print(f"\n📥 Importerar: {url}")
+    print(f"   Domän: {domain}")
+
+    # Temporärt ID för filnamn — ersätts med riktigt ID efter insert
+    tmp_id = int(datetime.now(timezone.utc).timestamp())
+    result = extract(url, item_id=tmp_id, source_name=domain, date="")
+
+    if not result:
+        print("✗ Extraktion misslyckades.")
+        return
+
+    source_type = result["source_type"]
+    title       = result["title"] or url[:80]
+    word_count  = result["word_count"]
+
+    print(f"   Typ: {source_type}  |  {word_count:,} ord  |  {title[:60]}")
+
+    # Upsert i vigil_items (hoppar om URL redan finns)
+    item_id = upsert_item(
+        conn,
+        url=url,
+        domain=domain,
+        source_type=source_type,
+        source_name=f"import-{source_type}",
+        source_maturity="tidig",
+        source_weight=1.0,
+        title=title,
+        description=title,
+        published_at=datetime.now(timezone.utc).isoformat(),
+        duration_seconds=None,
+        raw_metadata="{}",
+    )
+
+    if not item_id:
+        print("⚠ URL finns redan i databasen — hoppar över.")
+        return
+
+    # Döp om filen med riktigt item_id
+    from pathlib import Path
+    old_path = Path(result["transcript_path"])
+    new_name = old_path.name.replace(str(tmp_id), str(item_id))
+    new_path = old_path.parent / new_name
+    if old_path != new_path:
+        old_path.rename(new_path)
+        result["transcript_path"] = str(new_path)
+
+    # Sätt state direkt till transcribed (text redan extraherad)
+    conn.execute(
+        "UPDATE vigil_items SET state='transcribed', transcript_path=? WHERE id=?",
+        (result["transcript_path"], item_id)
+    )
+    conn.commit()
+
+    print(f"✓ Importerad som item {item_id} → redo för summera + indexera")
+    print(f"  Kör '3. summera' och '4. indexera' för att processa.")
+
 
 def pick_source(conn) -> None:
     """
@@ -413,6 +479,7 @@ def _interactive_menu():
         ("8", "Välj att transkribera", "--pick"),
         ("9", "Rensa kö",              "--clear-queue"),
         ("s", "Välj källa att hämta",  "--pick-source"),
+        ("i", "Importera URL",         "--import-url"),
         ("q", "Tillbaka",              None),
     ]
 
@@ -492,6 +559,11 @@ def _interactive_menu():
                 clear_queue(conn)
             elif flag == "--pick-source":
                 pick_source(conn)
+            elif flag == "--import-url":
+                url = input("  URL (webb eller PDF): ").strip()
+                dom = input("  Domän (ufo/ai): ").strip() or "ai"
+                if url:
+                    import_url(conn, url, dom)
         except KeyboardInterrupt:
             print("\n(Avbruten)")
 
@@ -515,6 +587,7 @@ def main():
     parser.add_argument("--pick",         action="store_true", help="Välj objekt att prioritera i kön")
     parser.add_argument("--clear-queue",  action="store_true", help="Rensa kön (återställ tillstånd)")
     parser.add_argument("--pick-source",  action="store_true", help="Välj vilken källa som ska hämtas in")
+    parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
@@ -525,7 +598,7 @@ def main():
     any_action = any([
         args.run, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
-        args.pick, args.clear_queue, args.pick_source,
+        args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
     ])
     if not any_action:
         _interactive_menu()
@@ -547,6 +620,9 @@ def main():
 
     elif args.pick_source:
         pick_source(conn)
+
+    elif args.import_url:
+        import_url(conn, args.import_url, args.domain or "ai")
 
     elif args.run or args.full:
         domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]

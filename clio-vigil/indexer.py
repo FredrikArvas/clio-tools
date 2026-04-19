@@ -45,9 +45,13 @@ QDRANT_PORT     = int(os.getenv("QDRANT_PORT", "6333"))
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM   = 1536
 
-# Tidsfönster per chunk (sekunder) och överlapp
+# Tidsfönster per chunk (sekunder) och överlapp — audio/video
 CHUNK_WINDOW_SEC  = 300   # 5 minuter per chunk
 CHUNK_OVERLAP_SEC = 30    # 30 sek överlapp
+
+# Ordfönster per chunk — text (webb/pdf)
+CHUNK_WORDS       = 500   # ~samma som clio-rag
+CHUNK_WORDS_OVERLAP = 100  # 20% överlapp
 
 
 # ---------------------------------------------------------------------------
@@ -135,6 +139,36 @@ def chunk_segments(segments: list[dict],
     return chunks
 
 
+def chunk_text(text: str,
+               words_per_chunk: int = CHUNK_WORDS,
+               overlap: int = CHUNK_WORDS_OVERLAP) -> list[dict]:
+    """
+    Delar fritext i ord-baserade fönster med överlapp.
+    Returnerar chunk-dicts med text + ord-positioner (används som segment_start/end).
+    Samma approach som clio-rag.
+    """
+    words = text.split()
+    if not words:
+        return []
+
+    chunks = []
+    step   = words_per_chunk - overlap
+    i      = 0
+    while i < len(words):
+        end   = min(i + words_per_chunk, len(words))
+        chunk = " ".join(words[i:end])
+        chunks.append({
+            "text":          chunk,
+            "segment_start": i,        # ordposition (inte sekunder)
+            "segment_end":   end,
+        })
+        if end == len(words):
+            break
+        i += step
+
+    return chunks
+
+
 # ---------------------------------------------------------------------------
 # Embeddings
 # ---------------------------------------------------------------------------
@@ -182,8 +216,22 @@ def index_item(conn, item_id: int) -> bool:
         logger.error(f"Transkript saknas på disk: {transcript_path}")
         return False
 
-    segments = json.loads(transcript_path.read_text(encoding="utf-8"))
-    chunks   = chunk_segments(segments)
+    source_type = item["source_type"] or "rss"
+
+    if source_type in ("web", "pdf"):
+        # Text-källa: läs .txt direkt, chunka på ord
+        text   = transcript_path.read_text(encoding="utf-8")
+        chunks = chunk_text(text)
+    else:
+        # Audio/video: läs Whisper-JSON, chunka på tidssegment
+        try:
+            segments = json.loads(transcript_path.read_text(encoding="utf-8"))
+        except Exception:
+            # Fallback: råtext (gamla .txt-filer)
+            text   = transcript_path.read_text(encoding="utf-8")
+            chunks = chunk_text(text)
+        else:
+            chunks = chunk_segments(segments)
 
     if not chunks:
         logger.warning(f"Item {item_id} gav inga chunks")
