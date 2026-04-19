@@ -32,7 +32,7 @@ _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL      = os.getenv("CLAUDE_MODEL", "claude-3-5-haiku-20241022")
+CLAUDE_MODEL      = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
 
 MAX_TRANSCRIPT_CHARS = 60_000   # ~15 000 tokens — täcker ~1 timme audio/video
 
