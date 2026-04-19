@@ -13,8 +13,6 @@ import json
 import logging
 import os
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -33,21 +31,17 @@ def send(to: str, subject: str, body: str, html: str = None) -> bool:
 
 def _try_service(to, subject, body, html) -> bool:
     try:
-        payload = json.dumps(
-            {"to": to, "subject": subject, "body": body, "html": html}
-        ).encode()
-        req = urllib.request.Request(
+        import requests as _requests
+        r = _requests.post(
             f"{_SERVICE_URL}/send",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
+            json={"to": to, "subject": subject, "body": body, "html": html},
+            timeout=5,
         )
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            if resp.status == 200:
-                logger.info(f"Mail skickat via relä: → {to} | {subject[:60]}")
-                return True
-            logger.warning(f"Mail-relä svarade {resp.status}")
-            return False
+        if r.ok:
+            logger.info(f"Mail skickat via relä: → {to} | {subject[:60]}")
+            return True
+        logger.warning(f"Mail-relä svarade {r.status_code}: {r.text[:80]}")
+        return False
     except Exception as e:
         logger.debug(f"Mail-relä ej nåbart: {e}")
         return False
