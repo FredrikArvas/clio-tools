@@ -1,97 +1,51 @@
 """
-clio_core.mail — delad mail-utility med tjänst-fallback
+clio_core.mail — delad mail-utility
 
-Försöker skicka via clio-agent-mails HTTP-tjänst (POST /send).
-Faller tillbaka på direkt SMTP om tjänsten inte svarar.
-
-Miljövariabler (root .env per maskin):
-  CLIO_MAIL_SERVICE_URL  — URL till mail-tjänsten (default http://127.0.0.1:7100)
-  SMTP_HOST              — SMTP-server (default mail.arvas.international)
-  SMTP_PORT              — SMTP-port SSL (default 465)
-  SMTP_USER              — Avsändaradress (default clio@arvas.international)
-  SMTP_PASSWORD          — Lösenord för direkt SMTP-fallback
+Delegerar till clio-agent-mail/smtp_client som finns på alla clio-maskiner.
+Credentials: clio-agent-mail/.env (IMAP_PASSWORD_CLIO).
 """
 
-import json
+import configparser
 import logging
 import os
-import smtplib
-import urllib.error
-import urllib.request
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_SERVICE_URL = os.getenv("CLIO_MAIL_SERVICE_URL", "http://127.0.0.1:7100")
-_SMTP_HOST   = os.getenv("SMTP_HOST",     "mail.arvas.international")
-_SMTP_PORT   = int(os.getenv("SMTP_PORT", "465"))
-_SMTP_USER   = os.getenv("SMTP_USER",     "clio@arvas.international")
-_SMTP_PASS   = os.getenv("SMTP_PASSWORD", "")
+# clio-core ligger i clio-tools/clio-core/clio_core/ → root = tre nivåer upp
+_AGENT_MAIL = Path(__file__).parent.parent.parent / "clio-agent-mail"
 
 
 def send(to: str, subject: str, body: str, html: str = None) -> bool:
-    """Skickar mail via agent-tjänst om tillgänglig, annars direkt SMTP."""
-    if _try_service(to, subject, body, html):
-        return True
-    logger.info("Mail-tjänst ej nåbar — faller tillbaka på direkt SMTP")
-    return _send_smtp(to, subject, body, html)
+    """Skickar mail via clio-agent-mail smtp_client. Returnerar True vid lyckat sändning."""
+    if str(_AGENT_MAIL) not in sys.path:
+        sys.path.insert(0, str(_AGENT_MAIL))
 
-
-def _try_service(to: str, subject: str, body: str, html) -> bool:
     try:
-        payload = json.dumps(
-            {"to": to, "subject": subject, "body": body, "html": html}
-        ).encode()
-        req = urllib.request.Request(
-            f"{_SERVICE_URL}/send",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
+        import smtp_client
+        from dotenv import load_dotenv
+
+        load_dotenv(_AGENT_MAIL / ".env", override=False)
+        imap_pass = os.getenv("IMAP_PASSWORD_CLIO", "")
+        if not imap_pass:
+            raise EnvironmentError("IMAP_PASSWORD_CLIO saknas i clio-agent-mail/.env")
+
+        config = configparser.ConfigParser()
+        config.read(_AGENT_MAIL / "clio.config")
+        config.set("mail", "imap_password_clio", imap_pass)
+
+        smtp_client.send_email(
+            config=config,
+            from_account_key="clio",
+            to_addr=to,
+            subject=subject,
+            body=body,
+            html_body=html,
         )
-        with urllib.request.urlopen(req, timeout=3) as resp:
-            if resp.status == 200:
-                logger.info(f"Mail skickat via tjänst: → {to} | {subject[:60]}")
-                return True
-            logger.warning(f"Mail-tjänst svarade {resp.status}")
-            return False
-    except Exception as e:
-        logger.debug(f"Mail-tjänst ej nåbar: {e}")
-        return False
-
-
-def _send_smtp(to: str, subject: str, body: str, html: str = None) -> bool:
-    if not _SMTP_PASS:
-        logger.error("SMTP_PASSWORD saknas i .env — kan inte skicka direkt")
-        return False
-
-    msg = MIMEMultipart("alternative")
-    msg["From"]    = _SMTP_USER
-    msg["To"]      = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    msg.attach(MIMEText(html or _plain_to_html(body), "html", "utf-8"))
-
-    try:
-        with smtplib.SMTP_SSL(_SMTP_HOST, _SMTP_PORT, timeout=10) as server:
-            server.login(_SMTP_USER, _SMTP_PASS)
-            server.sendmail(_SMTP_USER, [to], msg.as_bytes())
-        logger.info(f"Mail skickat direkt via SMTP: → {to} | {subject[:60]}")
+        logger.info(f"Mail skickat: clio → {to} | {subject[:60]}")
         return True
+
     except Exception as e:
-        logger.error(f"Direkt SMTP-fel: {e}")
+        logger.error(f"Mail-fel: {e}")
         return False
-
-
-def _plain_to_html(text: str) -> str:
-    import html
-    lines = text.splitlines()
-    parts = ['<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;">']
-    for line in lines:
-        esc = html.escape(line)
-        if not esc:
-            parts.append("<br>")
-        else:
-            parts.append(f"<p style='margin:0 0 6px 0;'>{esc}</p>")
-    parts.append("</div>")
-    return "\n".join(parts)
