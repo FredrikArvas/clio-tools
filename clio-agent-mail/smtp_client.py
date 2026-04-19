@@ -8,11 +8,20 @@ Stöder valfritt Message-ID (för att kunna spåra godkännandesvar).
 import imaplib
 import smtplib
 import logging
+import socket
 import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 logger = logging.getLogger(__name__)
+
+# Tvinga IPv4 — mail.arvas.international har IPv6-poster men routrar saknar ofta IPv6-route
+_orig_getaddrinfo = socket.getaddrinfo
+def _ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    if family == 0:
+        family = socket.AF_INET
+    return _orig_getaddrinfo(host, port, family, type, proto, flags)
+socket.getaddrinfo = _ipv4_getaddrinfo
 
 
 def send_email(
