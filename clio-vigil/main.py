@@ -28,13 +28,14 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
 # Windows: tvinga IPv4 DNS (Python 3.14 misslyckas med IPv6 link-local DNS-server)
-import socket as _socket
-_orig_getaddrinfo = _socket.getaddrinfo
-def _ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-    if family == 0:
-        family = _socket.AF_INET
-    return _orig_getaddrinfo(host, port, family, type, proto, flags)
-_socket.getaddrinfo = _ipv4_getaddrinfo
+if sys.platform == "win32":
+    import socket as _socket
+    _orig_getaddrinfo = _socket.getaddrinfo
+    def _ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        if family == 0:
+            family = _socket.AF_INET
+        return _orig_getaddrinfo(host, port, family, type, proto, flags)
+    _socket.getaddrinfo = _ipv4_getaddrinfo
 
 import yaml
 
