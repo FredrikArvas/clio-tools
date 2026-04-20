@@ -31,6 +31,7 @@ from clio_run_mail     import run_mail
 from clio_run_privfin  import run_privfin
 from clio_run_obit     import run_obit
 from clio_run_job      import run_job
+from clio_run_graph    import run_graph
 
 try:
     from config.clio_utils import t
@@ -73,6 +74,9 @@ def run_tool(tool: dict, state: dict) -> None:
             return
         if name == "clio-agent-job":
             run_job(tool, state)
+            return
+        if name == "clio-graph":
+            run_graph(tool, state)
             return
 
     if not tool["script"].exists():

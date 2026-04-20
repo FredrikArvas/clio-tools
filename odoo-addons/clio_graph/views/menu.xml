@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem id="menu_clio_graph_root"
+            name="Clio Graph"
+            sequence="110"
+            groups="base.group_system"/>
+
+  <menuitem id="menu_clio_graph_relationer"
+            name="Nätverksrelationer"
+            parent="menu_clio_graph_root"
+            action="action_clio_graph_relations"
+            sequence="10"
+            groups="base.group_system"/>
+
+</odoo>

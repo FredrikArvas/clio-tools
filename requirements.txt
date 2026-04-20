@@ -41,6 +41,10 @@ lxml                    # HTML-parser-backend för beautifulsoup4
 chardet                 # Encoding-detektering (optional men rekommenderat)
 send2trash              # Flytta filer till papperskorgen (krävs för --clean)
 
+# ── clio-graph ────────────────────────────────────────────────────────────────
+neo4j>=5.0              # Neo4j Bolt-drivrutin (MATCH/MERGE mot grafdatabas)
+pyodoo-connect          # Odoo JSON-RPC session (återanvänds i clio_odoo)
+
 # ── clio-emailfetch ───────────────────────────────────────────────────────────
 keyring                 # Windows Credential Manager för IMAP-lösenord
 

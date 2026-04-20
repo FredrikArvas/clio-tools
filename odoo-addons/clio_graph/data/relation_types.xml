@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+  <!-- GSF-relationstyper — seedas vid installation, ej skrivs över vid uppgradering -->
+
+  <record id="rel_type_kanner" model="res.partner.relation.type">
+    <field name="name">känner</field>
+    <field name="name_inverse">känd av</field>
+    <field name="is_symmetric">False</field>
+  </record>
+
+  <record id="rel_type_medlem" model="res.partner.relation.type">
+    <field name="name">är medlem i</field>
+    <field name="name_inverse">har medlem</field>
+    <field name="is_symmetric">False</field>
+  </record>
+
+  <record id="rel_type_bor" model="res.partner.relation.type">
+    <field name="name">bor på</field>
+    <field name="name_inverse">bor där</field>
+    <field name="is_symmetric">False</field>
+    <field name="contact_type_left">p</field>
+    <field name="contact_type_right">c</field>
+  </record>
+
+  <record id="rel_type_aker" model="res.partner.relation.type">
+    <field name="name">åker med</field>
+    <field name="name_inverse">åker med</field>
+    <field name="is_symmetric">True</field>
+    <field name="contact_type_left">p</field>
+    <field name="contact_type_right">p</field>
+  </record>
+
+</odoo>

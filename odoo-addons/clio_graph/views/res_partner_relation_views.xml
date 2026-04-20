@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Trädvy: alla relationer med Neo4j-synkstatus -->
+  <record id="view_clio_graph_relation_tree" model="ir.ui.view">
+    <field name="name">clio.graph.relation.tree</field>
+    <field name="model">res.partner.relation</field>
+    <field name="arch" type="xml">
+      <tree string="Nätverksrelationer">
+        <field name="left_partner_id"/>
+        <field name="type_id"/>
+        <field name="right_partner_id"/>
+        <field name="date_start"/>
+        <field name="date_end"/>
+        <field name="sync_to_neo4j"/>
+        <field name="neo4j_synced_at"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Formulärvy: ärver OCA-formulär, lägger till Neo4j-sektion -->
+  <record id="view_clio_graph_relation_form" model="ir.ui.view">
+    <field name="name">clio.graph.relation.form</field>
+    <field name="model">res.partner.relation</field>
+    <field name="inherit_id" ref="partner_multi_relation.view_partner_relation_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="Neo4j Synk" col="2">
+          <field name="sync_to_neo4j"/>
+          <field name="neo4j_synced_at"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Action: öppnar relationslistvy -->
+  <record id="action_clio_graph_relations" model="ir.actions.act_window">
+    <field name="name">Nätverksrelationer</field>
+    <field name="res_model">res.partner.relation</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="view_clio_graph_relation_tree"/>
+  </record>
+
+</odoo>
