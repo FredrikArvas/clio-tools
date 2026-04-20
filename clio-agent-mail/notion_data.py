@@ -56,6 +56,55 @@ def _query_database(db_id: str) -> list:
     return results
 
 
+def _notion_headers() -> dict:
+    token = os.environ.get("NOTION_API_KEY") or os.environ.get("NOTION_TOKEN")
+    return {
+        "Authorization": f"Bearer {token}",
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json",
+    }
+
+
+def _notion_post(endpoint: str, payload: dict) -> dict:
+    resp = httpx.post(
+        f"https://api.notion.com/v1/{endpoint}",
+        headers=_notion_headers(),
+        json=payload,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _notion_get(endpoint: str) -> dict:
+    resp = httpx.get(
+        f"https://api.notion.com/v1/{endpoint}",
+        headers=_notion_headers(),
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _notion_patch(endpoint: str, payload: dict) -> dict:
+    resp = httpx.patch(
+        f"https://api.notion.com/v1/{endpoint}",
+        headers=_notion_headers(),
+        json=payload,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _extract_page_id_from_url(url: str) -> str:
+    """Returnerar 32-teckens page_id utan bindestreck ur en Notion-URL."""
+    if not url:
+        return ""
+    m = re.search(r"([0-9a-f]{32})", url.replace("-", ""))
+    return m.group(1) if m else ""
+
+
 def _cached(key: str):
     if key in _cache:
         value, ts = _cache[key]
@@ -378,6 +427,41 @@ def get_project_index(db_id: str) -> list:
         return []
 
 
+def get_project_index_full(db_id: str) -> list:
+    """
+    Som get_project_index men med extra fält: nr, ncc_namn, ncc_page_id.
+    Bakåtkompatibel — lägger bara till fält, tar inte bort.
+    Cachas separat (15 min).
+    """
+    cache_key = f"project_index_full:{db_id}"
+    cached = _cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        pages = _query_database(db_id)
+        index = []
+        for page in pages:
+            props = page.get("properties", {})
+            ncc_url = _prop_value(props.get("Context Card URL", {}))
+            index.append({
+                "page_id":     _url_to_page_id(_prop_value(props.get("Context Card URL", {}))).replace("-", ""),
+                "name":        _prop_value(props.get("Projektnamn", {})),
+                "kodord":      _prop_value(props.get("Kodord", {})).lower().strip(),
+                "status":      _prop_value(props.get("Status", {})),
+                "ncc_url":     ncc_url,
+                "ncc_namn":    _prop_value(props.get("Context Card namn", {})),
+                "nr":          _prop_value(props.get("Nr", {})),
+                "sfar":        _prop_value(props.get("Sfär", {})),
+                "ncc_page_id": _extract_page_id_from_url(ncc_url),
+            })
+        _store(cache_key, index)
+        return index
+    except Exception as e:
+        logger.error(f"Fel vid hämtning av projektindex_full ({db_id}): {e}")
+        return []
+
+
 def get_relevant_context_cards(
     db_id: str,
     mail_subject: str,
@@ -616,6 +700,102 @@ def add_to_whitelist(page_id: str, email: str):
     except Exception as e:
         logger.error(f"Fel vid tillägg i vitlistan: {e}")
         raise
+
+
+def create_ncc_page(parent_page_id: str, title: str, content: str) -> tuple[str, str]:
+    """
+    Skapar en NCC-sida som barn till parent_page_id.
+    Returnerar (page_id_32chars, page_url) eller ('', '') vid fel.
+    """
+    # Notion begränsar rich_text-block till 2000 tecken — dela upp vid behov
+    chunks = [content[i:i+1999] for i in range(0, len(content), 1999)]
+    children = [
+        {
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {"rich_text": [{"type": "text", "text": {"content": chunk}}]},
+        }
+        for chunk in chunks
+    ]
+    payload = {
+        "parent": {"page_id": parent_page_id},
+        "properties": {
+            "title": {"title": [{"type": "text", "text": {"content": title}}]}
+        },
+        "children": children,
+    }
+    try:
+        resp = _notion_post("pages", payload)
+        page_id = resp.get("id", "").replace("-", "")
+        return page_id, f"https://www.notion.so/{page_id}"
+    except Exception as e:
+        logger.error(f"[create_ncc_page] {e}")
+        return "", ""
+
+
+def create_masterlist_row(
+    db_page_id: str,
+    projektnamn: str,
+    kodord: str,
+    nr: str | None,
+    sfar: str,
+    status: str,
+    ncc_url: str,
+    ncc_namn: str,
+) -> bool:
+    """Skapar en rad i Projektmasterlistan."""
+    props: dict = {
+        "Projektnamn":       {"title": [{"type": "text", "text": {"content": projektnamn}}]},
+        "Kodord":            {"rich_text": [{"type": "text", "text": {"content": kodord}}]},
+        "Sfär":              {"select": {"name": sfar}},
+        "Status":            {"select": {"name": status}},
+        "Context Card URL":  {"url": ncc_url},
+        "Context Card namn": {"rich_text": [{"type": "text", "text": {"content": ncc_namn}}]},
+    }
+    if nr:
+        props["Nr"] = {"rich_text": [{"type": "text", "text": {"content": nr}}]}
+    try:
+        _notion_post("pages", {"parent": {"database_id": db_page_id}, "properties": props})
+        logger.info(f"[create_masterlist_row] Rad skapad: #{kodord} — {projektnamn}")
+        return True
+    except Exception as e:
+        logger.error(f"[create_masterlist_row] {e}")
+        return False
+
+
+def append_kodord_to_sync_spec(page_id: str, kodord: str, ncc_page_id: str) -> bool:
+    """
+    Lägger till 'kodord:page_id' i kodordskodblocket i synkspecifikationssidan.
+    Identifierar blocket via förekomsten av 'väg:' eller 'vision:' i ett code-block.
+    Best-effort — misslyckas tyst.
+    """
+    try:
+        data = _notion_get(f"blocks/{page_id}/children")
+        blocks = data.get("results", [])
+        target_id = None
+        current_text = ""
+        for block in blocks:
+            if block.get("type") == "code":
+                rich = block.get("code", {}).get("rich_text", [])
+                text = "".join(r.get("plain_text", "") for r in rich)
+                if "väg:" in text or "vision:" in text:
+                    target_id = block["id"]
+                    current_text = text
+                    break
+        if not target_id:
+            logger.warning("[append_kodord] Synkblock ej hittat i synkspecifikationssidan")
+            return False
+
+        updated = current_text.rstrip() + f"\n{kodord}:{ncc_page_id}"
+        _notion_patch(
+            f"blocks/{target_id}",
+            {"code": {"rich_text": [{"type": "text", "text": {"content": updated}}]}},
+        )
+        logger.info(f"[append_kodord] #{kodord} tillagt i synkblocket")
+        return True
+    except Exception as e:
+        logger.error(f"[append_kodord] {e}")
+        return False
 
 
 def clear_cache():

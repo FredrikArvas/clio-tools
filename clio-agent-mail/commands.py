@@ -46,12 +46,17 @@ COMMAND_MAP: dict[str, list[str]] = {
     "language":   ["language", "språk", "langue", "sprache", "lang"],
     # Dolt kommando: visas bara i /manual för användare med :rw-behörighet
     "update":     ["update", "uppdatera", "opdater", "aktualisieren"],
+    "ncc_ny":          ["nytt ncc", "new ncc", "ncc ny", "ncc new", "skapa ncc"],
+    "ncc_lista":       ["ncc lista", "ncc list", "projektlista", "project list"],
+    "interview_start": ["intervju start", "interview start", "starta intervju", "start interview"],
+    "interview_stop":  ["intervju stopp", "interview stop", "avsluta intervju", "stop interview"],
 }
 
 # Kommandon som kräver admin-behörighet
 ADMIN_COMMANDS = {
     "list", "waiting", "status", "whitelist", "blacklist",
     "adminhelp", "manual", "onboarding", "prompt", "language",
+    "ncc_ny", "ncc_lista", "interview_start", "interview_stop",
 }
 
 # Nationella TLD → ISO 639-1 språkkod
@@ -699,6 +704,208 @@ Write a clear, professional email in {recipient_lang}.
     return CommandResult(confirm, outbound=[outbound])
 
 
+# ── NCC-kommandon ─────────────────────────────────────────────────────────────
+
+def _cmd_ncc_lista(mail_item, config) -> CommandResult:
+    """
+    Hierarkisk projektlista: Sfär → Projekt (2.x) → Metod (2.x.y).
+    Rader med Nr X.Y.Z indenteras under X.Y.
+    """
+    from collections import defaultdict
+
+    raw = config.get("mail", "knowledge_notion_db_ids", fallback="")
+    db_entries = [e.strip() for e in raw.split(",") if e.strip()]
+    if not db_entries:
+        return CommandResult("Ingen projektdatabas konfigurerad.")
+
+    db_id = db_entries[0].split(":")[0].strip()
+    index = notion_client.get_project_index_full(db_id)
+    if not index:
+        return CommandResult("Projektlistan är tom eller otillgänglig.")
+
+    def sort_key(p):
+        nr = p.get("nr") or "999"
+        try:
+            return [int(x) for x in nr.split(".")]
+        except ValueError:
+            return [999]
+
+    index.sort(key=sort_key)
+
+    by_sfar = defaultdict(list)
+    for proj in index:
+        by_sfar[proj.get("sfar") or "Övrigt"].append(proj)
+
+    SFAR_ORDER = ["Familj", "Fredrik", "Ulrika", "AIAB", "Capgemini", "GSF", "Övrigt"]
+    SFAR_ICONS = {
+        "Familj": "🏠", "Fredrik": "👤", "Ulrika": "👤",
+        "AIAB": "🏢", "Capgemini": "💼", "GSF": "⛳", "Övrigt": "📁",
+    }
+    STATUS_EMOJI = {
+        "✅ Bekräftad": "✅", "✅ Trolig": "✅",
+        "⚠️ Osäker": "⚠️", "❌ Saknas": "❌",
+        "🔵 Inget projekt": "🔵",
+    }
+
+    sep = "━" * 44
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    lines = [f"📋 PROJEKTMASTERLISTAN — {now}", ""]
+
+    total    = len(index)
+    with_ncc = sum(1 for p in index if p.get("ncc_url"))
+
+    for sfar in SFAR_ORDER:
+        projs = by_sfar.get(sfar)
+        if not projs:
+            continue
+        lines += [sep, f"{SFAR_ICONS.get(sfar, '📁')} {sfar.upper()}", sep]
+        for proj in projs:
+            nr     = proj.get("nr") or ""
+            kodord = proj.get("kodord") or ""
+            name   = proj.get("name") or ""
+            status = proj.get("status") or ""
+            depth  = max(0, len(nr.split(".")) - 2) if nr else 0
+            indent = "     " * depth
+            emoji  = STATUS_EMOJI.get(status, "❓")
+            lines.append(
+                f"{indent}{nr:<7} {'#'+kodord:<15} {name[:30]:<30} {emoji}"
+            )
+        lines.append("")
+
+    lines += [
+        sep,
+        f"Totalt: {total} | Med NCC: {with_ncc} | Saknar: {total - with_ncc}",
+        "",
+        "SKAPA NY — ämne: nytt ncc",
+        "  Kodord: [kodord]  Namn: [namn]  Sfär: [sfär]",
+        "  Nr: [2.x.y]  Förälder: [kodord]  Beskrivning: [text]",
+    ]
+    return CommandResult("\n".join(lines))
+
+
+def _cmd_ncc_ny(mail_item, config) -> CommandResult:
+    """
+    Skapar NCC i Notion + masterlistrad + synkblock-uppdatering.
+
+    Mail-format (brödtext):
+        Kodord: retorik
+        Namn: Retorikcoachen
+        Sfär: Fredrik
+        Nr: 2.2.3             (valfritt)
+        Förälder: cliocoach   (valfritt)
+        Beskrivning: ...      (valfritt)
+    """
+    body = mail_item.body.strip()
+
+    def _field(text, *keys):
+        for key in keys:
+            m = re.search(rf"(?i)^{key}\s*:\s*(.+)$", text, re.MULTILINE)
+            if m:
+                return m.group(1).strip()
+        return ""
+
+    kodord      = _field(body, "kodord", "keyword", "kod").lower()
+    namn        = _field(body, "namn", "name", "projektnamn")
+    sfar        = _field(body, "sfär", "sfar", "sphere") or "Fredrik"
+    nr          = _field(body, "nr", "nummer", "number")
+    foralder_kw = _field(body, "förälder", "foralder", "parent").lower()
+    beskrivning = _field(body, "beskrivning", "description", "desc")
+
+    if not kodord:
+        return CommandResult(
+            "Saknar Kodord.\n\nFormat:\n"
+            "  Kodord: [kodord]\n  Namn: [namn]\n  Sfär: [Fredrik/Ulrika/...]\n"
+            "  Nr: [t.ex. 2.2.6]  (valfritt)\n  Förälder: [kodord]  (valfritt)",
+            is_reasoning=True,
+        )
+    if not namn:
+        return CommandResult(
+            f"Saknar Namn för kodord '{kodord}'.", is_reasoning=True,
+        )
+
+    raw = config.get("mail", "knowledge_notion_db_ids", fallback="")
+    db_entries = [e.strip() for e in raw.split(",") if e.strip()]
+    db_id = db_entries[0].split(":")[0].strip() if db_entries else ""
+    index = notion_client.get_project_index_full(db_id) if db_id else []
+
+    # Dublettkoll
+    existing = next((p for p in index if p.get("kodord") == kodord), None)
+    if existing:
+        return CommandResult(
+            f"⚠️ Kodord '#{kodord}' finns redan: {existing['name']}\n"
+            f"NCC: {existing.get('ncc_url', '(ingen)')}\n"
+            f"Uppdatera direkt i Notion vid behov.",
+            is_reasoning=True,
+        )
+
+    # Förälderns page_id
+    SYNC_SPEC_PAGE = "33d67666d98a81368c12fab463b95de1"
+    parent_page_id = "33467666d98a816db2c0d30cb97206a3"  # Mall & Projektöversikt
+    if foralder_kw:
+        pp = next((p for p in index if p.get("kodord") == foralder_kw), None)
+        if pp and pp.get("ncc_page_id"):
+            parent_page_id = pp["ncc_page_id"]
+        else:
+            logger.warning(f"[ncc_ny] Förälder '#{foralder_kw}' ej hittad — använder default-förälder")
+
+    # Skapa NCC-sida
+    now_str = datetime.utcnow().strftime("%Y-%m-%d")
+    content = (
+        f"## 🔧 {namn} — NCC\n"
+        f"Senast uppdaterad: {now_str}\n"
+        f"Status: ❌ Ej byggd — platshållare\n\n"
+        f"För Clio: NCC:n är inte färdig. Om du ropar in #{kodord}, "
+        f"meddela att metoden är under uppbyggnad.\n\n"
+        f"## Vad ska den täcka\n"
+        f"{beskrivning or '(saknas — lägg till manuellt)'}\n\n"
+        f"## Versionslogg\n"
+        f"| Version | Datum | Förändring |\n"
+        f"|---|---|---|\n"
+        f"| 0.1 | {now_str} | Platshållare skapad via clio-mail-agent |"
+    )
+    ncc_page_id, ncc_url = notion_client.create_ncc_page(
+        parent_page_id=parent_page_id,
+        title=f"🔧 {namn} — NCC",
+        content=content,
+    )
+    if not ncc_page_id:
+        return CommandResult("❌ Kunde inte skapa NCC-sidan i Notion.")
+
+    # Masterlistrad
+    notion_client.create_masterlist_row(
+        db_page_id="c4d630a1252d4d7fb73cd65535c07708",
+        projektnamn=namn,
+        kodord=kodord,
+        nr=nr or None,
+        sfar=sfar,
+        status="❌ Saknas",
+        ncc_url=ncc_url,
+        ncc_namn=f"{namn} — NCC",
+    )
+
+    # Synkblock (best-effort)
+    notion_client.append_kodord_to_sync_spec(
+        page_id=SYNC_SPEC_PAGE,
+        kodord=kodord,
+        ncc_page_id=ncc_page_id,
+    )
+
+    # Svar = bekräftelse + aktuell lista
+    lista = _cmd_ncc_lista(mail_item, config)
+    confirm = (
+        f"✅ NCC skapad!\n\n"
+        f"  Kodord:   #{kodord}\n"
+        f"  Namn:     {namn}\n"
+        f"  Sfär:     {sfar}\n"
+        f"  Nr:       {nr or '(ej satt)'}\n"
+        f"  Förälder: {'#' + foralder_kw if foralder_kw else '(ingen)'}\n"
+        f"  Notion:   {ncc_url}\n\n"
+        f"Synkblocket uppdaterat — synka CLAUDE.md manuellt vid behov.\n\n"
+        f"{'─' * 44}\n\n{lista.reply_body}"
+    )
+    return CommandResult(confirm)
+
+
 # ── Sprint 3: obit import ─────────────────────────────────────────────────────
 
 def _cmd_obit_import(mail_item, config) -> CommandResult:
@@ -854,6 +1061,95 @@ def _cmd_update(mail_item, config) -> CommandResult:
     )
 
 
+# ── Intervjukommandon ─────────────────────────────────────────────────────────
+
+def _cmd_interview_start(mail_item, config) -> CommandResult:
+    """
+    Startar en intervjusekvens.
+
+    Brödtext-format:
+      till: frippe@capgemini.com
+      ämne: Karriärsamtal Q2 2026
+      [valfri kontext / öppningsfråga]
+    """
+    import uuid as _uuid
+    import reply as reply_module
+    import smtp_client as smtp_module
+
+    body = mail_item.body or ""
+    to_addr = None
+    subject = "Intervju"
+    context_lines = []
+
+    for line in body.splitlines():
+        l = line.strip()
+        if l.lower().startswith("till:"):
+            to_addr = l.split(":", 1)[1].strip()
+        elif l.lower().startswith("ämne:") or l.lower().startswith("subject:"):
+            subject = l.split(":", 1)[1].strip()
+        elif l:
+            context_lines.append(l)
+
+    if not to_addr:
+        return CommandResult(
+            "Intervju kunde inte startas — saknar 'till: adress' i brödtexten.\n\n"
+            "Format:\n  till: namn@exempel.se\n  ämne: Valfritt ämne\n  [kontext]"
+        )
+
+    context = "\n".join(context_lines)
+    thread_id = f"<clio-interview-{_uuid.uuid4()}@arvas.international>"
+    opener = reply_module.generate_interview_opener(subject, context, config)
+
+    account_key = "clio"
+    out_msg_id  = f"<clio-interview-{_uuid.uuid4()}@arvas.international>"
+    outbound = [OutboundMail(
+        from_account_key=account_key,
+        to_addr=to_addr,
+        subject=subject,
+        body=opener,
+        message_id=out_msg_id,
+    )]
+
+    # Spara session + utgående mail
+    state.create_interview_session(thread_id, to_addr, account_key=account_key)
+    state.save_outbound_interview_reply(
+        thread_id=thread_id,
+        account=config.get("mail", f"imap_user_{account_key}", fallback=account_key),
+        sender=config.get("mail", f"imap_user_{account_key}", fallback="clio@arvas.international"),
+        subject=subject,
+        body=opener,
+        message_id=out_msg_id,
+    )
+
+    logger.info(f"[interview_start] Session skapad för {to_addr} (tråd: {thread_id[:30]}…)")
+    return CommandResult(
+        f"Intervju startad med {to_addr}.\nÄmne: {subject}\n\nÖppningsmail skickat.",
+        outbound=outbound,
+    )
+
+
+def _cmd_interview_stop(mail_item, config) -> CommandResult:
+    """
+    Avslutar en pågående intervjusession.
+    Brödtext: e-postadress till deltagaren.
+    """
+    body = (mail_item.body or "").strip()
+    participant = body.splitlines()[0].strip() if body else ""
+
+    if not participant or "@" not in participant:
+        return CommandResult(
+            "Ange deltagarens e-postadress i brödtexten."
+        )
+
+    session = state.get_active_interview(participant)
+    if not session:
+        return CommandResult(f"Ingen aktiv intervjusession hittades för {participant}.")
+
+    state.stop_interview_session(session["thread_id"])
+    logger.info(f"[interview_stop] Session avslutad för {participant}")
+    return CommandResult(f"Intervjusession med {participant} avslutad.")
+
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 
 _HANDLERS = {
@@ -870,6 +1166,10 @@ _HANDLERS = {
     "prompt":      _cmd_prompt,
     "update":      _cmd_update,         # Dolt — skrivrätt per kodord (:rw)
     "obit_import": _cmd_obit_import,   # Sprint 3 — routed by ACTION_OBIT_IMPORT
+    "ncc_ny":           _cmd_ncc_ny,
+    "ncc_lista":        _cmd_ncc_lista,
+    "interview_start":  _cmd_interview_start,
+    "interview_stop":   _cmd_interview_stop,
 }
 
 

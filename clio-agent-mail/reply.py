@@ -185,6 +185,62 @@ Svara ovanför strecket — ingen signatur behövs."""
     return response.content[0].text.strip()
 
 
+def generate_interview_reply(mail_item, thread_history: list,
+                             system_prompt: str, config) -> str:
+    """
+    Genererar nästa fråga i en intervjudialog.
+
+    thread_history : lista av dict {direction, sender, body} — kronologisk ordning
+    system_prompt  : intervjupersonans instruktion
+    """
+    messages = []
+    for turn in thread_history:
+        role = "assistant" if turn["direction"] == "outbound" else "user"
+        messages.append({"role": role, "content": turn["body"] or ""})
+
+    # Nuvarande inkommande svar (om det inte redan finns i historiken)
+    if not thread_history or thread_history[-1]["direction"] != "inbound":
+        messages.append({"role": "user", "content": mail_item.body or ""})
+
+    # Garantera att vi börjar med user (Claude-krav)
+    if messages and messages[0]["role"] == "assistant":
+        messages.insert(0, {"role": "user", "content": "[Intervjun startar]"})
+
+    client = _get_client()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=800,
+        system=system_prompt,
+        messages=messages,
+    )
+    return response.content[0].text.strip()
+
+
+def generate_interview_opener(subject: str, context: str, config) -> str:
+    """Genererar det första mailet i en intervjusekvens (ingen historik ännu)."""
+    prompt = f"""Du är Clio, AI-medarbetare på Arvas International AB, och startar en strukturerad intervjudialog.
+
+{context}
+
+Skriv ett välkomnande, varmt öppningsmail som:
+- Presenterar syftet med intervjun kort (1–2 meningar)
+- Ställer den FÖRSTA frågan — en enda, öppen fråga
+- Inte avslöjar att det är ett automatiserat system (signaturen hanterar det)
+
+Ämne för intervjun: {subject}
+
+Avsluta med denna signatur, exakt som den är:
+
+{SIGNATURE}"""
+    client = _get_client()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text.strip()
+
+
 def generate_standard_reply(mail_item, config) -> str:
     """
     Standardsvar för ej vitlistade avsändare till clio@.

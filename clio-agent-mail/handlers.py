@@ -3,7 +3,7 @@ handlers.py — mail-routing och svarsgenerering för clio-agent-mail
 
 Innehåller:
   - process_mail()           — entrypoint från run_cycle, dispatchar på classifier-action
-  - _handle_*                — en handler per klassificering (auto/approval/standard/faq/...)
+  - _handle_*                — en handler per klassificering (auto/approval/standard/faq/interview/...)
   - _send_copy / _send_info_to_fredrik / _send_flagged_notification — notifieringar till Fredrik
   - check_flagged_responses()        — läser VITLISTA/SVARTLISTA/BEHÅLL-svar
   - _process_waiting_mails()         — bearbetar WAITING-mail när avsändare blir vitlistad
@@ -70,6 +70,12 @@ def process_mail(mail_item, config, dry_run: bool = False):
         f"[{clf.account_key}@] {_short(mail_item.sender, 40)} → {clf.action} ({clf.reason})"
     )
 
+    # Beräkna thread_id innan vi sparar
+    thread_id = state.resolve_thread_id(
+        getattr(mail_item, "in_reply_to", ""),
+        getattr(mail_item, "references", ""),
+    ) or mail_item.message_id
+
     if not dry_run:
         state.save_mail(
             message_id=mail_item.message_id,
@@ -80,10 +86,15 @@ def process_mail(mail_item, config, dry_run: bool = False):
             date_received=mail_item.date_received,
             status=state.STATUS_NEW,
             action=clf.action,
+            thread_id=thread_id,
+            in_reply_to=getattr(mail_item, "in_reply_to", None),
         )
 
     try:
-        if clf.action == classifier.ACTION_SELF_QUERY:
+        if clf.action == classifier.ACTION_INTERVIEW:
+            _handle_interview(mail_item, clf, thread_id, config, dry_run)
+
+        elif clf.action == classifier.ACTION_SELF_QUERY:
             _handle_self_query(mail_item, clf, config, dry_run)
 
         elif clf.action == classifier.ACTION_FAQ_CHECK:
@@ -103,6 +114,48 @@ def process_mail(mail_item, config, dry_run: bool = False):
 
     except Exception as e:
         logger.error(f"Error handling {mail_item.message_id}: {e}", exc_info=True)
+
+
+def _handle_interview(mail_item, clf, thread_id: str, config, dry_run: bool):
+    """
+    Fortsätter en pågående intervjusekvens.
+    Hämtar hela tråd-historiken och skickar nästa fråga som reply-in-thread.
+    """
+    sender_email = _extract_email(mail_item.sender)
+    session = state.get_active_interview(sender_email)
+    if not session:
+        logger.warning(f"[interview] Ingen aktiv session för {sender_email} — fallback AUTO")
+        _handle_auto_send(mail_item, clf, config, dry_run)
+        return
+
+    thread_history = state.get_thread_history(thread_id)
+    next_reply = reply_module.generate_interview_reply(
+        mail_item, thread_history, session["system_prompt"], config
+    )
+    out_msg_id = f"<clio-interview-{uuid.uuid4()}@arvas.international>"
+
+    logger.info(f"[interview] Nästa fråga genererad för {sender_email} (tråd: {thread_id[:20]}…)")
+    if not dry_run:
+        smtp_client.send_email(
+            config=config,
+            from_account_key=session["account_key"],
+            to_addr=sender_email,
+            subject=f"Re: {mail_item.subject}",
+            body=next_reply,
+            reply_to_message_id=mail_item.message_id,
+            message_id=out_msg_id,
+        )
+        state.save_outbound_interview_reply(
+            thread_id=thread_id,
+            account=config.get("mail", f"imap_user_{session['account_key']}",
+                               fallback=session["account_key"]),
+            sender=config.get("mail", f"imap_user_{session['account_key']}",
+                              fallback="clio@arvas.international"),
+            subject=f"Re: {mail_item.subject}",
+            body=next_reply,
+            message_id=out_msg_id,
+        )
+        state.update_status(mail_item.message_id, state.STATUS_SENT)
 
 
 def _handle_obit_import(mail_item, clf, config, dry_run: bool):

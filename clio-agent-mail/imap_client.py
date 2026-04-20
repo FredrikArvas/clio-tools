@@ -43,6 +43,8 @@ class MailItem:
     to_addresses: List[str] = field(default_factory=list)
     cc_addresses: List[str] = field(default_factory=list)
     attachments: List[AttachmentMeta] = field(default_factory=list)
+    in_reply_to: str = ""
+    references: str = ""
 
 
 # ── Hjälpfunktioner ───────────────────────────────────────────────────────────
@@ -247,6 +249,8 @@ def fetch_unseen(config, account_key: str) -> list:
                     to_addresses=_extract_addresses(_get_header(msg, "To")),
                     cc_addresses=_extract_addresses(_get_header(msg, "CC")),
                     attachments=saved_attachments,
+                    in_reply_to=_get_header(msg, "In-Reply-To").strip(),
+                    references=_get_header(msg, "References").strip(),
                 ))
             except Exception as e:
                 logger.error(f"[{account_key}] Fel vid parsning av UID {uid}: {e}")

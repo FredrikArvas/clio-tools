@@ -13,6 +13,7 @@ import re
 from dataclasses import dataclass
 
 from clio_core.utils import t, set_language
+import state as _state
 
 CODE_AUTO  = "[CLIO-AUTO]"
 CODE_DRAFT = "[CLIO-DRAFT]"
@@ -23,7 +24,8 @@ ACTION_SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL"
 ACTION_STANDARD_REPLY    = "STANDARD_REPLY"
 ACTION_FAQ_CHECK         = "FAQ_CHECK"
 ACTION_SELF_QUERY        = "SELF_QUERY"
-ACTION_OBIT_IMPORT       = "OBIT_IMPORT"   # Sprint 3: returned watch-list CSV
+ACTION_OBIT_IMPORT       = "OBIT_IMPORT"
+ACTION_INTERVIEW         = "INTERVIEW"
 
 
 @dataclass
@@ -127,6 +129,14 @@ def classify(mail_item, whitelist: set, config) -> Classification:
         return Classification(
             action=ACTION_AUTO_SEND,
             reason="Permission: coded",
+            account_key=account_key,
+        )
+
+    # ── Aktiv intervjusession — prioriteras före vitlista ────────────────────
+    if _state.get_active_interview(sender_email):
+        return Classification(
+            action=ACTION_INTERVIEW,
+            reason="Active interview session",
             account_key=account_key,
         )
 

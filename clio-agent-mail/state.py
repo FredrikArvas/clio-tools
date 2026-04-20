@@ -9,6 +9,7 @@ Tabeller:
   blacklist             — permanentblockerade adresser
   partners              — kontakter/partners med språkpreferens
                           (forward-compatible med clio-partnerdb)
+  interview_sessions    — pågående intervjudialoger via e-post
 """
 import sqlite3
 from datetime import datetime
@@ -37,6 +38,9 @@ def _migrate(conn):
         ("approvals",            "fredrik_cc",          "ALTER TABLE approvals ADD COLUMN fredrik_cc TEXT"),
         ("flagged_notifications", "responded_at",        "ALTER TABLE flagged_notifications ADD COLUMN responded_at TEXT"),
         ("flagged_notifications", "response",            "ALTER TABLE flagged_notifications ADD COLUMN response TEXT"),
+        ("mail",                 "thread_id",            "ALTER TABLE mail ADD COLUMN thread_id TEXT"),
+        ("mail",                 "in_reply_to",          "ALTER TABLE mail ADD COLUMN in_reply_to TEXT"),
+        ("mail",                 "direction",            "ALTER TABLE mail ADD COLUMN direction TEXT NOT NULL DEFAULT 'inbound'"),
     ]
     for table, col, sql in migrations:
         # Kör bara om tabellen finns och kolumnen saknas
@@ -116,6 +120,17 @@ def init_db(db_path=None):
                 created_at  TEXT NOT NULL DEFAULT (datetime('now')),
                 updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
             );
+
+            CREATE TABLE IF NOT EXISTS interview_sessions (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                thread_id        TEXT NOT NULL,
+                participant_email TEXT NOT NULL,
+                account_key      TEXT NOT NULL DEFAULT 'clio',
+                system_prompt    TEXT,
+                status           TEXT NOT NULL DEFAULT 'active',
+                created_at       TEXT NOT NULL,
+                updated_at       TEXT NOT NULL
+            );
         """)
         _migrate(conn)
 
@@ -129,18 +144,40 @@ def is_seen(message_id, db_path=None):
         return row is not None
 
 
+def resolve_thread_id(in_reply_to: str, references: str, db_path=None) -> str | None:
+    """Slår upp thread_id för ett inkommande svar via In-Reply-To / References."""
+    candidates = []
+    if in_reply_to:
+        candidates.append(in_reply_to.strip())
+    if references:
+        candidates.extend(references.split())
+    for msg_id in candidates:
+        with get_connection(db_path) as conn:
+            row = conn.execute(
+                "SELECT thread_id FROM mail WHERE message_id = ?", (msg_id.strip(),)
+            ).fetchone()
+            if row and row["thread_id"]:
+                return row["thread_id"]
+    return None
+
+
 def save_mail(message_id, account, sender, subject, body,
-              date_received, status=STATUS_NEW, action=None, db_path=None):
+              date_received, status=STATUS_NEW, action=None,
+              thread_id=None, in_reply_to=None, direction="inbound",
+              db_path=None):
     """Sparar ett nytt mail. Ignorerar om message_id redan finns."""
     now = datetime.utcnow().isoformat()
+    effective_thread_id = thread_id or message_id
     with get_connection(db_path) as conn:
         conn.execute(
             """INSERT OR IGNORE INTO mail
                (message_id, account, sender, subject, body,
-                date_received, status, action, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                date_received, status, action, thread_id, in_reply_to,
+                direction, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (message_id, account, sender, subject, body,
-             date_received, status, action, now, now),
+             date_received, status, action, effective_thread_id, in_reply_to,
+             direction, now, now),
         )
 
 
@@ -360,6 +397,94 @@ def get_all_partners(db_path=None) -> list:
         return [dict(r) for r in conn.execute(
             "SELECT * FROM partners ORDER BY email"
         ).fetchall()]
+
+
+# ── Intervjusessioner ─────────────────────────────────────────────────────────
+
+INTERVIEW_STATUS_ACTIVE  = "active"
+INTERVIEW_STATUS_STOPPED = "stopped"
+
+_DEFAULT_INTERVIEW_PROMPT = """Du är Clio, AI-medarbetare på Arvas International AB, och genomför en strukturerad intervjudialog via e-post.
+
+Riktlinjer:
+- Ställ EN fråga i taget. Vänta alltid på svar innan du går vidare.
+- Bekräfta och resonera kring svaret — förklara varför det är intressant eller hur det hänger ihop med helheten.
+- Håll en varm, nyfiken och professionell ton.
+- Bygg vidare på vad personen berättat — referera till tidigare svar.
+- Avsluta aldrig intervjun av dig själv — invänta signal från Fredrik."""
+
+
+def create_interview_session(thread_id: str, participant_email: str,
+                              account_key: str = "clio",
+                              system_prompt: str = None,
+                              db_path=None) -> dict:
+    """Skapar en ny intervjusession. Returnerar det skapade objektet."""
+    now = datetime.utcnow().isoformat()
+    prompt = system_prompt or _DEFAULT_INTERVIEW_PROMPT
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """INSERT INTO interview_sessions
+               (thread_id, participant_email, account_key, system_prompt, status,
+                created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (thread_id, participant_email.lower(), account_key, prompt,
+             INTERVIEW_STATUS_ACTIVE, now, now),
+        )
+    return get_active_interview(participant_email, db_path)
+
+
+def get_active_interview(participant_email: str, db_path=None) -> dict | None:
+    """Returnerar aktiv intervjusession för en given e-postadress, eller None."""
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            """SELECT * FROM interview_sessions
+               WHERE participant_email = ? AND status = ?
+               ORDER BY created_at DESC LIMIT 1""",
+            (participant_email.lower(), INTERVIEW_STATUS_ACTIVE),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def stop_interview_session(thread_id: str, db_path=None):
+    """Markerar en intervjusession som avslutad."""
+    now = datetime.utcnow().isoformat()
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """UPDATE interview_sessions SET status = ?, updated_at = ?
+               WHERE thread_id = ? AND status = ?""",
+            (INTERVIEW_STATUS_STOPPED, now, thread_id, INTERVIEW_STATUS_ACTIVE),
+        )
+
+
+def get_thread_history(thread_id: str, db_path=None) -> list:
+    """
+    Returnerar alla mail i en tråd (inbound + outbound), sorterade kronologiskt.
+    Varje rad är en dict med: direction, sender, body, date_received.
+    """
+    with get_connection(db_path) as conn:
+        rows = conn.execute(
+            """SELECT direction, sender, body, date_received
+               FROM mail WHERE thread_id = ?
+               ORDER BY date_received ASC, created_at ASC""",
+            (thread_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def save_outbound_interview_reply(thread_id: str, account: str, sender: str,
+                                   subject: str, body: str,
+                                   message_id: str, db_path=None):
+    """Sparar ett utgående intervjusvar i mail-tabellen för tråd-historik."""
+    now = datetime.utcnow().isoformat()
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO mail
+               (message_id, account, sender, subject, body, date_received,
+                status, action, thread_id, direction, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (message_id, account, sender, subject, body, now,
+             STATUS_SENT, "INTERVIEW", thread_id, "outbound", now, now),
+        )
 
 
 # ── Insikter ──────────────────────────────────────────────────────────────────
