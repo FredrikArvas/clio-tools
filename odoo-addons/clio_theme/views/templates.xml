@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <template id="clio_theme_body_db" inherit_id="web.layout" name="Clio Theme DB Marker">
+    <xpath expr="//body" position="attributes">
+      <attribute name="t-att-data-db">request.db</attribute>
+    </xpath>
+  </template>
+
+</odoo>

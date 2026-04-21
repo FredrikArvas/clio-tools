@@ -1,0 +1,81 @@
+// ── AIAB — Navy/Guld ─────────────────────────────────────────────────────────
+body[data-db="aiab"] .o_main_navbar {
+    background-color: #2A3F6F !important;
+    border-bottom-color: #C8A84B !important;
+
+    .o_menu_brand { color: #C8A84B !important; }
+
+    .o_navbar_apps_menu .dropdown-toggle,
+    .o_main_navbar > ul > li > a,
+    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+}
+
+// ── SSF — Teal ───────────────────────────────────────────────────────────────
+body[data-db^="ssf"] .o_main_navbar {
+    background-color: #1a6e6e !important;
+    border-bottom-color: #14a89e !important;
+
+    .o_menu_brand { color: #d4f0ee !important; }
+
+    .o_navbar_apps_menu .dropdown-toggle,
+    .o_main_navbar > ul > li > a,
+    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+}
+
+// ── TEST/DEMO — Orange varning ────────────────────────────────────────────────
+body[data-db$="_test"] .o_main_navbar,
+body[data-db$="_demo"] .o_main_navbar,
+body.clio-env-test .o_main_navbar {
+    background-color: #b85c00 !important;
+    border-bottom-color: #e07820 !important;
+    position: relative !important;
+
+    .o_menu_brand,
+    .o_navbar_apps_menu .dropdown-toggle,
+    .o_main_navbar > ul > li > a,
+    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+
+    &::after {
+        content: "TEST";
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #ffffff;
+        color: #b85c00;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        padding: 2px 8px;
+        border-radius: 3px;
+        pointer-events: none;
+    }
+}
+
+// ── STAGING — Röd varning ────────────────────────────────────────────────────
+body[data-db$="_staging"] .o_main_navbar {
+    background-color: #8b1a1a !important;
+    border-bottom-color: #c0392b !important;
+    position: relative !important;
+
+    .o_menu_brand,
+    .o_navbar_apps_menu .dropdown-toggle,
+    .o_main_navbar > ul > li > a,
+    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+
+    &::after {
+        content: "STAGING";
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #ffffff;
+        color: #8b1a1a;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        padding: 2px 8px;
+        border-radius: 3px;
+        pointer-events: none;
+    }
+}

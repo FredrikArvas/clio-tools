@@ -1,6 +1,6 @@
 {
     "name":        "Clio Mail Admin",
-    "version":     "17.0.1.0.0",
+    "version":     "18.0.1.0.0",
     "category":    "Extra Tools",
     "summary":     "Admin-panel för clio-agent-mail — kör kommandon direkt från Odoo.",
     "author":      "Fredrik Arvas / Arvas International AB",
