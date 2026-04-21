@@ -12,6 +12,8 @@ import socket
 import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders as _encoders
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,7 @@ def send_email(
     dry_run: bool = False,
     html_body: str = None,
     reply_to_addr: str = None,
+    attachments: list = None,
 ):
     """
     Skickar ett mail via SMTP.
@@ -47,13 +50,20 @@ def send_email(
     reply_to_message_id : Message-ID på mail vi svarar på (sätter In-Reply-To)
     message_id          : eget Message-ID att sätta i headern (för approval-spårning)
     dry_run             : loggar utan att skicka
+    attachments         : lista med sokvagar till filer att bifoga
     """
     host = config.get("mail", "smtp_host")
     port = int(config.get("mail", "smtp_port"))
     user = config.get("mail", f"imap_user_{from_account_key}")
     password = config.get("mail", f"imap_password_{from_account_key}")
 
-    msg = MIMEMultipart("alternative")
+    # Yttre container: mixed om bilagor, annars alternative
+    if attachments:
+        msg = MIMEMultipart("mixed")
+        _alt = MIMEMultipart("alternative")
+    else:
+        msg = MIMEMultipart("alternative")
+        _alt = msg
     msg["From"] = user
     msg["To"] = to_addr
     msg["Subject"] = subject
@@ -68,8 +78,21 @@ def send_email(
     if cc_addrs:
         msg["CC"] = ", ".join(cc_addrs)
 
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    msg.attach(MIMEText(html_body if html_body else _to_html(body), "html", "utf-8"))
+    _alt.attach(MIMEText(body, "plain", "utf-8"))
+    _alt.attach(MIMEText(html_body if html_body else _to_html(body), "html", "utf-8"))
+    if attachments:
+        msg.attach(_alt)
+        import os, mimetypes
+        for fpath in attachments:
+            ctype, _ = mimetypes.guess_type(fpath)
+            maintype, subtype = (ctype or "application/octet-stream").split("/", 1)
+            with open(fpath, "rb") as fp:
+                part = MIMEBase(maintype, subtype)
+                part.set_payload(fp.read())
+            _encoders.encode_base64(part)
+            part.add_header("Content-Disposition", "attachment",
+                            filename=os.path.basename(fpath))
+            msg.attach(part)
 
     if dry_run:
         cc_str = f", CC: {', '.join(cc_addrs)}" if cc_addrs else ""
