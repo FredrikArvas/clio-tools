@@ -203,6 +203,8 @@ Admin mailar till `clio@arvas.international`:
 | `onboarding` | `welcome`, `välkommen` | `email@...` + ev. namn | Välkomstmail till ny kontakt |
 | `prompt` | `instruera`, `instruct` | `email@...` + text med `#kodord` | Skicka instruktion till tredje part |
 | `language` | `språk`, `langue` | Språkkod (`sv`, `en`, `fr`, `de`) | Byt din språkpreferens |
+| `intervju start` | `interview start` | `till:`, `ämne:`, kontext i brödtext | Starta en guidad intervjudialog |
+| `intervju stopp` | `interview stop` | `email@...` i brödtext | Avsluta pågående intervju |
 
 ### #kodord i prompt
 
@@ -221,6 +223,46 @@ Skriv en statusrapport om #ssf och redovisa perspektiven från #iaf.
 - Inget `#kodord` → Clio svarar med resonemang och ber om förtydligande
 
 Se `list`-kommandot för alla tillgängliga kodord.
+
+### Intervjudialog
+
+Starta en guidad IAF-stil intervju via e-post:
+
+```
+Till: clio@arvas.international
+Ämne: intervju start
+
+till: frippe@capgemini.com
+ämne: Karriärsamtal Q2 2026
+Frippe är projektledare på Capgemini. Vi vill förstå
+hans erfarenhet av agila leveranser och ledarskap.
+```
+
+Clio skickar ett öppningsmail till deltagaren. När de svarar läser Clio
+**hela trådhistoriken** och genererar nästa fråga automatiskt — en fråga i
+taget, bekräftar svaret innan nästa ställs.
+
+Stoppa intervjun:
+
+```
+Till: clio@arvas.international
+Ämne: intervju stopp
+
+frippe@capgemini.com
+```
+
+**Flöde:**
+```
+Fredrik skickar "intervju start"
+        ↓
+Clio skickar öppningsfråga till deltagaren
+        ↓
+Deltagaren svarar → Clio läser hela tråden
+        ↓
+Clio skickar nästa fråga som reply
+        ↓
+[upprepas tills Fredrik skickar "intervju stopp"]
+```
 
 ### Språkdetektering
 

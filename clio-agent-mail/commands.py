@@ -465,8 +465,10 @@ Cover:
 5. Language preferences (per contact, stored, changeable)
 6. Whitelist / blacklist flow
 7. Approval flow (JA/NEJ)
+8. Interview dialog: "intervju start" (body: till:/ämne:/context) and "intervju stopp" (body: email).
+   Clio sends opening question, reads full thread history, generates one question at a time.
 Format: clear sections with headers, plain text suitable for email.
-Max 60 lines."""
+Max 70 lines."""
     response = client.messages.create(
         model=MODEL, max_tokens=1800,
         messages=[{"role": "user", "content": prompt}],
