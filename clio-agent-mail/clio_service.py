@@ -1,20 +1,18 @@
 """
-clio_service.py — HTTP API för clio-agent-mail admin-kommandon
+clio_service.py — HTTP API för clio-tools admin-kommandon
 
-Exponerar commands.dispatch() som REST-endpoints. Konsumeras av
-clio_mail_admin (Odoo-addon) och framtida klienter.
-
-Modulrouting (utbyggbar):
+Modulrouting:
+  /health             → hälsostatus
+  /agents/status      → status för alla clio-agenter
   /mail/...           → clio-agent-mail/commands.py
-  /rag/...            → (framtida)
-  /crm/...            → (framtida)
+  /rag/query          → clio-rag (Qdrant + Claude)
+  /library/search     → Arvas Familjebibliotek (Notion)
 
 Kör:   python clio_service.py [--port 7200]
 Port:  CLIO_SERVICE_PORT     (default 7200)
 Admin: CLIO_SERVICE_ADMIN    (default: mail.notify_address i clio.config)
 
-Request:  POST /mail/<command>   Content-Type: application/json  { ...args }
-Response: { "ok": true, "text": "...", "outbound": [...] }
+Response: { "ok": true, "text": "...", ... }
 """
 
 from __future__ import annotations
@@ -31,6 +29,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 ROOT_DIR = BASE_DIR.parent
+RAG_DIR  = ROOT_DIR / "clio-rag"
 
 from dotenv import load_dotenv
 load_dotenv(ROOT_DIR / ".env")
@@ -164,9 +163,159 @@ def _route_mail_update(data: dict) -> dict:
     return _dispatch("update", body_text=content, subject=subject)
 
 
+# ── RAG ──────────────────────────────────────────────────────────────────────
+
+def _route_rag_query(data: dict) -> dict:
+    q = data.get("q", "").strip()
+    if not q:
+        return {"ok": False, "error": "saknat fält: q"}
+    top     = int(data.get("top", 5))
+    use_ncc = bool(data.get("ncc", False))
+
+    if not RAG_DIR.exists():
+        return {"ok": False, "error": f"clio-rag ej hittad: {RAG_DIR}"}
+
+    sys.path.insert(0, str(RAG_DIR))
+    try:
+        import importlib
+        rag_query  = importlib.import_module("query")
+        rag_config = importlib.import_module("config")
+
+        collection = rag_config.NCC_COLLECTION_NAME if use_ncc else rag_config.COLLECTION_NAME
+        vector     = rag_query.embed_query(q)
+        hits       = rag_query.search_qdrant(vector, top_k=top, collection=collection)
+        context    = rag_query.format_context(hits, is_ncc=use_ncc)
+        answer     = rag_query.ask_claude(q, context, is_ncc=use_ncc)
+
+        sources = []
+        for hit in hits:
+            p = hit.payload
+            src = {"title": p.get("title", "?"), "score": round(hit.score, 3)}
+            if use_ncc:
+                src["url"] = p.get("ext_notion_url", "")
+            else:
+                src["page_start"] = p.get("ext_page_start")
+                src["page_end"]   = p.get("ext_page_end")
+            sources.append(src)
+
+        return {"ok": True, "text": answer, "sources": sources}
+    except Exception as e:
+        logger.error(f"RAG query failed: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
+    finally:
+        if str(RAG_DIR) in sys.path:
+            sys.path.remove(str(RAG_DIR))
+
+
+# ── Bibliotek ─────────────────────────────────────────────────────────────────
+
+def _route_library_search(data: dict) -> dict:
+    q = data.get("q", "").strip()
+    if not q:
+        return {"ok": False, "error": "saknat fält: q"}
+
+    notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
+    if not notion_token:
+        return {"ok": False, "error": "NOTION_API_KEY saknas i .env"}
+
+    import urllib.request, urllib.error
+    db_id = "94906f71ee0f4ff88c4b28e822f6e670"
+    url   = f"https://api.notion.com/v1/databases/{db_id}/query"
+    body  = json.dumps({
+        "filter": {"or": [
+            {"property": "Titel",      "title":     {"contains": q}},
+            {"property": "Författare", "rich_text": {"contains": q}},
+        ]},
+        "page_size": 20,
+    }).encode()
+
+    req = urllib.request.Request(url, data=body, method="POST", headers={
+        "Authorization":  f"Bearer {notion_token}",
+        "Notion-Version": "2022-06-28",
+        "Content-Type":   "application/json",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            result = json.loads(resp.read())
+    except urllib.error.URLError as e:
+        return {"ok": False, "error": f"Notion API-fel: {e.reason}"}
+
+    books = []
+    for page in result.get("results", []):
+        props = page.get("properties", {})
+        def _text(prop_name):
+            p = props.get(prop_name, {})
+            items = p.get("title") or p.get("rich_text") or p.get("select") and [p["select"]] or []
+            return "".join(t.get("plain_text", "") for t in items) if items else ""
+        books.append({
+            "titel":      _text("Titel"),
+            "forfattare": _text("Författare"),
+            "hyllplats":  _text("Hyllplats"),
+            "sprak":      _text("Språk"),
+            "format":     _text("Format"),
+            "hus":        _text("Hus"),
+        })
+
+    if not books:
+        text = f"Inga böcker hittades för '{q}'."
+    else:
+        lines = [f"Bibliotek — {len(books)} träff(ar) för '{q}'", "─" * 44]
+        for b in books:
+            autor = f" / {b['forfattare']}" if b["forfattare"] else ""
+            hyll  = f"  [{b['hyllplats']}]" if b["hyllplats"] else ""
+            lines.append(f"{b['titel']}{autor}{hyll}")
+        text = "\n".join(lines)
+
+    return {"ok": True, "text": text, "books": books}
+
+
+# ── Agentstatus ───────────────────────────────────────────────────────────────
+
+def _route_agents_status(_data: dict) -> dict:
+    import subprocess
+    agents = {}
+
+    for svc, label in [("clio-mail", "clio-agent-mail"), ("clio-service", "clio-service")]:
+        r = subprocess.run(["systemctl", "is-active", svc], capture_output=True, text=True)
+        agents[svc.replace("-", "_")] = {
+            "label":  label,
+            "status": r.stdout.strip(),
+            "active": r.stdout.strip() == "active",
+        }
+
+    # Qdrant / RAG
+    if RAG_DIR.exists():
+        sys.path.insert(0, str(RAG_DIR))
+        try:
+            import importlib
+            rag_config  = importlib.import_module("config")
+            client      = rag_config.get_qdrant_client()
+            collections = {c.name for c in client.get_collections().collections}
+            agents["rag"] = {
+                "label":   "clio-rag (Qdrant)",
+                "status":  "active",
+                "active":  True,
+                "books":   "clio_books" in collections,
+                "ncc":     "clio_ncc"   in collections,
+            }
+        except Exception as e:
+            agents["rag"] = {"label": "clio-rag", "status": "error", "active": False, "error": str(e)}
+        finally:
+            if str(RAG_DIR) in sys.path:
+                sys.path.remove(str(RAG_DIR))
+    else:
+        agents["rag"] = {"label": "clio-rag", "status": "not_installed", "active": False}
+
+    return {"ok": True, "agents": agents}
+
+
 # ── Router ────────────────────────────────────────────────────────────────────
 
 _ROUTES: dict[tuple[str, str], callable] = {
+    ("GET",  "/agents/status"):        _route_agents_status,
+    ("POST", "/agents/status"):        _route_agents_status,
+    ("POST", "/rag/query"):            _route_rag_query,
+    ("POST", "/library/search"):       _route_library_search,
     ("GET",  "/health"):               _route_health,
     ("POST", "/health"):               _route_health,
     ("GET",  "/mail/list"):            _route_mail_list,

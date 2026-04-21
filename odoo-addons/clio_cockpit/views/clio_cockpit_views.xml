@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_clio_cockpit_form" model="ir.ui.view">
+    <field name="name">clio.cockpit.form</field>
+    <field name="model">clio.cockpit</field>
+    <field name="arch" type="xml">
+      <form string="Clio Cockpit">
+        <sheet>
+
+          <!-- ── Agentstatus ─────────────────────────────────────── -->
+          <group string="Agenter">
+            <div class="o_row">
+              <button name="action_refresh_status" type="object"
+                      string="↻ Uppdatera status" class="btn-secondary"/>
+            </div>
+            <field name="agent_status" widget="text" nolabel="1"
+                   invisible="not agent_status"
+                   style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px;"/>
+          </group>
+
+          <separator/>
+
+          <!-- ── RAG ────────────────────────────────────────────── -->
+          <group string="RAG — Kunskapsbas">
+            <div class="o_row" style="align-items: center; gap: 8px;">
+              <field name="rag_query" placeholder="Ställ en fråga om böcker eller projekt…"
+                     style="flex: 1;" nolabel="1"/>
+              <field name="rag_mode" nolabel="1" style="width: 180px;"/>
+              <button name="action_rag_search" type="object"
+                      string="Sök" class="btn-primary"/>
+            </div>
+            <field name="rag_result" widget="text" nolabel="1"
+                   invisible="not rag_result"
+                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+          </group>
+
+          <separator/>
+
+          <!-- ── Bibliotek ──────────────────────────────────────── -->
+          <group string="Bibliotek">
+            <div class="o_row" style="align-items: center; gap: 8px;">
+              <field name="library_query" placeholder="Titel, författare…"
+                     style="flex: 1;" nolabel="1"/>
+              <button name="action_library_search" type="object"
+                      string="Sök" class="btn-primary"/>
+            </div>
+            <field name="library_result" widget="text" nolabel="1"
+                   invisible="not library_result"
+                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+          </group>
+
+          <separator/>
+
+          <!-- ── Mail Admin ─────────────────────────────────────── -->
+          <group string="Mail Admin">
+            <div class="o_row">
+              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
+              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
+              <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
+              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
+            </div>
+            <field name="mail_result" widget="text" nolabel="1"
+                   invisible="not mail_result"
+                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+          </group>
+
+          <!-- ── Vitlista / Svartlista ──────────────────────────── -->
+          <group string="Vitlista / Svartlista">
+            <field name="email_input" placeholder="namn@exempel.se"/>
+            <div class="o_row">
+              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+            </div>
+          </group>
+
+          <!-- ── Intervju ───────────────────────────────────────── -->
+          <group string="Intervju">
+            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
+            <field name="interview_subject" placeholder="Ämne"/>
+            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
+            <div class="o_row">
+              <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
+              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
+            </div>
+          </group>
+
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_clio_cockpit" model="ir.actions.act_window">
+    <field name="name">Clio Cockpit</field>
+    <field name="res_model">clio.cockpit</field>
+    <field name="view_mode">form</field>
+    <field name="target">current</field>
+  </record>
+
+</odoo>
