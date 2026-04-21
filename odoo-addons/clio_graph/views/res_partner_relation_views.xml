@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- Trädvy: alla relationer med Neo4j-synkstatus -->
-  <record id="view_clio_graph_relation_tree" model="ir.ui.view">
-    <field name="name">clio.graph.relation.tree</field>
+  <!-- Listvy: alla relationer med Neo4j-synkstatus -->
+  <record id="view_clio_graph_relation_list" model="ir.ui.view">
+    <field name="name">clio.graph.relation.list</field>
     <field name="model">res.partner.relation</field>
     <field name="arch" type="xml">
-      <tree string="Nätverksrelationer">
+      <list string="Nätverksrelationer">
         <field name="left_partner_id"/>
         <field name="type_id"/>
         <field name="right_partner_id"/>
@@ -14,7 +14,7 @@
         <field name="date_end"/>
         <field name="sync_to_neo4j"/>
         <field name="neo4j_synced_at"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -45,7 +45,7 @@
   <record id="action_clio_graph_relations" model="ir.actions.act_window">
     <field name="name">Nätverksrelationer</field>
     <field name="res_model">res.partner.relation</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 
 </odoo>
