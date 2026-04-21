@@ -3,17 +3,17 @@
 
   <!-- Listvy -->
   <record id="view_clio_job_profile_tree" model="ir.ui.view">
-    <field name="name">clio.job.profile.tree</field>
+    <field name="name">clio.job.profile.list</field>
     <field name="model">clio.job.profile</field>
     <field name="arch" type="xml">
-      <tree>
+      <list>
         <field name="partner_id"/>
         <field name="role"/>
         <field name="seniority"/>
         <field name="geography"/>
         <field name="match_count" string="Matchningar"/>
         <field name="active" optional="hide"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -66,14 +66,14 @@
 
             <page string="Matchningshistorik">
               <field name="match_ids" nolabel="1">
-                <tree create="false" delete="false">
+                <list create="false" delete="false">
                   <field name="sent_at" string="Skickad"/>
                   <field name="article_title" string="Rubrik"/>
                   <field name="signal_type" string="Signaltyp"/>
                   <field name="match_score" string="Poäng"/>
                   <field name="recommended_action" string="Åtgärd"/>
                   <field name="article_url" string="URL"/>
-                </tree>
+                </list>
               </field>
             </page>
           </notebook>
@@ -86,7 +86,7 @@
   <record id="action_clio_job_profile" model="ir.actions.act_window">
     <field name="name">Clio Job — Profiler</field>
     <field name="res_model">clio.job.profile</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 
 </odoo>
