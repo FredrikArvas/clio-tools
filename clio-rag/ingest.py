@@ -437,14 +437,16 @@ def _parse_selection(val: str, n: int) -> list[int] | None:
     return sorted(indices)
 
 
-def select_pdf_files(folder: Path) -> list[Path] | None:
+def select_pdf_files(folder: Path, recursive: bool = False) -> list[Path] | None:
     """
     Listar PDF-filer i mappen interaktivt.
     Returnerar lista med valda filer, eller None (Tillbaka).
     Stöd: nummer (3), intervall (1-3), kommalista (1,3,5), A (alla), 0 (tillbaka).
+    Med recursive=True söks även undermappar (rglob).
     """
     while True:
-        files = sorted(folder.glob("*.pdf"), key=lambda p: p.name.lower())
+        glob_fn = folder.rglob if recursive else folder.glob
+        files = sorted(glob_fn("*.pdf"), key=lambda p: p.name.lower())
 
         if not files:
             print(f"\n  Inga PDF-filer hittades i: {folder}")
@@ -488,19 +490,105 @@ def select_pdf_files(folder: Path) -> list[Path] | None:
 
 
 # ---------------------------------------------------------------------------
+# Förbered corpus (rekursiv kopiering + metadata-registrering)
+# ---------------------------------------------------------------------------
+
+def prepare_corpus(source_dir: Path, corpus_base: Path = config.CORPUS_PATH) -> Path | None:
+    """
+    Rekursivt hittar PDF:er i source_dir, kopierar dem platt till
+    corpus_base/<mappnamn>/ och registrerar metadata i metadata.json.
+
+    Returnerar destination-mappen, eller None om avbrutet.
+    """
+    source_dir = source_dir.resolve()
+    if not source_dir.exists():
+        print(f"\n{_YEL}FEL: Källmappen finns inte: {source_dir}{_NRM}")
+        return None
+
+    pdfs = sorted(source_dir.rglob("*.pdf"), key=lambda p: p.name.lower())
+    if not pdfs:
+        print(f"\n{_YEL}Inga PDF-filer hittades rekursivt i: {source_dir}{_NRM}")
+        return None
+
+    # Visa hittade filer
+    _section(f"Hittade {len(pdfs)} PDF:er i {source_dir.name}", [
+        f"{_YEL}{i:>2}{_NRM}  {p.name}  {_GRY}({p.stat().st_size // 1024} KB){_NRM}"
+        for i, p in enumerate(pdfs, 1)
+    ])
+
+    # Välj destinations-undermapp
+    default_name = source_dir.name.lower().replace(" ", "_")
+    dest_name = input(f"\n  Corpus-undermapp [{default_name}]: ").strip() or default_name
+    dest_dir = corpus_base / dest_name
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Kopiera och registrera metadata
+    cache = _load_meta_cache()
+    copied = 0
+    skipped = 0
+
+    print()
+    for pdf in pdfs:
+        dest_file = dest_dir / pdf.name
+        key = pdf.name.lower()
+
+        # Kopiera (skippa om identisk storlek redan finns)
+        if dest_file.exists() and dest_file.stat().st_size == pdf.stat().st_size:
+            print(f"  {_GRY}↷  {pdf.name} (finns redan){_NRM}")
+            skipped += 1
+        else:
+            import shutil
+            shutil.copy2(pdf, dest_file)
+            print(f"  {_GRN}✓  {pdf.name}{_NRM}")
+            copied += 1
+
+        # Registrera metadata om den saknas
+        if key not in cache and key not in {k.lower() for k in BOOK_METADATA}:
+            cache[key] = _ask_rights(pdf.name)
+
+    _save_meta_cache(cache)
+
+    print(f"\n{_GRN}✓ Förberedelse klar:{_NRM} {copied} kopierade, {skipped} redan på plats")
+    print(f"  Destination: {dest_dir}")
+    print(f"  Kör ingest med: python ingest.py --folder {dest_dir}")
+    return dest_dir
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="clio-rag ingestion-pipeline")
-    parser.add_argument("--pdf",    type=Path, help="Enskild PDF att indexera")
-    parser.add_argument("--folder", type=Path, help="Interaktiv filväljare i mappen")
+    parser.add_argument("folder_pos", nargs="?", type=Path, help="Mapp att indexera (positionellt)")
+    parser.add_argument("--pdf",       type=Path, help="Enskild PDF att indexera")
+    parser.add_argument("--folder",    type=Path, help="Interaktiv filväljare i mappen")
+    parser.add_argument("--recursive", action="store_true",
+                        help="Sök PDF:er rekursivt i undermappar (används med --folder)")
+    parser.add_argument("--prepare",   type=Path, metavar="KÄLLMAPP",
+                        help="Förbered corpus: hitta PDF:er rekursivt, kopiera platt, registrera metadata")
     parser.add_argument("--force",  action="store_true", help="Tvinga om-indexering")
     parser.add_argument("--corpus", type=Path, default=config.CORPUS_PATH,
                         help=f"Corpus-mapp (default: {config.CORPUS_PATH})")
     args = parser.parse_args()
 
-    if args.pdf:
+    # Stöd positionellt argument (från clio-menyn) som alias för --folder
+    if args.folder_pos and not args.folder:
+        args.folder = args.folder_pos
+
+    if args.prepare:
+        dest = prepare_corpus(args.prepare, corpus_base=args.corpus)
+        if dest:
+            run_now = input(f"\n  Starta ingest direkt? [J/n]: ").strip().lower()
+            if run_now in ("", "j", "ja", "y", "yes"):
+                selection = select_pdf_files(dest)
+                if selection:
+                    total_new = 0
+                    for pdf in selection:
+                        total_new += ingest_pdf(pdf, force=args.force)
+                    print(f"\n[ingest] Klart — {total_new} chunks totalt indexerade.")
+
+    elif args.pdf:
         ingest_pdf(args.pdf.resolve(), force=args.force)
 
     elif args.folder:
@@ -508,7 +596,7 @@ def main() -> None:
         if not folder.exists():
             print(f"[ingest] FEL: mappen finns inte: {folder}")
             sys.exit(1)
-        selection = select_pdf_files(folder)
+        selection = select_pdf_files(folder, recursive=args.recursive)
         if not selection:
             print("  Avbrutet.")
             sys.exit(0)

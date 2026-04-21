@@ -263,20 +263,28 @@ TOOLS = [
         "submenu": [
             {
                 "nr":           1,
+                "name":         "förbered-ingest",
+                "desc":         "Förbered corpus: hitta PDF:er rekursivt, kopiera platt, registrera metadata",
+                "script":       ROOT / "clio-rag" / "ingest.py",
+                "args":         ["--prepare"],
+                "needs_folder": True,
+            },
+            {
+                "nr":           2,
                 "name":         "ingest",
                 "desc":         "Importera PDF-dokument till RAG-indexet (Qdrant + Docling)",
                 "script":       ROOT / "clio-rag" / "ingest.py",
                 "needs_folder": True,
             },
             {
-                "nr":           2,
+                "nr":           3,
                 "name":         "query",
                 "desc":         "Sök i RAG-indexet med Claude",
                 "script":       ROOT / "clio-rag" / "query.py",
                 "needs_folder": False,
             },
             {
-                "nr":           3,
+                "nr":           4,
                 "name":         "export-index",
                 "desc":         "Exportera RAG-index till fil",
                 "script":       ROOT / "clio-rag" / "export_index.py",
