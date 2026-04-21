@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Clio Bot — partner som agenten postar som -->
+        <record id="partner_clio_bot" model="res.partner">
+            <field name="name">Clio</field>
+            <field name="email">clio-bot@arvas.se</field>
+            <field name="company_type">person</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- #clio — global kanal för AI-frågor -->
+        <record id="channel_clio" model="discuss.channel">
+            <field name="name">Clio</field>
+            <field name="channel_type">channel</field>
+            <field name="description">Ställ frågor till Clio AI-assistent</field>
+        </record>
+
+        <!-- Standard-systemparametrar (åsidosätts via Inställningar → Teknisk → Systemparametrar) -->
+        <record id="param_agent_url" model="ir.config_parameter">
+            <field name="key">clio_discuss.agent_url</field>
+            <field name="value">http://localhost:8100/message</field>
+        </record>
+
+        <record id="param_shared_secret" model="ir.config_parameter">
+            <field name="key">clio_discuss.shared_secret</field>
+            <field name="value"></field>
+        </record>
+
+    </data>
+</odoo>
