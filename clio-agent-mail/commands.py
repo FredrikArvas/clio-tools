@@ -82,6 +82,7 @@ class OutboundMail:
     subject: str
     body: str
     from_account_key: str = "clio"
+    message_id: str = ""
 
 
 @dataclass
