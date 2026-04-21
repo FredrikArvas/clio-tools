@@ -45,11 +45,8 @@ RELEVANT_URL_PATTERNS: list[str] = [
     "/utbildning/",
     "/utbildning",
     "/strategi",
-    "/organisation",
     "/historia",
     "/samarbetspartners",
-    "/styrelse",
-    "/kansli",
     "/forbundsstamma",
     "/idrott-och-halsa",
     "/antidoping",
@@ -60,12 +57,25 @@ RELEVANT_URL_PATTERNS: list[str] = [
     "/vision",
 ]
 
+# Sidor som matchar ovan men ändå ska uteslutas (brus/paginering/dubletter)
+EXCLUDE_URL_PATTERNS: list[str] = [
+    "hitta-forening",
+    "hitta-klubb",
+    "/styrelse",        # distrikts-styrelser, inte förbundsstyrelsen
+    "/kansli",          # distrikts-kansli
+    "/kontakta-oss-",   # distriktssidor
+    "/om-distriktet/",
+    "/kontakt/",
+]
+
 
 def url_is_relevant(url: str) -> bool:
-    """Returnerar True om URL matchar någon av de relevanta sektionerna."""
+    """Returnerar True om URL matchar relevant sektion och inte är exkluderad."""
     if not url:
         return False
     url_lower = url.lower()
+    if any(exc in url_lower for exc in EXCLUDE_URL_PATTERNS):
+        return False
     return any(pat in url_lower for pat in RELEVANT_URL_PATTERNS)
 
 
