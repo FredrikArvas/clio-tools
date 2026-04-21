@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem id="menu_clio_mail_admin"
+            name="Clio Mail Admin"
+            action="action_clio_mail_admin"
+            sequence="90"/>
+
+</odoo>

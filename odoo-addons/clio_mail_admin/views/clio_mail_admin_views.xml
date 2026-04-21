@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="view_clio_mail_admin_form" model="ir.ui.view">
+    <field name="name">clio.mail.admin.form</field>
+    <field name="model">clio.mail.admin</field>
+    <field name="arch" type="xml">
+      <form string="Clio Mail Admin">
+        <sheet>
+
+          <!-- Snabbknappar -->
+          <div class="oe_button_box" name="button_box"/>
+          <group string="Kommandon">
+            <div class="o_row">
+              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
+              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
+              <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
+              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
+            </div>
+          </group>
+
+          <!-- Resultat -->
+          <group string="Resultat">
+            <field name="result_text" widget="text" nolabel="1"
+                   invisible="not result_text"
+                   style="font-family: monospace; white-space: pre-wrap;"/>
+          </group>
+
+          <!-- Vitlista / svartlista -->
+          <group string="Vitlista / Svartlista">
+            <field name="email_input" placeholder="namn@exempel.se"/>
+            <div class="o_row">
+              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+            </div>
+          </group>
+
+          <!-- Intervju -->
+          <group string="Intervju">
+            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
+            <field name="interview_subject" placeholder="Ämne för intervjun"/>
+            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
+            <div class="o_row">
+              <button name="action_interview_start" type="object" string="Starta intervju"   class="btn-primary"/>
+              <button name="action_interview_stop"  type="object" string="Avsluta intervju"  class="btn-warning"/>
+            </div>
+          </group>
+
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_clio_mail_admin" model="ir.actions.act_window">
+    <field name="name">Clio Mail Admin</field>
+    <field name="res_model">clio.mail.admin</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="context">{'default_result_text': False}</field>
+  </record>
+
+</odoo>
