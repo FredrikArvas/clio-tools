@@ -19,13 +19,13 @@
                  string="Kandidatprofil"
                  nolabel="1"
                  invisible="not clio_job_watch">
-            <tree>
+            <list>
               <field name="role" string="Roll"/>
               <field name="seniority" string="Senioritet"/>
               <field name="geography" string="Geografi"/>
               <field name="match_count" string="Matchningar"/>
               <field name="active" optional="hide"/>
-            </tree>
+            </list>
           </field>
 
         </page>

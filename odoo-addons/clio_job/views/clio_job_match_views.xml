@@ -3,17 +3,17 @@
 
   <!-- Listvy (admin: alla matchningar) -->
   <record id="view_clio_job_match_tree" model="ir.ui.view">
-    <field name="name">clio.job.match.tree</field>
+    <field name="name">clio.job.match.list</field>
     <field name="model">clio.job.match</field>
     <field name="arch" type="xml">
-      <tree create="false">
+      <list create="false">
         <field name="sent_at" string="Skickad"/>
         <field name="profile_id" string="Kandidat"/>
         <field name="article_title" string="Rubrik"/>
         <field name="signal_type" string="Signaltyp"/>
         <field name="match_score" string="Poäng"/>
         <field name="recommended_action" string="Åtgärd"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -42,7 +42,7 @@
   <record id="action_clio_job_match" model="ir.actions.act_window">
     <field name="name">Clio Job — Matchningshistorik</field>
     <field name="res_model">clio.job.match</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 
 </odoo>
