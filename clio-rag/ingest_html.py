@@ -6,8 +6,14 @@ Extraherar titel, URL (från meta/canonical), och brödtext via html.parser.
 Chunkar text ~500 ord med 20% överlapp, precis som ingest.py.
 
 Användning:
-    python3 ingest_html.py --folder /sökväg/till/html --collection ssf_skidor_com
-    python3 ingest_html.py --folder /mnt/dropbox-disk/mediaarkiv/skrapade_webbar/skidor/www.skidor.com --collection ssf_skidor_com
+    # Simulera (visa vad som skulle indexeras, inget skrivs):
+    python3 ingest_html.py --folder /path/to/html --simulate
+
+    # Indexera med URL-filter (standard):
+    python3 ingest_html.py --folder /path/to/html --collection ssf_skidor_com
+
+    # Indexera ALLT (ej rekommenderat):
+    python3 ingest_html.py --folder /path/to/html --collection ssf_skidor_com --no-filter
 
 Kräver: qdrant-client, openai (för embeddings), python-dotenv
 """
@@ -28,13 +34,40 @@ from dotenv import load_dotenv
 _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
 
-sys.path.insert(0, str(_here))
-from config import get_qdrant_client, EMBEDDING_MODEL, EMBEDDING_DIM
-from qdrant_client.models import Distance, VectorParams, PointStruct
+# ── URL-filter: sektioner som är relevanta för IAF-analys ────────────────────
+# Matchar mot canonical URL. Lägg till mönster efter behov.
 
-import openai
+RELEVANT_URL_PATTERNS: list[str] = [
+    "/om-forbundet/",
+    "/om-forbundet",
+    "/vara-idrotter/",
+    "/vara-idrotter",
+    "/utbildning/",
+    "/utbildning",
+    "/strategi",
+    "/organisation",
+    "/historia",
+    "/samarbetspartners",
+    "/styrelse",
+    "/kansli",
+    "/forbundsstamma",
+    "/idrott-och-halsa",
+    "/antidoping",
+    "/miljo",
+    "/hallbarhet",
+    "/policy",
+    "/stadgar",
+    "/vision",
+]
 
-_client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def url_is_relevant(url: str) -> bool:
+    """Returnerar True om URL matchar någon av de relevanta sektionerna."""
+    if not url:
+        return False
+    url_lower = url.lower()
+    return any(pat in url_lower for pat in RELEVANT_URL_PATTERNS)
+
 
 # ── HTML-parser ───────────────────────────────────────────────────────────────
 
@@ -119,13 +152,17 @@ def _chunk_text(text: str, max_words: int = 500, overlap: int = 50) -> list[str]
 # ── Embeddings ────────────────────────────────────────────────────────────────
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    resp = _client_openai.embeddings.create(model=EMBEDDING_MODEL, input=texts)
+    import openai
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    resp = client.embeddings.create(model=EMBEDDING_MODEL, input=texts)
     return [d.embedding for d in resp.data]
 
 
 # ── Collection ────────────────────────────────────────────────────────────────
 
 def ensure_collection(collection: str) -> None:
+    from config import get_qdrant_client, EMBEDDING_DIM
+    from qdrant_client.models import Distance, VectorParams
     client = get_qdrant_client()
     existing = {c.name for c in client.get_collections().collections}
     if collection not in existing:
@@ -138,15 +175,68 @@ def ensure_collection(collection: str) -> None:
         print(f"[ingest_html] Collection finns: {collection}")
 
 
+# ── Simulering ────────────────────────────────────────────────────────────────
+
+def simulate(folder: Path, min_words: int = 50, use_filter: bool = True) -> None:
+    """Visar vad som SKULLE indexeras utan att skriva något till Qdrant."""
+    html_files = sorted(folder.rglob("*.html"))
+    print(f"\n[SIMULERING] {len(html_files)} HTML-filer totalt i {folder}\n")
+
+    matched: list[tuple[str, str, int]] = []   # (title, url, word_count)
+    no_url: list[str] = []
+    filtered_out: int = 0
+    too_short: int = 0
+    total_chunks_est: int = 0
+
+    for path in html_files:
+        title, url, text = extract_html(path)
+        words = text.split()
+
+        if len(words) < min_words:
+            too_short += 1
+            continue
+
+        if use_filter:
+            if not url:
+                no_url.append(path.name)
+                continue
+            if not url_is_relevant(url):
+                filtered_out += 1
+                continue
+
+        chunks = _chunk_text(text)
+        total_chunks_est += len(chunks)
+        matched.append((title or path.stem, url, len(words)))
+
+    print(f"{'Fil':50s} {'Ord':>6s}  URL")
+    print("-" * 100)
+    for title, url, wc in sorted(matched, key=lambda x: x[1]):
+        short_url = url.replace("https://www.skidor.com", "") if url else "(ingen URL)"
+        print(f"  {title[:48]:48s} {wc:>6d}  {short_url}")
+
+    print(f"\n{'─'*100}")
+    print(f"  Matchade sidor:          {len(matched):>5d}")
+    print(f"  Filtrerade bort:         {filtered_out:>5d}  (ej relevanta URL-mönster)")
+    print(f"  Saknar canonical URL:    {len(no_url):>5d}")
+    print(f"  För korta (< {min_words} ord):  {too_short:>5d}")
+    print(f"  Uppskattade chunks:      {total_chunks_est:>5d}  (~{total_chunks_est * 0.0001:.2f} USD embedding-kostnad)")
+    print(f"\n  URL-filter aktivt: {use_filter}")
+    if use_filter:
+        print(f"  Mönster: {', '.join(RELEVANT_URL_PATTERNS[:6])} ...")
+
+
 # ── Ingest ────────────────────────────────────────────────────────────────────
 
 def ingest_folder(folder: Path, collection: str, force: bool = False,
-                  min_words: int = 50) -> None:
+                  min_words: int = 50, use_filter: bool = True) -> None:
+    from config import get_qdrant_client, EMBEDDING_MODEL
+    from qdrant_client.models import PointStruct
+
     ensure_collection(collection)
     client = get_qdrant_client()
 
     html_files = sorted(folder.rglob("*.html"))
-    print(f"[ingest_html] Hittade {len(html_files)} HTML-filer i {folder}")
+    print(f"[ingest_html] {len(html_files)} HTML-filer | filter: {use_filter} | collection: {collection}")
 
     batch_points: list[PointStruct] = []
     batch_texts: list[str] = []
@@ -172,6 +262,10 @@ def ingest_folder(folder: Path, collection: str, force: bool = False,
         words = text.split()
 
         if len(words) < min_words:
+            skipped += 1
+            continue
+
+        if use_filter and not url_is_relevant(url):
             skipped += 1
             continue
 
@@ -201,8 +295,8 @@ def ingest_folder(folder: Path, collection: str, force: bool = False,
                 flush_batch()
 
         processed += 1
-        if processed % 200 == 0:
-            print(f"[ingest_html] {processed}/{len(html_files)} filer | {total_chunks} chunks...")
+        if processed % 100 == 0:
+            print(f"[ingest_html] {processed} filer | {total_chunks} chunks...")
 
     flush_batch()
     print(f"\n[ingest_html] Klar: {processed} filer | {skipped} hoppades over | {total_chunks} chunks -> {collection}")
@@ -215,14 +309,30 @@ if __name__ == "__main__":
     parser.add_argument("--folder", required=True, help="Rotmapp med HTML-filer")
     parser.add_argument("--collection", default="ssf_skidor_com",
                         help="Qdrant collection-namn (default: ssf_skidor_com)")
+    parser.add_argument("--simulate", action="store_true",
+                        help="Simulera: visa vad som skulle indexeras, skriv inget")
+    parser.add_argument("--no-filter", action="store_true",
+                        help="Indexera ALLA sidor (ej rekommenderat)")
     parser.add_argument("--force", action="store_true", help="Tvinga om-indexering")
     parser.add_argument("--min-words", type=int, default=50,
-                        help="Min ord per sida for att indexera (default: 50)")
+                        help="Min ord per sida (default: 50)")
     args = parser.parse_args()
 
-    ingest_folder(
-        folder=Path(args.folder),
-        collection=args.collection,
-        force=args.force,
-        min_words=args.min_words,
-    )
+    use_filter = not args.no_filter
+
+    if args.simulate:
+        simulate(
+            folder=Path(args.folder),
+            min_words=args.min_words,
+            use_filter=use_filter,
+        )
+    else:
+        sys.path.insert(0, str(_here))
+        from config import EMBEDDING_MODEL
+        ingest_folder(
+            folder=Path(args.folder),
+            collection=args.collection,
+            force=args.force,
+            min_words=args.min_words,
+            use_filter=use_filter,
+        )
