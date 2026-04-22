@@ -63,8 +63,9 @@ class ClioCockpit(models.TransientModel):
     server_last_checked = fields.Datetime(string="Senast kontrollerad", readonly=True)
 
     # ── Mail Admin ────────────────────────────────────────────────────────────
-    mail_result      = fields.Text(string="Resultat", readonly=True)
-    email_input      = fields.Char(string="E-post")
+    mail_result       = fields.Text(string="Resultat", readonly=True)
+    email_input       = fields.Char(string="E-post")
+    decide_sender     = fields.Char(string="Avsändare")
     interview_to      = fields.Char(string="Till")
     interview_subject = fields.Char(string="Ämne", default="Intervju")
     interview_context = fields.Text(string="Kontext")
@@ -131,11 +132,24 @@ class ClioCockpit(models.TransientModel):
             "top": 5,
             "ncc": self.rag_mode == "ncc",
         })
-        answer  = result.get("text", "")
+        # Strippa markdown-formattering (** och *)
+        import re as _re
+        answer = _re.sub(r'\*\*(.+?)\*\*', r'\1', result.get("text", ""))
+        answer = _re.sub(r'\*(.+?)\*', r'\1', answer)
+
         sources = result.get("sources", [])
         if sources:
-            src_lines = ["\n─── Källor ───"]
+            # Deduplicera på (title, page_start, page_end)
+            seen = set()
+            unique = []
             for s in sources:
+                key = (s.get("title"), s.get("page_start"), s.get("page_end"))
+                if key not in seen:
+                    seen.add(key)
+                    unique.append(s)
+
+            src_lines = ["\n─── Källor ───"]
+            for s in unique:
                 score = s.get("score", "")
                 title = s.get("title", "?")
                 if s.get("page_start"):
@@ -183,6 +197,30 @@ class ClioCockpit(models.TransientModel):
             raise UserError("Ange en e-postadress.")
         res = self._mail("/mail/blacklist", {"email": self.email_input})
         self.email_input = False
+        return res
+
+    def action_decide_vitlista(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        res = self._mail("/mail/waiting/decide", {
+            "sender": self.decide_sender, "action": "VITLISTA"})
+        self.decide_sender = False
+        return res
+
+    def action_decide_svartlista(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        res = self._mail("/mail/waiting/decide", {
+            "sender": self.decide_sender, "action": "SVARTLISTA"})
+        self.decide_sender = False
+        return res
+
+    def action_decide_behall(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        res = self._mail("/mail/waiting/decide", {
+            "sender": self.decide_sender, "action": "BEHÅLL"})
+        self.decide_sender = False
         return res
 
     def action_interview_start(self):
