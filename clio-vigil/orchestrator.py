@@ -225,14 +225,34 @@ def upsert_item(conn: sqlite3.Connection, url: str, domain: str,
 # Prioritetsberäkning
 # ---------------------------------------------------------------------------
 
+def _recency_factor(published_at: Optional[str], window_days: int = 30) -> float:
+    """
+    Tidsfaktor baserad på publiceringsdatum.
+    Linjär decay mot window_days med floor 0.1.
+    Okänt datum → neutral faktor 0.5.
+
+    Idag → 1.0 | 15 dagar → 0.5 | 30+ dagar → 0.1
+    """
+    if not published_at:
+        return 0.5
+    try:
+        pub = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+        age_days = (datetime.now(timezone.utc) - pub).total_seconds() / 86400
+        return round(max(0.1, 1.0 - age_days / window_days), 4)
+    except Exception:
+        return 0.5
+
+
 def compute_priority(relevance_score: float, source_weight: float,
                      duration_seconds: Optional[int],
-                     max_duration: int = 10800) -> float:
+                     published_at: Optional[str] = None,
+                     max_duration: int = 10800,
+                     recency_window_days: int = 30) -> float:
     """
-    Prioritetstal = relevansscore × källvikt × (1 / längd_normaliserad)
+    Prioritetstal = relevansscore × källvikt × längdfaktor × tidsfaktor
 
-    Längd normaliseras mot max_duration (default 3h).
-    Okänd längd → neutral faktor 0.5.
+    Längd normaliseras mot max_duration (default 3h). Okänd längd → 0.5.
+    Tidsfaktor: linjär decay, floor 0.1, fönster 30 dagar. Okänt datum → 0.5.
     """
     if duration_seconds is None:
         length_factor = 0.5
@@ -240,23 +260,54 @@ def compute_priority(relevance_score: float, source_weight: float,
         normalized = min(duration_seconds / max_duration, 1.0)
         length_factor = 1.0 - normalized  # kortare = högre prio
 
-    return round(relevance_score * source_weight * length_factor, 4)
+    recency = _recency_factor(published_at, window_days=recency_window_days)
+
+    return round(relevance_score * source_weight * length_factor * recency, 4)
 
 
 def update_priority(conn: sqlite3.Connection, item_id: int) -> float:
     """Räknar om och sparar prioritetstal för ett objekt."""
     row = conn.execute(
-        "SELECT relevance_score, source_weight, duration_seconds FROM vigil_items WHERE id = ?",
+        "SELECT relevance_score, source_weight, duration_seconds, published_at FROM vigil_items WHERE id = ?",
         (item_id,)
     ).fetchone()
 
     if not row:
         raise ValueError(f"item_id {item_id} hittades inte")
 
-    prio = compute_priority(row["relevance_score"], row["source_weight"], row["duration_seconds"])
+    prio = compute_priority(
+        row["relevance_score"], row["source_weight"],
+        row["duration_seconds"], row["published_at"],
+    )
     conn.execute("UPDATE vigil_items SET priority_score = ? WHERE id = ?", (prio, item_id))
     conn.commit()
     return prio
+
+
+def recompute_all_priorities(conn: sqlite3.Connection,
+                              states: Optional[list] = None) -> int:
+    """
+    Räknar om priority_score för alla objekt (eller specificerade tillstånd).
+    Returnerar antal uppdaterade rader.
+    """
+    if states:
+        placeholders = ",".join("?" * len(states))
+        rows = conn.execute(
+            f"SELECT id FROM vigil_items WHERE state IN ({placeholders})", states
+        ).fetchall()
+    else:
+        rows = conn.execute("SELECT id FROM vigil_items").fetchall()
+
+    count = 0
+    for row in rows:
+        try:
+            update_priority(conn, row["id"])
+            count += 1
+        except Exception as e:
+            logger.warning(f"Kunde inte uppdatera prio för item {row['id']}: {e}")
+
+    logger.info(f"Räknade om priority_score för {count} objekt")
+    return count
 
 
 # ---------------------------------------------------------------------------
