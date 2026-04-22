@@ -8,84 +8,108 @@
       <form string="Clio Cockpit">
         <sheet>
 
-          <!-- ── Agentstatus ─────────────────────────────────────── -->
-          <group string="Agenter">
-            <div class="o_row">
-              <button name="action_refresh_status" type="object"
-                      string="↻ Uppdatera status" class="btn-secondary"/>
-            </div>
-            <field name="agent_status" widget="text" nolabel="1"
-                   invisible="not agent_status"
-                   style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px;"/>
-          </group>
+          <notebook>
 
-          <separator/>
+            <!-- ══ FLIK: Agenter ══════════════════════════════════════════ -->
+            <page string="🤖 Agenter" groups="clio_cockpit.group_clio_user">
+              <group>
+                <div class="o_row">
+                  <button name="action_refresh_status" type="object"
+                          string="↻ Uppdatera status" class="btn-secondary"/>
+                </div>
+                <field name="agent_status" widget="text" nolabel="1"
+                       invisible="not agent_status"
+                       style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px;"/>
+              </group>
+            </page>
 
-          <!-- ── RAG ────────────────────────────────────────────── -->
-          <group string="RAG — Kunskapsbas">
-            <div class="o_row" style="align-items: center; gap: 8px;">
-              <field name="rag_query" placeholder="Ställ en fråga om böcker eller projekt…"
-                     style="flex: 1;" nolabel="1"/>
-              <field name="rag_mode" nolabel="1" style="width: 180px;"/>
-              <button name="action_rag_search" type="object"
-                      string="Sök" class="btn-primary"/>
-            </div>
-            <field name="rag_result" widget="text" nolabel="1"
-                   invisible="not rag_result"
-                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
-          </group>
+            <!-- ══ FLIK: RAG — Kunskapsbas ════════════════════════════════ -->
+            <page string="🔍 RAG">
+              <group>
+                <div class="o_row" style="align-items: center; gap: 8px;">
+                  <field name="rag_query" placeholder="Ställ en fråga om böcker eller projekt…"
+                         style="flex: 1;" nolabel="1"/>
+                  <field name="rag_mode" nolabel="1" style="width: 180px;"/>
+                  <button name="action_rag_search" type="object"
+                          string="Sök" class="btn-primary"/>
+                </div>
+                <field name="rag_result" widget="text" nolabel="1"
+                       invisible="not rag_result"
+                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+              </group>
+            </page>
 
-          <separator/>
+            <!-- ══ FLIK: Bibliotek ════════════════════════════════════════ -->
+            <page string="📚 Bibliotek">
+              <group>
+                <div class="o_row" style="align-items: center; gap: 8px;">
+                  <field name="library_query" placeholder="Titel, författare…"
+                         style="flex: 1;" nolabel="1"/>
+                  <button name="action_library_search" type="object"
+                          string="Sök" class="btn-primary"/>
+                </div>
+                <field name="library_result" widget="text" nolabel="1"
+                       invisible="not library_result"
+                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+              </group>
+            </page>
 
-          <!-- ── Bibliotek ──────────────────────────────────────── -->
-          <group string="Bibliotek">
-            <div class="o_row" style="align-items: center; gap: 8px;">
-              <field name="library_query" placeholder="Titel, författare…"
-                     style="flex: 1;" nolabel="1"/>
-              <button name="action_library_search" type="object"
-                      string="Sök" class="btn-primary"/>
-            </div>
-            <field name="library_result" widget="text" nolabel="1"
-                   invisible="not library_result"
-                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
-          </group>
+            <!-- ══ FLIK: Mail Admin ═══════════════════════════════════════ -->
+            <page string="📧 Mail Admin" groups="clio_cockpit.group_clio_admin">
+              <group>
+                <div class="o_row">
+                  <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
+                  <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
+                  <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
+                  <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
+                  <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
+                </div>
+                <field name="mail_result" widget="text" nolabel="1"
+                       invisible="not mail_result"
+                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+              </group>
 
-          <separator/>
+              <group string="Vitlista / Svartlista">
+                <field name="email_input" placeholder="namn@exempel.se"/>
+                <div class="o_row">
+                  <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
+                  <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+                </div>
+              </group>
 
-          <!-- ── Mail Admin ─────────────────────────────────────── -->
-          <group string="Mail Admin">
-            <div class="o_row">
-              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
-              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
-              <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
-              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
-              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
-            </div>
-            <field name="mail_result" widget="text" nolabel="1"
-                   invisible="not mail_result"
-                   style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
-          </group>
+              <group string="Intervju">
+                <field name="interview_to"      placeholder="deltagare@exempel.se"/>
+                <field name="interview_subject" placeholder="Ämne"/>
+                <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
+                <div class="o_row">
+                  <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
+                  <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
+                </div>
+              </group>
+            </page>
 
-          <!-- ── Vitlista / Svartlista ──────────────────────────── -->
-          <group string="Vitlista / Svartlista">
-            <field name="email_input" placeholder="namn@exempel.se"/>
-            <div class="o_row">
-              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
-              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
-            </div>
-          </group>
+            <!-- ══ FLIK: Server ═══════════════════════════════════════════ -->
+            <page string="🖥️ Server" groups="clio_cockpit.group_clio_admin">
+              <group>
+                <div class="o_row">
+                  <button name="action_refresh_server" type="object"
+                          string="↻ Uppdatera" class="btn-secondary"/>
+                  <field name="server_last_checked" nolabel="1" readonly="1"
+                         invisible="not server_last_checked"
+                         style="color: #888; font-size: 0.85em; margin-left: 12px;"/>
+                </div>
+                <field name="server_summary" widget="text" nolabel="1"
+                       invisible="not server_summary"
+                       style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px; margin-top: 8px;"/>
+              </group>
+              <group string="Uppdateringar">
+                <field name="server_updates" widget="text" nolabel="1"
+                       invisible="not server_updates"
+                       style="font-family: monospace; white-space: pre-wrap; background: #fff8f0; padding: 8px; border-radius: 4px;"/>
+              </group>
+            </page>
 
-          <!-- ── Intervju ───────────────────────────────────────── -->
-          <group string="Intervju">
-            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
-            <field name="interview_subject" placeholder="Ämne"/>
-            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
-            <div class="o_row">
-              <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
-              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
-            </div>
-          </group>
-
+          </notebook>
         </sheet>
       </form>
     </field>
