@@ -47,7 +47,8 @@ class ClioMailAdmin(models.TransientModel):
     result_text = fields.Text(string="Resultat", readonly=True)
 
     # Fält för åtgärder med argument
-    email_input      = fields.Char(string="E-post")
+    email_input       = fields.Char(string="E-post")
+    decide_sender     = fields.Char(string="Avsändare")
     interview_to      = fields.Char(string="Till")
     interview_subject = fields.Char(string="Ämne", default="Intervju")
     interview_context = fields.Text(string="Kontext")
@@ -88,6 +89,36 @@ class ClioMailAdmin(models.TransientModel):
             raise UserError("Ange en e-postadress att svartlista.")
         self.result_text = _call(self.env, "/mail/blacklist", {"email": self.email_input})
         self.email_input = False
+        return self._reopen()
+
+    def action_decide_vitlista(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        self.result_text = _call(self.env, "/mail/waiting/decide", {
+            "sender": self.decide_sender,
+            "action": "VITLISTA",
+        })
+        self.decide_sender = False
+        return self._reopen()
+
+    def action_decide_svartlista(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        self.result_text = _call(self.env, "/mail/waiting/decide", {
+            "sender": self.decide_sender,
+            "action": "SVARTLISTA",
+        })
+        self.decide_sender = False
+        return self._reopen()
+
+    def action_decide_behall(self):
+        if not self.decide_sender:
+            raise UserError("Ange avsändarens e-postadress.")
+        self.result_text = _call(self.env, "/mail/waiting/decide", {
+            "sender": self.decide_sender,
+            "action": "BEHÅLL",
+        })
+        self.decide_sender = False
         return self._reopen()
 
     def action_interview_start(self):

@@ -89,6 +89,16 @@ def _dispatch(command: str, body_text: str = "", subject: str = "") -> dict:
     }
 
 
+
+def _route_mail_waiting_decide(data: dict) -> dict:
+    sender = data.get("sender", "").strip()
+    action = data.get("action", "").strip().upper()
+    if not sender:
+        return {"ok": False, "error": "saknar fält: sender"}
+    if not action:
+        return {"ok": False, "error": "saknar fält: action (VITLISTA/SVARTLISTA/BEHÅLL)"}
+    return _dispatch("waiting_decide", body_text=sender, subject=action)
+
 # ── Route-handlers ────────────────────────────────────────────────────────────
 
 def _route_health(_data: dict) -> dict:

@@ -1186,3 +1186,50 @@ def dispatch(command: str, mail_item, config) -> CommandResult:
     except Exception as e:
         logger.error(f"Command '{command}' failed: {e}", exc_info=True)
         return CommandResult(f"Command '{command}' failed: {e}")
+
+
+def _cmd_waiting_decide(mail_item, config) -> CommandResult:
+    """Godkänn ett väntande mail direkt från Odoo admin.
+
+    subject = action: VITLISTA | SVARTLISTA | BEHÅLL
+    body    = avsändarens e-postadress
+    """
+    import re as _re
+
+    action = (mail_item.subject or "").strip().upper()
+    body   = (mail_item.body or "").strip()
+
+    email_match = _re.search(r"[\w.+\-]+@[\w.\-]+\.\w+", body)
+    if not email_match:
+        return CommandResult("Saknar e-postadress i brödtexten.")
+    sender = email_match.group(0).lower()
+
+    valid = ("VITLISTA", "SVARTLISTA", "BEHÅLL")
+    if action not in valid:
+        return CommandResult(
+            f"Okänd action: {action!r}. Använd VITLISTA, SVARTLISTA eller BEHÅLL."
+        )
+
+    if action == "VITLISTA":
+        import handlers as _handlers
+        wl_page = config.get("mail", "whitelist_notion_page_id", fallback="")
+        if wl_page:
+            from notion_client import add_to_whitelist
+            add_to_whitelist(wl_page, sender)
+        state.upsert_partner(sender, role="contact")
+        _handlers._process_waiting_mails(sender, config)
+        return CommandResult(f"Vitlistad och väntande mail bearbetade: {sender}")
+
+    if action == "SVARTLISTA":
+        state.add_to_blacklist(sender)
+        with state.get_connection() as conn:
+            conn.execute(
+                "UPDATE mail SET status = ? WHERE sender LIKE ? AND status = ?",
+                (state.STATUS_REJECTED, f"%{sender}%", state.STATUS_WAITING),
+            )
+        return CommandResult(f"Svartlistad: {sender}")
+
+    # BEHÅLL
+    import handlers as _handlers
+    _handlers._send_standard_for_waiting(sender, config)
+    return CommandResult(f"Standardsvar skickat för: {sender}")
