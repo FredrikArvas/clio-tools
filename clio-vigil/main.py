@@ -481,6 +481,7 @@ def _interactive_menu():
         ("9", "Rensa kö",              "--clear-queue"),
         ("s", "Välj källa att hämta",  "--pick-source"),
         ("i", "Importera URL",         "--import-url"),
+        ("p", "Räkna om prioriteter",  "--recompute-priorities"),
         ("q", "Tillbaka",              None),
     ]
 
@@ -558,6 +559,10 @@ def _interactive_menu():
                 pick_items(conn)
             elif flag == "--clear-queue":
                 clear_queue(conn)
+            elif flag == "--recompute-priorities":
+                from orchestrator import recompute_all_priorities
+                n = recompute_all_priorities(conn)
+                print(f"\n✓ Räknade om priority_score för {n} objekt (inkl. tidsfaktor)")
             elif flag == "--pick-source":
                 pick_source(conn)
             elif flag == "--import-url":
@@ -586,8 +591,9 @@ def main():
     parser.add_argument("--stats",       action="store_true", help="Visa tillståndsstatistik")
     parser.add_argument("--list-queued",  action="store_true", help="Lista transkriptionskön")
     parser.add_argument("--pick",         action="store_true", help="Välj objekt att prioritera i kön")
-    parser.add_argument("--clear-queue",  action="store_true", help="Rensa kön (återställ tillstånd)")
-    parser.add_argument("--pick-source",  action="store_true", help="Välj vilken källa som ska hämtas in")
+    parser.add_argument("--clear-queue",          action="store_true", help="Rensa kön (återställ tillstånd)")
+    parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
+    parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
@@ -600,6 +606,7 @@ def main():
         args.run, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
+        args.recompute_priorities,
     ])
     if not any_action:
         _interactive_menu()
@@ -624,6 +631,11 @@ def main():
 
     elif args.import_url:
         import_url(conn, args.import_url, args.domain or "ai")
+
+    elif args.recompute_priorities:
+        from orchestrator import recompute_all_priorities
+        n = recompute_all_priorities(conn)
+        print(f"\n✓ Räknade om priority_score för {n} objekt (inkl. tidsfaktor)")
 
     elif args.run or args.full:
         domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]
