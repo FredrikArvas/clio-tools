@@ -1,9 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <menuitem id="menu_clio_cockpit"
+  <!-- Toppnivå — ingen action, bara behållare -->
+  <menuitem id="menu_clio_cockpit_root"
             name="Clio Cockpit"
-            action="action_clio_cockpit"
             sequence="85"/>
+
+  <!-- Undermenyer — synliga för alla inloggade -->
+  <menuitem id="menu_cockpit_rag"
+            name="🔍 RAG"
+            parent="menu_clio_cockpit_root"
+            action="action_cockpit_rag"
+            sequence="10"/>
+
+  <menuitem id="menu_cockpit_bibliotek"
+            name="📚 Bibliotek"
+            parent="menu_clio_cockpit_root"
+            action="action_cockpit_bibliotek"
+            sequence="20"/>
+
+  <!-- Synliga för Clio User -->
+  <menuitem id="menu_cockpit_agenter"
+            name="🤖 Agenter"
+            parent="menu_clio_cockpit_root"
+            action="action_cockpit_agenter"
+            groups="clio_cockpit.group_clio_user"
+            sequence="30"/>
+
+  <!-- Synliga för Clio Admin -->
+  <menuitem id="menu_cockpit_mail"
+            name="📧 Mail Admin"
+            parent="menu_clio_cockpit_root"
+            action="action_cockpit_mail"
+            groups="clio_cockpit.group_clio_admin"
+            sequence="40"/>
+
+  <menuitem id="menu_cockpit_server"
+            name="🖥️ Server"
+            parent="menu_clio_cockpit_root"
+            action="action_cockpit_server"
+            groups="clio_cockpit.group_clio_admin"
+            sequence="50"/>
 
 </odoo>
