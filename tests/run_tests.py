@@ -38,12 +38,14 @@ UNIT_SUITES = {
     "clio":       "test_clio",
     "research":   "test_research",
     "obit":       "test_obit",
+    "cockpit":    "test_cockpit",       # clio_cockpit + odoo_reply (_md_to_html)
 }
 
 SYSTEM_SUITES = {
-    "docs_ocr":    "test_docs_ocr",
-    "narrate_edge": "test_narrate_edge",
-    "fetch_live":  "test_fetch_live",
+    "docs_ocr":         "test_docs_ocr",
+    "narrate_edge":     "test_narrate_edge",
+    "fetch_live":       "test_fetch_live",
+    "cockpit_service":  "test_cockpit_service",  # smoke-tester mot clio-service :7200
 }
 
 
