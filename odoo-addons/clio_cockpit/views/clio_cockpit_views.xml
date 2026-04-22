@@ -1,142 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <record id="view_clio_cockpit_form" model="ir.ui.view">
-    <field name="name">clio.cockpit.form</field>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VY: Agenter
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="view_cockpit_agenter" model="ir.ui.view">
+    <field name="name">clio.cockpit.agenter</field>
     <field name="model">clio.cockpit</field>
     <field name="arch" type="xml">
-      <form string="Clio Cockpit">
+      <form string="Clio — Agenter">
         <sheet>
-
-          <notebook>
-
-            <!-- ══ FLIK: Agenter ══════════════════════════════════════════ -->
-            <page string="🤖 Agenter" groups="clio_cockpit.group_clio_user">
-              <group>
-                <div class="o_row">
-                  <button name="action_refresh_status" type="object"
-                          string="↻ Uppdatera status" class="btn-secondary"/>
-                </div>
-                <field name="agent_status" widget="text" nolabel="1"
-                       invisible="not agent_status"
-                       style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px;"/>
-              </group>
-            </page>
-
-            <!-- ══ FLIK: RAG — Kunskapsbas ════════════════════════════════ -->
-            <page string="🔍 RAG">
-              <group>
-                <div class="o_cockpit_search_row"
-                     style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
-                  <field name="rag_query"
-                         placeholder="Ställ en fråga om böcker eller projekt… (Enter för att söka)"
-                         nolabel="1"
-                         style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
-                  <field name="rag_mode" nolabel="1"
-                         style="width:160px; border:none; border-left:1px solid #dee2e6; border-radius:0; box-shadow:none; background:#f8f9fa;"/>
-                  <button name="action_rag_search" type="object"
-                          string="🔍 Sök" class="btn-primary"
-                          style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
-                </div>
-                <field name="rag_result" widget="text" nolabel="1"
-                       invisible="not rag_result"
-                       style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
-              </group>
-            </page>
-
-            <!-- ══ FLIK: Bibliotek ════════════════════════════════════════ -->
-            <page string="📚 Bibliotek">
-              <group>
-                <div class="o_cockpit_search_row"
-                     style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
-                  <field name="library_query"
-                         placeholder="Sök på titel eller författare… (Enter för att söka)"
-                         nolabel="1"
-                         style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
-                  <button name="action_library_search" type="object"
-                          string="🔍 Sök" class="btn-primary"
-                          style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
-                </div>
-                <field name="library_result" widget="text" nolabel="1"
-                       invisible="not library_result"
-                       style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
-              </group>
-            </page>
-
-            <!-- ══ FLIK: Mail Admin ═══════════════════════════════════════ -->
-            <page string="📧 Mail Admin" groups="clio_cockpit.group_clio_admin">
-              <group>
-                <div class="o_row">
-                  <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
-                  <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
-                  <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
-                  <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
-                  <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
-                </div>
-                <field name="mail_result" widget="text" nolabel="1"
-                       invisible="not mail_result"
-                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
-              </group>
-
-              <group string="Godkänn väntande">
-                <field name="decide_sender" placeholder="avsandare@exempel.se"/>
-                <div class="o_row">
-                  <button name="action_decide_vitlista"   type="object" string="Vitlista"   class="btn-success"/>
-                  <button name="action_decide_svartlista" type="object" string="Svartlista" class="btn-danger"/>
-                  <button name="action_decide_behall"     type="object" string="Behåll"     class="btn-secondary"/>
-                </div>
-              </group>
-
-              <group string="Vitlista / Svartlista">
-                <field name="email_input" placeholder="namn@exempel.se"/>
-                <div class="o_row">
-                  <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
-                  <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
-                </div>
-              </group>
-
-              <group string="Intervju">
-                <field name="interview_to"      placeholder="deltagare@exempel.se"/>
-                <field name="interview_subject" placeholder="Ämne"/>
-                <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
-                <div class="o_row">
-                  <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
-                  <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
-                </div>
-              </group>
-            </page>
-
-            <!-- ══ FLIK: Server ═══════════════════════════════════════════ -->
-            <page string="🖥️ Server" groups="clio_cockpit.group_clio_admin">
-              <group>
-                <div class="o_row">
-                  <button name="action_refresh_server" type="object"
-                          string="↻ Uppdatera" class="btn-secondary"/>
-                  <field name="server_last_checked" nolabel="1" readonly="1"
-                         invisible="not server_last_checked"
-                         style="color: #888; font-size: 0.85em; margin-left: 12px;"/>
-                </div>
-                <field name="server_summary" widget="text" nolabel="1"
-                       invisible="not server_summary"
-                       style="font-family: monospace; white-space: pre; background: #f7f7f7; padding: 8px; border-radius: 4px; margin-top: 8px;"/>
-              </group>
-              <group string="Uppdateringar">
-                <field name="server_updates" widget="text" nolabel="1"
-                       invisible="not server_updates"
-                       style="font-family: monospace; white-space: pre-wrap; background: #fff8f0; padding: 8px; border-radius: 4px;"/>
-              </group>
-            </page>
-
-          </notebook>
+          <group string="Agentstatus">
+            <div class="o_row">
+              <button name="action_refresh_status" type="object"
+                      string="↻ Uppdatera status" class="btn-secondary"/>
+            </div>
+            <field name="agent_status" widget="text" nolabel="1"
+                   invisible="not agent_status"
+                   style="font-family:monospace; white-space:pre; background:#f7f7f7; padding:10px; border-radius:6px; margin-top:8px;"/>
+          </group>
         </sheet>
       </form>
     </field>
   </record>
 
-  <record id="action_clio_cockpit" model="ir.actions.act_window">
-    <field name="name">Clio Cockpit</field>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VY: RAG — Kunskapsbas
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="view_cockpit_rag" model="ir.ui.view">
+    <field name="name">clio.cockpit.rag</field>
+    <field name="model">clio.cockpit</field>
+    <field name="arch" type="xml">
+      <form string="Clio — RAG Kunskapsbas">
+        <sheet>
+          <group string="Kunskapsbas">
+            <div style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+              <field name="rag_query"
+                     placeholder="Ställ en fråga… (Enter för att söka)"
+                     nolabel="1"
+                     style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
+              <field name="rag_mode" nolabel="1"
+                     style="width:160px; border:none; border-left:1px solid #dee2e6; border-radius:0; box-shadow:none; background:#f8f9fa;"/>
+              <button name="action_rag_search" type="object"
+                      string="🔍 Sök" class="btn-primary"
+                      style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
+            </div>
+            <field name="rag_result" widget="text" nolabel="1"
+                   invisible="not rag_result"
+                   style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VY: Bibliotek
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="view_cockpit_bibliotek" model="ir.ui.view">
+    <field name="name">clio.cockpit.bibliotek</field>
+    <field name="model">clio.cockpit</field>
+    <field name="arch" type="xml">
+      <form string="Clio — Bibliotek">
+        <sheet>
+          <group string="Sök i biblioteket">
+            <div style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+              <field name="library_query"
+                     placeholder="Titel eller författare… (Enter för att söka)"
+                     nolabel="1"
+                     style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
+              <button name="action_library_search" type="object"
+                      string="🔍 Sök" class="btn-primary"
+                      style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
+            </div>
+            <field name="library_result" widget="text" nolabel="1"
+                   invisible="not library_result"
+                   style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VY: Mail Admin
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="view_cockpit_mail" model="ir.ui.view">
+    <field name="name">clio.cockpit.mail</field>
+    <field name="model">clio.cockpit</field>
+    <field name="arch" type="xml">
+      <form string="Clio — Mail Admin">
+        <sheet>
+          <group string="Åtgärder">
+            <div class="o_row">
+              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
+              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
+              <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
+              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
+            </div>
+            <field name="mail_result" widget="text" nolabel="1"
+                   invisible="not mail_result"
+                   style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; margin-top:8px;"/>
+          </group>
+
+          <group string="Vitlista / Svartlista">
+            <field name="email_input" placeholder="namn@exempel.se"/>
+            <div class="o_row">
+              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+            </div>
+          </group>
+
+          <group string="Intervju">
+            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
+            <field name="interview_subject" placeholder="Ämne"/>
+            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
+            <div class="o_row">
+              <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
+              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
+            </div>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VY: Server
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="view_cockpit_server" model="ir.ui.view">
+    <field name="name">clio.cockpit.server</field>
+    <field name="model">clio.cockpit</field>
+    <field name="arch" type="xml">
+      <form string="Clio — Server">
+        <sheet>
+          <group string="Systeminformation">
+            <div class="o_row">
+              <button name="action_refresh_server" type="object"
+                      string="↻ Uppdatera" class="btn-secondary"/>
+              <field name="server_last_checked" nolabel="1" readonly="1"
+                     invisible="not server_last_checked"
+                     style="color:#888; font-size:0.85em; margin-left:12px;"/>
+            </div>
+            <field name="server_summary" widget="text" nolabel="1"
+                   invisible="not server_summary"
+                   style="font-family:monospace; white-space:pre; background:#f7f7f7; padding:10px; border-radius:6px; margin-top:8px;"/>
+          </group>
+          <group string="Uppdateringar">
+            <field name="server_updates" widget="text" nolabel="1"
+                   invisible="not server_updates"
+                   style="font-family:monospace; white-space:pre-wrap; background:#fff8f0; padding:10px; border-radius:6px;"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ACTIONS
+  ══════════════════════════════════════════════════════════════════════ -->
+  <record id="action_cockpit_agenter" model="ir.actions.act_window">
+    <field name="name">Agenter</field>
     <field name="res_model">clio.cockpit</field>
     <field name="view_mode">form</field>
+    <field name="view_id" ref="view_cockpit_agenter"/>
+    <field name="target">current</field>
+  </record>
+
+  <record id="action_cockpit_rag" model="ir.actions.act_window">
+    <field name="name">RAG — Kunskapsbas</field>
+    <field name="res_model">clio.cockpit</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_cockpit_rag"/>
+    <field name="target">current</field>
+  </record>
+
+  <record id="action_cockpit_bibliotek" model="ir.actions.act_window">
+    <field name="name">Bibliotek</field>
+    <field name="res_model">clio.cockpit</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_cockpit_bibliotek"/>
+    <field name="target">current</field>
+  </record>
+
+  <record id="action_cockpit_mail" model="ir.actions.act_window">
+    <field name="name">Mail Admin</field>
+    <field name="res_model">clio.cockpit</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_cockpit_mail"/>
+    <field name="target">current</field>
+  </record>
+
+  <record id="action_cockpit_server" model="ir.actions.act_window">
+    <field name="name">Server</field>
+    <field name="res_model">clio.cockpit</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_cockpit_server"/>
     <field name="target">current</field>
   </record>
 
