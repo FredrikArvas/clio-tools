@@ -90,7 +90,7 @@ class ClioCockpit(models.TransientModel):
                 if parts: extra = f"  [{', '.join(parts)}]"
             lines.append(f"{icon}  {info.get('label', key)}  {info.get('status', '')}{extra}")
         self.agent_status = "\n".join(lines)
-        return self._reopen()
+        return self._reopen("clio_cockpit.view_cockpit_agenter")
 
     # ── Server ────────────────────────────────────────────────────────────────
 
@@ -123,7 +123,7 @@ class ClioCockpit(models.TransientModel):
             self.server_updates = "✅  Inga väntande uppdateringar"
 
         self.server_last_checked = odoo_fields.Datetime.now()
-        return self._reopen()
+        return self._reopen("clio_cockpit.view_cockpit_server")
 
     # ── RAG ───────────────────────────────────────────────────────────────────
 
@@ -165,7 +165,7 @@ class ClioCockpit(models.TransientModel):
                     src_lines.append(f"  [{score}] {title}  {url}")
             answer += "\n".join(src_lines)
         self.rag_result = answer
-        return self._reopen()
+        return self._reopen("clio_cockpit.view_cockpit_rag")
 
     # ── Bibliotek ─────────────────────────────────────────────────────────────
 
@@ -174,13 +174,13 @@ class ClioCockpit(models.TransientModel):
             raise UserError("Skriv en sökning först.")
         result = _call(self.env, "/library/search", {"q": self.library_query})
         self.library_result = result.get("text", "")
-        return self._reopen()
+        return self._reopen("clio_cockpit.view_cockpit_bibliotek")
 
     # ── Mail Admin ────────────────────────────────────────────────────────────
 
     def _mail(self, path, data=None):
         self.mail_result = _call(self.env, path, data).get("text", "")
-        return self._reopen()
+        return self._reopen("clio_cockpit.view_cockpit_mail")
 
     def action_list(self):       return self._mail("/mail/list")
     def action_waiting(self):    return self._mail("/mail/waiting")
@@ -244,11 +244,16 @@ class ClioCockpit(models.TransientModel):
 
     # ── Hjälp ─────────────────────────────────────────────────────────────────
 
-    def _reopen(self):
-        return {
+    def _reopen(self, view_xml_id: str | None = None):
+        res = {
             "type":      "ir.actions.act_window",
             "res_model": self._name,
             "res_id":    self.id,
             "view_mode": "form",
             "target":    "current",
         }
+        if view_xml_id:
+            view = self.env.ref(view_xml_id, raise_if_not_found=False)
+            if view:
+                res["view_id"] = view.id
+        return res
