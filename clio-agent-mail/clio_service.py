@@ -309,6 +309,65 @@ def _route_agents_status(_data: dict) -> dict:
     return {"ok": True, "agents": agents}
 
 
+# ── Serverhälsa ──────────────────────────────────────────────────────────────
+
+_updates_cache: dict = {"ts": 0.0, "list": []}
+_UPDATES_TTL = 3600  # sekunder — apt körs max en gång per timme
+
+
+def _get_pending_updates() -> list[str]:
+    import time, subprocess
+    now = time.time()
+    if now - _updates_cache["ts"] > _UPDATES_TTL:
+        try:
+            subprocess.run(["apt-get", "update", "-qq"], capture_output=True, timeout=30)
+            r = subprocess.run(
+                ["apt", "list", "--upgradable"],
+                capture_output=True, text=True, timeout=15,
+            )
+            pkgs = [
+                line.split("/")[0]
+                for line in r.stdout.splitlines()
+                if "/" in line
+            ]
+            _updates_cache["list"] = pkgs
+        except Exception:
+            pass
+        _updates_cache["ts"] = now
+    return _updates_cache["list"]
+
+
+def _route_server_health(_data: dict) -> dict:
+    try:
+        import psutil
+    except ImportError:
+        return {"ok": False, "error": "psutil saknas — kör: pip install psutil"}
+
+    cpu   = psutil.cpu_percent(interval=0.3)
+    ram   = psutil.virtual_memory()
+    disk  = psutil.disk_usage("/")
+    uptime_s = int(__import__("time").time() - psutil.boot_time())
+    days, rem = divmod(uptime_s, 86400)
+    hours, _  = divmod(rem, 3600)
+
+    updates = _get_pending_updates()
+
+    return {
+        "ok":            True,
+        "cpu_percent":   round(cpu, 1),
+        "ram_used_gb":   round(ram.used   / 1024 ** 3, 1),
+        "ram_total_gb":  round(ram.total  / 1024 ** 3, 1),
+        "ram_percent":   round(ram.percent, 1),
+        "disk_used_gb":  round(disk.used  / 1024 ** 3, 0),
+        "disk_total_gb": round(disk.total / 1024 ** 3, 0),
+        "disk_percent":  round(disk.percent, 1),
+        "uptime_days":   days,
+        "uptime_hours":  hours,
+        "updates":       updates,
+        "updates_count": len(updates),
+    }
+
+
 # ── Router ────────────────────────────────────────────────────────────────────
 
 _ROUTES: dict[tuple[str, str], callable] = {
@@ -317,6 +376,8 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("POST", "/rag/query"):            _route_rag_query,
     ("POST", "/library/search"):       _route_library_search,
     ("GET",  "/health"):               _route_health,
+    ("GET",  "/health/server"):        _route_server_health,
+    ("POST", "/health/server"):        _route_server_health,
     ("POST", "/health"):               _route_health,
     ("GET",  "/mail/list"):            _route_mail_list,
     ("POST", "/mail/list"):            _route_mail_list,

@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_clio_cockpit,clio.cockpit,model_clio_cockpit,base.group_system,1,1,1,1
+access_clio_cockpit_user,clio.cockpit (user),model_clio_cockpit,base.group_user,1,1,1,1

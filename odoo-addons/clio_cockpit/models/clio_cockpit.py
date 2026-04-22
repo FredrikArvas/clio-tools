@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_URL = "http://localhost:7200"
+_DEFAULT_URL = "http://172.18.0.1:7200"
 
 
 def _service_url(env) -> str:
@@ -57,6 +57,11 @@ class ClioCockpit(models.TransientModel):
     library_query  = fields.Char(string="Sök titel / författare")
     library_result = fields.Text(string="Träffar", readonly=True)
 
+    # ── Server ────────────────────────────────────────────────────────────────
+    server_summary      = fields.Text(string="Systeminformation", readonly=True)
+    server_updates      = fields.Text(string="Tillgängliga uppdateringar", readonly=True)
+    server_last_checked = fields.Datetime(string="Senast kontrollerad", readonly=True)
+
     # ── Mail Admin ────────────────────────────────────────────────────────────
     mail_result      = fields.Text(string="Resultat", readonly=True)
     email_input      = fields.Char(string="E-post")
@@ -81,6 +86,39 @@ class ClioCockpit(models.TransientModel):
                 if parts: extra = f"  [{', '.join(parts)}]"
             lines.append(f"{icon}  {info.get('label', key)}  {info.get('status', '')}{extra}")
         self.agent_status = "\n".join(lines)
+        return self._reopen()
+
+    # ── Server ────────────────────────────────────────────────────────────────
+
+    def action_refresh_server(self):
+        from odoo import fields as odoo_fields
+        r = _call(self.env, "/health/server")
+
+        cpu   = r.get("cpu_percent", "?")
+        ram_u = r.get("ram_used_gb", "?")
+        ram_t = r.get("ram_total_gb", "?")
+        ram_p = r.get("ram_percent", "?")
+        disk_u = r.get("disk_used_gb", "?")
+        disk_t = r.get("disk_total_gb", "?")
+        disk_p = r.get("disk_percent", "?")
+        days   = r.get("uptime_days", 0)
+        hours  = r.get("uptime_hours", 0)
+
+        self.server_summary = (
+            f"CPU      {cpu} %\n"
+            f"RAM      {ram_u} / {ram_t} GB  ({ram_p} %)\n"
+            f"Disk     {disk_u} / {disk_t} GB  ({disk_p} %)\n"
+            f"Uptime   {days} dagar  {hours} timmar"
+        )
+
+        updates = r.get("updates", [])
+        count   = r.get("updates_count", 0)
+        if updates:
+            self.server_updates = f"{count} uppdateringar:\n" + "\n".join(f"  • {u}" for u in updates)
+        else:
+            self.server_updates = "✅  Inga väntande uppdateringar"
+
+        self.server_last_checked = odoo_fields.Datetime.now()
         return self._reopen()
 
     # ── RAG ───────────────────────────────────────────────────────────────────
