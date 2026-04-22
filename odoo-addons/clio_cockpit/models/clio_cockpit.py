@@ -41,6 +41,9 @@ def _call(env, path: str, data: dict | None = None) -> dict:
 class ClioCockpit(models.TransientModel):
     _name        = "clio.cockpit"
     _description = "Clio Cockpit"
+    _rec_name    = "display_name"
+
+    display_name = fields.Char(default="Clio Cockpit", readonly=True)
 
     # ── Agentstatus ───────────────────────────────────────────────────────────
     agent_status = fields.Text(string="Agentstatus", readonly=True)
