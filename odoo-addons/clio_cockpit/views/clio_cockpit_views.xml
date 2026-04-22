@@ -26,31 +26,40 @@
             <!-- ══ FLIK: RAG — Kunskapsbas ════════════════════════════════ -->
             <page string="🔍 RAG">
               <group>
-                <div class="o_row" style="align-items: center; gap: 8px;">
-                  <field name="rag_query" placeholder="Ställ en fråga om böcker eller projekt…"
-                         style="flex: 1;" nolabel="1"/>
-                  <field name="rag_mode" nolabel="1" style="width: 180px;"/>
+                <div class="o_cockpit_search_row"
+                     style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+                  <field name="rag_query"
+                         placeholder="Ställ en fråga om böcker eller projekt… (Enter för att söka)"
+                         nolabel="1"
+                         style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
+                  <field name="rag_mode" nolabel="1"
+                         style="width:160px; border:none; border-left:1px solid #dee2e6; border-radius:0; box-shadow:none; background:#f8f9fa;"/>
                   <button name="action_rag_search" type="object"
-                          string="Sök" class="btn-primary"/>
+                          string="🔍 Sök" class="btn-primary"
+                          style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
                 </div>
                 <field name="rag_result" widget="text" nolabel="1"
                        invisible="not rag_result"
-                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+                       style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
               </group>
             </page>
 
             <!-- ══ FLIK: Bibliotek ════════════════════════════════════════ -->
             <page string="📚 Bibliotek">
               <group>
-                <div class="o_row" style="align-items: center; gap: 8px;">
-                  <field name="library_query" placeholder="Titel, författare…"
-                         style="flex: 1;" nolabel="1"/>
+                <div class="o_cockpit_search_row"
+                     style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+                  <field name="library_query"
+                         placeholder="Sök på titel eller författare… (Enter för att söka)"
+                         nolabel="1"
+                         style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
                   <button name="action_library_search" type="object"
-                          string="Sök" class="btn-primary"/>
+                          string="🔍 Sök" class="btn-primary"
+                          style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
                 </div>
                 <field name="library_result" widget="text" nolabel="1"
                        invisible="not library_result"
-                       style="font-family: monospace; white-space: pre-wrap; margin-top: 8px;"/>
+                       style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; border:1px solid #e9ecef; width:100%;"/>
               </group>
             </page>
 

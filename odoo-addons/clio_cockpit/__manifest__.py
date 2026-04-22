@@ -12,6 +12,11 @@
         "views/clio_cockpit_views.xml",
         "views/menu.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "clio_cockpit/static/src/js/cockpit_enter.js",
+        ],
+    },
     "installable": True,
     "auto_install": False,
     "application":  False,
