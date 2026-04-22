@@ -27,6 +27,16 @@
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
 
+          <!-- Godkänn väntande mail -->
+          <group string="Godkänn väntande">
+            <field name="decide_sender" placeholder="avsandare@exempel.se"/>
+            <div class="o_row">
+              <button name="action_decide_vitlista"   type="object" string="Vitlista"   class="btn-success"/>
+              <button name="action_decide_svartlista" type="object" string="Svartlista" class="btn-danger"/>
+              <button name="action_decide_behall"     type="object" string="Behåll"     class="btn-secondary"/>
+            </div>
+          </group>
+
           <!-- Vitlista / svartlista -->
           <group string="Vitlista / Svartlista">
             <field name="email_input" placeholder="namn@exempel.se"/>
