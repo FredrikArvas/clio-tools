@@ -43,7 +43,8 @@ MODEL          = os.environ.get('CLIO_MODEL', 'claude-sonnet-4-6')
 
 # Kanal-id -> Qdrant-collection (RAG-projektminne)
 CHANNEL_RAG_MAP: dict[int, str] = {
-    5: "cap_ssf_pmo",   # #SSF-PMO
+    4: "cap_ssf_pmo",   # #SSF-PMO i ssf_t2
+    5: "cap_ssf_pmo",   # #SSF-PMO i aiab
 }
 
 SYSTEM_PROMPT_BASE = (
