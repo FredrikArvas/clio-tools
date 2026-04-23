@@ -215,14 +215,51 @@ def _route_mail_update(data: dict) -> dict:
     return _dispatch("update", body_text=content, subject=subject)
 
 
+
+# Etiketter för kända Qdrant-collections
+_COLLECTION_LABELS: dict[str, str] = {
+    "clio_books":  "Böcker",
+    "clio_ncc":    "Context Cards (NCC)",
+    "cap_ssf":     "SSF — Protokoll & Årsred.",
+    "cap_ssf_pmo": "SSF — PMO",
+    "cap_ssf_crm": "SSF — CRM",
+    "mem_ssf":     "SSF — Minne",
+    "vigil_ufo":   "Vigil — UFO",
+    "vigil_ai":    "Vigil — AI",
+}
+
 # ── RAG ──────────────────────────────────────────────────────────────────────
+
+def _route_rag_collections(_data: dict) -> dict:
+    if not RAG_DIR.exists():
+        return {"ok": False, "error": f"clio-rag ej hittad: {RAG_DIR}"}
+    sys.path.insert(0, str(RAG_DIR))
+    try:
+        import importlib
+        rag_config  = importlib.import_module("config")
+        client      = rag_config.get_qdrant_client()
+        available   = {c.name for c in client.get_collections().collections}
+        result = [
+            {"key": k, "label": v}
+            for k, v in _COLLECTION_LABELS.items()
+            if k in available
+        ]
+        return {"ok": True, "collections": result}
+    except Exception as e:
+        logger.error(f"rag/collections failed: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
+    finally:
+        if str(RAG_DIR) in sys.path:
+            sys.path.remove(str(RAG_DIR))
+
 
 def _route_rag_query(data: dict) -> dict:
     q = data.get("q", "").strip()
     if not q:
         return {"ok": False, "error": "saknat fält: q"}
     top     = int(data.get("top", 5))
-    use_ncc = bool(data.get("ncc", False))
+    collection_key = data.get("collection", "").strip()
+    use_ncc = bool(data.get("ncc", False))  # bakåtkompatibilitet
 
     if not RAG_DIR.exists():
         return {"ok": False, "error": f"clio-rag ej hittad: {RAG_DIR}"}
@@ -233,17 +270,23 @@ def _route_rag_query(data: dict) -> dict:
         rag_query  = importlib.import_module("query")
         rag_config = importlib.import_module("config")
 
-        collection = rag_config.NCC_COLLECTION_NAME if use_ncc else rag_config.COLLECTION_NAME
+        if collection_key:
+            collection = collection_key
+        elif use_ncc:
+            collection = rag_config.NCC_COLLECTION_NAME
+        else:
+            collection = rag_config.COLLECTION_NAME
+        is_ncc = collection == rag_config.NCC_COLLECTION_NAME
         vector     = rag_query.embed_query(q)
         hits       = rag_query.search_qdrant(vector, top_k=top, collection=collection)
-        context    = rag_query.format_context(hits, is_ncc=use_ncc)
-        answer     = rag_query.ask_claude(q, context, is_ncc=use_ncc)
+        context    = rag_query.format_context(hits, is_ncc=is_ncc)
+        answer     = rag_query.ask_claude(q, context, is_ncc=is_ncc)
 
         sources = []
         for hit in hits:
             p = hit.payload
             src = {"title": p.get("title", "?"), "score": round(hit.score, 3)}
-            if use_ncc:
+            if is_ncc:
                 src["url"] = p.get("ext_notion_url", "")
             else:
                 src["page_start"] = p.get("ext_page_start")
@@ -451,6 +494,8 @@ def _route_health_docker(_data: dict) -> dict:
 _ROUTES: dict[tuple[str, str], callable] = {
     ("GET",  "/agents/status"):        _route_agents_status,
     ("POST", "/agents/status"):        _route_agents_status,
+    ("GET",  "/rag/collections"):       _route_rag_collections,
+    ("POST", "/rag/collections"):       _route_rag_collections,
     ("POST", "/rag/query"):            _route_rag_query,
     ("POST", "/library/search"):       _route_library_search,
     ("GET",  "/health"):               _route_health,
