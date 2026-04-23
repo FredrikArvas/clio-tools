@@ -43,8 +43,8 @@ class TestMdToHtml(unittest.TestCase):
         self.assertIn("Stycke två", result)
 
     def test_code_block_preserved(self):
-        result = _md_to_html("Intro\n```python\nprint('hello')\n```\nAvslut")
-        self.assertIn("<pre><code>", result)
+        result = _md_to_html("Intro\n\n```python\nprint('hello')\n```\n\nAvslut")
+        self.assertIn("<pre><code", result)   # class="language-python" kan finnas
         self.assertIn("print(", result)
 
     def test_code_block_html_escaped(self):
@@ -52,9 +52,9 @@ class TestMdToHtml(unittest.TestCase):
         self.assertIn("&lt;script&gt;", result)
         self.assertNotIn("<script>", result)
 
-    def test_single_newline_becomes_space(self):
+    def test_single_newline_becomes_br(self):
         result = _md_to_html("Rad ett\nRad två")
-        self.assertNotIn("<br", result)   # enkel radbryt → mellanslag
+        self.assertIn("<br", result)      # nl2br: enkel radbryt → <br/>
         self.assertIn("Rad ett", result)
 
     def test_empty_string(self):
