@@ -4,6 +4,7 @@
     'summary': 'Meta-modul: installerar alla Clio-moduler för AIAB-databasen',
     'author': 'Arvas International AB',
     'depends': [
+        'partner_autocomplete',
         'clio_cockpit',
         'clio_discuss',
         'clio_graph',
