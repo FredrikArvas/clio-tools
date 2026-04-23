@@ -7,6 +7,8 @@ import urllib.error
 import json
 
 from odoo import api, models
+from markupsafe import Markup
+from odoo.tools import html_sanitize
 
 logger = logging.getLogger('clio_discuss')
 
@@ -20,16 +22,34 @@ def _strip_html(raw: str) -> str:
 class ClioDiscussChannel(models.Model):
     _inherit = 'discuss.channel'
 
-    def message_post(self, **kwargs):
-        msg = super().message_post(**kwargs)
+    def _clio_active_channel_ids(self) -> set[int]:
+        """Returnerar mängden kanal-id:n som Clio lyssnar på."""
+        config = self.env['ir.config_parameter'].sudo()
 
+        # Primär kanal via XML-id (bakåtkompatibelt)
+        ids: set[int] = set()
         clio_channel = self.env.ref(
             'clio_discuss.channel_clio', raise_if_not_found=False
         )
-        if not clio_channel or self.id != clio_channel.id:
+        if clio_channel:
+            ids.add(clio_channel.id)
+
+        # Extra kanaler via kommaseparerad config (t.ex. "5,7,12")
+        extra = config.get_param('clio_discuss.extra_channel_ids', '')
+        for part in extra.split(','):
+            part = part.strip()
+            if part.isdigit():
+                ids.add(int(part))
+
+        return ids
+
+    def message_post(self, **kwargs):
+        msg = super().message_post(**kwargs)
+
+        if self.id not in self._clio_active_channel_ids():
             return msg
 
-        # Hoppa över svar från clio_post_reply (context-flagga) eller Clio Bot — förhindrar loop
+        # Hoppa över svar från clio_post_reply (context-flagga) eller Clio Bot
         if self.env.context.get('clio_skip_hook'):
             return msg
         clio_bot = self.env.ref(
@@ -43,11 +63,11 @@ class ClioDiscussChannel(models.Model):
             return msg
 
         sender_email = self.env.user.email or ''
-        sender_name = self.env.user.name or ''
-        channel_id = self.id
+        sender_name  = self.env.user.name or ''
+        channel_id   = self.id
 
         config = self.env['ir.config_parameter'].sudo()
-        agent_url = config.get_param(
+        agent_url     = config.get_param(
             'clio_discuss.agent_url', 'http://localhost:8100/message'
         )
         shared_secret = config.get_param('clio_discuss.shared_secret', '')
@@ -84,5 +104,5 @@ class ClioDiscussChannel(models.Model):
         agent-hooken och behåller HTML-formatering.
         """
         channel = self.sudo().with_context(clio_skip_hook=True).browse(channel_id)
-        channel.message_post(body=body, message_type='comment')
+        channel.message_post(body=Markup(html_sanitize(body)), message_type="comment")
         return True
