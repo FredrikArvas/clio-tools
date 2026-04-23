@@ -50,10 +50,7 @@ class ClioCockpit(models.TransientModel):
 
     # ── RAG ───────────────────────────────────────────────────────────────────
     rag_query  = fields.Char(string="Fråga")
-    rag_mode   = fields.Selection([
-        ("books", "Böcker"),
-        ("ncc",   "Context Cards (NCC)"),
-    ], string="Källa", default="books")
+    rag_mode   = fields.Selection(selection="_get_rag_modes", string="Källa", default="clio_books")
     rag_result = fields.Text(string="Svar", readonly=True)
 
     # ── Bibliotek ─────────────────────────────────────────────────────────────
@@ -127,13 +124,36 @@ class ClioCockpit(models.TransientModel):
 
     # ── RAG ───────────────────────────────────────────────────────────────────
 
+
+    def _get_rag_modes(self):
+        import json as _json
+        try:
+            result      = _call(self.env, "/rag/collections")
+            collections = result.get("collections", [])
+        except Exception:
+            return [("clio_books", "Böcker"), ("clio_ncc", "Context Cards (NCC)")]
+        perm_json = self.env["ir.config_parameter"].sudo().get_param(
+            "clio.rag.permissions", default="{}"
+        )
+        try:
+            perm_map = _json.loads(perm_json)
+        except Exception:
+            perm_map = {}
+        modes = []
+        for c in collections:
+            key      = c["key"]
+            required = perm_map.get(key, [])
+            if not required or any(self.env.user.has_group(g) for g in required):
+                modes.append((key, c["label"]))
+        return modes or [("clio_books", "Böcker")]
+
     def action_rag_search(self):
         if not self.rag_query:
             raise UserError("Skriv en fråga först.")
         result = _call(self.env, "/rag/query", {
-            "q":   self.rag_query,
-            "top": 5,
-            "ncc": self.rag_mode == "ncc",
+            "q":          self.rag_query,
+            "top":        5,
+            "collection": self.rag_mode or "clio_books",
         })
         # Strippa markdown-formattering (** och *)
         import re as _re

@@ -24,7 +24,7 @@ EMBED_MODEL   = "text-embedding-3-small"
 EMBED_DIM     = 1536
 CHUNK_WORDS   = 500
 OVERLAP_WORDS = 60
-SUPPORTED_EXT = {".pdf", ".docx", ".pptx", ".txt", ".py"}
+SUPPORTED_EXT = {".pdf", ".docx", ".pptx", ".txt"}
 
 # ---------------------------------------------------------------------------
 def get_client() -> QdrantClient:
@@ -97,7 +97,7 @@ def extract_text(path: Path) -> str:
     if ext == ".pdf":   return extract_pdf(path)
     if ext == ".docx":  return extract_docx(path)
     if ext == ".pptx":  return extract_pptx(path)
-    if ext in (".txt", ".py"):  return path.read_text(errors="ignore")
+    if ext == ".txt":   return path.read_text(errors="ignore")
     return ""
 
 # ---------------------------------------------------------------------------
