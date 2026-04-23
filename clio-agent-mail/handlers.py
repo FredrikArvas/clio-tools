@@ -187,23 +187,37 @@ def _handle_obit_import(mail_item, clf, config, dry_run: bool):
 
 
 
+
 def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
-    """Admin/coded mailar ssf@arvas.international — RAG mot cap_ssf_crm.
-    Stöder trådad konversation (via thread_history) och bifogade filer.
-    """
+    """ssf@/aiab@/gsf@ → multi-collection RAG + bilage-sparning i *minnet-mapp."""
     import subprocess
     import re
     import sys
     import json
+    import uuid as _uuid
+    from datetime import datetime as _dt
     import attachments as att_module
 
-    to_addr = _extract_email(mail_item.sender)
+    to_addr    = _extract_email(mail_item.sender)
+    account    = clf.account_key   # "ssf" | "aiab" | "gsf"
 
-    # ── Fråga: ämnesrad + första stycket av brödtext ─────────────────────────
+    # ── Läs config ───────────────────────────────────────────────────────────
+    def _cfg(key, fallback=""):
+        try:
+            return config.get("rag_accounts", f"{account}_{key}", fallback=fallback)
+        except Exception:
+            return fallback
+
+    collections_raw = _cfg("collections", "cap_ssf_crm" if account == "ssf" else f"mem_{account}")
+    collections     = [c.strip() for c in collections_raw.split(",") if c.strip()]
+    minnet_path_str = _cfg("minnet_path", "")
+    minnet_path     = Path(minnet_path_str).expanduser() if minnet_path_str else None
+
+    # ── Fråga ────────────────────────────────────────────────────────────────
     subject_clean = re.sub(
         r"^(Re|Fwd|Fw|Sv|VS):\s*", "", mail_item.subject or "", flags=re.IGNORECASE
     ).strip()
-    body_raw = _get_plain_body(mail_item) or ""
+    body_raw   = _get_plain_body(mail_item) or ""
     body_lines = [l for l in body_raw.splitlines() if l.strip() and not l.startswith(">")]
     first_para = " ".join(body_lines[:5]).strip()
 
@@ -213,35 +227,35 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
     if not question:
         question = "Ge en översikt av projektets innehåll"
 
-    # ── Konversationshistorik ────────────────────────────────────────────────
+    # ── Konversationshistorik ─────────────────────────────────────────────────
     history: list[dict] = []
     if thread_id:
-        raw_history = state.get_thread_history(thread_id)
-        for msg in raw_history:
+        for msg in state.get_thread_history(thread_id):
             direction = msg.get("direction", "inbound")
             body      = (msg.get("body") or "").strip()
-            if not body:
-                continue
-            # Strippa citerad text (>-rader) och vår footer från outbound
             clean_lines = []
             for line in body.splitlines():
                 if line.startswith(">"):
                     break
-                if line.startswith("---") and "cap_ssf_crm" in body:
+                if line.startswith("---") and "mem_" in body:
                     break
                 clean_lines.append(line)
             clean_body = "\n".join(clean_lines).strip()
-            if not clean_body:
-                continue
-            role = "user" if direction == "inbound" else "assistant"
-            history.append({"role": role, "content": clean_body})
+            if clean_body:
+                history.append({
+                    "role":    "user" if direction == "inbound" else "assistant",
+                    "content": clean_body,
+                })
 
-    # ── Bilagor ──────────────────────────────────────────────────────────────
+    # ── Bilagor: extrahera + spara till *minnet-mapp ─────────────────────────
     attachment_text: str | None = None
-    att_names: list[str] = []
+    att_names: list[str]        = []
+    sender_slug = re.sub(r"[^a-z0-9]", "_", to_addr.split("@")[0].lower())[:20]
+    datestamp   = _dt.utcnow().strftime("%Y%m%d_%H%M%S")
+
     for att in getattr(mail_item, "attachments", []):
         filepath = getattr(att, "filepath", None) or getattr(att, "path", None)
-        filename = getattr(att, "filename", "")
+        filename = getattr(att, "filename", "") or ""
         if not filepath:
             continue
         ext = Path(filepath).suffix.lower()
@@ -250,60 +264,73 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
         try:
             result = att_module.extract(filepath)
             if result.text and result.text.strip():
-                attachment_text = (attachment_text or "") + f"[{filename}]\n{result.text[:3000]}\n\n"
+                attachment_text = (attachment_text or "") + (
+                    f"[{filename}]\n{result.text[:3000]}\n\n"
+                )
                 att_names.append(filename)
         except Exception as e:
             logger.warning(f"[rag_query] Kunde inte läsa bilaga {filename}: {e}")
 
+        # Spara till *minnet-mapp
+        if minnet_path and not dry_run:
+            try:
+                minnet_path.mkdir(parents=True, exist_ok=True)
+                safe_name  = re.sub(r"[^\w\-.]", "_", filename)
+                dest       = minnet_path / f"{datestamp}_{sender_slug}_{safe_name}"
+                import shutil
+                shutil.copy2(filepath, dest)
+                logger.info(f"[rag_query] Bilaga sparad: {dest.name}")
+            except Exception as e:
+                logger.warning(f"[rag_query] Kunde inte spara bilaga till minnet: {e}")
+
     logger.info(
-        f"[rag_query] ssf@ från {to_addr}: {question[:60]}"
+        f"[rag_query] {account}@ från {to_addr}: {question[:60]}"
+        + (f" | collections: {collections}" )
         + (f" | historik: {len(history)} msg" if history else "")
         + (f" | bilagor: {att_names}" if att_names else "")
     )
 
-    # ── Kör query.py ─────────────────────────────────────────────────────────
+    # ── Kör query.py mot alla collections, samla hits ─────────────────────────
     rag_script = Path(__file__).parent.parent / "clio-rag" / "query.py"
-    cmd = [
-        sys.executable, str(rag_script),
-        "--collection", "cap_ssf_crm",
-        "--q",          question,
-        "--top",        "5",
-    ]
-    if history:
-        cmd += ["--history", json.dumps(history, ensure_ascii=False)]
-    if attachment_text:
-        cmd += ["--attachment-text", attachment_text]
+    combined_output_parts: list[str] = []
 
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=90,
-            cwd=str(rag_script.parent),
-        )
-        rag_output = (
-            result.stdout.strip()
-            if result.returncode == 0
-            else f"RAG-fel: {result.stderr[:300]}"
-        )
-    except subprocess.TimeoutExpired:
-        rag_output = "Tidsgräns överskreds (90 s) — försök med en kortare fråga."
-    except Exception as e:
-        rag_output = f"Tekniskt fel: {e}"
+    for collection in collections:
+        cmd = [
+            sys.executable, str(rag_script),
+            "--collection", collection,
+            "--q",          question,
+            "--top",        "4",
+        ]
+        if history:
+            cmd += ["--history", json.dumps(history, ensure_ascii=False)]
+        if attachment_text:
+            cmd += ["--attachment-text", attachment_text]
 
-    # ── Rensa query.py-header ─────────────────────────────────────────────────
-    skip = ("Fråga:", "Collection:", "Söker", "Historik:", "Bilaga:")
-    clean_lines = [
-        line for line in rag_output.splitlines()
-        if not any(line.startswith(s) for s in skip)
-    ]
-    reply_text = "\n".join(clean_lines).strip()
+        try:
+            res = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=90,
+                cwd=str(rag_script.parent),
+            )
+            out = res.stdout.strip() if res.returncode == 0 else f"[{collection}] Fel: {res.stderr[:150]}"
+        except subprocess.TimeoutExpired:
+            out = f"[{collection}] Tidsgräns överskreds."
+        except Exception as e:
+            out = f"[{collection}] Tekniskt fel: {e}"
 
-    # ── Bygg svar ────────────────────────────────────────────────────────────
-    footer_parts = ["📚 cap_ssf_crm | SSF CRM 2023"]
+        skip = ("Fråga:", "Collection:", "Söker", "Historik:", "Bilaga:")
+        clean = "\n".join(
+            l for l in out.splitlines() if not any(l.startswith(s) for s in skip)
+        ).strip()
+        if clean:
+            combined_output_parts.append(clean)
+
+    reply_text = "\n\n".join(combined_output_parts).strip() or "Inga träffar i projektminnet."
+
+    # ── Bygg svarsmail ────────────────────────────────────────────────────────
+    col_label    = " + ".join(collections)
+    footer_parts = [f"📚 {col_label}"]
     if att_names:
-        footer_parts.append(f"📎 Bilagor lästa: {', '.join(att_names)}")
+        footer_parts.append(f"📎 Sparad i {account}minnet: {', '.join(att_names)}")
 
     reply_body = (
         f"**Fråga:** {subject_clean}\n\n"
@@ -313,7 +340,7 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
     )
 
     if not dry_run:
-        out_msg_id = f"<clio-rag-{__import__('uuid').uuid4()}@arvas.international>"
+        out_msg_id = f"<clio-rag-{_uuid.uuid4()}@arvas.international>"
         smtp_client.send_email(
             config=config,
             from_account_key=clf.account_key,
@@ -323,14 +350,15 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
             reply_to_message_id=mail_item.message_id,
             message_id=out_msg_id,
         )
-        # Spara utgående svar i tråden så nästa mail har historik
         state.save_mail(
             message_id=out_msg_id,
-            account=config.get("mail", f"imap_user_{clf.account_key}", fallback="ssf@arvas.international"),
-            sender=config.get("mail", f"imap_user_{clf.account_key}", fallback="ssf@arvas.international"),
+            account=config.get("mail", f"imap_user_{clf.account_key}",
+                               fallback=f"{clf.account_key}@arvas.international"),
+            sender=config.get("mail", f"imap_user_{clf.account_key}",
+                              fallback=f"{clf.account_key}@arvas.international"),
             subject=f"Re: {mail_item.subject}",
             body=reply_body,
-            date_received=__import__("datetime").datetime.utcnow().isoformat(),
+            date_received=_dt.utcnow().isoformat(),
             status=state.STATUS_SENT,
             action="RAG_QUERY",
             thread_id=thread_id,
@@ -338,7 +366,7 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
             direction="outbound",
         )
         state.update_status(mail_item.message_id, state.STATUS_SENT)
-        logger.info(f"[rag_query] Svar skickat till {to_addr} (tråd: {thread_id[:20]}…)")
+        logger.info(f"[rag_query] Svar skickat till {to_addr}")
 
 
 def _handle_self_query(mail_item, clf, config, dry_run: bool):
