@@ -1233,3 +1233,6 @@ def _cmd_waiting_decide(mail_item, config) -> CommandResult:
     import handlers as _handlers
     _handlers._send_standard_for_waiting(sender, config)
     return CommandResult(f"Standardsvar skickat för: {sender}")
+
+# Late-bind: waiting_decide added after function definition
+_HANDLERS["waiting_decide"] = _cmd_waiting_decide

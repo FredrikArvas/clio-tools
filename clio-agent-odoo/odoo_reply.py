@@ -49,41 +49,24 @@ def _get_session() -> str:
 
 
 def _md_to_html(text: str) -> str:
-    """
-    Konverterar markdown till Odoo-säker HTML.
-    Odoo saniterar okända tags — vi HTML-escaper all text först
-    och lägger sedan till <br/> för radbrytningar.
-    """
-    import html as html_lib
-
-    # Extrahera kodblockar innan escaping
-    code_blocks: list[str] = []
-
-    def _save_code(m: re.Match) -> str:
-        code_blocks.append(m.group(2))
-        return f'\x00CODE{len(code_blocks) - 1}\x00'
-
-    text = re.sub(r'```(\w*)\n(.*?)```', _save_code, text, flags=re.DOTALL)
-
-    # Escape all HTML-specialtecken i resterande text
-    text = html_lib.escape(text)
-
-    # Återställ kodblockar som <pre><code>...</code></pre>
-    for i, code in enumerate(code_blocks):
-        text = text.replace(
-            f'\x00CODE{i}\x00',
-            f'<pre><code>{html_lib.escape(code)}</code></pre>',
+    """Konverterar markdown till HTML via markdown-biblioteket."""
+    try:
+        import markdown
+        html = markdown.markdown(
+            text,
+            extensions=['nl2br', 'fenced_code'],
         )
-
-    # Stycken → separata <p>-block (Odoo renderar dessa korrekt)
-    # Enkla radbrytningar → mellanslag inom stycket
-    paragraphs = text.split('\n\n')
-    parts = []
-    for para in paragraphs:
-        inner = para.replace('\n', ' ').strip()
-        if inner:
-            parts.append(f'<p>{inner}</p>')
-    return ''.join(parts) if parts else f'<p>{text}</p>'
+        return html
+    except ImportError:
+        # Fallback: enkel konvertering om markdown inte finns
+        import html as html_lib
+        paragraphs = text.split('\n\n')
+        parts = []
+        for para in paragraphs:
+            inner = html_lib.escape(para).replace('\n', '<br/>').strip()
+            if inner:
+                parts.append(f'<p>{inner}</p>')
+        return ''.join(parts) if parts else f'<p>{html_lib.escape(text)}</p>'
 
 
 def post_reply(channel_id: int, text: str) -> None:
@@ -114,7 +97,6 @@ def post_reply(channel_id: int, text: str) -> None:
     if data.get('error'):
         raise RuntimeError(data['error'])
 
-    # Om sessionen gick ut, töm cachen så nästa anrop återautentiserar
     result = data.get('result')
     if result is None and not data.get('error'):
         cache_key = f'{_ODOO_URL}/{_ODOO_DB}/{_BOT_LOGIN}'

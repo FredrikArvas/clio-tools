@@ -3,6 +3,8 @@ agent.py — clio-agent-odoo
 
 Flask-endpoint som tar emot meddelanden från Odoo #clio-kanalen,
 anropar Claude API och postar svaret tillbaka i kanalen via XML-RPC.
+
+RAG: Kanaler med CHANNEL_RAG_MAP söker projektminnet innan Claude svarar.
 """
 
 from __future__ import annotations
@@ -20,8 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / '.env')
 load_dotenv(Path(__file__).parent / '.env', override=True)
 
-# Gör clio_access och clio_core tillgängliga
-for _p in [str(ROOT), str(ROOT / 'clio-core')]:
+for _p in [str(ROOT), str(ROOT / 'clio-core'), str(ROOT / 'clio-rag')]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
@@ -39,18 +40,70 @@ app = Flask(__name__)
 SHARED_SECRET  = os.environ.get('CLIO_ODOO_SECRET', '')
 ANTHROPIC_KEY  = os.environ.get('ANTHROPIC_API_KEY', '')
 MODEL          = os.environ.get('CLIO_MODEL', 'claude-sonnet-4-6')
-SYSTEM_PROMPT  = (
+
+# Kanal-id -> Qdrant-collection (RAG-projektminne)
+CHANNEL_RAG_MAP: dict[int, str] = {
+    5: "cap_ssf_pmo",   # #SSF-PMO
+}
+
+SYSTEM_PROMPT_BASE = (
     'Du är Clio, AI-assistent på Arvas International AB, Muskö. '
     'Du svarar i Odoo Discuss. Håll svaren koncisa och använd markdown '
     'när det hjälper läsbarheten. Svara alltid på samma språk som frågan.'
 )
 
+SYSTEM_PROMPT_RAG = (
+    'Du är Clio, AI-assistent och projektminne för Capgemini-SSF-projektet. '
+    'Du svarar i Odoo Discuss #SSF-PMO. '
+    'Du får relevanta textpassager från projektdokumenten som kontext. '
+    'Basera ditt svar på dessa passager. Ange källdokument i hakparentes, '
+    'ex. [SSF Digitaliseringsstrategisk handlingsplan]. '
+    'Om svaret inte finns i passagerna, säg det tydligt. '
+    'Håll svaren koncisa. Svara alltid på samma språk som frågan.'
+)
+
+
+# ---------------------------------------------------------------------------
+# RAG-sökning
+# ---------------------------------------------------------------------------
+
+def _rag_search(question: str, collection: str, top_k: int = 5) -> str:
+    """Söker RAG-collection och returnerar formaterad kontext-sträng."""
+    try:
+        from openai import OpenAI
+        from qdrant_client import QdrantClient
+
+        oai    = OpenAI()
+        vec    = oai.embeddings.create(input=[question], model="text-embedding-3-small").data[0].embedding
+        qdrant = QdrantClient(host="localhost", port=6333)
+        hits   = qdrant.query_points(
+            collection_name=collection,
+            query=vec,
+            limit=top_k,
+            with_payload=True,
+        ).points
+
+        if not hits:
+            return ""
+
+        parts = []
+        for i, hit in enumerate(hits, 1):
+            p     = hit.payload
+            title = p.get("title", "Okänt dokument")
+            text  = p.get("summary", "")
+            parts.append(f"[Passage {i} — {title}]\n{text}")
+        return "\n\n".join(parts)
+
+    except Exception as exc:
+        logger.warning("RAG-sökning misslyckades: %s", exc)
+        return ""
+
+
+# ---------------------------------------------------------------------------
+# Behörighetskontroll
+# ---------------------------------------------------------------------------
 
 def _check_access(sender_email: str) -> str:
-    """
-    Returnerar behörighetsnivå för avsändaren.
-    Försöker använda clio_access om konfigurerat, annars enkel e-post-lista.
-    """
     matrix_page_id = os.environ.get('CLIO_ACCESS_MATRIX_PAGE_ID', '')
     notion_token   = os.environ.get('NOTION_API_KEY', '')
     admin_emails   = {
@@ -86,28 +139,50 @@ def _check_access(sender_email: str) -> str:
     return 'denied'
 
 
-def _build_reply(message: str, sender_name: str, level: str) -> str:
-    """Anropar Claude och returnerar svarstext (markdown)."""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
-    user_content = f'[{sender_name}]: {message}'
+# ---------------------------------------------------------------------------
+# Claude-anrop
+# ---------------------------------------------------------------------------
+
+def _build_reply(message: str, sender_name: str, rag_context: str = "") -> str:
+    client  = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
+    if rag_context:
+        system       = SYSTEM_PROMPT_RAG
+        user_content = (
+            f"Projektdokument (kontext):\n\n{rag_context}\n\n"
+            f"Fråga från {sender_name}: {message}"
+        )
+    else:
+        system       = SYSTEM_PROMPT_BASE
+        user_content = f'[{sender_name}]: {message}'
+
     response = client.messages.create(
         model=MODEL,
         max_tokens=2048,
-        system=SYSTEM_PROMPT,
+        system=system,
         messages=[{'role': 'user', 'content': user_content}],
     )
     return response.content[0].text
 
 
+# ---------------------------------------------------------------------------
+# Meddelandehantering
+# ---------------------------------------------------------------------------
+
 def _process(message: str, sender_email: str, sender_name: str, channel_id: int):
     level = _check_access(sender_email)
-    logger.info('Meddelande från %s (nivå: %s): %s', sender_email, level, message[:80])
+    logger.info('Meddelande från %s (nivå: %s) i kanal %d: %s',
+                sender_email, level, channel_id, message[:80])
 
     if level == 'denied':
         reply = f'Hej {sender_name} — du har tyvärr inte behörighet att använda Clio här.'
     else:
         try:
-            reply = _build_reply(message, sender_name, level)
+            rag_context = ""
+            collection  = CHANNEL_RAG_MAP.get(channel_id)
+            if collection:
+                logger.info('RAG-sökning i collection: %s', collection)
+                rag_context = _rag_search(message, collection)
+            reply = _build_reply(message, sender_name, rag_context)
         except Exception as exc:
             logger.error('Claude API-fel: %s', exc)
             reply = 'Tekniskt fel — kunde inte generera svar. Försök igen.'
@@ -117,6 +192,10 @@ def _process(message: str, sender_email: str, sender_name: str, channel_id: int)
     except Exception as exc:
         logger.error('Kunde inte posta svar i Odoo: %s', exc)
 
+
+# ---------------------------------------------------------------------------
+# Flask-endpoints
+# ---------------------------------------------------------------------------
 
 @app.route('/message', methods=['POST'])
 def handle_message():
@@ -146,7 +225,7 @@ def handle_message():
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'ok', 'model': MODEL})
+    return jsonify({'status': 'ok', 'model': MODEL, 'rag_channels': list(CHANNEL_RAG_MAP.keys())})
 
 
 def main():
