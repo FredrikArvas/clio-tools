@@ -23,7 +23,7 @@ pymupdf>=1.23.0         # PDF text-extraktion (importeras som fitz)
 pyexiftool>=0.5.0       # Läser/skriver XMP-metadata i bilder
 
 # ── clio-transcribe ───────────────────────────────────────────────────────────
-faster-whisper>=1.0.0   # Whisper-transkribering (CPU och GPU)
+faster-whisper>=1.0.0   # Whisper-transkribering (CPU och GPU) # optional
 
 # ── clio-narrate ──────────────────────────────────────────────────────────────
 edge-tts>=6.0.0         # Microsoft Edge TTS (kräver internet)
