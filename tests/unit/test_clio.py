@@ -435,5 +435,52 @@ class TestRunTool(unittest.TestCase):
             mock_sf.assert_not_called()
 
 
+# ── _interactive() ────────────────────────────────────────────────────────────
+
+class TestInteractive(unittest.TestCase):
+    """Verifierar att _interactive() aldrig kraschar och returnerar bool."""
+
+    def setUp(self):
+        # Töm cachen innan varje test
+        import clio_menu as _cm
+        _cm._INTERACTIVE_CACHE = None
+
+    def tearDown(self):
+        import clio_menu as _cm
+        _cm._INTERACTIVE_CACHE = None
+
+    def test_returns_bool(self):
+        result = clio_menu._interactive()
+        self.assertIsInstance(result, bool)
+
+    def test_false_when_no_isatty(self):
+        mock_stdin = MagicMock()
+        del mock_stdin.isatty          # saknar isatty-attributet
+        with patch("sys.stdin", mock_stdin):
+            self.assertFalse(clio_menu._interactive())
+
+    def test_false_when_isatty_returns_false(self):
+        mock_stdin = MagicMock()
+        mock_stdin.isatty.return_value = False
+        with patch("sys.stdin", mock_stdin):
+            self.assertFalse(clio_menu._interactive())
+
+    def test_false_when_prompt_toolkit_raises(self):
+        mock_stdin = MagicMock()
+        mock_stdin.isatty.return_value = True
+        with patch("sys.stdin", mock_stdin):
+            with patch("prompt_toolkit.output.defaults.create_output",
+                       side_effect=Exception("no console")):
+                self.assertFalse(clio_menu._interactive())
+
+    def test_result_is_cached(self):
+        with patch("sys.stdin") as mock_stdin:
+            mock_stdin.isatty.return_value = False
+            first  = clio_menu._interactive()
+            second = clio_menu._interactive()
+        self.assertEqual(first, second)
+        self.assertEqual(mock_stdin.isatty.call_count, 1)  # bara ett anrop
+
+
 if __name__ == "__main__":
     unittest.main()

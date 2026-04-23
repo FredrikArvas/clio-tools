@@ -31,6 +31,33 @@ try:
 except ImportError:
     _HAS_QUESTIONARY = False
 
+_INTERACTIVE_CACHE: bool | None = None
+
+
+def _interactive() -> bool:
+    """True om miljön stöder questionary interaktivt.
+
+    Kollar både att stdin är en TTY och att prompt_toolkit kan skapa konsol-
+    output. Faller annars tillbaka på input()-vägen. Resultatet cachas.
+    Falska negativ (säkert fallback): Docker, CI, Git Bash på Windows, pipe.
+    """
+    global _INTERACTIVE_CACHE
+    if _INTERACTIVE_CACHE is not None:
+        return _INTERACTIVE_CACHE
+
+    if not (hasattr(sys.stdin, "isatty") and sys.stdin.isatty()):
+        _INTERACTIVE_CACHE = False
+        return False
+
+    try:
+        from prompt_toolkit.output.defaults import create_output
+        create_output()
+        _INTERACTIVE_CACHE = True
+    except Exception:
+        _INTERACTIVE_CACHE = False
+
+    return _INTERACTIVE_CACHE
+
 # ── ANSI-hjälpare ────────────────────────────────────────────────────────────
 
 _ANSI_RE = re.compile(r"\033\[[0-9;]*m")
@@ -76,7 +103,7 @@ def menu_select(title: str, choices: list[str], back: bool = True) -> str | None
 
     Faller tillbaka på numrerad input() om questionary saknas.
     """
-    if _HAS_QUESTIONARY:
+    if _HAS_QUESTIONARY and _interactive():
         opts = list(choices) + ([_BACK] if back else [])
         result = questionary.select(title, choices=opts, style=_CLIO_STYLE).ask()
         return None if result in (None, _BACK) else result
@@ -109,7 +136,7 @@ def menu_select(title: str, choices: list[str], back: bool = True) -> str | None
 
 def menu_confirm(question: str, default: bool = True) -> bool:
     """Ja/Nej-fråga. Returnerar bool."""
-    if _HAS_QUESTIONARY:
+    if _HAS_QUESTIONARY and _interactive():
         result = questionary.confirm(question, default=default, style=_CLIO_STYLE).ask()
         return bool(result)
     ans = input(f"{question} [{'J/n' if default else 'j/N'}]: ").strip().lower()
@@ -120,7 +147,7 @@ def menu_confirm(question: str, default: bool = True) -> bool:
 
 def menu_text(prompt: str, default: str = "", validate=None) -> str | None:
     """Fritext-prompt. Returnerar None om användaren lämnar tomt utan default."""
-    if _HAS_QUESTIONARY:
+    if _HAS_QUESTIONARY and _interactive():
         kwargs = {"style": _CLIO_STYLE}
         if default:
             kwargs["default"] = default
