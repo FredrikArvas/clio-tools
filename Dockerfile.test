@@ -1,0 +1,46 @@
+# Dockerfile.test — clio-tools installationstest
+#
+# Syfte: Verifiera att requirements.txt installeras korrekt på Linux
+#        och att unit-tester passerar i ren miljö.
+#
+# Kör via: tests/docker/run_install_test.sh
+#
+# Vad som INTE testas här (kräver externa tjänster):
+#   - Qdrant/RAG          → Steg 3 (docker-compose)
+#   - Odoo                → Steg 3
+#   - SMTP/mail           → Steg 3
+#   - GPU/Whisper         → faster-whisper markerad optional i requirements.txt
+
+FROM python:3.12-slim
+
+# Systempaket som krävs för pip-installation och runtime av kärn-moduler.
+# Hålls minimal — tyngre OCR-verktyg (tesseract, ghostscript) inkluderas
+# för att verifiera att ocrmypdf och pytesseract löser sina systemkrav.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        tesseract-ocr \
+        ghostscript \
+        ffmpeg \
+        libimage-exiftool-perl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /clio-tools
+
+# Kopiera requirements.txt separat — utnyttjar Docker layer-cache.
+# Om requirements.txt inte ändrats byggs pip-steget om direkt.
+COPY requirements.txt .
+
+# Installera alla paket. optional-märkta (neo4j, faster-whisper) hoppas
+# inte över här — vi vill se att de kan installeras på Linux.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Kopiera resten av kodbasen
+COPY . .
+
+# Steg 1: QC (syntax + beroenden)
+# Kör utan --strict: filstorlek-varningar ska inte blockera CI.
+RUN python clio_qc.py
+
+# Steg 2: Unit-tester
+# Enbart unit-lager (system-tester kräver externa tjänster).
+RUN python tests/run_tests.py
