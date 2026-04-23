@@ -45,7 +45,7 @@ send2trash              # Flytta filer till papperskorgen (krävs för --clean)
 markdown>=3.5.0         # Markdown → HTML i odoo_reply._md_to_html (nl2br, fenced_code)
 
 # ── clio-graph ────────────────────────────────────────────────────────────────
-neo4j>=5.0              # Neo4j Bolt-drivrutin (MATCH/MERGE mot grafdatabas)
+neo4j>=5.0              # Neo4j Bolt-drivrutin (MATCH/MERGE mot grafdatabas) # optional
 pyodoo-connect          # Odoo JSON-RPC session (återanvänds i clio_odoo)
 
 # ── clio-emailfetch ───────────────────────────────────────────────────────────
