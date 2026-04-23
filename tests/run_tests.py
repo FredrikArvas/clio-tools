@@ -39,6 +39,7 @@ UNIT_SUITES = {
     "research":   "test_research",
     "obit":       "test_obit",
     "cockpit":    "test_cockpit",       # clio_cockpit + odoo_reply (_md_to_html)
+    "qc":         "test_qc",            # clio_qc hjälpfunktioner (_parse_requirements)
 }
 
 SYSTEM_SUITES = {
