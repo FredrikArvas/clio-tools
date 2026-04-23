@@ -1,5 +1,5 @@
 """
-ingest_crm.py — indexerar SSF CRM 2023-dokument (pdf/docx) i cap_ssf_crm.
+ingest_crm.py — indexerar SSF CRM 2023-dokument (pdf/docx/pptx) i cap_ssf_crm.
 
 Körning:
   python3 ingest_crm.py                        # alla filer i corpus_crm_ssf/
@@ -82,10 +82,24 @@ def extract_docx(path: Path) -> str:
 
     return "\n".join(parts)
 
+def extract_pptx(path: Path) -> str:
+    from pptx import Presentation
+    prs = Presentation(str(path))
+    parts = []
+    for i, slide in enumerate(prs.slides, 1):
+        texts = []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                texts.append(shape.text_frame.text.strip())
+        if texts:
+            parts.append(f"[Bild {i}] " + " ".join(t for t in texts if t))
+    return "\n".join(parts)
+
 def extract_text(path: Path) -> str:
     ext = path.suffix.lower()
     if ext == ".pdf":  return extract_pdf(path)
     if ext == ".docx": return extract_docx(path)
+    if ext == ".pptx": return extract_pptx(path)
     return ""
 
 # ---------------------------------------------------------------------------
@@ -174,7 +188,7 @@ def main() -> None:
         return
 
     files = [f for f in sorted(CORPUS_DIR.rglob("*"))
-             if f.suffix.lower() in {".pdf", ".docx"} and f.is_file()]
+             if f.suffix.lower() in {".pdf", ".docx", ".pptx"} and f.is_file()]
     print(f"\n[ingest_crm] Hittade {len(files)} filer i {CORPUS_DIR.name}")
 
     total = sum(ingest_file(f, force=args.force) for f in files)
