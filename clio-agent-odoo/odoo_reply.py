@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / '.env')
-load_dotenv(Path(__file__).parent / '.env', override=True)
+load_dotenv(Path(__file__).parent / '.env')
 
 for _p in [str(ROOT)]:
     if _p not in sys.path:
