@@ -708,7 +708,7 @@ def create_ncc_page(parent_page_id: str, title: str, content: str) -> tuple[str,
     Returnerar (page_id_32chars, page_url) eller ('', '') vid fel.
     """
     # Notion begränsar rich_text-block till 2000 tecken — dela upp vid behov
-    chunks = [content[i:i+1999] for i in range(0, len(content), 1999)]
+    chunks = [content[i:i+1800] for i in range(0, len(content), 1800)]
     children = [
         {
             "object": "block",
@@ -787,9 +787,11 @@ def append_kodord_to_sync_spec(page_id: str, kodord: str, ncc_page_id: str) -> b
             return False
 
         updated = current_text.rstrip() + f"\n{kodord}:{ncc_page_id}"
+        chunks = [updated[i:i+1800] for i in range(0, len(updated), 1800)]
+        rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
         _notion_patch(
             f"blocks/{target_id}",
-            {"code": {"rich_text": [{"type": "text", "text": {"content": updated}}]}},
+            {"code": {"rich_text": rich_text, "language": "javascript"}},
         )
         logger.info(f"[append_kodord] #{kodord} tillagt i synkblocket")
         return True

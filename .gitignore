@@ -13,12 +13,15 @@ db/*.sqlite
 clio-privfin/*.db
 clio-agent-mail/state.db
 clio-agent-obit/state.db
+clio-agent-job/state.db
 
 # clio-install runtime log
 clio-install/install_log.json
 
 # clio-rag runtime data
 clio-rag/metadata.json
+clio-rag/corpus/
+clio-rag/corpus_*/
 clio-privfin/data/raw/
 *_OCR.pdf
 *_OCR.md
