@@ -101,10 +101,16 @@ def process_mail(mail_item, config, dry_run: bool = False):
                 _handle_self_query(mail_item, clf, config, dry_run)
 
         elif clf.action == classifier.ACTION_FAQ_CHECK:
-            _handle_faq(mail_item, clf, config, dry_run)
+            if clf.account_key == "ssf":
+                _handle_rag_query(mail_item, clf, config, dry_run)
+            else:
+                _handle_faq(mail_item, clf, config, dry_run)
 
         elif clf.action == classifier.ACTION_AUTO_SEND:
-            _handle_auto_send(mail_item, clf, config, dry_run)
+            if clf.account_key == "ssf":
+                _handle_rag_query(mail_item, clf, config, dry_run)
+            else:
+                _handle_auto_send(mail_item, clf, config, dry_run)
 
         elif clf.action == classifier.ACTION_SEND_FOR_APPROVAL:
             _handle_approval(mail_item, clf, config, dry_run)
