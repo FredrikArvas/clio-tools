@@ -1,6 +1,6 @@
 {
     "name":        "Clio Obit — Dödsannonsbevakning",
-    "version":     "18.0.2.0.0",
+    "version":     "18.0.3.0.0",
     "category":    "Extra Tools",
     "summary":     "Bevakar dödsannonser mot res.partner-bevakningslistan. Lagrar annonser, bilder och matchningshistorik.",
     "author":      "Fredrik Arvas / Arvas International AB",
@@ -11,6 +11,7 @@
         "security/ir.model.access.csv",
         "views/clio_obit_announcement_views.xml",
         "views/clio_obit_match_views.xml",
+        "views/clio_obit_gedcom_views.xml",
         "views/res_partner_views.xml",
         "views/menu.xml",
     ],
