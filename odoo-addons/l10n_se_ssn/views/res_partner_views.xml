@@ -2,8 +2,8 @@
 <odoo>
 
   <!-- Lägg till personnummer-fält på res.partner-formuläret -->
-  <record id="view_partner_form_ssn_se" model="ir.ui.view">
-    <field name="name">res.partner.form.ssn_se</field>
+  <record id="view_partner_form_l10n_se_ssn" model="ir.ui.view">
+    <field name="name">res.partner.form.l10n_se_ssn</field>
     <field name="model">res.partner</field>
     <field name="inherit_id" ref="base.view_partner_form"/>
     <field name="arch" type="xml">
