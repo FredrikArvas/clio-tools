@@ -190,6 +190,10 @@ class ClioObitGedcomWizard(models.TransientModel):
             )
 
         raw = base64.b64decode(self.gedcom_id.file_data)
+        # Strip UTF-8 BOM om exportverktyget (Ancestry, MyHeritage m.fl.) lagt till det.
+        # _to_utf8_tempfile missar BOM när filen i övrigt inte är ren UTF-8.
+        if raw.startswith(b"\xef\xbb\xbf"):
+            raw = raw[3:]
         tmp_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".ged", delete=False) as f:
