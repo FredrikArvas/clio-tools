@@ -105,7 +105,7 @@ class ClioObitGedcom(models.Model):
             try:
                 utf8_path, is_temp = _to_utf8_tempfile(tmp)
                 parser = Parser()
-                parser.parse_file(utf8_path)
+                parser.parse_file(utf8_path, strict=False)
                 if is_temp:
                     os.unlink(utf8_path)
                 count = len(_collect_full(parser))
@@ -143,6 +143,7 @@ class ClioObitGedcomWizard(models.TransientModel):
     owner_email = fields.Char(
         string      = "Notifiera e-post",
         required    = True,
+        default     = lambda self: self.env.user.email or "",
         help        = "E-post som får notiser för alla importerade bevakningar.",
     )
     ego_name = fields.Char(
