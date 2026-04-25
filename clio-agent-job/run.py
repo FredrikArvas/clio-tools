@@ -68,6 +68,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="Visa detaljer om varje artikel (även icke-matchande)")
     p.add_argument("--onboard", action="store_true",
                    help="Skicka onboarding-mail och avsluta (hoppar över analys)")
+    p.add_argument("--no-odoo", action="store_true",
+                   help="Kör utan Odoo (läs YAML, skriv inte matchningar eller heartbeat)")
     return p.parse_args(argv)
 
 
@@ -76,6 +78,7 @@ def run(
     profile_path: Path | None = None,
     verbose: bool = False,
     force_onboard: bool = False,
+    odoo_enabled: bool = True,
 ) -> int:
     """
     Kör en komplett bevakningscykel.
@@ -89,7 +92,9 @@ def run(
     from reporter import build_report, MatchedArticle
     from notifier import send_report, send_onboarding
     from onboarding import build_onboarding_mail
-    from odoo_writer import write_matches_to_odoo
+    from odoo_writer import write_matches_to_odoo, write_heartbeat, get_odoo_env
+
+    odoo_env = get_odoo_env() if odoo_enabled else None
 
     cfg = _load_cfg()
     threshold: int = int(cfg.get("threshold", 50))
@@ -206,13 +211,20 @@ def run(
             if sent and not dry_run:
                 mail_sent = 1
                 print(f"[clio-job] Rapport skickad till {to_addr}")
-                write_matches_to_odoo(profile, matched)
+                if odoo_env:
+                    write_matches_to_odoo(profile, matched)
         except (RuntimeError, ValueError, FileNotFoundError) as e:
             print(f"[FEL] Kunde inte skicka mail: {e}", file=sys.stderr)
     else:
         print("[clio-job] Inga matchande artiklar — tyst körning.")
 
     log_run(total_fetched, total_new, total_matched, mail_sent, dry_run)
+
+    # Heartbeat till Odoo
+    if odoo_env and not dry_run:
+        hb_msg = f"{total_matched} matchningar / {total_new} nya / {total_fetched} hämtade"
+        write_heartbeat(odoo_env, status="ok", items_processed=total_new, message=hb_msg)
+
     return total_matched
 
 
@@ -230,6 +242,7 @@ def main(argv=None) -> None:
         profile_path=args.profile,
         verbose=args.verbose,
         force_onboard=args.onboard,
+        odoo_enabled=not args.no_odoo,
     )
     sys.exit(0 if result >= 0 else 1)
 
