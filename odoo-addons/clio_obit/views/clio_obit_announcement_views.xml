@@ -131,7 +131,7 @@
           </group>
 
           <!-- Tidningsbild -->
-          <group string="Tidningsbild" attrs="{'invisible': [('image', '=', False)]}">
+          <group string="Tidningsbild" invisible="not image">
             <field name="image" widget="image" string="" nolabel="1"
                    options="{'img_class': 'img-fluid rounded', 'size': [0, 600]}"/>
           </group>
