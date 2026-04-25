@@ -222,6 +222,7 @@ class ClioObitGedcomWizard(models.TransientModel):
                         depth        = int(self.depth),
                         full         = self.full_import,
                         dry_run      = self.dry_run,
+                        env          = self.env,
                     )
                 finally:
                     sys.stdin = old_stdin
