@@ -1,6 +1,6 @@
 {
     "name":        "Clio Job — Jobbsökar-profiler",
-    "version":     "18.0.2.0.0",
+    "version":     "18.0.3.0.0",
     "category":    "Extra Tools",
     "summary":     "Extends res.partner with job-signal profile and match history for Clio automation.",
     "author":      "Fredrik Arvas / Arvas International AB",
@@ -12,6 +12,7 @@
         "security/ir_rules.xml",
         "views/clio_job_profile_views.xml",
         "views/clio_job_match_views.xml",
+        "views/clio_job_article_views.xml",
         "views/res_partner_views.xml",
         "views/menu.xml",
     ],

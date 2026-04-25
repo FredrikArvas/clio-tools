@@ -92,7 +92,10 @@ def run(
     from reporter import build_report, MatchedArticle
     from notifier import send_report, send_onboarding
     from onboarding import build_onboarding_mail
-    from odoo_writer import write_matches_to_odoo, write_heartbeat, get_odoo_env
+    from odoo_writer import (
+        write_matches_to_odoo, write_heartbeat, get_odoo_env,
+        load_known_article_ids, write_articles_to_odoo,
+    )
 
     odoo_env = get_odoo_env() if odoo_enabled else None
 
@@ -158,7 +161,13 @@ def run(
     print(f"\n[clio-job] Totalt hämtade: {total_fetched} artiklar")
 
     # Filtrera redan-sedda
-    new_articles = [a for a in all_articles if not is_seen(a.article_id)]
+    # Odoo-läge: bulk-fetch alla kända IDs i ett anrop (snabbt)
+    # SQLite-läge (--no-odoo): kontrollera per artikel som tidigare
+    if odoo_env:
+        known_ids = load_known_article_ids(odoo_env)
+        new_articles = [a for a in all_articles if a.article_id not in known_ids]
+    else:
+        new_articles = [a for a in all_articles if not is_seen(a.article_id)]
     total_new = len(new_articles)
     print(f"[clio-job] Nya (ej tidigare sedda): {total_new}")
 
@@ -173,6 +182,7 @@ def run(
     # Analysera mot profil
     print(f"\n[clio-job] Analyserar {total_new} artiklar mot profil...")
     matched = []
+    articles_to_write: list[dict] = []  # samlas för bulk-write till Odoo
 
     for i, article in enumerate(new_articles, 1):
         if verbose:
@@ -180,13 +190,29 @@ def run(
 
         result = analyze(article, profile, model=model)
 
-        mark_seen(
-            article.article_id,
-            url=article.url,
-            title=article.title,
-            source=article.source,
-            match_score=result.match_score,
-        )
+        is_match = (not result.error
+                    and result.match_score >= threshold
+                    and result.is_relevant)
+
+        if odoo_env:
+            # Odoo-läge: samla för bulk-write i slutet
+            articles_to_write.append({
+                "article_id":  article.article_id,
+                "url":         article.url,
+                "title":       article.title,
+                "source":      article.source,
+                "match_score": result.match_score if not result.error else -1,
+                "is_matched":  is_match,
+            })
+        else:
+            # SQLite-läge: skriv direkt per artikel
+            mark_seen(
+                article.article_id,
+                url=article.url,
+                title=article.title,
+                source=article.source,
+                match_score=result.match_score if not result.error else -1,
+            )
 
         if result.error:
             if verbose:
@@ -196,7 +222,7 @@ def run(
         if verbose:
             print(f"    -> {result.signal_type} ({result.signal_strength}) score={result.match_score}")
 
-        if result.match_score >= threshold and result.is_relevant:
+        if is_match:
             matched.append(MatchedArticle(article=article, result=result))
 
     total_matched = len(matched)
@@ -222,6 +248,11 @@ def run(
         print("[clio-job] Inga matchande artiklar — tyst körning.")
 
     log_run(total_fetched, total_new, total_matched, mail_sent, dry_run)
+
+    # Bulk-write artiklar till Odoo
+    if odoo_env and not dry_run and articles_to_write:
+        print(f"[clio-job] Sparar {len(articles_to_write)} artiklar till Odoo...")
+        write_articles_to_odoo(odoo_env, articles_to_write)
 
     # Heartbeat till Odoo
     if odoo_env and not dry_run:

@@ -5,3 +5,5 @@ access_clio_job_profile_kandidat,clio.job.profile kandidat,model_clio_job_profil
 access_clio_job_match_user,clio.job.match user,model_clio_job_match,base.group_user,1,0,0,0
 access_clio_job_match_admin,clio.job.match admin,model_clio_job_match,base.group_system,1,1,1,1
 access_clio_job_match_kandidat,clio.job.match kandidat,model_clio_job_match,clio_job.group_clio_kandidat,1,0,0,0
+access_clio_job_article_admin,clio.job.article admin,model_clio_job_article,base.group_system,1,1,1,1
+access_clio_job_article_user,clio.job.article user,model_clio_job_article,base.group_user,1,0,0,0

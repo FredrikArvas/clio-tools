@@ -31,4 +31,12 @@
             sequence="30"
             groups="base.group_system"/>
 
+  <!-- Admin: Alla sedda artiklar -->
+  <menuitem id="menu_clio_job_artiklar"
+            name="Artikelhistorik"
+            parent="menu_clio_job_root"
+            action="action_clio_job_article"
+            sequence="40"
+            groups="base.group_system"/>
+
 </odoo>

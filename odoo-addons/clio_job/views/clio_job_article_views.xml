@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_job_article_list" model="ir.ui.view">
+    <field name="name">clio.job.article.list</field>
+    <field name="model">clio.job.article</field>
+    <field name="arch" type="xml">
+      <list string="Artikelhistorik"
+            decoration-success="is_matched == True"
+            decoration-muted="match_score &lt; 0"
+            default_order="first_seen desc">
+        <field name="first_seen" string="Sedd" widget="datetime" optional="show"/>
+        <field name="source" string="Källa" optional="show"/>
+        <field name="title" string="Rubrik"/>
+        <field name="score_label" string="Score" optional="show"/>
+        <field name="is_matched" string="Matchad" widget="boolean_toggle" optional="show"/>
+        <field name="match_score" column_invisible="1"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_job_article_form" model="ir.ui.view">
+    <field name="name">clio.job.article.form</field>
+    <field name="model">clio.job.article</field>
+    <field name="arch" type="xml">
+      <form string="Artikel">
+        <sheet>
+          <group>
+            <group string="Artikel">
+              <field name="title" string="Rubrik"/>
+              <field name="url" string="URL" widget="url"/>
+              <field name="source" string="Källa"/>
+            </group>
+            <group string="Analys">
+              <field name="first_seen" string="Först sedd"/>
+              <field name="match_score" string="Matchning (0–100)"/>
+              <field name="is_matched" string="Matchad"/>
+            </group>
+          </group>
+          <group string="Teknisk info">
+            <field name="article_id" string="Artikel-ID" attrs="{'readonly': [('id', '!=', False)]}"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_job_article_search" model="ir.ui.view">
+    <field name="name">clio.job.article.search</field>
+    <field name="model">clio.job.article</field>
+    <field name="arch" type="xml">
+      <search string="Sök artiklar">
+        <field name="title" string="Rubrik"/>
+        <field name="source" string="Källa"/>
+        <filter name="matched" string="Matchade" domain="[('is_matched','=',True)]"/>
+        <filter name="unmatched" string="Ej matchade" domain="[('is_matched','=',False),('match_score','>=',0)]"/>
+        <filter name="error" string="Fel vid analys" domain="[('match_score','&lt;',0)]"/>
+        <separator/>
+        <filter name="today" string="Idag"
+                domain="[('first_seen','&gt;=', (context_today()).strftime('%Y-%m-%d'))]"/>
+        <group expand="0" string="Gruppera efter">
+          <filter name="group_source" string="Källa" context="{'group_by': 'source'}"/>
+          <filter name="group_date" string="Datum" context="{'group_by': 'first_seen:day'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_job_article" model="ir.actions.act_window">
+    <field name="name">Artikelhistorik</field>
+    <field name="res_model">clio.job.article</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_matched': 0}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga artiklar registrerade ännu.
+      </p>
+      <p>
+        Artiklar läggs till automatiskt när clio-agent-job körs.
+      </p>
+    </field>
+  </record>
+
+</odoo>
