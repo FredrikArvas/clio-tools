@@ -60,7 +60,8 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
     Skriver analyserade artiklar till clio.job.article i Odoo.
 
     Varje artikel är en dict med nycklarna:
-        article_id, url, title, source, match_score, is_matched
+        article_id, url, title, source, match_score, is_matched,
+        published (ISO-str, valfri), body_snippet (str, valfri)
 
     Kraschsäkert — Odoo är ett extra lager.
     """
@@ -71,14 +72,27 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
         now = _utcnow_str()
         created = 0
         for a in articles:
+            # Publicerat datum — konvertera till "YYYY-MM-DD HH:MM:SS" om satt
+            published = a.get("published")
+            if published:
+                try:
+                    if hasattr(published, "strftime"):
+                        published = published.strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        published = str(published)[:19].replace("T", " ")
+                except Exception:
+                    published = False
+
             Article.create({
-                "article_id":  a.get("article_id", ""),
-                "url":         a.get("url", ""),
-                "title":       (a.get("title", "") or "")[:500],
-                "source":      a.get("source", ""),
-                "first_seen":  now,
-                "match_score": int(a.get("match_score", -1)),
-                "is_matched":  bool(a.get("is_matched", False)),
+                "article_id":   a.get("article_id", ""),
+                "url":          a.get("url", ""),
+                "title":        (a.get("title", "") or "")[:500],
+                "source":       a.get("source", ""),
+                "published":    published or False,
+                "first_seen":   now,
+                "body_snippet": (a.get("body_snippet", "") or "")[:1000],
+                "match_score":  int(a.get("match_score", -1)),
+                "is_matched":   bool(a.get("is_matched", False)),
             })
             created += 1
         _logger.info("write_articles_to_odoo: %d artikel(ar) sparade", created)

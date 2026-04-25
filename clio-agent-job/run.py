@@ -197,12 +197,14 @@ def run(
         if odoo_env:
             # Odoo-läge: samla för bulk-write i slutet
             articles_to_write.append({
-                "article_id":  article.article_id,
-                "url":         article.url,
-                "title":       article.title,
-                "source":      article.source,
-                "match_score": result.match_score if not result.error else -1,
-                "is_matched":  is_match,
+                "article_id":   article.article_id,
+                "url":          article.url,
+                "title":        article.title,
+                "source":       article.source,
+                "published":    article.published,
+                "body_snippet": article.body_snippet,
+                "match_score":  result.match_score if not result.error else -1,
+                "is_matched":   is_match,
             })
         else:
             # SQLite-läge: skriv direkt per artikel

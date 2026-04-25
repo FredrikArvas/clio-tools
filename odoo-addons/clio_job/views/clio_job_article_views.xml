@@ -9,13 +9,13 @@
       <list string="Artikelhistorik"
             decoration-success="is_matched == True"
             decoration-muted="match_score &lt; 0"
-            default_order="first_seen desc">
-        <field name="first_seen" string="Sedd" widget="datetime" optional="show"/>
+            default_order="match_score desc">
+        <field name="match_score" string="Score" optional="show"/>
+        <field name="published" string="Publicerad" widget="date" optional="show"/>
         <field name="source" string="Källa" optional="show"/>
         <field name="title" string="Rubrik"/>
-        <field name="score_label" string="Score" optional="show"/>
         <field name="is_matched" string="Matchad" widget="boolean_toggle" optional="show"/>
-        <field name="match_score" column_invisible="1"/>
+        <field name="first_seen" string="Hämtad" widget="datetime" optional="hide"/>
       </list>
     </field>
   </record>
@@ -32,14 +32,20 @@
               <field name="title" string="Rubrik"/>
               <field name="url" string="URL" widget="url"/>
               <field name="source" string="Källa"/>
+              <field name="published" string="Publicerad"/>
             </group>
             <group string="Analys">
-              <field name="first_seen" string="Först sedd"/>
-              <field name="match_score" string="Matchning (0–100)"/>
+              <field name="match_score" string="Score (0–100)"/>
               <field name="is_matched" string="Matchad"/>
+              <field name="first_seen" string="Hämtad av Clio"/>
             </group>
           </group>
-          <group string="Teknisk info">
+          <group string="Utdrag">
+            <field name="body_snippet" string="" nolabel="1"
+                   widget="text" readonly="1"
+                   placeholder="(Ingen brödtext sparad — artiklar hämtade innan v3.2 saknar utdrag)"/>
+          </group>
+          <group string="Teknisk info" groups="base.group_system">
             <field name="article_id" string="Artikel-ID" readonly="id"/>
           </group>
         </sheet>
@@ -55,15 +61,36 @@
       <search string="Sök artiklar">
         <field name="title" string="Rubrik"/>
         <field name="source" string="Källa"/>
+        <field name="body_snippet" string="Utdrag"/>
+
+        <!-- Matchningsfilter -->
         <filter name="matched" string="Matchade" domain="[('is_matched','=',True)]"/>
-        <filter name="unmatched" string="Ej matchade" domain="[('is_matched','=',False),('match_score','>=',0)]"/>
-        <filter name="error" string="Fel vid analys" domain="[('match_score','&lt;',0)]"/>
+        <filter name="unmatched" string="Ej matchade"
+                domain="[('is_matched','=',False),('match_score','&gt;=',0)]"/>
         <separator/>
-        <filter name="today" string="Idag"
+
+        <!-- Scorefilter -->
+        <filter name="score_high" string="Score ≥ 70"
+                domain="[('match_score','&gt;=',70)]"/>
+        <filter name="score_medium" string="Score 50–69"
+                domain="[('match_score','&gt;=',50),('match_score','&lt;',70)]"/>
+        <filter name="score_low" string="Score &lt; 50"
+                domain="[('match_score','&gt;=',0),('match_score','&lt;',50)]"/>
+        <separator/>
+
+        <!-- Datumfilter -->
+        <filter name="today" string="Hämtad idag"
                 domain="[('first_seen','&gt;=', (context_today()).strftime('%Y-%m-%d'))]"/>
+        <filter name="has_snippet" string="Har utdrag"
+                domain="[('body_snippet','!=',False),('body_snippet','!=','')]"/>
+
         <group expand="0" string="Gruppera efter">
-          <filter name="group_source" string="Källa" context="{'group_by': 'source'}"/>
-          <filter name="group_date" string="Datum" context="{'group_by': 'first_seen:day'}"/>
+          <filter name="group_source" string="Källa"
+                  context="{'group_by': 'source'}"/>
+          <filter name="group_date" string="Hämtad"
+                  context="{'group_by': 'first_seen:day'}"/>
+          <filter name="group_published" string="Publicerad"
+                  context="{'group_by': 'published:day'}"/>
         </group>
       </search>
     </field>
@@ -71,10 +98,10 @@
 
   <!-- ── Action ─────────────────────────────────────────────────────────── -->
   <record id="action_clio_job_article" model="ir.actions.act_window">
-    <field name="name">Artikelhistorik</field>
+    <field name="name">Artiklar</field>
     <field name="res_model">clio.job.article</field>
     <field name="view_mode">list,form</field>
-    <field name="context">{'search_default_matched': 0}</field>
+    <field name="context">{}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">
         Inga artiklar registrerade ännu.
