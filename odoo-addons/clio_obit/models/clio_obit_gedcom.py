@@ -177,10 +177,13 @@ class ClioObitGedcomWizard(models.TransientModel):
 
     def action_run_import(self):
         self.ensure_one()
+        _logger.info("GEDCOM-import START wizard=%s fil=%s", self.id, self.gedcom_id.name)
+
         if not self.gedcom_id.file_data:
             raise UserError("Den valda filen har ingen data.")
 
         _ensure_paths()
+        _logger.info("GEDCOM-import: sys.path OK, laddar importscript")
 
         try:
             from import_gedcom_to_odoo import run_import
@@ -190,21 +193,24 @@ class ClioObitGedcomWizard(models.TransientModel):
                 f"Kontrollera att /mnt/clio-tools är monterat och att python-gedcom är installerat."
             )
 
+        _logger.info("GEDCOM-import: importscript laddat, dekoderar fil (%d bytes base64)", len(self.gedcom_id.file_data))
         raw = base64.b64decode(self.gedcom_id.file_data)
-        # Strip UTF-8 BOM om exportverktyget (Ancestry, MyHeritage m.fl.) lagt till det.
-        # _to_utf8_tempfile missar BOM när filen i övrigt inte är ren UTF-8.
         if raw.startswith(b"\xef\xbb\xbf"):
+            _logger.info("GEDCOM-import: UTF-8 BOM strippad")
             raw = raw[3:]
+
+        _logger.info("GEDCOM-import: rå filstorlek %d bytes", len(raw))
         tmp_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".ged", delete=False) as f:
                 f.write(raw)
                 tmp_path = f.name
+            _logger.info("GEDCOM-import: tempfil skapad %s", tmp_path)
 
             buf = io.StringIO()
-            # Ersätt stdin med "0\n" så att input()-anrop vid tvetydigt ego-namn
-            # aldrig blockerar Odoo-workern. "0" = "Full import instead" i find_ego().
             fake_stdin = io.StringIO("0\n")
+            _logger.info("GEDCOM-import: anropar run_import (ego=%r full=%s dry=%s)",
+                         self.ego_name, self.full_import, self.dry_run)
             with redirect_stdout(buf):
                 old_stdin = sys.stdin
                 sys.stdin = fake_stdin
@@ -220,6 +226,7 @@ class ClioObitGedcomWizard(models.TransientModel):
                 finally:
                     sys.stdin = old_stdin
             output = buf.getvalue()
+            _logger.info("GEDCOM-import: run_import klar, output %d tecken", len(output))
         except Exception as exc:
             output = f"FEL: {exc}"
             _logger.exception("GEDCOM-import misslyckades")
