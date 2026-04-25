@@ -77,6 +77,20 @@ def _get_env():
         sys.exit(1)
 
 
+def _odoo_create(env, model: str, vals: dict) -> int:
+    """Skapar en post och returnerar alltid ett heltal-ID (ORM eller xmlrpc)."""
+    result = env[model].create(vals)
+    return result.id if hasattr(result, "id") else int(result)
+
+
+def _odoo_write(env, model: str, ids: list, vals: dict) -> None:
+    """Skriver till poster med ids (ORM eller xmlrpc)."""
+    if hasattr(env[model], "browse"):
+        env[model].browse(ids).write(vals)
+    else:
+        env[model].write(ids, vals)
+
+
 # ── Namnsökning i Odoo ───────────────────────────────────────────────────────
 
 _GEDCOM_MODULE = "clio_obit_gedcom"
@@ -141,10 +155,9 @@ def _store_gedcom_xref(env, xref: str, partner_id: int) -> None:
     )
     if existing:
         if existing[0]["res_id"] != partner_id:
-            # Partner har slagits ihop — uppdatera pekaren
-            env["ir.model.data"].write([existing[0]["id"]], {"res_id": partner_id})
+            _odoo_write(env, "ir.model.data", [existing[0]["id"]], {"res_id": partner_id})
     else:
-        env["ir.model.data"].create({
+        _odoo_create(env, "ir.model.data", {
             "module":   _GEDCOM_MODULE,
             "name":     name,
             "model":    "res.partner",
@@ -203,7 +216,7 @@ def _find_or_create_partner(
     if birth_place:
         vals["city"] = birth_place[:100]
 
-    pid = env["res.partner"].create(vals)
+    pid = _odoo_create(env, "res.partner", vals)
     # Uppdatera lookup för idempotens inom samma körning
     lookup[(fn_low, en_low, by)] = pid
     lookup.setdefault((fn_low, en_low, 0), pid)
@@ -214,7 +227,7 @@ def _set_watch_fields(env, partner_id: int, priority_odoo: str, owner_email: str
     """Sätter clio_obit-fälten på en befintlig partner."""
     if dry_run:
         return
-    env["res.partner"].write([partner_id], {
+    _odoo_write(env, "res.partner", [partner_id], {
         "clio_obit_watch":         True,
         "clio_obit_priority":      priority_odoo,
         "clio_obit_notify_email":  owner_email,
@@ -230,7 +243,12 @@ def run_import(
     depth: int,
     full: bool,
     dry_run: bool,
+    env=None,
 ) -> None:
+    """
+    env: skickas in från Odoo-wizard (self.env) för att undvika deadlock.
+         Om None används _get_env() (CLI-läge via xmlrpc).
+    """
     print(f"\n{'DRY RUN — ' if dry_run else ''}Importerar {gedcom_path}")
     print(f"Ägare: {owner_email} | Djup: {'full' if full else depth}")
 
@@ -260,7 +278,8 @@ def run_import(
         return
 
     # ── Odoo ──────────────────────────────────────────────────────────────────
-    env = _get_env()
+    if env is None:
+        env = _get_env()
     lookup = _build_odoo_lookup(env)
     gedcom_lookup = _build_gedcom_id_lookup(env)
     print(f"Odoo har {len(lookup)} befintliga kontakter, {len(gedcom_lookup)} GEDCOM-ID-kopplingar")
