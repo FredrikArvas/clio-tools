@@ -5,8 +5,10 @@ Importerar ett GEDCOM-släktträd till Odoo res.partner med clio_obit_watch=True
 Återanvänder all parsninglogik från clio-partnerdb/import_gedcom.py.
 Skriver till Odoo istället för partnerdb.
 
-Idempotent: matchar på namn + födelseår. Befintliga partner uppdateras
-med bevakningsflaggor utan att dubbletter skapas.
+Idempotent, två nivåer:
+  1. GEDCOM-ID (ir.model.data, modul clio_obit_gedcom) — primär nyckel.
+     Hittar rätt partner även om namn ändrats (t.ex. giftermål).
+  2. Namn + födelseår — fallback för nyimport eller om GEDCOM-ID saknas.
 
 Usage:
     python import_gedcom_to_odoo.py --gedcom FILE.ged --owner EMAIL
@@ -77,6 +79,14 @@ def _get_env():
 
 # ── Namnsökning i Odoo ───────────────────────────────────────────────────────
 
+_GEDCOM_MODULE = "clio_obit_gedcom"
+
+
+def _xref_to_name(xref: str) -> str:
+    """Konverterar '@I42@' → 'I42' (giltigt ir.model.data-namn)."""
+    return xref.strip("@").replace(" ", "_")
+
+
 def _build_odoo_lookup(env) -> dict[tuple, int]:
     """
     Hämtar alla partners med namn + birthdate från Odoo.
@@ -107,26 +117,73 @@ def _build_odoo_lookup(env) -> dict[tuple, int]:
     return lookup
 
 
+def _build_gedcom_id_lookup(env) -> dict[str, int]:
+    """
+    Hämtar alla ir.model.data-poster för modul clio_obit_gedcom.
+    Returnerar {xref_name: partner_id}, t.ex. {'I42': 1337}.
+    """
+    rows = env["ir.model.data"].search_read(
+        [("module", "=", _GEDCOM_MODULE), ("model", "=", "res.partner")],
+        ["name", "res_id"],
+    )
+    return {r["name"]: r["res_id"] for r in rows if r.get("res_id")}
+
+
+def _store_gedcom_xref(env, xref: str, partner_id: int) -> None:
+    """
+    Sparar eller uppdaterar GEDCOM-ID → partner-kopplingen i ir.model.data.
+    Idempotent: befintlig post skrivs aldrig om med samma res_id.
+    """
+    name = _xref_to_name(xref)
+    existing = env["ir.model.data"].search_read(
+        [("module", "=", _GEDCOM_MODULE), ("name", "=", name)],
+        ["id", "res_id"],
+    )
+    if existing:
+        if existing[0]["res_id"] != partner_id:
+            # Partner har slagits ihop — uppdatera pekaren
+            env["ir.model.data"].write([existing[0]["id"]], {"res_id": partner_id})
+    else:
+        env["ir.model.data"].create({
+            "module":   _GEDCOM_MODULE,
+            "name":     name,
+            "model":    "res.partner",
+            "res_id":   partner_id,
+            "noupdate": True,
+        })
+
+
 def _find_or_create_partner(
     env,
     lookup: dict,
+    gedcom_lookup: dict,
     fornamn: str,
     efternamn: str,
     birth_year: int | None,
     birth_place: str | None,
+    gedcom_xref: str | None,
     dry_run: bool,
 ) -> tuple[int | None, str]:
     """
     Hittar befintlig partner eller skapar ny.
+    Söker i prioritetsordning:
+      1. GEDCOM-ID (ir.model.data) — robust mot namnbyten
+      2. Namn + födelseår — fallback för nyimport
     Returnerar (partner_id, action) där action är 'found'|'created'|'dry_run'.
     """
+    # 1. GEDCOM-ID-sökning
+    if gedcom_xref:
+        xref_name = _xref_to_name(gedcom_xref)
+        pid = gedcom_lookup.get(xref_name)
+        if pid:
+            return pid, "found"
+
+    # 2. Namn + födelseår
     fn_low = fornamn.lower()
     en_low = efternamn.lower()
     by = birth_year or 0
 
-    # Försök: exakt namn + födelseår
     pid = lookup.get((fn_low, en_low, by))
-    # Fallback: bara namn (födelseår okänt)
     if pid is None and by:
         pid = lookup.get((fn_low, en_low, 0))
 
@@ -138,8 +195,8 @@ def _find_or_create_partner(
 
     # Skapa ny partner
     vals: dict = {
-        "name":         f"{fornamn} {efternamn}",
-        "is_company":   False,
+        "name":       f"{fornamn} {efternamn}",
+        "is_company": False,
     }
     if birth_year:
         vals["birthdate"] = f"{birth_year}-01-01"
@@ -205,7 +262,8 @@ def run_import(
     # ── Odoo ──────────────────────────────────────────────────────────────────
     env = _get_env()
     lookup = _build_odoo_lookup(env)
-    print(f"Odoo har {len(lookup)} befintliga kontakter")
+    gedcom_lookup = _build_gedcom_id_lookup(env)
+    print(f"Odoo har {len(lookup)} befintliga kontakter, {len(gedcom_lookup)} GEDCOM-ID-kopplingar")
 
     created = updated = skipped = dry_count = 0
 
@@ -218,9 +276,12 @@ def run_import(
         birth_year = _extract_birth_year(ind)
         birth_place = _extract_birth_place(ind)
         priority_odoo = PRIORITY_MAP.get(priority_en, "normal")
+        gedcom_xref = ind.get_pointer() if hasattr(ind, "get_pointer") else None
 
         pid, action = _find_or_create_partner(
-            env, lookup, fornamn, efternamn, birth_year, birth_place, dry_run
+            env, lookup, gedcom_lookup,
+            fornamn, efternamn, birth_year, birth_place,
+            gedcom_xref, dry_run,
         )
 
         if action == "dry_run":
@@ -229,6 +290,11 @@ def run_import(
             continue
 
         _set_watch_fields(env, pid, priority_odoo, owner_email, dry_run)
+
+        # Spara GEDCOM-ID → partner-kopplingen (idempotent)
+        if gedcom_xref and pid:
+            _store_gedcom_xref(env, gedcom_xref, pid)
+            gedcom_lookup[_xref_to_name(gedcom_xref)] = pid
 
         if action == "created":
             created += 1
