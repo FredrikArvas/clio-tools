@@ -237,7 +237,7 @@ def run_import(
     # ── Parsa GEDCOM ──────────────────────────────────────────────────────────
     utf8_path, is_temp = _to_utf8_tempfile(gedcom_path)
     parser = Parser()
-    parser.parse_file(utf8_path)
+    parser.parse_file(utf8_path, strict=False)
     if is_temp:
         os.unlink(utf8_path)
 
