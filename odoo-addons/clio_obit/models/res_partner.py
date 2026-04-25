@@ -31,6 +31,11 @@ class ResPartner(models.Model):
         help="E-post som får notiser när denna person hittas i en dödsannons. "
              "Lämnas tomt = använd systeminställningens standardadress.",
     )
+    clio_obit_birth_name = fields.Char(
+        string="Födelsenamn",
+        help="Namn vid födseln (flicknamn/ogift namn). "
+             "Används som matchningsnyckel vid GEDCOM-import.",
+    )
     clio_link_ids = fields.One2many(
         comodel_name="clio.partner.link",
         inverse_name="from_partner_id",

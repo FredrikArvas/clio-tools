@@ -46,6 +46,7 @@
             <field name="clio_obit_notify_email" invisible="not clio_obit_watch"
                    placeholder="Lämna tomt = systemets standardadress"/>
             <field name="clio_family_role"/>
+            <field name="clio_obit_birth_name" placeholder="T.ex. Ulrika Johnsson"/>
           </group>
 
           <field name="clio_link_ids" string="Familjerelationer" nolabel="1"/>
