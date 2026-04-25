@@ -97,6 +97,11 @@ class Announcement:
     url: str
     publiceringsdatum: str            # ISO date string "YYYY-MM-DD"
     raw_title: str
+    # Detaljdata — hämtas från detaljsidan för matchade annonser
+    body_html: str = ""               # Fullständig annonstext (HTML)
+    image_url: str = ""               # URL till tidningsbild om tillgänglig
+    image_data: Optional[bytes] = None  # Nedladdad bild (binär)
+    source_name: str = ""             # Källans namn, t.ex. "familjesidan.se"
 
 
 @dataclass

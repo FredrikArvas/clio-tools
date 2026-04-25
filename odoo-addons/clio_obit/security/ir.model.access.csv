@@ -1,2 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_clio_partner_link_user,clio.partner.link user,model_clio_partner_link,base.group_user,1,1,1,1
+access_clio_obit_announcement_admin,clio.obit.announcement admin,model_clio_obit_announcement,base.group_system,1,1,1,1
+access_clio_obit_announcement_user,clio.obit.announcement user,model_clio_obit_announcement,clio_obit.group_clio_bevakare,1,0,0,0
+access_clio_obit_match_admin,clio.obit.match admin,model_clio_obit_match,base.group_system,1,1,1,1
+access_clio_obit_match_user,clio.obit.match user,model_clio_obit_match,clio_obit.group_clio_bevakare,1,0,0,0

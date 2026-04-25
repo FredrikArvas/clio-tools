@@ -1,5 +1,7 @@
 """
-clio.py
+clio1.py  — PARKERAD VERSION (fryst 2026-04-25)
+Se clio2.py för aktiv version. Används som referens och fallback.
+
 Tunn launcher för clio-tools. All logik finns i separata moduler:
   clio_menu.py          — färger, state, menyvisning, select_folder
   clio_run_research.py  — GEDCOM-navigering, run_research
