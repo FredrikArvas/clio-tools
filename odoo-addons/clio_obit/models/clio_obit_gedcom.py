@@ -197,15 +197,23 @@ class ClioObitGedcomWizard(models.TransientModel):
                 tmp_path = f.name
 
             buf = io.StringIO()
+            # Ersätt stdin med "0\n" så att input()-anrop vid tvetydigt ego-namn
+            # aldrig blockerar Odoo-workern. "0" = "Full import instead" i find_ego().
+            fake_stdin = io.StringIO("0\n")
             with redirect_stdout(buf):
-                run_import(
-                    gedcom_path  = tmp_path,
-                    owner_email  = self.owner_email,
-                    ego_name     = self.ego_name or None,
-                    depth        = int(self.depth),
-                    full         = self.full_import,
-                    dry_run      = self.dry_run,
-                )
+                old_stdin = sys.stdin
+                sys.stdin = fake_stdin
+                try:
+                    run_import(
+                        gedcom_path  = tmp_path,
+                        owner_email  = self.owner_email,
+                        ego_name     = self.ego_name or None,
+                        depth        = int(self.depth),
+                        full         = self.full_import,
+                        dry_run      = self.dry_run,
+                    )
+                finally:
+                    sys.stdin = old_stdin
             output = buf.getvalue()
         except Exception as exc:
             output = f"FEL: {exc}"
