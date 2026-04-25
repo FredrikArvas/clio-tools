@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Toppnivå -->
+  <menuitem id="menu_clio_obit_root"
+            name="Clio Obit"
+            sequence="101"
+            groups="clio_obit.group_clio_bevakare,base.group_system"/>
+
+  <!-- Bevakade personer (res.partner filtrerat) -->
+  <menuitem id="menu_clio_obit_bevakade"
+            name="Bevakade"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_bevakade_partner"
+            sequence="10"/>
+
+  <!-- Matchade annonser (kanban first) -->
+  <menuitem id="menu_clio_obit_matchade"
+            name="Matchade annonser"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_announcement_matched"
+            sequence="20"/>
+
+  <!-- Alla annonser -->
+  <menuitem id="menu_clio_obit_annonser"
+            name="Alla annonser"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_announcement"
+            sequence="30"
+            groups="base.group_system"/>
+
+  <!-- Matchningshistorik -->
+  <menuitem id="menu_clio_obit_matchningar"
+            name="Matchningshistorik"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_match"
+            sequence="40"/>
+
+</odoo>

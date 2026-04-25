@@ -26,6 +26,11 @@ class ResPartner(models.Model):
         string="Familjeroll",
         help="T.ex. farfar, faster, granne",
     )
+    clio_obit_notify_email = fields.Char(
+        string="Notifiera e-post",
+        help="E-post som får notiser när denna person hittas i en dödsannons. "
+             "Lämnas tomt = använd systeminställningens standardadress.",
+    )
     clio_link_ids = fields.One2many(
         comodel_name="clio.partner.link",
         inverse_name="from_partner_id",
