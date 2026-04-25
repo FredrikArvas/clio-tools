@@ -36,4 +36,12 @@
             action="action_clio_obit_match"
             sequence="40"/>
 
+  <!-- GEDCOM-filer -->
+  <menuitem id="menu_clio_obit_gedcom"
+            name="GEDCOM-filer"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_gedcom"
+            sequence="50"
+            groups="base.group_system"/>
+
 </odoo>
