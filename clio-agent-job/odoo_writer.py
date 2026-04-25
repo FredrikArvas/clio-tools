@@ -67,22 +67,24 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
     """
     if env is None or not articles:
         return
-    try:
-        Article = env["clio.job.article"]
-        now = _utcnow_str()
-        created = 0
-        for a in articles:
-            # Publicerat datum — konvertera till "YYYY-MM-DD HH:MM:SS" om satt
-            published = a.get("published")
-            if published:
-                try:
-                    if hasattr(published, "strftime"):
-                        published = published.strftime("%Y-%m-%d %H:%M:%S")
-                    else:
-                        published = str(published)[:19].replace("T", " ")
-                except Exception:
-                    published = False
 
+    Article = env["clio.job.article"]
+    now = _utcnow_str()
+    created = skipped = failed = 0
+
+    for a in articles:
+        # Publicerat datum — konvertera till "YYYY-MM-DD HH:MM:SS" om satt
+        published = a.get("published")
+        if published:
+            try:
+                if hasattr(published, "strftime"):
+                    published = published.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    published = str(published)[:19].replace("T", " ")
+            except Exception:
+                published = False
+
+        try:
             Article.create({
                 "article_id":   a.get("article_id", ""),
                 "url":          a.get("url", ""),
@@ -95,9 +97,22 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
                 "is_matched":   bool(a.get("is_matched", False)),
             })
             created += 1
-        _logger.info("write_articles_to_odoo: %d artikel(ar) sparade", created)
-    except Exception as exc:
-        _logger.warning("Kunde inte spara artiklar i Odoo: %s", exc)
+        except Exception as exc:
+            msg = str(exc).lower()
+            if "unik" in msg or "unique" in msg or "uniq" in msg:
+                # Parallel körning — annan profil hann skriva artikeln först
+                skipped += 1
+                _logger.debug("write_articles_to_odoo: skip duplicate %s", a.get("article_id", "")[:12])
+            else:
+                failed += 1
+                _logger.warning("write_articles_to_odoo: fel för %s: %s", a.get("url", "")[:60], exc)
+
+    _logger.info(
+        "write_articles_to_odoo: %d skapade, %d skippad (dubblett), %d fel",
+        created, skipped, failed,
+    )
+    if skipped:
+        print(f"[clio-job] Artiklar till Odoo: {created} nya, {skipped} redan inlagda av parallell körning.")
 
 
 def write_matches_to_odoo(profile: dict, matches: list) -> None:
