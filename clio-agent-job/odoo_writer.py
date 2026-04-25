@@ -35,6 +35,57 @@ def get_odoo_env():
         return None
 
 
+def load_known_article_ids(env) -> set[str]:
+    """
+    Hämtar alla kända artikel-IDs från Odoo i en enda bulk-fråga.
+    Returnerar ett tomt set om Odoo inte är tillgängligt.
+
+    Används i run.py för att filtrera redan-sedda artiklar INNAN analysen —
+    ett anrop istället för N individuella is_seen()-kontroller.
+    """
+    if env is None:
+        return set()
+    try:
+        rows = env["clio.job.article"].search_read([], ["article_id"])
+        ids = {r["article_id"] for r in rows}
+        _logger.debug("load_known_article_ids: %d kända artikel-IDs hämtade", len(ids))
+        return ids
+    except Exception as exc:
+        _logger.warning("Kunde inte hämta artikel-IDs från Odoo: %s", exc)
+        return set()
+
+
+def write_articles_to_odoo(env, articles: list[dict]) -> None:
+    """
+    Skriver analyserade artiklar till clio.job.article i Odoo.
+
+    Varje artikel är en dict med nycklarna:
+        article_id, url, title, source, match_score, is_matched
+
+    Kraschsäkert — Odoo är ett extra lager.
+    """
+    if env is None or not articles:
+        return
+    try:
+        Article = env["clio.job.article"]
+        now = _utcnow_str()
+        created = 0
+        for a in articles:
+            Article.create({
+                "article_id":  a.get("article_id", ""),
+                "url":         a.get("url", ""),
+                "title":       (a.get("title", "") or "")[:500],
+                "source":      a.get("source", ""),
+                "first_seen":  now,
+                "match_score": int(a.get("match_score", -1)),
+                "is_matched":  bool(a.get("is_matched", False)),
+            })
+            created += 1
+        _logger.info("write_articles_to_odoo: %d artikel(ar) sparade", created)
+    except Exception as exc:
+        _logger.warning("Kunde inte spara artiklar i Odoo: %s", exc)
+
+
 def write_matches_to_odoo(profile: dict, matches: list) -> None:
     """
     Skapar clio.job.match-poster i Odoo för varje matchad artikel.
