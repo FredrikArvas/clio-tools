@@ -31,10 +31,20 @@ class ClioJobArticle(models.Model):
     url = fields.Char(string="URL")
     title = fields.Char(string="Rubrik")
     source = fields.Char(string="Källa", index=True)
-    first_seen = fields.Datetime(string="Först sedd", index=True)
+    published = fields.Datetime(
+        string = "Publicerad",
+        index  = True,
+        help   = "Artikelns publiceringsdatum enligt källan.",
+    )
+    first_seen = fields.Datetime(string="Hämtad", index=True)
+    body_snippet = fields.Text(
+        string = "Utdrag",
+        help   = "Upp till 1 000 tecken brödtext från artikeln.",
+    )
     match_score = fields.Integer(
-        string  = "Matchning",
+        string  = "Score",
         default = -1,
+        index   = True,
         help    = "0–100 från AI-analysen. -1 = ej analyserad (fel).",
     )
     is_matched = fields.Boolean(
@@ -50,16 +60,17 @@ class ClioJobArticle(models.Model):
 
     # ── Beräknade fält ────────────────────────────────────────────────────────
 
-    score_label = fields.Char(
-        string   = "Score",
-        compute  = "_compute_score_label",
-        store    = False,
+    score_display = fields.Char(
+        string  = "Score",
+        compute = "_compute_score_display",
+        store   = False,
+        help    = "Visar '—' för ej analyserade, annars score i %.",
     )
 
     @api.depends("match_score")
-    def _compute_score_label(self):
+    def _compute_score_display(self):
         for rec in self:
             if rec.match_score < 0:
-                rec.score_label = "—"
+                rec.score_display = "—"
             else:
-                rec.score_label = f"{rec.match_score} %"
+                rec.score_display = f"{rec.match_score} %"
