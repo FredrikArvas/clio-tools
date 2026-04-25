@@ -165,6 +165,9 @@ def run(
     if not new_articles:
         print("[clio-job] Inga nya artiklar — tyst körning.")
         log_run(total_fetched, 0, 0, 0, dry_run)
+        if odoo_env and not dry_run:
+            write_heartbeat(odoo_env, status="ok", items_processed=0,
+                            message=f"0 nya av {total_fetched} hämtade")
         return 0
 
     # Analysera mot profil
