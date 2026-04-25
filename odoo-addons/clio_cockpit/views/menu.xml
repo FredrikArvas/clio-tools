@@ -27,6 +27,14 @@
             groups="clio_cockpit.group_clio_user"
             sequence="30"/>
 
+  <!-- Synliga för Clio User -->
+  <menuitem id="menu_cockpit_heartbeat"
+            name="💓 Agenthälsa"
+            parent="menu_clio_cockpit_root"
+            action="clio_cockpit.action_clio_tool_heartbeat"
+            groups="clio_cockpit.group_clio_user"
+            sequence="35"/>
+
   <!-- Synliga för Clio Admin -->
   <menuitem id="menu_cockpit_mail"
             name="📧 Mail Admin"

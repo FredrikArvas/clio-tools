@@ -1,10 +1,11 @@
 """
 odoo_writer.py
-Skriver matchningsresultat till Odoo (clio.job.match) efter att en rapport
-har skickats till kandidaten.
+Skriver körningsresultat från clio-agent-job till Odoo:
+  - clio.job.match       — en post per matchad artikel per kandidat
+  - clio.tool.heartbeat  — en post per körning (upsert på tool_name)
 
-Helt valfritt — om Odoo-anslutning saknas eller misslyckas loggas en varning
-och körningen fortsätter normalt. Kraschsäkert.
+Kraschsäkert: Odoo är ett extra lager, inte ett hårdberoende.
+Om anslutning saknas eller misslyckas loggas en varning och körningen fortsätter.
 
 Kräver i .env: ODOO_URL, ODOO_DB, ODOO_USER, ODOO_PASSWORD
 """
@@ -13,12 +14,25 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    pass  # Inga cykliska importer
+_logger = logging.getLogger(__name__)
+log = _logger  # Bakåtkompatibelt alias
 
-log = logging.getLogger(__name__)
+TOOL_NAME = "clio-agent-job"
+
+
+def _utcnow_str() -> str:
+    return datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_odoo_env():
+    """Returnerar en ansluten OdooConnector, eller None vid fel."""
+    try:
+        from clio_odoo import connect
+        return connect()
+    except Exception as exc:
+        _logger.warning("Odoo-anslutning misslyckades: %s", exc)
+        return None
 
 
 def write_matches_to_odoo(profile: dict, matches: list) -> None:
@@ -84,4 +98,42 @@ def write_matches_to_odoo(profile: dict, matches: list) -> None:
 
     except Exception as exc:  # noqa: BLE001
         # Aldrig krasch — Odoo är ett extra lager, inte ett hårdberoende
-        log.warning(f"odoo_writer: kunde inte spara matchningar i Odoo: {exc}")
+        _logger.warning("odoo_writer: kunde inte spara matchningar i Odoo: %s", exc)
+
+
+def write_heartbeat(
+    env,
+    status: str,
+    items_processed: int = 0,
+    message: str = "",
+) -> None:
+    """
+    Upsert: uppdaterar eller skapar clio.tool.heartbeat för clio-agent-job.
+
+    Args:
+        env:             OdooConnector (från get_odoo_env())
+        status:          'ok', 'warning' eller 'error'
+        items_processed: Antal artiklar/profiler som bearbetades
+        message:         Kort sammanfattning av körningen
+    """
+    if env is None:
+        return
+    try:
+        Heartbeat = env["clio.tool.heartbeat"]
+        vals = {
+            "last_run":        _utcnow_str(),
+            "status":          status,
+            "items_processed": int(items_processed),
+            "message":         (message or "")[:255],
+        }
+        existing = Heartbeat.search_read(
+            [("tool_name", "=", TOOL_NAME)], ["id"], limit=1
+        )
+        if existing:
+            Heartbeat.write([existing[0]["id"]], vals)
+        else:
+            vals["tool_name"] = TOOL_NAME
+            Heartbeat.create(vals)
+        _logger.info("Heartbeat: %s → %s", TOOL_NAME, status)
+    except Exception as exc:
+        _logger.warning("Kunde inte skriva heartbeat: %s", exc)
