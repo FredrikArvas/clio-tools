@@ -103,31 +103,32 @@ def _xref_to_name(xref: str) -> str:
 
 def _build_odoo_lookup(env) -> dict[tuple, int]:
     """
-    Hämtar alla partners med namn + birthdate från Odoo.
-    Returnerar {(fornamn_lower, efternamn_lower, birth_year_or_0): partner_id}.
+    Hämtar alla partners med namn + födelsenamn från Odoo.
+    Returnerar {(fornamn_lower, efternamn_lower): partner_id}.
+    Inkluderar clio_obit_birth_name som alternativ efternamns-nyckel.
     """
     rows = env["res.partner"].search_read(
         [("is_company", "=", False)],
-        ["id", "name", "birthdate"],
+        ["id", "name", "clio_obit_birth_name"],
     )
     lookup: dict[tuple, int] = {}
     for r in rows:
+        pid = r["id"]
         name = (r.get("name") or "").strip()
         parts = name.split()
-        if len(parts) < 2:
-            continue
-        fornamn = " ".join(parts[:-1]).lower()
-        efternamn = parts[-1].lower()
-        bd = r.get("birthdate") or ""
-        birth_year = 0
-        if bd and len(bd) >= 4:
-            try:
-                birth_year = int(bd[:4])
-            except ValueError:
-                pass
-        lookup[(fornamn, efternamn, birth_year)] = r["id"]
-        # Lägg också in utan födelseår som fallback
-        lookup.setdefault((fornamn, efternamn, 0), r["id"])
+        if len(parts) >= 2:
+            fornamn = " ".join(parts[:-1]).lower()
+            efternamn = parts[-1].lower()
+            lookup.setdefault((fornamn, efternamn), pid)
+
+        # Födelsenamn som alternativ matchningsnyckel
+        birth_name = (r.get("clio_obit_birth_name") or "").strip()
+        if birth_name:
+            bparts = birth_name.split()
+            if len(bparts) >= 2:
+                bf = " ".join(bparts[:-1]).lower()
+                be = bparts[-1].lower()
+                lookup.setdefault((bf, be), pid)
     return lookup
 
 
@@ -181,7 +182,7 @@ def _find_or_create_partner(
     Hittar befintlig partner eller skapar ny.
     Söker i prioritetsordning:
       1. GEDCOM-ID (ir.model.data) — robust mot namnbyten
-      2. Namn + födelseår — fallback för nyimport
+      2. Namn (visnings- eller födelsenamn) — fallback för nyimport
     Returnerar (partner_id, action) där action är 'found'|'created'|'dry_run'.
     """
     # 1. GEDCOM-ID-sökning
@@ -191,14 +192,10 @@ def _find_or_create_partner(
         if pid:
             return pid, "found"
 
-    # 2. Namn + födelseår
+    # 2. Namnmatchning (visningsnamn eller födelsenamn)
     fn_low = fornamn.lower()
     en_low = efternamn.lower()
-    by = birth_year or 0
-
-    pid = lookup.get((fn_low, en_low, by))
-    if pid is None and by:
-        pid = lookup.get((fn_low, en_low, 0))
+    pid = lookup.get((fn_low, en_low))
 
     if pid:
         return pid, "found"
@@ -206,20 +203,19 @@ def _find_or_create_partner(
     if dry_run:
         return None, "dry_run"
 
-    # Skapa ny partner
+    # Skapa ny partner — GEDCOM-namn blir födelsenamn, också visningsnamn vid skapande
+    birth_name = f"{fornamn} {efternamn}"
     vals: dict = {
-        "name":       f"{fornamn} {efternamn}",
-        "is_company": False,
+        "name":                  birth_name,
+        "is_company":            False,
+        "clio_obit_birth_name":  birth_name,
     }
-    if birth_year:
-        vals["birthdate"] = f"{birth_year}-01-01"
     if birth_place:
         vals["city"] = birth_place[:100]
 
     pid = _odoo_create(env, "res.partner", vals)
     # Uppdatera lookup för idempotens inom samma körning
-    lookup[(fn_low, en_low, by)] = pid
-    lookup.setdefault((fn_low, en_low, 0), pid)
+    lookup[(fn_low, en_low)] = pid
     return pid, "created"
 
 
@@ -302,6 +298,7 @@ def run_import(
             fornamn, efternamn, birth_year, birth_place,
             gedcom_xref, dry_run,
         )
+        # birth_year behålls i signaturen för framtida eget fält men används ej mot Odoo nu
 
         if action == "dry_run":
             dry_count += 1
