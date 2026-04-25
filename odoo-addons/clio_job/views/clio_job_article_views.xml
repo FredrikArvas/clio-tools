@@ -40,7 +40,7 @@
             </group>
           </group>
           <group string="Teknisk info">
-            <field name="article_id" string="Artikel-ID" attrs="{'readonly': [('id', '!=', False)]}"/>
+            <field name="article_id" string="Artikel-ID" readonly="id"/>
           </group>
         </sheet>
       </form>
