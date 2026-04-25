@@ -23,19 +23,19 @@
             sequence="20"
             groups="base.group_system"/>
 
+  <!-- Admin: Artiklar (alla sedda) -->
+  <menuitem id="menu_clio_job_artiklar"
+            name="Artiklar"
+            parent="menu_clio_job_root"
+            action="action_clio_job_article"
+            sequence="30"
+            groups="base.group_system"/>
+
   <!-- Admin: Matchningshistorik -->
   <menuitem id="menu_clio_job_matchningar"
             name="Matchningshistorik"
             parent="menu_clio_job_root"
             action="action_clio_job_match"
-            sequence="30"
-            groups="base.group_system"/>
-
-  <!-- Admin: Alla sedda artiklar -->
-  <menuitem id="menu_clio_job_artiklar"
-            name="Artikelhistorik"
-            parent="menu_clio_job_root"
-            action="action_clio_job_article"
             sequence="40"
             groups="base.group_system"/>
 
