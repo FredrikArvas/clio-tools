@@ -27,7 +27,7 @@
             parent="menu_clio_obit_root"
             action="action_clio_obit_announcement"
             sequence="30"
-            groups="base.group_system"/>
+            groups="clio_obit.group_clio_bevakare,base.group_system"/>
 
   <!-- Matchningshistorik -->
   <menuitem id="menu_clio_obit_matchningar"
