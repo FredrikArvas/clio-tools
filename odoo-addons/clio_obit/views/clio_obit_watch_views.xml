@@ -14,7 +14,7 @@
         <field name="priority" string="Prioritet" widget="badge"
                decoration-danger="priority == 'viktig'"
                decoration-warning="priority == 'normal'"
-               decoration-secondary="priority == 'bra_att_veta'"/>
+               decoration-muted="priority == 'bra_att_veta'"/>
         <field name="user_id" string="Bevakare" optional="show" groups="base.group_system"/>
         <field name="effective_email" string="Notifiera" optional="show"/>
       </list>
