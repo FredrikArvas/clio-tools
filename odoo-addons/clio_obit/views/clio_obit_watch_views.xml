@@ -65,8 +65,7 @@
     <field name="name">Bevakade</field>
     <field name="res_model">clio.obit.watch</field>
     <field name="view_mode">list,form</field>
-    <field name="domain">[('user_id','=',uid)]</field>
-    <field name="context">{'default_user_id': uid, 'search_default_mine': 1}</field>
+    <field name="context">{'default_user_id': uid}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">
         Inga bevakade personer ännu.
