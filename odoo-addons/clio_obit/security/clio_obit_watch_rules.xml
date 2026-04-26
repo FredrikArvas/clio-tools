@@ -13,11 +13,11 @@
     <field name="perm_unlink" eval="True"/>
   </record>
 
-  <!-- Admins ser alla bevakningar -->
+  <!-- Admins (base.group_system) ser och hanterar alla bevakningar -->
   <record id="rule_clio_obit_watch_admin" model="ir.rule">
     <field name="name">Clio Obit Watch: admin ser alla</field>
     <field name="model_id" ref="model_clio_obit_watch"/>
-    <field name="groups" eval="[(4, ref('clio_obit.group_clio_admin'))]"/>
+    <field name="groups" eval="[(4, ref('base.group_system'))]"/>
     <field name="domain_force">[(1,'=',1)]</field>
     <field name="perm_read"   eval="True"/>
     <field name="perm_write"  eval="True"/>
