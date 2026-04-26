@@ -74,44 +74,55 @@ def _fix_level_jumps(lines: list[str]) -> list[str]:
 def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
     """
     Return (path, is_temp).
-    If the file needs level-jump fixing, writes a tempfile in the ORIGINAL
-    encoding so python-gedcom reads it correctly (it ignores our CHAR tag
-    overrides and always uses the encoding declared in the file).
-    If no fixes needed, returns the original path.
+    Always produces a UTF-8 tempfile — python-gedcom decodes every line with
+    utf-8-sig regardless of the CHAR tag.
+
+    Strategy:
+      1. UTF-8 BOM present → read with utf-8-sig, errors='replace'.
+         Some GEDCOM exporters split a multi-byte UTF-8 sequence across CONC
+         records, which breaks strict decoding.  'replace' emits U+FFFD for the
+         bad bytes — far better than falling back to latin-1 which turns all
+         UTF-8 sequences into mojibake.
+      2. No BOM → try utf-8 strict, then cp1252, then latin-1.
     """
-    detected_enc = "utf-8-sig"
     content = None
-    try:
-        with open(gedcom_path, encoding="utf-8-sig") as f:
+    with open(gedcom_path, "rb") as f:
+        raw_start = f.read(3)
+    has_utf8_bom = raw_start[:3] == b"\xef\xbb\xbf"
+
+    if has_utf8_bom:
+        with open(gedcom_path, encoding="utf-8-sig", errors="replace") as f:
             content = f.read()
-    except UnicodeDecodeError:
-        pass
-    if content is None:
-        for enc in ("cp1252", "latin-1"):
-            try:
-                with open(gedcom_path, encoding=enc) as f:
-                    content = f.read()
-                detected_enc = enc
-                print(f"[import_gedcom] Converted {enc} → utf-8")
-                break
-            except UnicodeDecodeError:
-                continue
-    if content is None:
-        raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
+        # Warn if any replacement chars were needed
+        if "�" in content:
+            print("[import_gedcom] Varning: ogiltiga UTF-8-bytes hittades (ersatta med �)")
+    else:
+        try:
+            with open(gedcom_path, encoding="utf-8-sig") as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            pass
+        if content is None:
+            for enc in ("cp1252", "latin-1"):
+                try:
+                    with open(gedcom_path, encoding=enc) as f:
+                        content = f.read()
+                    print(f"[import_gedcom] Converted {enc} → utf-8")
+                    break
+                except UnicodeDecodeError:
+                    continue
+        if content is None:
+            raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
 
     lines_before = content.splitlines(keepends=True)
     lines_after = _fix_level_jumps(lines_before)
-    needs_temp = lines_after != lines_before
+    needs_temp = (lines_after != lines_before) or has_utf8_bom
 
     if not needs_temp:
         return gedcom_path, False
 
-    # Write tempfile in the ORIGINAL encoding — python-gedcom reads the CHAR
-    # tag and re-opens with whatever encoding it declares (typically ANSI/latin-1).
-    # If we write UTF-8 but CHAR says ANSI, we get double-decoding ("AndrÃ©").
-    write_enc = detected_enc if detected_enc != "utf-8-sig" else "utf-8"
     tmp = tempfile.NamedTemporaryFile(
-        mode="w", encoding=write_enc, suffix=".ged",
+        mode="w", encoding="utf-8", suffix=".ged",
         delete=False, prefix="clio_gedcom_",
     )
     tmp.writelines(lines_after)
