@@ -88,8 +88,7 @@
             <field name="gedcom_id"  string="GEDCOM-fil"/>
           </group>
           <group string="Inställningar">
-            <field name="owner_email"  string="Notifiera e-post"
-                   placeholder="fredrik@arvas.se"/>
+            <field name="user_id"      string="Bevakare"/>
             <field name="ego_name"     string="Startperson (ego)"
                    placeholder="Lämna tomt = helträd"/>
             <field name="depth"        string="Djup" invisible="full_import"/>
