@@ -15,8 +15,7 @@
                decoration-danger="priority == 'viktig'"
                decoration-warning="priority == 'normal'"
                decoration-muted="priority == 'bra_att_veta'"/>
-        <field name="user_id" string="Bevakare" optional="show" groups="base.group_system"/>
-        <field name="effective_email" string="Notifiera" optional="show"/>
+        <field name="user_id" string="Bevakande användare" optional="show"/>
       </list>
     </field>
   </record>
