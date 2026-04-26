@@ -54,9 +54,7 @@
         <field name="created_at"        string="Startad"    optional="show"/>
         <field name="account_key"       string="Konto"      optional="show"/>
         <field name="participant_email" string="Deltagare"/>
-        <field name="status"            string="Status"     widget="badge"
-               decoration-success="status == 'active'"
-               decoration-secondary="status == 'stopped'"/>
+        <field name="status" string="Status" widget="badge"/>
         <field name="updated_at"        string="Senaste"    optional="hide"/>
       </list>
     </field>
