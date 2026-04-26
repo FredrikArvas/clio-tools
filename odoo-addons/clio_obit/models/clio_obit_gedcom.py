@@ -140,11 +140,12 @@ class ClioObitGedcomWizard(models.TransientModel):
         string       = "GEDCOM-fil",
         required     = True,
     )
-    owner_email = fields.Char(
-        string      = "Notifiera e-post",
-        required    = True,
-        default     = lambda self: self.env.user.email or "",
-        help        = "E-post som får notiser för alla importerade bevakningar.",
+    user_id = fields.Many2one(
+        comodel_name = "res.users",
+        string       = "Bevakare",
+        required     = True,
+        default      = lambda self: self.env.user,
+        help         = "Användare som äger bevakningarna. Notiser skickas till användarens e-post.",
     )
     ego_name = fields.Char(
         string      = "Ego (startperson)",
@@ -217,7 +218,7 @@ class ClioObitGedcomWizard(models.TransientModel):
                 try:
                     run_import(
                         gedcom_path  = tmp_path,
-                        owner_email  = self.owner_email,
+                        user_id      = self.user_id.id,
                         ego_name     = self.ego_name or None,
                         depth        = int(self.depth),
                         full         = self.full_import,

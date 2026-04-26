@@ -6,3 +6,5 @@ access_clio_obit_match_admin,clio.obit.match admin,model_clio_obit_match,base.gr
 access_clio_obit_match_user,clio.obit.match user,model_clio_obit_match,clio_obit.group_clio_bevakare,1,0,0,0
 access_clio_obit_gedcom_admin,clio.obit.gedcom admin,model_clio_obit_gedcom,base.group_system,1,1,1,1
 access_clio_obit_gedcom_wizard_admin,clio.obit.gedcom.wizard admin,model_clio_obit_gedcom_wizard,base.group_system,1,1,1,1
+access_clio_obit_watch_admin,clio.obit.watch admin,model_clio_obit_watch,base.group_system,1,1,1,1
+access_clio_obit_watch_user,clio.obit.watch user,model_clio_obit_watch,clio_obit.group_clio_bevakare,1,1,1,1
