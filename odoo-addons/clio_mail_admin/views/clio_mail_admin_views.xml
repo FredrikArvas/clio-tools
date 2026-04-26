@@ -31,7 +31,7 @@
               <button name="action_load_ncc" type="object" string="Hämta NCC-lista" class="btn-primary"/>
             </div>
             <field name="ncc_ids" nolabel="1" invisible="not ncc_ids">
-              <tree decoration-success="ncc_ok == True"
+              <list decoration-success="ncc_ok == True"
                     decoration-danger="ncc_ok == False"
                     editable="False"
                     default_order="id">
@@ -41,7 +41,7 @@
                 <field name="name"                        string="Projektnamn"/>
                 <field name="ncc_ok"     widget="boolean" string="NCC" readonly="1"/>
                 <field name="status_raw" optional="hide"  string="Status"/>
-              </tree>
+              </list>
             </field>
           </group>
 
@@ -51,7 +51,7 @@
               <button name="action_load_waiting" type="object" string="Hämta väntande" class="btn-primary"/>
             </div>
             <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
-              <tree editable="False">
+              <list editable="False">
                 <field name="date_received" string="Datum"     optional="show"/>
                 <field name="account"       string="Konto"     optional="show"/>
                 <field name="sender"        string="Avsändare"/>
@@ -62,7 +62,7 @@
                         icon="fa-ban"    class="btn-sm btn-danger"/>
                 <button name="action_behall"     type="object" string="Behåll"
                         icon="fa-clock-o" class="btn-sm btn-secondary"/>
-              </tree>
+              </list>
             </field>
           </group>
 

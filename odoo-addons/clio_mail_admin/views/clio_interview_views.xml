@@ -7,12 +7,12 @@
     <field name="name">clio.interview.template.list</field>
     <field name="model">clio.interview.template</field>
     <field name="arch" type="xml">
-      <tree string="Intervjumallar">
+      <list string="Intervjumallar">
         <field name="name"             string="Mallnamn"/>
         <field name="subject"          string="Ämne"/>
         <field name="opening_question" string="Öppningsfråga"/>
         <field name="active"           string="Aktiv" widget="boolean"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -39,7 +39,7 @@
   <record id="action_clio_interview_templates" model="ir.actions.act_window">
     <field name="name">Intervjumallar</field>
     <field name="res_model">clio.interview.template</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 
   <!-- ── Sessioner ──────────────────────────────────────────────────────── -->
@@ -48,7 +48,7 @@
     <field name="name">clio.interview.session.list</field>
     <field name="model">clio.interview.session</field>
     <field name="arch" type="xml">
-      <tree string="Intervjusessioner"
+      <list string="Intervjusessioner"
             decoration-success="status == 'active'"
             decoration-muted="status == 'stopped'">
         <field name="created_at"        string="Startad"    optional="show"/>
@@ -58,7 +58,7 @@
                decoration-success="status == 'active'"
                decoration-secondary="status == 'stopped'"/>
         <field name="updated_at"        string="Senaste"    optional="hide"/>
-      </tree>
+      </list>
     </field>
   </record>
 
@@ -90,14 +90,14 @@
           </group>
           <group string="Dialog">
             <field name="message_ids" nolabel="1" invisible="not message_ids">
-              <tree editable="False">
+              <list editable="False">
                 <field name="date_received" string="Datum"/>
                 <field name="direction"     string="Riktning" widget="badge"
                        decoration-info="direction == 'outbound'"
                        decoration-success="direction == 'inbound'"/>
                 <field name="sender"        string="Avsändare" optional="hide"/>
                 <field name="body"          string="Meddelande"/>
-              </tree>
+              </list>
             </field>
           </group>
         </sheet>
@@ -108,7 +108,7 @@
   <record id="action_clio_interview_sessions" model="ir.actions.act_window">
     <field name="name">Intervjusessioner</field>
     <field name="res_model">clio.interview.session</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
   </record>
 
   <!-- ── Starta intervju-wizard ─────────────────────────────────────────── -->
