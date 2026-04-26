@@ -213,6 +213,10 @@ def save_match(
     suppressed: bool = False,
 ) -> None:
     """
+    Skapar clio.obit.match och kopplar partnern till mentioned_partner_ids
+    på annonsen (för retroaktiv sökning).
+    """
+    """
     Skapar clio.obit.match för en matchad annons.
 
     Args:
@@ -234,6 +238,11 @@ def save_match(
             "notified_at":     notified_at,
             "suppressed":      suppressed,
         })
+        # Lägg till partnern i nämnda personer på annonsen
+        env["clio.obit.announcement"].write(
+            [announcement_odoo_id],
+            {"mentioned_partner_ids": [(4, partner_odoo_id)]},
+        )
     except Exception as exc:
         _logger.warning("Kunde inte spara match i Odoo: %s", exc)
 

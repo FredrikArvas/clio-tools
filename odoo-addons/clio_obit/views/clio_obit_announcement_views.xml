@@ -22,6 +22,7 @@
         <field name="image"         string="Bild"       widget="boolean" optional="show"
                column_invisible="True"/>
         <field name="first_seen"    string="Hämtad"     widget="datetime" optional="hide"/>
+        <field name="mentioned_partner_ids" string="Nämnda" widget="many2many_tags" optional="hide"/>
       </list>
     </field>
   </record>
@@ -158,6 +159,14 @@
             </list>
           </field>
 
+          <!-- Nämnda personer -->
+          <field name="mentioned_partner_ids" string="Nämnda personer" nolabel="1">
+            <list>
+              <field name="name" string="Namn"/>
+              <field name="city" string="Ort" optional="show"/>
+            </list>
+          </field>
+
           <!-- Teknisk info -->
           <group string="Teknisk info" groups="base.group_system">
             <field name="ann_id" string="Annons-ID" readonly="1"/>
@@ -177,6 +186,7 @@
         <field name="source_name" string="Källa"/>
         <field name="hemort"      string="Hemort"/>
         <field name="body_snippet" string="Annonstext"/>
+        <field name="mentioned_partner_ids" string="Nämnd person"/>
 
         <!-- Matchningsfilter -->
         <filter name="matched"   string="Matchade"
