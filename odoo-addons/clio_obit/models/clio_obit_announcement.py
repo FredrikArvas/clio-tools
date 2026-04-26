@@ -92,6 +92,15 @@ class ClioObitAnnouncement(models.Model):
         inverse_name = "announcement_id",
         string       = "Matchningar",
     )
+    mentioned_partner_ids = fields.Many2many(
+        comodel_name = "res.partner",
+        relation     = "clio_obit_announcement_mentioned_rel",
+        column1      = "announcement_id",
+        column2      = "partner_id",
+        string       = "Nämnda personer",
+        help         = "Kontakter som nämns i annonsen. Kopplas automatiskt vid matchning. "
+                       "Underlättar retroaktiv sökning när ny bevakning läggs till.",
+    )
     duplicate_of = fields.Many2one(
         comodel_name = "clio.obit.announcement",
         string       = "Duplikat av",

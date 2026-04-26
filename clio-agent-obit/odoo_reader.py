@@ -1,6 +1,6 @@
 """
 odoo_reader.py
-Läser bevakningslistan från Odoo (res.partner där clio_obit_watch=True).
+Läser bevakningslistan från Odoo via clio.obit.watch.
 Returnerar samma dict-struktur som _load_all_watchlists() i run.py
 så att resten av koden inte behöver ändras.
 
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -29,8 +30,6 @@ def _split_name(full_name: str) -> tuple[str, str]:
     """
     Delar upp "Förnamn Efternamn" → (fornamn, efternamn).
     Sista ordet = efternamn, resten = förnamn.
-    "Göran Frisk"       → ("Göran", "Frisk")
-    "Karl Gustav Berg"  → ("Karl Gustav", "Berg")
     """
     parts = (full_name or "").strip().split()
     if len(parts) == 0:
@@ -45,31 +44,24 @@ def load_watchlist_from_odoo(
     default_notify_email: str = "",
 ) -> dict[str, list] | None:
     """
-    Hämtar aktiva bevakningsposter från Odoo.
+    Hämtar aktiva bevakningsposter från Odoo via clio.obit.watch.
 
-    Args:
-        env:                  OdooConnector (från odoo_writer.get_odoo_env())
-        default_notify_email: E-post att använda om clio_obit_notify_email är tomt.
-                              Typiskt notify.to från config.yaml.
-
-    Returns:
-        Dict {owner_email: [WatchlistEntry, ...]} — samma format som _load_all_watchlists().
-        None om anslutning misslyckades.
+    Returnerar Dict {owner_email: [WatchlistEntry, ...]} — samma format som
+    _load_all_watchlists(). None om anslutning misslyckades.
     """
     if env is None:
         return None
 
-    # Import här för att undvika cirkulärt beroende vid import av modulen
     sys.path.insert(0, str(Path(__file__).parent))
     from matcher import WatchlistEntry
 
     try:
-        Partner = env["res.partner"]
-        partners = Partner.search_read(
-            [("clio_obit_watch", "=", True)],
+        watches = env["clio.obit.watch"].search_read(
+            [],
             [
-                "name", "birthdate", "city", "street",
-                "clio_obit_priority", "clio_obit_notify_email",
+                "partner_id", "user_id", "priority",
+                "notify_email", "effective_email",
+                "partner_name", "partner_birth_name",
                 "create_date",
             ],
         )
@@ -77,55 +69,67 @@ def load_watchlist_from_odoo(
         _logger.warning("Kunde inte hämta bevakningslista från Odoo: %s", exc)
         return None
 
-    if not partners:
-        _logger.info("Inga bevakade partners i Odoo (clio_obit_watch=True).")
+    if not watches:
+        _logger.info("Inga bevakningsrelationer i Odoo.")
         return {}
+
+    # Bulk-hämta födelseår och hemort från res.partner
+    partner_ids = list({w["partner_id"][0] for w in watches if w.get("partner_id")})
+    partners_by_id: dict[int, dict] = {}
+    try:
+        prows = env["res.partner"].read(
+            partner_ids, ["id", "clio_obit_birth_year", "city"]
+        )
+        partners_by_id = {p["id"]: p for p in prows}
+    except Exception as exc:
+        _logger.warning("Kunde inte läsa partner-data: %s", exc)
 
     result: dict[str, list[WatchlistEntry]] = {}
 
-    for p in partners:
-        fornamn, efternamn = _split_name(p.get("name") or "")
-        if not efternamn:
-            _logger.debug("Partner %s saknar efternamn — hoppar över.", p.get("id"))
+    for w in watches:
+        if not w.get("partner_id") or not w.get("user_id"):
             continue
 
-        # Födelseår från birthdate ("YYYY-MM-DD" eller False)
-        fodelsear = None
-        bd = p.get("birthdate")
-        if bd and isinstance(bd, str) and len(bd) >= 4:
-            try:
-                fodelsear = int(bd[:4])
-            except ValueError:
-                pass
+        partner_id   = w["partner_id"][0]
+        partner_name = w.get("partner_name") or ""
+        birth_name   = w.get("partner_birth_name") or ""
 
-        # Hemort: city är primär, street som fallback
-        hemort = p.get("city") or None
+        # Föredra födelsenamn för matchning om det skiljer sig
+        name_for_match = birth_name if birth_name else partner_name
+        fornamn, efternamn = _split_name(name_for_match)
+        if not efternamn:
+            fornamn, efternamn = _split_name(partner_name)
+        if not efternamn:
+            _logger.debug("Partner %d saknar efternamn — hoppar över.", partner_id)
+            continue
 
-        prioritet = p.get("clio_obit_priority") or "normal"
+        pdata     = partners_by_id.get(partner_id, {})
+        fodelsear = pdata.get("clio_obit_birth_year") or None
+        if fodelsear == 0:
+            fodelsear = None
+        hemort    = pdata.get("city") or None
 
-        # Notifiera-email: specifik per partner, annars systemstandard
-        owner_email = (p.get("clio_obit_notify_email") or "").strip()
+        prioritet   = w.get("priority") or "normal"
+        owner_email = (w.get("effective_email") or "").strip()
         if not owner_email:
             owner_email = default_notify_email
         if not owner_email:
-            _logger.debug("Partner %s saknar notify_email och inget default — hoppar över.", p.get("id"))
+            _logger.debug("Watch %d saknar e-post — hoppar över.", w.get("id", 0))
             continue
 
-        # added_at: create_date från Odoo (ISO-format)
-        added_at = p.get("create_date") or ""
+        added_at = w.get("create_date") or datetime.now(timezone.utc).isoformat()
 
         entry = WatchlistEntry(
-            efternamn       = efternamn,
-            fornamn         = fornamn,
-            fodelsear       = fodelsear,
-            hemort          = hemort,
-            prioritet       = prioritet,
-            kalla           = "odoo",
-            partner_id      = str(p.get("id", "")),
-            added_at        = added_at,
-            fodelsear_approx= fodelsear is None,  # approx om födelseår saknas
+            efternamn        = efternamn,
+            fornamn          = fornamn,
+            fodelsear        = fodelsear,
+            hemort           = hemort,
+            prioritet        = prioritet,
+            kalla            = "odoo",
+            partner_id       = str(partner_id),
+            added_at         = added_at,
+            fodelsear_approx = fodelsear is None,
         )
-
         result.setdefault(owner_email, []).append(entry)
 
     total = sum(len(v) for v in result.values())
@@ -139,7 +143,6 @@ def load_watchlist_from_odoo(
 def get_partner_odoo_id(env, partner_id_str: str) -> int | None:
     """
     Slår upp Odoo-ID för res.partner via partner_id (str från WatchlistEntry).
-    Returnerar None om inte funnen.
     """
     if env is None or not partner_id_str:
         return None
