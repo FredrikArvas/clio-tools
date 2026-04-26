@@ -8,6 +8,7 @@
     <field name="arch" type="xml">
       <list string="Dödsannonser"
             decoration-success="matched == True"
+            decoration-muted="is_duplicate == True"
             default_order="published_date desc">
         <field name="name"          string="Namn"/>
         <field name="source_name"   string="Källa"      optional="show"/>
@@ -16,6 +17,8 @@
         <field name="fodelsear"     string="Födelseår"  optional="show"/>
         <field name="match_count"   string="Träffar"    optional="show"/>
         <field name="matched"       string="Matchad"    widget="boolean_toggle" optional="show"/>
+        <field name="is_duplicate"  string="Duplikat"   widget="boolean_toggle" optional="show"/>
+        <field name="duplicate_of"  string="Duplikat av" optional="hide"/>
         <field name="image"         string="Bild"       widget="boolean" optional="show"
                column_invisible="True"/>
         <field name="first_seen"    string="Hämtad"     widget="datetime" optional="hide"/>
@@ -127,6 +130,8 @@
               <field name="matched" string="Matchad" widget="boolean_toggle"/>
               <field name="match_count" string="Antal träffar"/>
               <field name="first_seen" string="Hämtad av Clio"/>
+              <field name="duplicate_of" string="Duplikat av"
+                     options="{'no_create': True, 'no_open': False}"/>
             </group>
           </group>
 
@@ -178,6 +183,10 @@
                 domain="[('matched','=',True)]"/>
         <filter name="unmatched" string="Ej matchade"
                 domain="[('matched','=',False)]"/>
+        <filter name="no_duplicates" string="Ej duplikat"
+                domain="[('is_duplicate','=',False)]"/>
+        <filter name="duplicates" string="Duplikat"
+                domain="[('is_duplicate','=',True)]"/>
         <separator/>
 
         <!-- Bildfilter -->

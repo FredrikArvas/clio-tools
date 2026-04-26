@@ -47,6 +47,51 @@ def get_odoo_env():
         return None
 
 
+def check_cross_source_duplicates(env, announcements: list) -> dict[str, int]:
+    """
+    Söker efter korsvis källduplikat: samma person publicerad på flera sajter.
+    Returnerar {ann_id: canonical_odoo_id} för annonser som troligen är duplikat.
+
+    Algoritm: för varje ny annons, kolla om Odoo redan har en annons med
+    samma efternamn + förnamn från en ANNAN källa inom de senaste 14 dagarna.
+    """
+    if env is None or not announcements:
+        return {}
+    from datetime import date, timedelta
+    date_from = (date.today() - timedelta(days=14)).isoformat()
+    result: dict[str, int] = {}
+    try:
+        for ann in announcements:
+            namn = getattr(ann, "namn", "") or ""
+            source = getattr(ann, "source_name", "") or ""
+            if not namn or not source:
+                continue
+            words = namn.strip().split()
+            if len(words) < 2:
+                continue
+            last_name  = words[-1]
+            first_name = words[0]
+            existing = env["clio.obit.announcement"].search_read([
+                ("name", "ilike", last_name),
+                ("source_name", "!=", source),
+                ("source_name", "!=", False),
+                "|",
+                ("published_date", "=", False),
+                ("published_date", ">=", date_from),
+            ], ["id", "name", "source_name"], limit=5)
+            for rec in existing:
+                if first_name.lower() in (rec["name"] or "").lower():
+                    result[ann.id] = rec["id"]
+                    _logger.info(
+                        "Duplikat: %r (%s) ≈ Odoo#%d (%s)",
+                        namn, source, rec["id"], rec["source_name"],
+                    )
+                    break
+    except Exception as exc:
+        _logger.warning("check_cross_source_duplicates misslyckades: %s", exc)
+    return result
+
+
 def bulk_load_seen_ann_ids(env) -> set[str]:
     """
     Hämtar alla kända annons-IDs från Odoo i en enda bulk-fråga.
@@ -66,13 +111,14 @@ def bulk_load_seen_ann_ids(env) -> set[str]:
         return set()
 
 
-def save_announcement(env, ann) -> int | None:
+def save_announcement(env, ann, duplicate_of_id: int | None = None) -> int | None:
     """
     Skapar clio.obit.announcement om ann_id inte redan finns.
 
     Args:
-        env: OdooConnector
-        ann: Announcement-objekt från matcher.py
+        env:              OdooConnector
+        ann:              Announcement-objekt från matcher.py
+        duplicate_of_id:  Odoo-ID för kanonisk annons om denna är ett duplikat
 
     Returns:
         Odoo-postens ID (int), eller None vid fel / om den redan finns.
@@ -99,10 +145,12 @@ def save_announcement(env, ann) -> int | None:
         else:
             pub_date = None
 
+        source = getattr(ann, "source_name", "") or ""
+
         vals = {
             "ann_id":         ann.id,
             "name":           ann.namn or ann.raw_title or "Okänt namn",
-            "source_name":    getattr(ann, "source_name", "") or "",
+            "source_name":    source,
             "url":            ann.url or "",
             "published_date": pub_date,
             "first_seen":     _utcnow_str(),
@@ -110,6 +158,8 @@ def save_announcement(env, ann) -> int | None:
             "hemort":         ann.hemort or "",
             "matched":        False,
         }
+        if duplicate_of_id:
+            vals["duplicate_of"] = duplicate_of_id
 
         # Annonstext och bild (sätts om de är hämtade)
         if getattr(ann, "body_html", ""):
