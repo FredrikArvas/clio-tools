@@ -13,23 +13,6 @@
     </field>
   </record>
 
-  <!-- Action: Bevakade personer -->
-  <record id="action_clio_obit_bevakade_partner" model="ir.actions.act_window">
-    <field name="name">Bevakade</field>
-    <field name="res_model">res.partner</field>
-    <field name="view_mode">list,form</field>
-    <field name="domain">[('clio_obit_watch','=',True)]</field>
-    <field name="context">{'default_clio_obit_watch': True}</field>
-    <field name="help" type="html">
-      <p class="o_view_nocontent_smiling_face">
-        Inga bevakade personer ännu.
-      </p>
-      <p>
-        Öppna en kontakt och aktivera "Bevaka dödsannonser" under fliken Clio Obit.
-      </p>
-    </field>
-  </record>
-
   <!-- Lagg till Clio-flik pa res.partner-formularet -->
   <record id="view_partner_form_clio_obit" model="ir.ui.view">
     <field name="name">res.partner.form.clio_obit</field>
@@ -40,13 +23,24 @@
       <notebook position="inside">
         <page string="Clio Obit" name="clio_obit">
 
-          <group string="Dodsannonsbevakning">
-            <field name="clio_obit_watch"/>
-            <field name="clio_obit_priority" invisible="not clio_obit_watch"/>
-            <field name="clio_obit_notify_email" invisible="not clio_obit_watch"
-                   placeholder="Lämna tomt = systemets standardadress"/>
-            <field name="clio_family_role"/>
+          <group string="Identitet">
             <field name="clio_obit_birth_name" placeholder="T.ex. Ulrika Johnsson"/>
+            <field name="clio_family_role" placeholder="T.ex. farfar, faster, granne"/>
+          </group>
+
+          <group string="Bevakningar">
+            <field name="clio_obit_watch" readonly="1" string="Bevakad"/>
+            <field name="watch_ids" nolabel="1" string="Bevakningsrelationer">
+              <list editable="bottom">
+                <field name="user_id"/>
+                <field name="priority" widget="badge"
+                       decoration-danger="priority == 'viktig'"
+                       decoration-warning="priority == 'normal'"
+                       decoration-secondary="priority == 'bra_att_veta'"/>
+                <field name="notify_email" placeholder="Tomt = användarens e-post"/>
+                <field name="effective_email" readonly="1" string="Effektiv e-post"/>
+              </list>
+            </field>
           </group>
 
           <field name="clio_link_ids" string="Familjerelationer" nolabel="1"/>

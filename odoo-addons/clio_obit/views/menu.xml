@@ -7,11 +7,11 @@
             sequence="101"
             groups="clio_obit.group_clio_bevakare,base.group_system"/>
 
-  <!-- Bevakade personer (res.partner filtrerat) -->
+  <!-- Bevakade (mina) -->
   <menuitem id="menu_clio_obit_bevakade"
             name="Bevakade"
             parent="menu_clio_obit_root"
-            action="action_clio_obit_bevakade_partner"
+            action="action_clio_obit_watch_mine"
             sequence="10"/>
 
   <!-- Matchade annonser (kanban first) -->
@@ -35,6 +35,14 @@
             parent="menu_clio_obit_root"
             action="action_clio_obit_match"
             sequence="40"/>
+
+  <!-- Alla bevakningar (admin) -->
+  <menuitem id="menu_clio_obit_watch_all"
+            name="Alla bevakningar"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_watch_all"
+            sequence="45"
+            groups="base.group_system"/>
 
   <!-- GEDCOM-filer -->
   <menuitem id="menu_clio_obit_gedcom"

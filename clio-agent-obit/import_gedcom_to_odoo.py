@@ -219,34 +219,41 @@ def _find_or_create_partner(
     return pid, "created"
 
 
-def _set_watch_fields(env, partner_id: int, priority_odoo: str, owner_email: str, dry_run: bool):
-    """Sätter clio_obit-fälten på en befintlig partner."""
+def _upsert_watch_record(env, partner_id: int, priority_odoo: str, user_id: int, dry_run: bool):
+    """Skapar eller uppdaterar en clio.obit.watch-rad för partner+användare."""
     if dry_run:
         return
-    _odoo_write(env, "res.partner", [partner_id], {
-        "clio_obit_watch":         True,
-        "clio_obit_priority":      priority_odoo,
-        "clio_obit_notify_email":  owner_email,
-    })
+    existing = env["clio.obit.watch"].search_read(
+        [("partner_id", "=", partner_id), ("user_id", "=", user_id)],
+        ["id"],
+    )
+    vals = {"partner_id": partner_id, "user_id": user_id, "priority": priority_odoo}
+    if existing:
+        _odoo_write(env, "clio.obit.watch", [existing[0]["id"]], {"priority": priority_odoo})
+    else:
+        _odoo_create(env, "clio.obit.watch", vals)
 
 
 # ── Huvudimport ──────────────────────────────────────────────────────────────
 
 def run_import(
     gedcom_path: str,
-    owner_email: str,
+    user_id: int | None,
     ego_name: str | None,
     depth: int,
     full: bool,
     dry_run: bool,
     env=None,
+    owner_email: str | None = None,  # Legacy CLI-parameter, används ej internt
 ) -> None:
     """
     env: skickas in från Odoo-wizard (self.env) för att undvika deadlock.
          Om None används _get_env() (CLI-läge via xmlrpc).
+    user_id: Odoo res.users ID för bevakningsrelationen.
+             I CLI-läge: slås upp via owner_email om None.
     """
     print(f"\n{'DRY RUN — ' if dry_run else ''}Importerar {gedcom_path}")
-    print(f"Ägare: {owner_email} | Djup: {'full' if full else depth}")
+    print(f"Djup: {'full' if full else depth}")
 
     # ── Parsa GEDCOM ──────────────────────────────────────────────────────────
     utf8_path, is_temp = _to_utf8_tempfile(gedcom_path)
@@ -276,6 +283,27 @@ def run_import(
     # ── Odoo ──────────────────────────────────────────────────────────────────
     if env is None:
         env = _get_env()
+
+    # Slå upp user_id via owner_email i CLI-läge
+    if user_id is None and owner_email:
+        users = env["res.users"].search_read(
+            [("login", "=", owner_email)], ["id", "name"]
+        )
+        if not users:
+            users = env["res.users"].search_read(
+                [("email", "=", owner_email)], ["id", "name"]
+            )
+        if users:
+            user_id = users[0]["id"]
+            print(f"Bevakare: {users[0]['name']} (id={user_id})")
+        else:
+            print(f"Varning: Ingen användare med e-post {owner_email} — faller tillbaka på admin (id=1)")
+            user_id = 1
+
+    if not user_id:
+        print("Fel: user_id krävs. Ange --owner EMAIL i CLI-läge.")
+        return
+
     lookup = _build_odoo_lookup(env)
     gedcom_lookup = _build_gedcom_id_lookup(env)
     print(f"Odoo har {len(lookup)} befintliga kontakter, {len(gedcom_lookup)} GEDCOM-ID-kopplingar")
@@ -305,7 +333,7 @@ def run_import(
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
-        _set_watch_fields(env, pid, priority_odoo, owner_email, dry_run)
+        _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
         # Spara GEDCOM-ID → partner-kopplingen (idempotent)
         if gedcom_xref and pid:
@@ -334,7 +362,7 @@ def parse_args(argv=None):
         description="Importera GEDCOM-släktträd till Odoo res.partner med dödsannonsbevakning"
     )
     p.add_argument("--gedcom",   required=True, metavar="FILE.ged", help="Sökväg till GEDCOM-fil")
-    p.add_argument("--owner",    required=True, metavar="EMAIL",    help="E-post som får notiser")
+    p.add_argument("--owner",    required=True, metavar="EMAIL",    help="E-post för bevakaren (slås upp mot res.users)")
     p.add_argument("--ego",      metavar="NAMN", default=None,       help="Ego-person i trädet (namn)")
     p.add_argument("--depth",    type=int, default=2, choices=[1, 2, 3],
                    help="Antal relationsled från ego (1–3, standard: 2)")
@@ -349,6 +377,7 @@ def main(argv=None):
     args = parse_args(argv)
     run_import(
         gedcom_path  = args.gedcom,
+        user_id      = None,
         owner_email  = args.owner,
         ego_name     = args.ego,
         depth        = args.depth,
