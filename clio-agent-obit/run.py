@@ -272,6 +272,15 @@ def run(
         else:
             new_announcements = [a for a in all_announcements if not is_seen(a.id)]
 
+    # ── Korsvis duplikatdetektering ───────────────────────────────────────────
+    # Identifiera samma person på flera källor — spara men matcha ej duplikat.
+    dup_map: dict[str, int] = {}  # ann_id → canonical odoo_id
+    if env and not backfill_range:
+        dup_map = odoo_writer.check_cross_source_duplicates(env, new_announcements)
+        if dup_map:
+            _log(f"{timestamp} | {len(dup_map)} korsvis duplikat(er) — hoppas över vid matchning")
+    matching_announcements = [a for a in new_announcements if a.id not in dup_map]
+
     # ── Matchning ─────────────────────────────────────────────────────────────
     urgent_by_owner:  dict[str, list[Match]] = {o: [] for o in watchlists}
     digest_by_owner:  dict[str, list[Match]] = {o: [] for o in watchlists}
@@ -281,7 +290,7 @@ def run(
     # Samla matchade annonser (dedup: en annons kan matcha via flera ägare)
     matched_ann_ids: set[str] = set()
 
-    for announcement in new_announcements:
+    for announcement in matching_announcements:
         any_match = False
         for owner, entries in watchlists.items():
             matches = match_announcement(announcement, entries)
@@ -315,7 +324,9 @@ def run(
 
     if not backfill_range and env:
         for ann in new_announcements:
-            odoo_id = odoo_writer.save_announcement(env, ann)
+            odoo_id = odoo_writer.save_announcement(
+                env, ann, duplicate_of_id=dup_map.get(ann.id)
+            )
             if odoo_id:
                 ann_odoo_ids[ann.id] = odoo_id
 

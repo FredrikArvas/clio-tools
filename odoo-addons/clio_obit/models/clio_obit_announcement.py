@@ -92,6 +92,24 @@ class ClioObitAnnouncement(models.Model):
         inverse_name = "announcement_id",
         string       = "Matchningar",
     )
+    duplicate_of = fields.Many2one(
+        comodel_name = "clio.obit.announcement",
+        string       = "Duplikat av",
+        ondelete     = "set null",
+        index        = True,
+        help         = "Om satt är denna annons en duplikat från annan källa. Matchning hoppas över.",
+    )
+    is_duplicate = fields.Boolean(
+        string  = "Är duplikat",
+        compute = "_compute_is_duplicate",
+        store   = True,
+        index   = True,
+    )
+
+    @api.depends("duplicate_of")
+    def _compute_is_duplicate(self):
+        for rec in self:
+            rec.is_duplicate = bool(rec.duplicate_of)
 
     _sql_constraints = [
         ("ann_id_uniq", "UNIQUE(ann_id)", "Annons-ID måste vara unikt."),

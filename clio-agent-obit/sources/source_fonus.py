@@ -14,13 +14,14 @@ from typing import Optional
 
 from sources.source_html import HtmlListSource
 
-# Default-selektorer verifierade mot live-sajt 2026-04-08 via discover.py probe.
-# .item träffar 50 minnessida-rader, varje innehåller "Namn ÅR DATUM STAD".
+# Default-selektorer verifierade mot live-sajt 2026-04-26.
+# .item träffar 50 minnessida-rader. Varje .item har .user_text med h4 (namn)
+# och span (födelseår - dödsdatum hemort), samt en länk till minnessidan.
 CSS_DEFAULTS = {
-    "list_selector": ".item",
-    "name_selector": "h2, h3, a, span",
-    "link_selector": "a",
-    "summary_selector": "p, span",
+    "list_selector":  ".item",
+    "name_selector":  ".user_text h4",
+    "link_selector":  ".user_text a",
+    "summary_selector": ".user_text span",
 }
 
 
