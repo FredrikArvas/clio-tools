@@ -51,12 +51,19 @@ class ClioObitAddWatch(models.TransientModel):
         full_name   = f"{self.fornamn} {self.efternamn}".strip()
         name_lower  = full_name.lower()
 
-        # 1. Sök befintlig partner på visningsnamn eller födelsenamn
-        partners = self.env["res.partner"].search([
+        # 1. Sök befintlig partner på visningsnamn eller födelsenamn.
+        # sudo() krävs för att se alla kontakter oavsett åtkomstregler.
+        # Söker på fullt namn, födelsenamn, och båda namndelar separat.
+        fornamn   = self.fornamn.strip()
+        efternamn = self.efternamn.strip()
+        partners = self.env["res.partner"].sudo().search([
             ("is_company", "=", False),
-            "|",
-            ("name", "ilike", full_name),
-            ("clio_obit_birth_name", "ilike", full_name),
+            "|", "|", "|",
+            ("name",                  "ilike", full_name),
+            ("clio_obit_birth_name",  "ilike", full_name),
+            "&", ("name", "ilike", fornamn), ("name", "ilike", efternamn),
+            "&", ("clio_obit_birth_name", "ilike", fornamn),
+                 ("clio_obit_birth_name", "ilike", efternamn),
         ])
 
         # Välj bästa träff (exakt matchning prioriteras)
