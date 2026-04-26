@@ -147,9 +147,12 @@ def save_announcement(env, ann, duplicate_of_id: int | None = None) -> int | Non
 
         source = getattr(ann, "source_name", "") or ""
 
+        full_name = ann.namn or ann.raw_title or "Okänt namn"
+        fornamn, efternamn = _split_name(full_name)
+
         vals = {
             "ann_id":         ann.id,
-            "name":           ann.namn or ann.raw_title or "Okänt namn",
+            "name":           full_name,
             "source_name":    source,
             "url":            ann.url or "",
             "published_date": pub_date,
@@ -157,6 +160,9 @@ def save_announcement(env, ann, duplicate_of_id: int | None = None) -> int | Non
             "fodelsear":      fodelsear,
             "hemort":         ann.hemort or "",
             "matched":        False,
+            "fornamn":        fornamn,
+            "efternamn":      efternamn,
+            "dodsar":         getattr(ann, "dodsar", None) or 0,
         }
         if duplicate_of_id:
             vals["duplicate_of"] = duplicate_of_id
@@ -275,6 +281,15 @@ def write_heartbeat(
         _logger.info("Heartbeat: %s → %s", TOOL_NAME, status)
     except Exception as exc:
         _logger.warning("Kunde inte skriva heartbeat: %s", exc)
+
+
+def _split_name(full_name: str) -> tuple[str, str]:
+    parts = (full_name or "").strip().split()
+    if not parts:
+        return ("", "")
+    if len(parts) == 1:
+        return ("", parts[0])
+    return (" ".join(parts[:-1]), parts[-1])
 
 
 def _image_filename(ann) -> str:

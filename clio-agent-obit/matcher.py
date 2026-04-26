@@ -97,6 +97,7 @@ class Announcement:
     url: str
     publiceringsdatum: str            # ISO date string "YYYY-MM-DD"
     raw_title: str
+    dodsar: Optional[int] = None      # Dödsår om det finns i annonslistan
     # Detaljdata — hämtas från detaljsidan för matchade annonser
     body_html: str = ""               # Fullständig annonstext (HTML)
     image_url: str = ""               # URL till tidningsbild om tillgänglig

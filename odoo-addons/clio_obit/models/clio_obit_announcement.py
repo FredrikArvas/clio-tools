@@ -92,6 +92,20 @@ class ClioObitAnnouncement(models.Model):
         inverse_name = "announcement_id",
         string       = "Matchningar",
     )
+    fornamn = fields.Char(
+        string = "Förnamn",
+        index  = True,
+        help   = "Extraherat vid insamling — används för retroaktiv matchning.",
+    )
+    efternamn = fields.Char(
+        string = "Efternamn",
+        index  = True,
+        help   = "Extraherat vid insamling — primär sökkolumn.",
+    )
+    dodsar = fields.Integer(
+        string = "Dödsår",
+        help   = "Extraherat från annonstexten. 0 = okänt.",
+    )
     mentioned_partner_ids = fields.Many2many(
         comodel_name = "res.partner",
         relation     = "clio_obit_announcement_mentioned_rel",

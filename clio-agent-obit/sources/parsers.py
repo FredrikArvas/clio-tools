@@ -34,6 +34,27 @@ def extract_birth_year(text: str) -> Optional[int]:
     return None
 
 
+def extract_death_year(text: str) -> Optional[int]:
+    """
+    Försöker extrahera dödsår ur annonstext.
+    Letar efter "d. 2026", "† 2026", "1942-2026" (andra årtalet).
+    """
+    if not text:
+        return None
+    patterns = [
+        r"d(?:öd|\.)\s*(\d{4})",
+        r"†\s*(\d{4})",
+        r"\d{4}\s*[-–]\s*(20[012]\d|19[5-9]\d)",
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            year = int(m.group(1))
+            if 1950 <= year <= 2100:
+                return year
+    return None
+
+
 def extract_location(text: str) -> Optional[str]:
     """
     Hemortsutvinning. Sprint 2 — för 0.2.0 returneras None.
