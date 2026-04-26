@@ -247,6 +247,40 @@ def _upsert_watch_record(env, partner_id: int, priority_odoo: str, user_id: int,
         _odoo_create(env, "clio.obit.watch", vals)
 
 
+# ── Dödsår-backfill ─────────────────────────────────────────────────────────
+
+def _backfill_death_years(env, parser, gedcom_lookup: dict) -> None:
+    """
+    Scannar hela GEDCOM-trädet (inkl. döda) och sätter clio_obit_death_year
+    på partners som redan finns i Odoo men saknar dödsår.
+    Körs efter huvudloopen eftersom _collect_full filtrerar bort döda individer.
+    """
+    try:
+        from gedcom.element.individual import IndividualElement as _Ind
+    except ImportError:
+        return
+
+    updated = 0
+    for element in parser.get_element_list():
+        if not isinstance(element, _Ind):
+            continue
+        xref = element.get_pointer() if hasattr(element, "get_pointer") else None
+        if not xref:
+            continue
+        pid = gedcom_lookup.get(_xref_to_name(xref))
+        if not pid:
+            continue
+        dy = _extract_death_year(element)
+        if not dy:
+            continue
+        rows = env["res.partner"].search_read([("id", "=", pid)], ["clio_obit_death_year"])
+        if rows and not rows[0].get("clio_obit_death_year"):
+            _odoo_write(env, "res.partner", [pid], {"clio_obit_death_year": dy})
+            updated += 1
+    if updated:
+        print(f"Dödsår: {updated} partners uppdaterade")
+
+
 # ── Familjerelationer ────────────────────────────────────────────────────────
 
 def _import_family_links(env, parser, gedcom_lookup: dict, dry_run: bool) -> dict:
@@ -483,6 +517,12 @@ def run_import(
             print(f"  [NY]  {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
         else:
             updated += 1
+
+    # ── Dödsår för alla kända individer ──────────────────────────────────────
+    # Döda individer filtreras bort av _collect_full, men kan finnas i Odoo
+    # sedan tidigare. Scanna hela trädet och sätt dödsår om det saknas.
+    if not dry_run:
+        _backfill_death_years(env, parser, gedcom_lookup)
 
     # ── Familjerelationer ─────────────────────────────────────────────────────
     # Kör mot hela trädet — gedcom_lookup har nu alla importerade xrefs
