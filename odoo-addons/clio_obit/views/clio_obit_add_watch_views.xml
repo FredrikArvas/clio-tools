@@ -12,7 +12,7 @@
             <group string="Person att bevaka">
               <field name="fornamn"/>
               <field name="efternamn"/>
-              <field name="fodelsear"/>
+              <field name="fodelsedatum" placeholder="T.ex. 1952, ca 1952, 1952-03-15"/>
             </group>
             <group string="Bevakning">
               <field name="user_id"/>

@@ -16,7 +16,10 @@ class ClioObitAddWatch(models.TransientModel):
     fornamn = fields.Char(string="Förnamn", required=True)
     efternamn = fields.Char(string="Efternamn / Födelsenamn", required=True,
                             help="Används för matchning mot dödsannonser.")
-    fodelsear = fields.Integer(string="Födelseår", help="Lämna 0 om okänt.")
+    fodelsedatum = fields.Char(
+        string = "Födelseuppgift",
+        help   = "Fritt format: '1952', 'ca 1952', 'mars 1952', '1952-03-15'. Lämna tomt om okänt.",
+    )
     priority = fields.Selection(
         selection=[("viktig",       "Viktig — direkt notis"),
                    ("normal",       "Normal — daglig digest"),
@@ -89,11 +92,11 @@ class ClioObitAddWatch(models.TransientModel):
             # 2. Skapa ny partner
             vals = {
                 "name":                 full_name,
-                "clio_obit_birth_name": full_name,
+                "clio_obit_birth_name": self.efternamn.strip(),
                 "is_company":           False,
             }
-            if self.fodelsear:
-                vals["comment"] = f"Födelseår: {self.fodelsear}"
+            if self.fodelsedatum:
+                vals["clio_obit_birth_approx"] = self.fodelsedatum.strip()
             partner = self.env["res.partner"].create(vals)
             self.found_partner_id = partner
             self.env["clio.obit.watch"].create({
