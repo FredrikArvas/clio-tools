@@ -15,7 +15,7 @@ from odoo import api, fields, models
 class ClioObitWatch(models.Model):
     _name        = "clio.obit.watch"
     _description = "Clio Obit — Bevakningsrelation"
-    _order       = "priority, partner_id"
+    _order       = "partner_name, priority"
     _rec_name    = "partner_id"
 
     partner_id = fields.Many2one(
