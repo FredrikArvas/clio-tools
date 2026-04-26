@@ -69,3 +69,11 @@ class ResPartner(models.Model):
         inverse_name = "from_partner_id",
         string       = "Familjerelationer",
     )
+
+    def action_open_family_tree(self):
+        self.ensure_one()
+        return {
+            "type":   "ir.actions.act_url",
+            "url":    f"/clio/family-tree/{self.id}",
+            "target": "new",
+        }
