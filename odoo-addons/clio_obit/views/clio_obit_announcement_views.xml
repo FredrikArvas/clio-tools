@@ -123,8 +123,11 @@
             <group string="Annonsuppgifter">
               <field name="source_name" string="Källa"/>
               <field name="published_date" string="Publicerad"/>
-              <field name="hemort" string="Hemort"/>
+              <field name="fornamn"   string="Förnamn"/>
+              <field name="efternamn" string="Efternamn"/>
+              <field name="hemort"    string="Hemort"/>
               <field name="fodelsear" string="Födelseår"/>
+              <field name="dodsar"    string="Dödsår" invisible="dodsar == 0"/>
               <field name="url" string="URL" widget="url"/>
             </group>
             <group string="Bevakningsstatus">
@@ -183,6 +186,7 @@
     <field name="arch" type="xml">
       <search string="Sök dödsannonser">
         <field name="name"        string="Namn"/>
+        <field name="efternamn"   string="Efternamn"/>
         <field name="source_name" string="Källa"/>
         <field name="hemort"      string="Hemort"/>
         <field name="body_snippet" string="Annonstext"/>

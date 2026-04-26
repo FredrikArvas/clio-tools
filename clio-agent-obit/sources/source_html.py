@@ -33,7 +33,7 @@ except ImportError:
 
 from matcher import Announcement
 from sources.source_base import ObituarySource, SourceError
-from sources.parsers import extract_birth_year, extract_location, clean_name
+from sources.parsers import extract_birth_year, extract_death_year, extract_location, clean_name
 
 
 DEFAULT_USER_AGENT = "clio-agent-obit/0.2 (+https://arvas.se)"
@@ -126,18 +126,19 @@ class HtmlListSource(ObituarySource):
                 full_text = f"{by_el.get_text(' ', strip=True)} {full_text}"
 
         birth_year = extract_birth_year(full_text)
+        death_year = extract_death_year(full_text)
         location = extract_location(full_text)
 
-        # ID: föredrar länk, faller tillbaka på rubriken
         ann_id = href or f"{self.name}:{raw_title}"
 
         return Announcement(
             id=ann_id,
             namn=clean_name(raw_title),
             fodelsear=birth_year,
+            dodsar=death_year,
             hemort=location,
             url=href or self.url,
-            publiceringsdatum="",  # ingen tillförlitlig timestamp i en lista-vy
+            publiceringsdatum="",
             raw_title=raw_title,
             source_name=self.name,
         )
