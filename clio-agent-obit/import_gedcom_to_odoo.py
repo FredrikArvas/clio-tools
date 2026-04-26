@@ -366,6 +366,14 @@ def run_import(
     else:
         print(f"Klart: {created} nya partners, {updated} bevakningar skapade/uppdaterade, {skipped} hoppades över")
 
+    return {
+        "created":  created if not dry_run else 0,
+        "updated":  updated if not dry_run else 0,
+        "skipped":  skipped,
+        "dry_run":  dry_run,
+        "dry_count": dry_count,
+    }
+
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
 

@@ -8,16 +8,16 @@
     <field name="arch" type="xml">
       <list string="GEDCOM-filer" default_order="uploaded_at desc">
         <field name="name"             string="Namn"/>
-        <field name="filename"         string="Filnamn"       optional="show"/>
-        <field name="individual_count" string="Individer"     optional="show"/>
-        <field name="file_size"        string="Storlek (B)"   optional="hide"/>
-        <field name="uploaded_at"      string="Uppladdad"     widget="datetime" optional="show"/>
+        <field name="filename"         string="Filnamn"        optional="show"/>
+        <field name="individual_count" string="Individer"      optional="show"/>
+        <field name="file_size"        string="Storlek (B)"    optional="hide"/>
+        <field name="uploaded_at"      string="Uppladdad"      widget="datetime" optional="show"/>
         <field name="last_import_at"   string="Senaste import" widget="datetime" optional="show"/>
       </list>
     </field>
   </record>
 
-  <!-- ── Formulärvy: fil + smarta knappar ───────────────────────────────── -->
+  <!-- ── Formulärvy: fil + importlogg ───────────────────────────────────── -->
   <record id="view_clio_obit_gedcom_form" model="ir.ui.view">
     <field name="name">clio.obit.gedcom.form</field>
     <field name="model">clio.obit.gedcom</field>
@@ -51,10 +51,19 @@
                      readonly="1"/>
             </group>
           </group>
-          <group string="Senaste importlogg" invisible="not last_import_log">
-            <field name="last_import_log" string="" nolabel="1"
-                   widget="text" readonly="1"/>
-          </group>
+
+          <!-- Importlogg — en rad per körning -->
+          <field name="log_ids" string="Importlogg" readonly="1">
+            <list create="false" delete="false" default_order="imported_at desc">
+              <field name="imported_at"  string="Tidpunkt"      widget="datetime"/>
+              <field name="user_id"      string="Bevakare"/>
+              <field name="created"      string="Nya"/>
+              <field name="updated"      string="Uppdaterade"/>
+              <field name="skipped"      string="Överhoppade"/>
+              <field name="dry_run"      string="Torrkörning"   widget="boolean_toggle"/>
+              <field name="log_text"     string="Detaljlogg"    optional="show"/>
+            </list>
+          </field>
         </sheet>
       </form>
     </field>

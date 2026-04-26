@@ -61,7 +61,11 @@ class ClioObitGedcom(models.Model):
         help    = "Antal levande individer hittade vid senaste analys.",
     )
     last_import_at = fields.Datetime(string="Senaste import", readonly=True)
-    last_import_log = fields.Text(string="Importlogg", readonly=True)
+    log_ids = fields.One2many(
+        comodel_name = "clio.obit.gedcom.log",
+        inverse_name = "gedcom_id",
+        string       = "Importlogg",
+    )
 
     # ── Hooks ─────────────────────────────────────────────────────────────────
 
@@ -74,6 +78,7 @@ class ClioObitGedcom(models.Model):
         records = super().create(vals_list)
         for rec in records:
             rec._analyse_gedcom()
+            rec._backfill_filename()
         return records
 
     def write(self, vals):
@@ -83,7 +88,21 @@ class ClioObitGedcom(models.Model):
         result = super().write(vals)
         if vals.get("file_data"):
             self._analyse_gedcom()
+            self._backfill_filename()
         return result
+
+    def _backfill_filename(self):
+        """Fyll i filename från ir.attachment om det saknas."""
+        self.ensure_one()
+        if self.filename:
+            return
+        att = self.env["ir.attachment"].sudo().search([
+            ("res_model", "=", "clio.obit.gedcom"),
+            ("res_id",    "=", self.id),
+            ("res_field", "=", "file_data"),
+        ], limit=1)
+        if att:
+            self.filename = att.name
 
     # ── Analyse ───────────────────────────────────────────────────────────────
 
@@ -216,7 +235,7 @@ class ClioObitGedcomWizard(models.TransientModel):
                 old_stdin = sys.stdin
                 sys.stdin = fake_stdin
                 try:
-                    run_import(
+                    stats = run_import(
                         gedcom_path  = tmp_path,
                         user_id      = self.user_id.id,
                         ego_name     = self.ego_name or None,
@@ -224,27 +243,29 @@ class ClioObitGedcomWizard(models.TransientModel):
                         full         = self.full_import,
                         dry_run      = self.dry_run,
                         env          = self.env,
-                    )
+                    ) or {}
                 finally:
                     sys.stdin = old_stdin
             output = buf.getvalue()
             _logger.info("GEDCOM-import: run_import klar, output %d tecken", len(output))
         except Exception as exc:
             output = f"FEL: {exc}"
+            stats = {}
             _logger.exception("GEDCOM-import misslyckades")
         finally:
             if tmp_path and os.path.exists(tmp_path):
                 os.unlink(tmp_path)
-
-        # Ackumulera logg — senaste körning överst
-        prev = self.gedcom_id.last_import_log or ""
-        separator = f"\n{'─' * 50}\n" if prev else ""
-        accumulated = output + separator + prev
-
-        self.gedcom_id.write({
-            "last_import_at":  fields.Datetime.now(),
-            "last_import_log": accumulated,
+        self.env["clio.obit.gedcom.log"].create({
+            "gedcom_id":   self.gedcom_id.id,
+            "user_id":     self.user_id.id,
+            "imported_at": fields.Datetime.now(),
+            "dry_run":     self.dry_run,
+            "created":     stats.get("created", 0),
+            "updated":     stats.get("updated", 0),
+            "skipped":     stats.get("skipped", 0),
+            "log_text":    output,
         })
+        self.gedcom_id.write({"last_import_at": fields.Datetime.now()})
         self.write({"state": "done", "result_text": output})
 
         # Håll dialogen öppen med resultatet
@@ -256,3 +277,19 @@ class ClioObitGedcomWizard(models.TransientModel):
             "view_mode": "form",
             "target":    "new",
         }
+
+
+class ClioObitGedcomLog(models.Model):
+    _name        = "clio.obit.gedcom.log"
+    _description = "Clio Obit — Importloggpost"
+    _order       = "imported_at desc"
+    _rec_name    = "imported_at"
+
+    gedcom_id   = fields.Many2one("clio.obit.gedcom", required=True, ondelete="cascade", index=True)
+    imported_at = fields.Datetime(string="Tidpunkt", default=fields.Datetime.now, readonly=True)
+    user_id     = fields.Many2one("res.users", string="Bevakare", readonly=True)
+    dry_run     = fields.Boolean(string="Torrkörning", readonly=True)
+    created     = fields.Integer(string="Nya", readonly=True)
+    updated     = fields.Integer(string="Uppdaterade", readonly=True)
+    skipped     = fields.Integer(string="Hoppades över", readonly=True)
+    log_text    = fields.Text(string="Detaljlogg", readonly=True)
