@@ -440,14 +440,6 @@ def run_import(
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
-        # Uppdatera namn om det skiljer sig — fixar t.ex. mojibake vid re-import
-        if action == "found_by_xref" and pid and not dry_run:
-            correct_name = f"{fornamn} {efternamn}"
-            rows = env["res.partner"].search_read([("id", "=", pid)], ["name"])
-            if rows and rows[0]["name"] != correct_name:
-                _odoo_write(env, "res.partner", [pid], {"name": correct_name})
-                print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
-
         _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
         # Spara GEDCOM-ID → partner-kopplingen (idempotent)

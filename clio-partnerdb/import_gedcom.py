@@ -72,7 +72,14 @@ def _fix_level_jumps(lines: list[str]) -> list[str]:
 
 
 def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
-    """Return (path, is_temp). If file is already UTF-8, returns original path."""
+    """
+    Return (path, is_temp).
+    If the file needs level-jump fixing, writes a tempfile in the ORIGINAL
+    encoding so python-gedcom reads it correctly (it ignores our CHAR tag
+    overrides and always uses the encoding declared in the file).
+    If no fixes needed, returns the original path.
+    """
+    detected_enc = "utf-8-sig"
     content = None
     try:
         with open(gedcom_path, encoding="utf-8-sig") as f:
@@ -84,6 +91,7 @@ def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
             try:
                 with open(gedcom_path, encoding=enc) as f:
                     content = f.read()
+                detected_enc = enc
                 print(f"[import_gedcom] Converted {enc} → utf-8")
                 break
             except UnicodeDecodeError:
@@ -91,18 +99,22 @@ def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
     if content is None:
         raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
 
-    # Normalisera CHAR-taggen till UTF-8.
-    # python-gedcom's parser läser CHAR-taggen och öppnar filen igen med den
-    # kodningen — om taggen säger ANSI/WINDOWS-1252 men innehållet är UTF-8
-    # (som det alltid är i vår tempfil) uppstår dubbel-decoding ("AndrÃ©").
-    content = re.sub(r"(?m)^(1 CHAR\s+)\S+", r"\1UTF-8", content)
+    lines_before = content.splitlines(keepends=True)
+    lines_after = _fix_level_jumps(lines_before)
+    needs_temp = lines_after != lines_before
 
-    lines = _fix_level_jumps(content.splitlines(keepends=True))
+    if not needs_temp:
+        return gedcom_path, False
+
+    # Write tempfile in the ORIGINAL encoding — python-gedcom reads the CHAR
+    # tag and re-opens with whatever encoding it declares (typically ANSI/latin-1).
+    # If we write UTF-8 but CHAR says ANSI, we get double-decoding ("AndrÃ©").
+    write_enc = detected_enc if detected_enc != "utf-8-sig" else "utf-8"
     tmp = tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", suffix=".ged",
+        mode="w", encoding=write_enc, suffix=".ged",
         delete=False, prefix="clio_gedcom_",
     )
-    tmp.writelines(lines)
+    tmp.writelines(lines_after)
     tmp.close()
     return tmp.name, True
 
