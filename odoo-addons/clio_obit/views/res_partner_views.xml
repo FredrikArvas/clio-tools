@@ -35,13 +35,11 @@
             <field name="clio_obit_watch" readonly="1" string="Bevakad"/>
             <field name="watch_ids" nolabel="1" string="Bevakningsrelationer">
               <list editable="bottom">
-                <field name="user_id"/>
+                <field name="user_id" string="Bevakande användare"/>
                 <field name="priority" widget="badge"
                        decoration-danger="priority == 'viktig'"
                        decoration-warning="priority == 'normal'"
-                       decoration-secondary="priority == 'bra_att_veta'"/>
-                <field name="notify_email" placeholder="Tomt = användarens e-post"/>
-                <field name="effective_email" readonly="1" string="Effektiv e-post"/>
+                       decoration-muted="priority == 'bra_att_veta'"/>
               </list>
             </field>
           </group>
