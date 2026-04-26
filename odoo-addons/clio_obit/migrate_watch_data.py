@@ -1,7 +1,8 @@
 """
 migrate_watch_data.py
 Engångsmigering: skapar clio.obit.watch-rader för alla res.partner
-som har clio_obit_watch=True, och kopplar dem till angiven användare.
+som hade clio_obit_watch=True (läses direkt ur PostgreSQL-kolumnen
+som nu är en orphan-kolumn sedan fältet togs bort från modellen).
 
 Kör på servern:
     python3 migrate_watch_data.py --user fredrik@arvas.se
@@ -17,6 +18,19 @@ _ROOT = Path(__file__).parent.parent.parent  # clio-tools/
 for _p in [str(_ROOT / "clio-partnerdb"), str(_ROOT)]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
+
+
+def _pg_connect():
+    """Anslut direkt till PostgreSQL för att läsa orphan-kolumner."""
+    import psycopg2
+    import os
+    host = os.environ.get("PGHOST", "localhost")
+    port = os.environ.get("PGPORT", "5432")
+    dbname = os.environ.get("PGDATABASE", "aiab")
+    user = os.environ.get("PGUSER", "odoo")
+    password = os.environ.get("PGPASSWORD", "odoo")
+    return psycopg2.connect(host=host, port=port, dbname=dbname,
+                            user=user, password=password)
 
 
 def migrate(owner_email: str, dry_run: bool = False) -> None:
@@ -37,11 +51,46 @@ def migrate(owner_email: str, dry_run: bool = False) -> None:
     user_id = users[0]["id"]
     print(f"Bevakare: {users[0]['name']} (id={user_id})")
 
-    # Hämta alla bevakade partners (gamla boolean-flaggan)
-    partners = env["res.partner"].search_read(
-        [("clio_obit_watch", "=", True)],
-        ["id", "name", "clio_obit_priority", "clio_obit_notify_email"],
-    )
+    # Läs orphan-kolumnerna direkt ur PostgreSQL
+    # (clio_obit_watch, clio_obit_priority, clio_obit_notify_email
+    #  finns kvar i tabellen efter att fälten togs bort från modellen)
+    conn = _pg_connect()
+    cur = conn.cursor()
+
+    # Kontrollera att kolumnerna finns
+    cur.execute("""
+        SELECT column_name FROM information_schema.columns
+        WHERE table_name = 'res_partner'
+          AND column_name IN ('clio_obit_watch','clio_obit_priority','clio_obit_notify_email')
+    """)
+    found_cols = {r[0] for r in cur.fetchall()}
+    print(f"Hittade orphan-kolumner: {found_cols}")
+
+    if "clio_obit_watch" not in found_cols:
+        print("Kolumnen clio_obit_watch saknas — ingenting att migrera.")
+        conn.close()
+        return
+
+    priority_col = "clio_obit_priority" if "clio_obit_priority" in found_cols else None
+    email_col = "clio_obit_notify_email" if "clio_obit_notify_email" in found_cols else None
+
+    select_cols = "id, name"
+    if priority_col:
+        select_cols += f", {priority_col}"
+    if email_col:
+        select_cols += f", {email_col}"
+
+    cur.execute(f"SELECT {select_cols} FROM res_partner WHERE clio_obit_watch = true AND active = true")
+    rows = cur.fetchall()
+    conn.close()
+
+    col_names = ["id", "name"]
+    if priority_col:
+        col_names.append(priority_col)
+    if email_col:
+        col_names.append(email_col)
+
+    partners = [dict(zip(col_names, row)) for row in rows]
     print(f"Hittade {len(partners)} bevakade partners att migrera")
 
     # Hämta befintliga watch-rader för denna användare
@@ -58,8 +107,8 @@ def migrate(owner_email: str, dry_run: bool = False) -> None:
             skipped += 1
             continue
 
-        priority = p.get("clio_obit_priority") or "normal"
-        notify   = p.get("clio_obit_notify_email") or ""
+        priority = p.get(priority_col) or "normal" if priority_col else "normal"
+        notify   = p.get(email_col) or "" if email_col else ""
 
         if dry_run:
             print(f"  [DRY] {p['name']} → {priority}")
