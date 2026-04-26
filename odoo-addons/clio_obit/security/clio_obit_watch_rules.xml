@@ -13,6 +13,16 @@
     <field name="perm_unlink" eval="True"/>
   </record>
 
-  <!-- Admins ser alla bevakningar (ingen rule = ingen begränsning) -->
+  <!-- Admins ser alla bevakningar -->
+  <record id="rule_clio_obit_watch_admin" model="ir.rule">
+    <field name="name">Clio Obit Watch: admin ser alla</field>
+    <field name="model_id" ref="model_clio_obit_watch"/>
+    <field name="groups" eval="[(4, ref('clio_obit.group_clio_admin'))]"/>
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="perm_read"   eval="True"/>
+    <field name="perm_write"  eval="True"/>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+  </record>
 
 </odoo>
