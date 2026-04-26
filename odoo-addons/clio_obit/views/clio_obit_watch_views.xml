@@ -16,6 +16,7 @@
                decoration-warning="priority == 'normal'"
                decoration-muted="priority == 'bra_att_veta'"/>
         <field name="user_id" string="Bevakande användare" optional="show"/>
+        <field name="family_role" string="Familjeroll" optional="show"/>
       </list>
     </field>
   </record>
@@ -33,6 +34,7 @@
             <field name="user_id" string="Bevakande användare"
                    options="{'no_create': True, 'no_open': False}"/>
             <field name="priority"/>
+            <field name="family_role" placeholder="T.ex. farfar, faster, granne"/>
           </group>
         </sheet>
       </form>

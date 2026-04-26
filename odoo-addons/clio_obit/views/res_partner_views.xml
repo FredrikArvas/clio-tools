@@ -36,7 +36,6 @@
             <field name="clio_obit_birth_year" readonly="1"
                    invisible="clio_obit_birth_year == 0"/>
             <field name="clio_obit_death_year" invisible="clio_obit_death_year == 0"/>
-            <field name="clio_family_role" placeholder="T.ex. farfar, faster, granne"/>
           </group>
 
           <group string="Bevakningar">
@@ -49,6 +48,8 @@
                        decoration-danger="priority == 'viktig'"
                        decoration-warning="priority == 'normal'"
                        decoration-muted="priority == 'bra_att_veta'"/>
+                <field name="family_role" string="Familjeroll"
+                       placeholder="T.ex. farfar, faster, granne"/>
               </list>
             </field>
           </group>

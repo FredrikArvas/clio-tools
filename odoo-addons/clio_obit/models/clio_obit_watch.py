@@ -56,6 +56,11 @@ class ClioObitWatch(models.Model):
         default  = "normal",
         required = True,
     )
+    family_role = fields.Char(
+        string = "Familjeroll",
+        help   = "Din relation till den här personen, t.ex. farfar, faster, granne. "
+                 "Gäller bara för dig som bevakare.",
+    )
     notify_email = fields.Char(
         string = "Notifiera e-post",
         help   = "Lämnas tomt = användarens e-postadress används.",
