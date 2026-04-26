@@ -33,8 +33,7 @@
             <field name="ncc_ids" nolabel="1" invisible="not ncc_ids">
               <list decoration-success="ncc_ok == True"
                     decoration-danger="ncc_ok == False"
-                    editable="False"
-                    default_order="id">
+                                       default_order="id">
                 <field name="nr"         optional="show"  string="Nr"/>
                 <field name="sfar"       optional="show"  string="Sfär"/>
                 <field name="kodord"                      string="Kodord"/>

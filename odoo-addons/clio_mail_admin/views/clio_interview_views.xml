@@ -90,7 +90,7 @@
           </group>
           <group string="Dialog">
             <field name="message_ids" nolabel="1" invisible="not message_ids">
-              <list editable="False">
+              <list>
                 <field name="date_received" string="Datum"/>
                 <field name="direction"     string="Riktning" widget="badge"
                        decoration-info="direction == 'outbound'"
