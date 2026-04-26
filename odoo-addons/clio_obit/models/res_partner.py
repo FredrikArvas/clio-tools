@@ -60,10 +60,6 @@ class ResPartner(models.Model):
         default = 0,
         help    = "Dödsår från GEDCOM eller manuellt. 0 = okänt.",
     )
-    clio_family_role = fields.Char(
-        string = "Familjeroll",
-        help   = "T.ex. farfar, faster, granne",
-    )
     clio_link_ids = fields.One2many(
         comodel_name = "clio.partner.link",
         inverse_name = "from_partner_id",
