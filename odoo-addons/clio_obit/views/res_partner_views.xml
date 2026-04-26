@@ -24,10 +24,10 @@
         <page string="Clio Obit" name="clio_obit">
 
           <div class="mb-3">
-            <a t-attf-href="/clio/family-tree/#{id}" target="_blank"
-               class="btn btn-sm btn-outline-primary">
+            <button name="action_open_family_tree" type="object"
+                    class="btn btn-sm btn-outline-primary">
               Visa familjeträd ↗
-            </a>
+            </button>
           </div>
 
           <group string="Identitet">
