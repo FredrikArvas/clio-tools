@@ -440,20 +440,24 @@ def run_import(
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
-        # Rätta mojibake-namn (innehåller "Ã") — bara om det nya namnet ser korrekt ut
+        # Rätta mojibake-fält (innehåller "Ã") — bara om källdata ser korrekt ut
         if action == "found_by_xref" and pid and not dry_run:
             correct_name = f"{fornamn} {efternamn}"
+            correct_city = birth_place or ""
             if "Ã" not in correct_name:
                 rows = env["res.partner"].search_read(
-                    [("id", "=", pid)], ["name", "clio_obit_birth_name"]
+                    [("id", "=", pid)], ["name", "clio_obit_birth_name", "city"]
                 )
                 if rows:
                     fix_vals = {}
                     if "Ã" in (rows[0]["name"] or ""):
                         fix_vals["name"] = correct_name
-                        print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
+                        print(f"  [FIX name] {rows[0]['name']!r} → {correct_name!r}")
                     if "Ã" in (rows[0].get("clio_obit_birth_name") or ""):
                         fix_vals["clio_obit_birth_name"] = correct_name
+                    if correct_city and "Ã" in (rows[0].get("city") or ""):
+                        fix_vals["city"] = correct_city[:100]
+                        print(f"  [FIX city] {rows[0]['city']!r} → {correct_city!r}")
                     if fix_vals:
                         _odoo_write(env, "res.partner", [pid], fix_vals)
 
