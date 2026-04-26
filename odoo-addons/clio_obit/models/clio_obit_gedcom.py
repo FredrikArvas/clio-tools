@@ -236,9 +236,14 @@ class ClioObitGedcomWizard(models.TransientModel):
             if tmp_path and os.path.exists(tmp_path):
                 os.unlink(tmp_path)
 
+        # Ackumulera logg — senaste körning överst
+        prev = self.gedcom_id.last_import_log or ""
+        separator = f"\n{'─' * 50}\n" if prev else ""
+        accumulated = output + separator + prev
+
         self.gedcom_id.write({
             "last_import_at":  fields.Datetime.now(),
-            "last_import_log": output,
+            "last_import_log": accumulated,
         })
         self.write({"state": "done", "result_text": output})
 
