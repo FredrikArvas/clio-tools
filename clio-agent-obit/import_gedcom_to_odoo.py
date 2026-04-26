@@ -364,8 +364,7 @@ def run_import(
     if dry_run:
         print(f"DRY RUN: {dry_count} skulle ha importerats, {skipped} hoppades över")
     else:
-        print(f"Klart: {created} nya partners, {updated} uppdaterade, {skipped} hoppades över")
-        print(f"Alla satta till clio_obit_watch=True, notify → {owner_email}")
+        print(f"Klart: {created} nya partners, {updated} bevakningar skapade/uppdaterade, {skipped} hoppades över")
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
