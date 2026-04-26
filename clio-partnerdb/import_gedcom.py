@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
 from typing import Optional
@@ -89,6 +90,12 @@ def _to_utf8_tempfile(gedcom_path: str) -> tuple[str, bool]:
                 continue
     if content is None:
         raise ValueError(f"Cannot read {gedcom_path} — unknown encoding")
+
+    # Normalisera CHAR-taggen till UTF-8.
+    # python-gedcom's parser läser CHAR-taggen och öppnar filen igen med den
+    # kodningen — om taggen säger ANSI/WINDOWS-1252 men innehållet är UTF-8
+    # (som det alltid är i vår tempfil) uppstår dubbel-decoding ("AndrÃ©").
+    content = re.sub(r"(?m)^(1 CHAR\s+)\S+", r"\1UTF-8", content)
 
     lines = _fix_level_jumps(content.splitlines(keepends=True))
     tmp = tempfile.NamedTemporaryFile(
