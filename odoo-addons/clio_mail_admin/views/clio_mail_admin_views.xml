@@ -12,11 +12,9 @@
           <div class="oe_button_box" name="button_box"/>
           <group string="Kommandon">
             <div class="o_row">
-              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
               <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
               <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
               <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
-              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
             </div>
           </group>
 
@@ -27,14 +25,45 @@
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
 
-          <!-- Godkänn väntande mail -->
-          <group string="Godkänn väntande">
-            <field name="decide_sender" placeholder="avsandare@exempel.se"/>
-            <div class="o_row">
-              <button name="action_decide_vitlista"   type="object" string="Vitlista"   class="btn-success"/>
-              <button name="action_decide_svartlista" type="object" string="Svartlista" class="btn-danger"/>
-              <button name="action_decide_behall"     type="object" string="Behåll"     class="btn-secondary"/>
+          <!-- NCC-lista -->
+          <group string="Projektlista / NCC">
+            <div class="o_row" style="margin-bottom: 8px;">
+              <button name="action_load_ncc" type="object" string="Hämta NCC-lista" class="btn-primary"/>
             </div>
+            <field name="ncc_ids" nolabel="1" invisible="not ncc_ids">
+              <tree decoration-success="ncc_ok == True"
+                    decoration-danger="ncc_ok == False"
+                    editable="False"
+                    default_order="id">
+                <field name="nr"         optional="show"  string="Nr"/>
+                <field name="sfar"       optional="show"  string="Sfär"/>
+                <field name="kodord"                      string="Kodord"/>
+                <field name="name"                        string="Projektnamn"/>
+                <field name="ncc_ok"     widget="boolean" string="NCC" readonly="1"/>
+                <field name="status_raw" optional="hide"  string="Status"/>
+              </tree>
+            </field>
+          </group>
+
+          <!-- Väntande mail — tree med per-rad-knappar -->
+          <group string="Väntande mail">
+            <div class="o_row" style="margin-bottom: 8px;">
+              <button name="action_load_waiting" type="object" string="Hämta väntande" class="btn-primary"/>
+            </div>
+            <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
+              <tree editable="False">
+                <field name="date_received" string="Datum"     optional="show"/>
+                <field name="account"       string="Konto"     optional="show"/>
+                <field name="sender"        string="Avsändare"/>
+                <field name="subject"       string="Ämne"/>
+                <button name="action_vitlista"   type="object" string="Vitlista"
+                        icon="fa-check"  class="btn-sm btn-success"/>
+                <button name="action_svartlista" type="object" string="Svartlista"
+                        icon="fa-ban"    class="btn-sm btn-danger"/>
+                <button name="action_behall"     type="object" string="Behåll"
+                        icon="fa-clock-o" class="btn-sm btn-secondary"/>
+              </tree>
+            </field>
           </group>
 
           <!-- Vitlista / svartlista -->
@@ -46,16 +75,6 @@
             </div>
           </group>
 
-          <!-- Intervju -->
-          <group string="Intervju">
-            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
-            <field name="interview_subject" placeholder="Ämne för intervjun"/>
-            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
-            <div class="o_row">
-              <button name="action_interview_start" type="object" string="Starta intervju"   class="btn-primary"/>
-              <button name="action_interview_stop"  type="object" string="Avsluta intervju"  class="btn-warning"/>
-            </div>
-          </group>
 
         </sheet>
       </form>
