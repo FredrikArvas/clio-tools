@@ -59,4 +59,17 @@
             sequence="50"
             groups="clio_obit.group_clio_bevakare,base.group_system"/>
 
+  <!-- Neo4j Browser -->
+  <record id="action_clio_obit_neo4j" model="ir.actions.act_url">
+    <field name="name">Neo4j Browser</field>
+    <field name="url">http://100.107.127.104:7474</field>
+    <field name="target">new</field>
+  </record>
+  <menuitem id="menu_clio_obit_neo4j"
+            name="Familjegrafen (Neo4j)"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_neo4j"
+            sequence="60"
+            groups="base.group_system"/>
+
 </odoo>
