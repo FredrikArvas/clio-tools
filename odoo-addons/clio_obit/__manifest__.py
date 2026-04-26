@@ -1,6 +1,6 @@
 {
     "name":        "Clio Obit — Dödsannonsbevakning",
-    "version":     "18.0.13.0.0",
+    "version":     "18.0.14.0.0",
     "category":    "Extra Tools",
     "summary":     "Bevakar dödsannonser mot res.partner. Flera bevakare per person via clio.obit.watch.",
     "author":      "Fredrik Arvas / Arvas International AB",
@@ -16,6 +16,7 @@
         "views/clio_obit_gedcom_views.xml",
         "views/clio_obit_add_watch_views.xml",
         "views/res_partner_views.xml",
+        "views/family_tree_template.xml",
         "views/menu.xml",
     ],
     "installable": True,

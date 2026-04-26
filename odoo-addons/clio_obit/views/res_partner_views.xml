@@ -23,6 +23,13 @@
       <notebook position="inside">
         <page string="Clio Obit" name="clio_obit">
 
+          <div class="mb-3">
+            <a t-attf-href="/clio/family-tree/#{id}" target="_blank"
+               class="btn btn-sm btn-outline-primary">
+              Visa familjeträd ↗
+            </a>
+          </div>
+
           <group string="Identitet">
             <field name="clio_obit_birth_name" placeholder="T.ex. Ulrika Johnsson"/>
             <field name="clio_obit_birth_approx" placeholder="T.ex. 1952, ca 1952, mars 1952, 1952-03-15"/>
