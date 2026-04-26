@@ -44,6 +44,13 @@
             sequence="45"
             groups="base.group_system"/>
 
+  <!-- Lägg till bevakning (manuell) -->
+  <menuitem id="menu_clio_obit_add_watch"
+            name="Lägg till bevakning"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_add_watch"
+            sequence="12"/>
+
   <!-- GEDCOM-filer -->
   <menuitem id="menu_clio_obit_gedcom"
             name="GEDCOM-filer"
