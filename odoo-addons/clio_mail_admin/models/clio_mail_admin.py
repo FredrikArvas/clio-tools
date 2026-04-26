@@ -18,7 +18,7 @@ def _service_url(env) -> str:
     return param.rstrip("/")
 
 
-def _call(env, path: str, data: dict | None = None) -> str:
+def _call_raw(env, path: str, data: dict | None = None) -> dict:
     base = _service_url(env)
     url = f"{base}{path}"
     method = "POST" if data is not None else "GET"
@@ -34,10 +34,66 @@ def _call(env, path: str, data: dict | None = None) -> str:
         raise UserError(f"Kunde inte nå clio-service ({base}): {e.reason}")
     except Exception as e:
         raise UserError(f"clio-service fel: {e}")
-
     if not result.get("ok"):
         raise UserError(result.get("error", "Okänt fel från clio-service"))
-    return result.get("text", "")
+    return result
+
+
+def _call(env, path: str, data: dict | None = None) -> str:
+    return _call_raw(env, path, data).get("text", "")
+
+
+class ClioNccLine(models.TransientModel):
+    _name = "clio.ncc.line"
+    _description = "Clio NCC-rad"
+    _order = "id"
+
+    admin_id   = fields.Many2one("clio.mail.admin", ondelete="cascade")
+    nr         = fields.Char(string="Nr")
+    sfar       = fields.Char(string="Sfär")
+    kodord     = fields.Char(string="Kodord")
+    name       = fields.Char(string="Projektnamn")
+    ncc_ok     = fields.Boolean(string="NCC")
+    status_raw = fields.Char(string="Status")
+
+
+class ClioWaitingLine(models.TransientModel):
+    _name = "clio.waiting.line"
+    _description = "Väntande mail"
+    _order = "id"
+
+    admin_id      = fields.Many2one("clio.mail.admin", ondelete="cascade")
+    sender        = fields.Char(string="Avsändare")
+    subject       = fields.Char(string="Ämne")
+    date_received = fields.Char(string="Datum")
+    account       = fields.Char(string="Konto")
+
+    def _decide(self, action: str):
+        _call(self.env, "/mail/waiting/decide", {"sender": self.sender, "action": action})
+        parent = self.admin_id
+        parent.waiting_ids.unlink()
+        result = _call_raw(self.env, "/mail/waiting/json")
+        vals = [
+            {
+                "admin_id":      parent.id,
+                "sender":        r.get("sender", ""),
+                "subject":       r.get("subject", ""),
+                "date_received": (r.get("date_received") or "")[:10],
+                "account":       r.get("account", ""),
+            }
+            for r in result.get("waiting", [])
+        ]
+        self.env["clio.waiting.line"].create(vals)
+        return parent._reopen()
+
+    def action_vitlista(self):
+        return self._decide("VITLISTA")
+
+    def action_svartlista(self):
+        return self._decide("SVARTLISTA")
+
+    def action_behall(self):
+        return self._decide("BEHÅLL")
 
 
 class ClioMailAdmin(models.TransientModel):
@@ -45,6 +101,8 @@ class ClioMailAdmin(models.TransientModel):
     _description = "Clio Mail Admin"
 
     result_text = fields.Text(string="Resultat", readonly=True)
+    ncc_ids     = fields.One2many("clio.ncc.line",    "admin_id", string="Projekt")
+    waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Väntande")
 
     # Fält för åtgärder med argument
     email_input       = fields.Char(string="E-post")
@@ -73,6 +131,39 @@ class ClioMailAdmin(models.TransientModel):
 
     def action_ncc_lista(self):
         self.result_text = _call(self.env, "/mail/ncc/lista")
+        return self._reopen()
+
+    def action_load_ncc(self):
+        result = _call_raw(self.env, "/mail/ncc/lista/json")
+        self.ncc_ids.unlink()
+        vals = []
+        for p in result.get("projects", []):
+            vals.append({
+                "admin_id":   self.id,
+                "nr":         p.get("nr") or "",
+                "sfar":       p.get("sfar") or "",
+                "kodord":     p.get("kodord") or "",
+                "name":       p.get("name") or "",
+                "ncc_ok":     bool(p.get("ncc_url")),
+                "status_raw": p.get("status") or "",
+            })
+        self.env["clio.ncc.line"].create(vals)
+        return self._reopen()
+
+    def action_load_waiting(self):
+        self.waiting_ids.unlink()
+        result = _call_raw(self.env, "/mail/waiting/json")
+        vals = [
+            {
+                "admin_id":      self.id,
+                "sender":        r.get("sender", ""),
+                "subject":       r.get("subject", ""),
+                "date_received": (r.get("date_received") or "")[:10],
+                "account":       r.get("account", ""),
+            }
+            for r in result.get("waiting", [])
+        ]
+        self.env["clio.waiting.line"].create(vals)
         return self._reopen()
 
     # ── Kommandon med argument ────────────────────────────────────────────────

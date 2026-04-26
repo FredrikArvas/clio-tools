@@ -9,6 +9,7 @@
     "data": [
         "security/ir.model.access.csv",
         "views/clio_mail_admin_views.xml",
+        "views/clio_interview_views.xml",
         "views/menu.xml",
     ],
     "installable": True,
