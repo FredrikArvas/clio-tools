@@ -444,10 +444,18 @@ def run_import(
         if action == "found_by_xref" and pid and not dry_run:
             correct_name = f"{fornamn} {efternamn}"
             if "Ã" not in correct_name:
-                rows = env["res.partner"].search_read([("id", "=", pid)], ["name"])
-                if rows and "Ã" in (rows[0]["name"] or ""):
-                    _odoo_write(env, "res.partner", [pid], {"name": correct_name})
-                    print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
+                rows = env["res.partner"].search_read(
+                    [("id", "=", pid)], ["name", "clio_obit_birth_name"]
+                )
+                if rows:
+                    fix_vals = {}
+                    if "Ã" in (rows[0]["name"] or ""):
+                        fix_vals["name"] = correct_name
+                        print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
+                    if "Ã" in (rows[0].get("clio_obit_birth_name") or ""):
+                        fix_vals["clio_obit_birth_name"] = correct_name
+                    if fix_vals:
+                        _odoo_write(env, "res.partner", [pid], fix_vals)
 
         _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
