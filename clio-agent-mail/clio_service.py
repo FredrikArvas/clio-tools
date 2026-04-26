@@ -129,6 +129,36 @@ def _route_mail_blacklist(data: dict) -> dict:
     return _dispatch("blacklist", body_text=email)
 
 
+def _route_mail_waiting_json(_data: dict) -> dict:
+    import state as st
+    with st.get_connection() as conn:
+        rows = conn.execute(
+            "SELECT id, sender, subject, date_received, account FROM mail "
+            "WHERE status = ? ORDER BY created_at",
+            (st.STATUS_WAITING,),
+        ).fetchall()
+    return {"ok": True, "waiting": [dict(r) for r in rows]}
+
+
+def _route_mail_interview_sessions(_data: dict) -> dict:
+    import state as st
+    with st.get_connection() as conn:
+        rows = conn.execute(
+            "SELECT thread_id, participant_email, account_key, status, "
+            "created_at, updated_at FROM interview_sessions ORDER BY created_at DESC"
+        ).fetchall()
+    return {"ok": True, "sessions": [dict(r) for r in rows]}
+
+
+def _route_mail_interview_thread(data: dict) -> dict:
+    thread_id = data.get("thread_id", "").strip()
+    if not thread_id:
+        return {"ok": False, "error": "saknat fält: thread_id"}
+    import state as st
+    messages = st.get_thread_history(thread_id)
+    return {"ok": True, "messages": messages}
+
+
 def _route_mail_interview_start(data: dict) -> dict:
     to      = data.get("to", "").strip()
     subject = data.get("subject", "Intervju").strip()
@@ -150,6 +180,18 @@ def _route_mail_interview_stop(data: dict) -> dict:
 
 def _route_mail_ncc_lista(_data: dict) -> dict:
     return _dispatch("ncc_lista")
+
+
+def _route_mail_ncc_lista_json(_data: dict) -> dict:
+    import notion_data as nd
+    config = _get_config()
+    raw = config.get("mail", "knowledge_notion_db_ids", fallback="")
+    db_entries = [e.strip() for e in raw.split(",") if e.strip()]
+    if not db_entries:
+        return {"ok": False, "error": "Ingen projektdatabas konfigurerad."}
+    db_id = db_entries[0].split(":")[0].strip()
+    index = nd.get_project_index_full(db_id)
+    return {"ok": True, "projects": index}
 
 
 def _route_mail_ncc_ny(data: dict) -> dict:
@@ -398,10 +440,17 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("GET",  "/mail/whitelist"):       _route_mail_whitelist,
     ("POST", "/mail/whitelist"):       _route_mail_whitelist,
     ("POST", "/mail/blacklist"):       _route_mail_blacklist,
-    ("POST", "/mail/interview/start"): _route_mail_interview_start,
-    ("POST", "/mail/interview/stop"):  _route_mail_interview_stop,
-    ("GET",  "/mail/ncc/lista"):       _route_mail_ncc_lista,
+    ("GET",  "/mail/waiting/json"):           _route_mail_waiting_json,
+    ("POST", "/mail/waiting/json"):           _route_mail_waiting_json,
+    ("GET",  "/mail/interview/sessions"):     _route_mail_interview_sessions,
+    ("POST", "/mail/interview/sessions"):     _route_mail_interview_sessions,
+    ("POST", "/mail/interview/thread"):       _route_mail_interview_thread,
+    ("POST", "/mail/interview/start"):        _route_mail_interview_start,
+    ("POST", "/mail/interview/stop"):         _route_mail_interview_stop,
+    ("GET",  "/mail/ncc/lista"):        _route_mail_ncc_lista,
     ("POST", "/mail/ncc/lista"):       _route_mail_ncc_lista,
+    ("GET",  "/mail/ncc/lista/json"):  _route_mail_ncc_lista_json,
+    ("POST", "/mail/ncc/lista/json"):  _route_mail_ncc_lista_json,
     ("POST", "/mail/ncc/ny"):          _route_mail_ncc_ny,
     ("POST", "/mail/update"):          _route_mail_update,
 }
