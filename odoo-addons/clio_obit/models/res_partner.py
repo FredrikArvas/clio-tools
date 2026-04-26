@@ -3,7 +3,11 @@ res_partner.py
 Utökar res.partner med dödsannonsbevakningsfält.
 """
 
+import re
+
 from odoo import api, fields, models
+
+_YEAR_RE = re.compile(r'\b(1[5-9]\d{2}|20[012]\d)\b')
 
 
 class ResPartner(models.Model):
@@ -35,6 +39,22 @@ class ResPartner(models.Model):
         help   = "Namn vid födseln (flicknamn/ogift namn). "
                  "Används som matchningsnyckel vid GEDCOM-import.",
     )
+    clio_obit_birth_approx = fields.Char(
+        string = "Födelseuppgift",
+        help   = "Fritt format: '1952', 'ca 1952', 'mars 1952', '1952-03-15', '1940-talet'.",
+    )
+    clio_obit_birth_year = fields.Integer(
+        string  = "Födelseår (extraherat)",
+        compute = "_compute_clio_obit_birth_year",
+        store   = True,
+        help    = "Automatiskt extraherat årtalet ur Födelseuppgift. 0 = okänt.",
+    )
+
+    @api.depends("clio_obit_birth_approx")
+    def _compute_clio_obit_birth_year(self):
+        for rec in self:
+            m = _YEAR_RE.search(rec.clio_obit_birth_approx or "")
+            rec.clio_obit_birth_year = int(m.group(1)) if m else 0
     clio_family_role = fields.Char(
         string = "Familjeroll",
         help   = "T.ex. farfar, faster, granne",
