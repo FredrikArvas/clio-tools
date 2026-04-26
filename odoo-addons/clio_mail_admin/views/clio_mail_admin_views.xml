@@ -50,7 +50,7 @@
               <button name="action_load_waiting" type="object" string="Hämta väntande" class="btn-primary"/>
             </div>
             <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
-              <list editable="False">
+              <list>
                 <field name="date_received" string="Datum"     optional="show"/>
                 <field name="account"       string="Konto"     optional="show"/>
                 <field name="sender"        string="Avsändare"/>
