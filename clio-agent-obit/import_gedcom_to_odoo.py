@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 # Lägg till clio-partnerdb och clio-tools i sökvägen
@@ -91,6 +92,12 @@ def _odoo_write(env, model: str, ids: list, vals: dict) -> None:
         env[model].write(ids, vals)
 
 
+def _model(env, model: str):
+    """Returnerar env[model] med sudo() om ORM (xmlrpc är redan admin)."""
+    m = env[model]
+    return m.sudo() if hasattr(m, "sudo") else m
+
+
 # ── Namnsökning i Odoo ───────────────────────────────────────────────────────
 
 _GEDCOM_MODULE = "clio_obit_gedcom"
@@ -137,7 +144,7 @@ def _build_gedcom_id_lookup(env) -> dict[str, int]:
     Hämtar alla ir.model.data-poster för modul clio_obit_gedcom.
     Returnerar {xref_name: partner_id}, t.ex. {'I42': 1337}.
     """
-    rows = env["ir.model.data"].search_read(
+    rows = _model(env, "ir.model.data").search_read(
         [("module", "=", _GEDCOM_MODULE), ("model", "=", "res.partner")],
         ["name", "res_id"],
     )
@@ -150,15 +157,20 @@ def _store_gedcom_xref(env, xref: str, partner_id: int) -> None:
     Idempotent: befintlig post skrivs aldrig om med samma res_id.
     """
     name = _xref_to_name(xref)
-    existing = env["ir.model.data"].search_read(
+    imd = _model(env, "ir.model.data")
+    existing = imd.search_read(
         [("module", "=", _GEDCOM_MODULE), ("name", "=", name)],
         ["id", "res_id"],
     )
     if existing:
         if existing[0]["res_id"] != partner_id:
-            _odoo_write(env, "ir.model.data", [existing[0]["id"]], {"res_id": partner_id})
+            rec = imd.browse([existing[0]["id"]]) if hasattr(imd, "browse") else None
+            if rec is not None:
+                rec.write({"res_id": partner_id})
+            else:
+                imd.write([existing[0]["id"]], {"res_id": partner_id})
     else:
-        _odoo_create(env, "ir.model.data", {
+        imd.create({
             "module":   _GEDCOM_MODULE,
             "name":     name,
             "model":    "res.partner",
@@ -252,8 +264,9 @@ def run_import(
     user_id: Odoo res.users ID för bevakningsrelationen.
              I CLI-läge: slås upp via owner_email om None.
     """
-    print(f"\n{'DRY RUN — ' if dry_run else ''}Importerar {gedcom_path}")
-    print(f"Djup: {'full' if full else depth}")
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{'DRY RUN — ' if dry_run else ''}Import {ts}")
+    print(f"Fil: {gedcom_path} | Djup: {'full' if full else depth}")
 
     # ── Parsa GEDCOM ──────────────────────────────────────────────────────────
     utf8_path, is_temp = _to_utf8_tempfile(gedcom_path)
