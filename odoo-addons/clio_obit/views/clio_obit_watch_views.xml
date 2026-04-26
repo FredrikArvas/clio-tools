@@ -28,11 +28,11 @@
       <form string="Bevakning">
         <sheet>
           <group>
-            <field name="partner_id"/>
-            <field name="user_id" groups="base.group_system"/>
+            <field name="partner_id" string="Bevakad person"
+                   options="{'no_create': True, 'no_open': False}"/>
+            <field name="user_id" string="Bevakande användare"
+                   options="{'no_create': True, 'no_open': False}"/>
             <field name="priority"/>
-            <field name="notify_email" placeholder="Lämna tomt = användarens e-postadress"/>
-            <field name="effective_email" readonly="1"/>
           </group>
         </sheet>
       </form>
