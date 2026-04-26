@@ -12,3 +12,5 @@ access_clio_obit_gedcom_wizard_admin,clio.obit.gedcom.wizard admin,model_clio_ob
 access_clio_obit_gedcom_wizard_user,clio.obit.gedcom.wizard user,model_clio_obit_gedcom_wizard,clio_obit.group_clio_bevakare,1,1,1,1
 access_clio_obit_watch_admin,clio.obit.watch admin,model_clio_obit_watch,base.group_system,1,1,1,1
 access_clio_obit_watch_user,clio.obit.watch user,model_clio_obit_watch,clio_obit.group_clio_bevakare,1,1,1,1
+access_clio_obit_add_watch_admin,clio.obit.add.watch admin,model_clio_obit_add_watch,base.group_system,1,1,1,1
+access_clio_obit_add_watch_user,clio.obit.add.watch user,model_clio_obit_add_watch,clio_obit.group_clio_bevakare,1,1,1,1
