@@ -440,6 +440,15 @@ def run_import(
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
+        # Rätta mojibake-namn (innehåller "Ã") — bara om det nya namnet ser korrekt ut
+        if action == "found_by_xref" and pid and not dry_run:
+            correct_name = f"{fornamn} {efternamn}"
+            if "Ã" not in correct_name:
+                rows = env["res.partner"].search_read([("id", "=", pid)], ["name"])
+                if rows and "Ã" in (rows[0]["name"] or ""):
+                    _odoo_write(env, "res.partner", [pid], {"name": correct_name})
+                    print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
+
         _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
         # Spara GEDCOM-ID → partner-kopplingen (idempotent)
