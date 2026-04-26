@@ -202,7 +202,7 @@ def _find_or_create_partner(
         xref_name = _xref_to_name(gedcom_xref)
         pid = gedcom_lookup.get(xref_name)
         if pid:
-            return pid, "found"
+            return pid, "found_by_xref"
 
     # 2. Namnmatchning (visningsnamn eller födelsenamn)
     fn_low = fornamn.lower()
@@ -244,6 +244,100 @@ def _upsert_watch_record(env, partner_id: int, priority_odoo: str, user_id: int,
         _odoo_write(env, "clio.obit.watch", [existing[0]["id"]], {"priority": priority_odoo})
     else:
         _odoo_create(env, "clio.obit.watch", vals)
+
+
+# ── Familjerelationer ────────────────────────────────────────────────────────
+
+def _import_family_links(env, parser, gedcom_lookup: dict, dry_run: bool) -> dict:
+    """
+    Skapar clio.partner.link-rader från GEDCOM FAM-poster.
+
+    Relationstyper som skapas (ömsesidigt):
+      make/maka  — HUSB ↔ WIFE i samma familj
+      förälder   — HUSB/WIFE → CHIL
+      barn       — CHIL → HUSB/WIFE
+      syskon     — CHIL ↔ CHIL i samma familj (max 6 per individ)
+
+    Idempotent: hoppar över om (from, to, label) redan finns.
+    Skapar bara länkar för individer som finns i gedcom_lookup
+    (dvs. faktiskt importerade som res.partner).
+    """
+    try:
+        from gedcom.element.family import FamilyElement
+    except ImportError:
+        return {"created": 0, "skipped": 0, "families": 0}
+
+    # Förladda befintliga länkar för snabb duplikatcheck
+    existing: set[tuple] = set()
+    if not dry_run:
+        rows = env["clio.partner.link"].search_read(
+            [], ["from_partner_id", "to_partner_id", "relation_label"]
+        )
+        for r in rows:
+            existing.add((
+                r["from_partner_id"][0],
+                r["to_partner_id"][0],
+                r["relation_label"],
+            ))
+
+    created = skipped = families = 0
+
+    def _link(from_pid: int, to_pid: int, label: str) -> None:
+        nonlocal created, skipped
+        key = (from_pid, to_pid, label)
+        if key in existing:
+            skipped += 1
+            return
+        if not dry_run:
+            _odoo_create(env, "clio.partner.link", {
+                "from_partner_id": from_pid,
+                "to_partner_id":   to_pid,
+                "relation_label":  label,
+            })
+            existing.add(key)
+        created += 1
+
+    for element in parser.get_element_list():
+        if not isinstance(element, FamilyElement):
+            continue
+        families += 1
+
+        husb_pid = wife_pid = None
+        child_pids: list[int] = []
+
+        for child in element.get_child_elements():
+            tag = child.get_tag()
+            ptr = child.get_value()
+            pid = gedcom_lookup.get(_xref_to_name(ptr))
+            if not pid:
+                continue
+            if tag == "HUSB":
+                husb_pid = pid
+            elif tag == "WIFE":
+                wife_pid = pid
+            elif tag == "CHIL":
+                child_pids.append(pid)
+
+        # Make/maka — ömsesidig
+        if husb_pid and wife_pid:
+            _link(husb_pid, wife_pid, "make/maka")
+            _link(wife_pid, husb_pid, "make/maka")
+
+        # Förälder ↔ barn
+        parents = [p for p in (husb_pid, wife_pid) if p]
+        for parent_pid in parents:
+            for child_pid in child_pids:
+                _link(parent_pid, child_pid, "barn")
+                _link(child_pid, parent_pid, "förälder")
+
+        # Syskon — tak vid 6 för att undvika kvadratisk explosion
+        limited = child_pids[:6]
+        for i, c1 in enumerate(limited):
+            for c2 in limited[i + 1:]:
+                _link(c1, c2, "syskon")
+                _link(c2, c1, "syskon")
+
+    return {"created": created, "skipped": skipped, "families": families}
 
 
 # ── Huvudimport ──────────────────────────────────────────────────────────────
@@ -346,6 +440,14 @@ def run_import(
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
+        # Uppdatera namn om det skiljer sig — fixar t.ex. mojibake vid re-import
+        if action == "found_by_xref" and pid and not dry_run:
+            correct_name = f"{fornamn} {efternamn}"
+            rows = env["res.partner"].search_read([("id", "=", pid)], ["name"])
+            if rows and rows[0]["name"] != correct_name:
+                _odoo_write(env, "res.partner", [pid], {"name": correct_name})
+                print(f"  [FIX] {rows[0]['name']!r} → {correct_name!r}")
+
         _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
         # Spara GEDCOM-ID → partner-kopplingen (idempotent)
@@ -359,6 +461,13 @@ def run_import(
         else:
             updated += 1
 
+    # ── Familjerelationer ─────────────────────────────────────────────────────
+    # Kör mot hela trädet — gedcom_lookup har nu alla importerade xrefs
+    link_stats = _import_family_links(env, parser, gedcom_lookup, dry_run)
+    if not dry_run:
+        print(f"Relationer: {link_stats['created']} nya, {link_stats['skipped']} redan finns "
+              f"({link_stats['families']} familjer i trädet)")
+
     # ── Rapport ───────────────────────────────────────────────────────────────
     print(f"\n{'─' * 50}")
     if dry_run:
@@ -367,11 +476,12 @@ def run_import(
         print(f"Klart: {created} nya partners, {updated} bevakningar skapade/uppdaterade, {skipped} hoppades över")
 
     return {
-        "created":  created if not dry_run else 0,
-        "updated":  updated if not dry_run else 0,
-        "skipped":  skipped,
-        "dry_run":  dry_run,
-        "dry_count": dry_count,
+        "created":       created if not dry_run else 0,
+        "updated":       updated if not dry_run else 0,
+        "skipped":       skipped,
+        "dry_run":       dry_run,
+        "dry_count":     dry_count,
+        "links_created": link_stats["created"],
     }
 
 
