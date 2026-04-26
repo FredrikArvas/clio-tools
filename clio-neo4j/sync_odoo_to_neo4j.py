@@ -18,7 +18,9 @@ import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(_ROOT / "clio-agent-obit"))
+for _p in [str(_ROOT / "clio-agent-obit"), str(_ROOT)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from dotenv import load_dotenv
 load_dotenv(_ROOT / ".env")
