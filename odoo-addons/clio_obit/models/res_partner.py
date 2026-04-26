@@ -55,6 +55,11 @@ class ResPartner(models.Model):
         for rec in self:
             m = _YEAR_RE.search(rec.clio_obit_birth_approx or "")
             rec.clio_obit_birth_year = int(m.group(1)) if m else 0
+    clio_obit_death_year = fields.Integer(
+        string  = "Dödsår",
+        default = 0,
+        help    = "Dödsår från GEDCOM eller manuellt. 0 = okänt.",
+    )
     clio_family_role = fields.Char(
         string = "Familjeroll",
         help   = "T.ex. farfar, faster, granne",

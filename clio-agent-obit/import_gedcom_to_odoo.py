@@ -51,6 +51,7 @@ from import_gedcom import (
     _get_name,
     _extract_birth_year,
     _extract_birth_place,
+    _extract_death_year,
     _is_likely_alive,
 )
 
@@ -425,6 +426,7 @@ def run_import(
         fornamn, efternamn = name
         birth_year = _extract_birth_year(ind)
         birth_place = _extract_birth_place(ind)
+        death_year = _extract_death_year(ind)
         priority_odoo = PRIORITY_MAP.get(priority_en, "normal")
         gedcom_xref = ind.get_pointer() if hasattr(ind, "get_pointer") else None
 
@@ -433,23 +435,25 @@ def run_import(
             fornamn, efternamn, birth_year, birth_place,
             gedcom_xref, dry_run,
         )
-        # birth_year behålls i signaturen för framtida eget fält men används ej mot Odoo nu
 
         if action == "dry_run":
             dry_count += 1
             print(f"  [DRY] {fornamn} {efternamn} ({birth_year or '?'}) → {priority_odoo}")
             continue
 
-        # Rätta mojibake-fält (innehåller "Ã") — bara om källdata ser korrekt ut
-        if action == "found_by_xref" and pid and not dry_run:
+        # Rätta mojibake-fält och fyll i birth/death om de saknas
+        if pid and not dry_run:
             correct_name = f"{fornamn} {efternamn}"
             correct_city = birth_place or ""
-            if "Ã" not in correct_name:
-                rows = env["res.partner"].search_read(
-                    [("id", "=", pid)], ["name", "clio_obit_birth_name", "city"]
-                )
-                if rows:
-                    fix_vals = {}
+            rows = env["res.partner"].search_read(
+                [("id", "=", pid)],
+                ["name", "clio_obit_birth_name", "city",
+                 "clio_obit_birth_approx", "clio_obit_death_year"],
+            )
+            if rows:
+                fix_vals = {}
+                # Mojibake-rättning (bara om källdata ser korrekt ut)
+                if "Ã" not in correct_name:
                     if "Ã" in (rows[0]["name"] or ""):
                         fix_vals["name"] = correct_name
                         print(f"  [FIX name] {rows[0]['name']!r} → {correct_name!r}")
@@ -458,8 +462,14 @@ def run_import(
                     if correct_city and "Ã" in (rows[0].get("city") or ""):
                         fix_vals["city"] = correct_city[:100]
                         print(f"  [FIX city] {rows[0]['city']!r} → {correct_city!r}")
-                    if fix_vals:
-                        _odoo_write(env, "res.partner", [pid], fix_vals)
+                # Födelseår — fyll i om saknas
+                if birth_year and not rows[0].get("clio_obit_birth_approx"):
+                    fix_vals["clio_obit_birth_approx"] = str(birth_year)
+                # Dödsår — fyll i om saknas
+                if death_year and not rows[0].get("clio_obit_death_year"):
+                    fix_vals["clio_obit_death_year"] = death_year
+                if fix_vals:
+                    _odoo_write(env, "res.partner", [pid], fix_vals)
 
         _upsert_watch_record(env, pid, priority_odoo, user_id, dry_run)
 
