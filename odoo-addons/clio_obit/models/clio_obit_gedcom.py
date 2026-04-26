@@ -215,10 +215,9 @@ class ClioObitGedcomWizard(models.TransientModel):
 
         _logger.info("GEDCOM-import: importscript laddat, dekoderar fil (%d bytes base64)", len(self.gedcom_id.file_data))
         raw = base64.b64decode(self.gedcom_id.file_data)
-        if raw.startswith(b"\xef\xbb\xbf"):
-            _logger.info("GEDCOM-import: UTF-8 BOM strippad")
-            raw = raw[3:]
-
+        # BOM ska INTE strippas — _to_utf8_tempfile använder den för att
+        # detektera UTF-8-kodning och välja errors='replace' istället för
+        # latin-1 fallback (som ger mojibake på svenska tecken).
         _logger.info("GEDCOM-import: rå filstorlek %d bytes", len(raw))
         tmp_path = None
         try:
