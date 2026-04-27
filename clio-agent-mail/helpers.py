@@ -22,26 +22,53 @@ def _short(text: str, n: int) -> str:
     return text[:n] if len(text) > n else text
 
 
-def _quote_original(mail_item) -> str:
+def _clean_quote_body(text):
+    """Rensar bort skrap innan kroppen citeras i ett svar."""
+    text = re.sub(r'\[cid:[^\]]+\]', '', text)
+    text = re.sub(r'\[A picture[^\]]*\]', '', text, flags=re.I)
+    lines = []
+    for ln in text.splitlines():
+        stripped = ln.strip()
+        if re.match(r'https?://\S+$', stripped):
+            continue
+        if 'consider the environment' in stripped.lower():
+            continue
+        lines.append(ln.rstrip())
+    cleaned = []
+    blanks = 0
+    for ln in lines:
+        if ln == '':
+            blanks += 1
+            if blanks <= 2:
+                cleaned.append(ln)
+        else:
+            blanks = 0
+            cleaned.append(ln)
+    return '\n'.join(cleaned).strip()
+
+
+def _quote_original(mail_item):
     """
     Returnerar ett citerat ursprungsmeddelande att bifoga under svaret.
-    Max 60 rader av brödtexten — resten trunkeras.
+    Max 40 rader av den rensade brodtexten - resten trunkeras.
     """
-    sep = "─" * 40
-    lines = (mail_item.body or "").splitlines()
-    quoted = "\n".join(f"> {line}" for line in lines[:60])
-    if len(lines) > 60:
-        quoted += "\n> [...]"
+    sep = chr(0x2500) * 40
+    body = _clean_quote_body(mail_item.body or '')
+    lines = body.splitlines()
+    quoted = '\n'.join('> ' + line for line in lines[:40])
+    if len(lines) > 40:
+        quoted += '\n> [...]'
+    sender_display = mail_item.sender or ''
+    date_display = (mail_item.date_received or '')[:16]
     return (
-        f"\n\n{sep}\n"
-        f"Svara ovanför strecket\n"
-        f"{sep}\n"
-        f"Från: {mail_item.sender}\n"
-        f"Ämne: {mail_item.subject}\n"
-        f"Datum: {mail_item.date_received or ''}\n\n"
-        f"{quoted}"
+        '\n\n' + sep + '\n'
+        'Svara ovanför strecket\n'
+        + sep + '\n'
+        'Från: ' + sender_display + '\n'
+        'Ämne: ' + str(mail_item.subject) + '\n'
+        'Datum: ' + date_display + '\n\n'
+        + quoted
     )
-
 
 def _get_plain_body(msg) -> str:
     """Extraherar text/plain-brödtext ur ett email.message-objekt."""

@@ -177,22 +177,77 @@ def _save_attachments(msg, attachments_dir: Path, message_id: str) -> List[Attac
     return saved
 
 
-def _get_body(msg) -> str:
-    """Extraherar text/plain-brödtext, hanterar multipart."""
+def _clean_body(text):
+    """Rensar bort Outlook-skrap: [cid:...], bildtexter, multipla blankrader."""
+    text = re.sub(r'\[cid:[^\]]+\]', '', text)
+    text = re.sub(r'\[A picture[^\]]*\]', '', text, flags=re.I)
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    cleaned = []
+    blanks = 0
+    for ln in lines:
+        if ln == '':
+            blanks += 1
+            if blanks <= 2:
+                cleaned.append(ln)
+        else:
+            blanks = 0
+            cleaned.append(ln)
+    return '\n'.join(cleaned).strip()
+
+
+def _html_to_text(html):
+    """Strippar HTML-taggar och returnerar lasbar klartext."""
+    html = re.sub(r'<(script|style)[^>]*>.*?</(script|style)>', ' ', html, flags=re.S | re.I)
+    html = re.sub(r'<br\s*/?>', '\n', html, flags=re.I)
+    html = re.sub(r'</p>', '\n', html, flags=re.I)
+    html = re.sub(r'</div>', '\n', html, flags=re.I)
+    html = re.sub(r'</tr>', '\n', html, flags=re.I)
+    html = re.sub(r'</li>', '\n', html, flags=re.I)
+    html = re.sub(r'<[^>]+>', '', html)
+    html = (html
+            .replace('&nbsp;', ' ')
+            .replace('&amp;', '&')
+            .replace('&lt;', '<')
+            .replace('&gt;', '>')
+            .replace('&quot;', '"'))
+    return _clean_body(html)
+
+
+def _get_body(msg):
+    """Extraherar brodtext. Foredrar text/plain men faller tillbaka till HTML."""
+    plain_text = None
+    html_text = None
     if msg.is_multipart():
         for part in msg.walk():
-            if (part.get_content_type() == "text/plain"
-                    and "attachment" not in str(part.get("Content-Disposition", ""))):
+            ct = part.get_content_type()
+            disp = str(part.get('Content-Disposition', ''))
+            if 'attachment' in disp:
+                continue
+            if ct == 'text/plain' and plain_text is None:
                 payload = part.get_payload(decode=True)
                 if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    return payload.decode(charset, errors="replace").strip()
+                    charset = part.get_content_charset() or 'utf-8'
+                    plain_text = payload.decode(charset, errors='replace').strip()
+            elif ct == 'text/html' and html_text is None:
+                payload = part.get_payload(decode=True)
+                if payload:
+                    charset = part.get_content_charset() or 'utf-8'
+                    html_text = payload.decode(charset, errors='replace').strip()
     else:
         payload = msg.get_payload(decode=True)
         if payload:
-            charset = msg.get_content_charset() or "utf-8"
-            return payload.decode(charset, errors="replace").strip()
-    return ""
+            charset = msg.get_content_charset() or 'utf-8'
+            ct = msg.get_content_type()
+            if ct == 'text/html':
+                html_text = payload.decode(charset, errors='replace').strip()
+            else:
+                plain_text = payload.decode(charset, errors='replace').strip()
+
+    if plain_text:
+        return _clean_body(plain_text)
+    if html_text:
+        return _html_to_text(html_text)
+    return ''
 
 
 # ── Publik API ────────────────────────────────────────────────────────────────
