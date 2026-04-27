@@ -1,0 +1,244 @@
+# Swedish translation for clio_ssf
+# Copyright (C) 2025 Arvas International AB
+msgid ""
+msgstr ""
+"Project-Id-Version: clio_ssf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 20:49+0100\n"
+"PO-Revision-Date: 2026-04-27 20:49+0100\n"
+"Last-Translator: Clio <clio@arvas.international>\n"
+"Language-Team: Swedish <sv@li.org>\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Created by"
+msgstr "Skapad av"
+
+msgid "Created on"
+msgstr "Skapad"
+
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Name"
+msgstr "Namn"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Description"
+msgstr "Beskrivning"
+
+msgid "Notes"
+msgstr "Anteckningar"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "User"
+msgstr "Användare"
+
+msgid "Partner"
+msgstr "Kontakt"
+
+msgid "Company"
+msgstr "Företag"
+
+msgid "Email"
+msgstr "E-post"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Address"
+msgstr "Adress"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "Currency"
+msgstr "Valuta"
+
+msgid "Amount"
+msgstr "Belopp"
+
+msgid "Reference"
+msgstr "Referens"
+
+msgid "Category"
+msgstr "Kategori"
+
+msgid "Tag"
+msgstr "Tagg"
+
+msgid "Color"
+msgstr "Färg"
+
+msgid "Image"
+msgstr "Bild"
+
+msgid "Sequence"
+msgstr "Ordning"
+
+msgid "Priority"
+msgstr "Prioritet"
+
+msgid "State"
+msgstr "Tillstånd"
+
+msgid "Action"
+msgstr "Åtgärd"
+
+msgid "Model"
+msgstr "Modell"
+
+msgid "Field"
+msgstr "Fält"
+
+msgid "View"
+msgstr "Vy"
+
+msgid "Menu"
+msgstr "Meny"
+
+msgid "Report"
+msgstr "Rapport"
+
+msgid "Archive"
+msgstr "Arkivera"
+
+msgid "Unarchive"
+msgstr "Avarkivera"
+
+msgid "Confirm"
+msgstr "Bekräfta"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Save"
+msgstr "Spara"
+
+msgid "Delete"
+msgstr "Ta bort"
+
+msgid "Search"
+msgstr "Sök"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Group By"
+msgstr "Gruppera efter"
+
+msgid "New"
+msgstr "Ny"
+
+msgid "Edit"
+msgstr "Redigera"
+
+msgid "Close"
+msgstr "Stäng"
+
+msgid "Back"
+msgstr "Tillbaka"
+
+msgid "Next"
+msgstr "Nästa"
+
+msgid "Previous"
+msgstr "Föregående"
+
+msgid "Select"
+msgstr "Välj"
+
+msgid "Apply"
+msgstr "Tillämpa"
+
+msgid "Reset"
+msgstr "Återställ"
+
+msgid "Export"
+msgstr "Exportera"
+
+msgid "Import"
+msgstr "Importera"
+
+msgid "Print"
+msgstr "Skriv ut"
+
+msgid "Send"
+msgstr "Skicka"
+
+msgid "Refresh"
+msgstr "Uppdatera"
+
+msgid "Settings"
+msgstr "Inställningar"
+
+msgid "Configuration"
+msgstr "Konfiguration"
+
+msgid "Overview"
+msgstr "Översikt"
+
+msgid "Dashboard"
+msgstr "Instrumentpanel"
+
+msgid "Log"
+msgstr "Logg"
+
+msgid "Error"
+msgstr "Fel"
+
+msgid "Warning"
+msgstr "Varning"
+
+msgid "Info"
+msgstr "Information"
+
+msgid "Success"
+msgstr "Lyckades"
+
+msgid "Failed"
+msgstr "Misslyckades"
+
+msgid "Pending"
+msgstr "Väntar"
+
+msgid "Running"
+msgstr "Kör"
+
+msgid "Done"
+msgstr "Klar"
+
+msgid "Draft"
+msgstr "Utkast"
+
+msgid "Confirmed"
+msgstr "Bekräftad"
+
+msgid "Cancelled"
+msgstr "Avbruten"
+
+msgid "Clio SSF — Installationsprofil"
+msgstr "Clio SSF — Installationsprofil"
+
