@@ -11,6 +11,10 @@
       <list string="Agenthälsa" decoration-success="status == 'ok'"
                                 decoration-warning="status == 'warning'"
                                 decoration-danger="status == 'error'">
+        <header>
+          <button name="action_sync_heartbeat" type="object"
+                  string="Synka systemstatus" class="btn-primary"/>
+        </header>
         <field name="status_icon" string=" " width="30px"/>
         <field name="tool_name"        string="Verktyg"/>
         <field name="last_run"         string="Senaste körning"/>

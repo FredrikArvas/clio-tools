@@ -20,14 +20,6 @@
             sequence="20"/>
 
   <!-- Synliga för Clio User -->
-  <menuitem id="menu_cockpit_agenter"
-            name="🤖 Agenter"
-            parent="menu_clio_cockpit_root"
-            action="action_cockpit_agenter"
-            groups="clio_cockpit.group_clio_user"
-            sequence="30"/>
-
-  <!-- Synliga för Clio User -->
   <menuitem id="menu_cockpit_heartbeat"
             name="💓 Agenthälsa"
             parent="menu_clio_cockpit_root"

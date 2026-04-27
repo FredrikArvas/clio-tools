@@ -420,6 +420,32 @@ def _route_server_health(_data: dict) -> dict:
     }
 
 
+# ── Docker-hälsa ─────────────────────────────────────────────────────────────
+
+def _route_health_docker(_data: dict) -> dict:
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Status}}\t{{.Image}}"],
+            capture_output=True, text=True, timeout=10,
+        )
+        containers = []
+        for line in r.stdout.strip().splitlines():
+            parts = line.split("\t")
+            name    = parts[0] if len(parts) > 0 else "?"
+            status  = parts[1] if len(parts) > 1 else "?"
+            image   = parts[2] if len(parts) > 2 else "?"
+            containers.append({
+                "name":    name,
+                "status":  status,
+                "image":   image,
+                "running": status.startswith("Up"),
+            })
+        return {"ok": True, "containers": containers}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 # ── Router ────────────────────────────────────────────────────────────────────
 
 _ROUTES: dict[tuple[str, str], callable] = {
@@ -430,6 +456,8 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("GET",  "/health"):               _route_health,
     ("GET",  "/health/server"):        _route_server_health,
     ("POST", "/health/server"):        _route_server_health,
+    ("GET",  "/health/docker"):        _route_health_docker,
+    ("POST", "/health/docker"):        _route_health_docker,
     ("POST", "/health"):               _route_health,
     ("GET",  "/mail/list"):            _route_mail_list,
     ("POST", "/mail/list"):            _route_mail_list,
