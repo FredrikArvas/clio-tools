@@ -442,6 +442,7 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("POST", "/mail/blacklist"):       _route_mail_blacklist,
     ("GET",  "/mail/waiting/json"):           _route_mail_waiting_json,
     ("POST", "/mail/waiting/json"):           _route_mail_waiting_json,
+    ("POST", "/mail/waiting/decide"):         _route_mail_waiting_decide,
     ("GET",  "/mail/interview/sessions"):     _route_mail_interview_sessions,
     ("POST", "/mail/interview/sessions"):     _route_mail_interview_sessions,
     ("POST", "/mail/interview/thread"):       _route_mail_interview_thread,
