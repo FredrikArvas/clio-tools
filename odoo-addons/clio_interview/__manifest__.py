@@ -8,6 +8,7 @@
     "depends":     ["base"],
     "data": [
         "security/ir.model.access.csv",
+        "data/clio_interview_cron.xml",
         "views/clio_interview_views.xml",
         "views/menu.xml",
     ],
