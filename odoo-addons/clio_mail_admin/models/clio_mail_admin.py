@@ -63,6 +63,7 @@ class ClioWaitingLine(models.TransientModel):
     _order = "id"
 
     admin_id      = fields.Many2one("clio.mail.admin", ondelete="cascade")
+    selected      = fields.Boolean(string="")
     sender        = fields.Char(string="Avsändare")
     subject       = fields.Char(string="Ämne")
     date_received = fields.Char(string="Datum")
@@ -165,6 +166,36 @@ class ClioMailAdmin(models.TransientModel):
         ]
         self.env["clio.waiting.line"].create(vals)
         return self._reopen()
+
+    def _bulk_decide(self, action: str):
+        selected = self.waiting_ids.filtered("selected")
+        if not selected:
+            raise UserError("Välj minst ett mail.")
+        for line in selected:
+            _call(self.env, "/mail/waiting/decide", {"sender": line.sender, "action": action})
+        self.waiting_ids.unlink()
+        result = _call_raw(self.env, "/mail/waiting/json")
+        vals = [
+            {
+                "admin_id":      self.id,
+                "sender":        r.get("sender", ""),
+                "subject":       r.get("subject", ""),
+                "date_received": (r.get("date_received") or "")[:10],
+                "account":       r.get("account", ""),
+            }
+            for r in result.get("waiting", [])
+        ]
+        self.env["clio.waiting.line"].create(vals)
+        return self._reopen()
+
+    def action_bulk_vitlista(self):
+        return self._bulk_decide("VITLISTA")
+
+    def action_bulk_svartlista(self):
+        return self._bulk_decide("SVARTLISTA")
+
+    def action_bulk_behall(self):
+        return self._bulk_decide("BEHÅLL")
 
     # ── Kommandon med argument ────────────────────────────────────────────────
 

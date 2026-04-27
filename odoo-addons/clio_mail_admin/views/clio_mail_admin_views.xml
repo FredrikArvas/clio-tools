@@ -43,22 +43,26 @@
             </field>
           </group>
 
-          <!-- Väntande mail — tree med per-rad-knappar -->
+          <!-- Väntande mail -->
           <group string="Väntande mail">
             <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_waiting" type="object" string="Hämta väntande" class="btn-primary"/>
+              <button name="action_load_waiting"   type="object" string="Hämta väntande" class="btn-primary"/>
+              <button name="action_bulk_vitlista"  type="object" string="Vitlista valda"  class="btn-success"/>
+              <button name="action_bulk_svartlista" type="object" string="Svartlista valda" class="btn-danger"/>
+              <button name="action_bulk_behall"    type="object" string="Behåll valda"   class="btn-secondary"/>
             </div>
             <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
-              <list>
-                <field name="date_received" string="Datum"     optional="show"/>
-                <field name="account"       string="Konto"     optional="show"/>
-                <field name="sender"        string="Avsändare"/>
-                <field name="subject"       string="Ämne"/>
-                <button name="action_vitlista"   type="object" string="Vitlista"
-                        icon="fa-check"  class="btn-sm btn-success"/>
-                <button name="action_svartlista" type="object" string="Svartlista"
-                        icon="fa-ban"    class="btn-sm btn-danger"/>
-                <button name="action_behall"     type="object" string="Behåll"
+              <list editable="top">
+                <field name="selected"      string=""          widget="boolean_toggle"/>
+                <field name="date_received" string="Datum"     readonly="1" optional="show"/>
+                <field name="account"       string="Konto"     readonly="1" optional="show"/>
+                <field name="sender"        string="Avsändare" readonly="1"/>
+                <field name="subject"       string="Ämne"      readonly="1"/>
+                <button name="action_vitlista"    type="object" string="Vitlista"
+                        icon="fa-check"   class="btn-sm btn-success"/>
+                <button name="action_svartlista"  type="object" string="Svartlista"
+                        icon="fa-ban"     class="btn-sm btn-danger"/>
+                <button name="action_behall"      type="object" string="Behåll"
                         icon="fa-clock-o" class="btn-sm btn-secondary"/>
               </list>
             </field>
