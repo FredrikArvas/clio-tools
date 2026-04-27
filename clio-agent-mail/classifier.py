@@ -117,6 +117,13 @@ def classify(mail_item, whitelist: set, config) -> Classification:
     perm = _get_permission(sender_email, account_key, config)
 
     if perm in ("admin", "write"):
+        # Admin/write kan delta i intervju om aktiv session finns
+        if _state.get_active_interview(sender_email):
+            return Classification(
+                action=ACTION_INTERVIEW,
+                reason="Active interview session (admin participant)",
+                account_key=account_key,
+            )
         return Classification(
             action=ACTION_SELF_QUERY,
             reason=f"Permission: {perm}",
