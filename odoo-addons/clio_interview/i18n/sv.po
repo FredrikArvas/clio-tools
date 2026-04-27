@@ -1,0 +1,184 @@
+# Swedish translation of clio_interview
+# Copyright (C) 2026 Arvas International AB
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: sv\n"
+
+msgid "Interview Template"
+msgstr "Intervjumall"
+
+msgid "Interview Templates"
+msgstr "Intervjumallar"
+
+msgid "Interview Message"
+msgstr "Intervjumeddelande"
+
+msgid "Interview Session"
+msgstr "Intervjusession"
+
+msgid "Interview Sessions"
+msgstr "Intervjusessioner"
+
+msgid "Start Interview"
+msgstr "Starta intervju"
+
+msgid "Template Name"
+msgstr "Mallnamn"
+
+msgid "Subject"
+msgstr "Ämne"
+
+msgid "Opening Question"
+msgstr "Öppningsfråga"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Direction"
+msgstr "Riktning"
+
+msgid "Inbound"
+msgstr "Inkommande"
+
+msgid "Outbound"
+msgstr "Utgående"
+
+msgid "Sender"
+msgstr "Avsändare"
+
+msgid "Message"
+msgstr "Meddelande"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Thread ID"
+msgstr "Tråd-ID"
+
+msgid "Participant"
+msgstr "Deltagare"
+
+msgid "Participants"
+msgstr "Deltagare"
+
+msgid "Email"
+msgstr "E-post"
+
+msgid "Account"
+msgstr "Konto"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Stopped"
+msgstr "Avslutad"
+
+msgid "Started"
+msgstr "Startad"
+
+msgid "Updated"
+msgstr "Uppdaterad"
+
+msgid "Auto-close"
+msgstr "Stäng automatiskt"
+
+msgid "Messages"
+msgstr "Dialog"
+
+msgid "Compose"
+msgstr "Skriv meddelande"
+
+msgid "Summary Prompt"
+msgstr "Sammanfattningsinstruktion"
+
+msgid "Summary"
+msgstr "Sammanfattning"
+
+msgid "Template"
+msgstr "Mall"
+
+msgid "Custom Subject"
+msgstr "Eget ämne"
+
+msgid "Custom Opening Question"
+msgstr "Egen öppningsfråga"
+
+msgid "Result"
+msgstr "Resultat"
+
+msgid "Closes"
+msgstr "Stängs"
+
+msgid "Latest"
+msgstr "Senaste"
+
+msgid "Load Messages"
+msgstr "Ladda dialog"
+
+msgid "Stop Session"
+msgstr "Avsluta session"
+
+msgid "Stop the interview session with this participant?"
+msgstr "Avsluta intervjusessionen med denna deltagare?"
+
+msgid "Send"
+msgstr "Skicka"
+
+msgid "Write your next question or message..."
+msgstr "Skriv nästa fråga eller meddelande..."
+
+msgid "Request Summary"
+msgstr "Begär sammanfattning"
+
+msgid "Fetches the conversation and sends it to Claude. Continue?"
+msgstr "Hämtar dialog och skickar till Claude. Fortsätta?"
+
+msgid "Leave empty for default summary — or describe what you want from the answers."
+msgstr "Lämna tom för standardsammanfattning — eller beskriv vad du vill ha ut av svaren."
+
+msgid "Template (optional)"
+msgstr "Mall (valfri)"
+
+msgid "Select Template"
+msgstr "Välj mall"
+
+msgid "Or enter manually"
+msgstr "Eller ange manuellt"
+
+msgid "E.g. Career talk Q2 2026"
+msgstr "T.ex. Karriärsamtal Q2 2026"
+
+msgid "Search and select contacts..."
+msgstr "Sök och välj kontakter..."
+
+msgid "Leave empty for manual close"
+msgstr "Lämna tom för manuell stängning"
+
+msgid "Send Opening Message"
+msgstr "Skicka öppningsfråga"
+
+msgid "Clio Interview"
+msgstr "Clio Intervju"
+
+msgid "Sessions"
+msgstr "Sessioner"
+
+msgid "Templates"
+msgstr "Mallar"
+
+msgid "Clio closes the session, generates a summary and sends it to you."
+msgstr "Clio stänger sessionen, genererar sammanfattning och skickar den till dig."
+
+msgid "Select one or more contacts. One session is created per participant."
+msgstr "Välj en eller flera kontakter. En session skapas per deltagare."
+
+msgid "Leave empty for default summary."
+msgstr "Lämna tom för standardsammanfattning."
+
+msgid "Leave empty for manual close."
+msgstr "Lämna tom för manuell stängning."
