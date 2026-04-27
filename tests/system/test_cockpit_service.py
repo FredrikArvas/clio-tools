@@ -124,6 +124,47 @@ class TestServiceLibrary(unittest.TestCase):
             self.assertIn(e.code, [400, 422])
 
 
+class TestServicePermissions(unittest.TestCase):
+    """Smoke-tester för /mail/permissions/json (skrivskyddad — ändrar inget)."""
+
+    def test_permissions_json_returns_ok(self):
+        d = _get("/mail/permissions/json")
+        self.assertTrue(d.get("ok"), f"Svar: {d}")
+        self.assertIn("users", d)
+        self.assertIsInstance(d["users"], list)
+
+    def test_permissions_user_has_required_fields(self):
+        d = _get("/mail/permissions/json")
+        for user in d.get("users", []):
+            for field in ["email", "level", "accounts", "kodord_scope", "kodord_write"]:
+                self.assertIn(field, user, f"Saknar fält '{field}' för {user.get('email')}")
+
+    def test_permissions_level_is_valid(self):
+        valid = {"admin", "write", "coded", "whitelisted", "denied"}
+        d = _get("/mail/permissions/json")
+        for user in d.get("users", []):
+            self.assertIn(
+                user["level"], valid,
+                f"Ogiltig nivå '{user['level']}' för {user['email']}",
+            )
+
+
+class TestServiceInterviewSessions(unittest.TestCase):
+    """Smoke-tester för /mail/interview/sessions (skrivskyddad — ändrar inget)."""
+
+    def test_sessions_returns_ok(self):
+        d = _get("/mail/interview/sessions")
+        self.assertTrue(d.get("ok"), f"Svar: {d}")
+        self.assertIn("sessions", d)
+        self.assertIsInstance(d["sessions"], list)
+
+    def test_session_has_required_fields(self):
+        d = _get("/mail/interview/sessions")
+        for s in d.get("sessions", []):
+            for field in ["thread_id", "participant_email", "status"]:
+                self.assertIn(field, s, f"Saknar fält '{field}' i session")
+
+
 class TestServiceUnknownRoute(unittest.TestCase):
 
     def test_unknown_route_returns_404(self):

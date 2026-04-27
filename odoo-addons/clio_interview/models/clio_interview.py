@@ -1,7 +1,45 @@
+import json
+import logging
+import urllib.error
+import urllib.request
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
-from .clio_mail_admin import _call, _call_raw
+logger = logging.getLogger(__name__)
+
+_DEFAULT_URL = "http://localhost:7200"
+
+
+def _service_url(env) -> str:
+    return env["ir.config_parameter"].sudo().get_param(
+        "clio.service.url", default=_DEFAULT_URL
+    ).rstrip("/")
+
+
+def _call_raw(env, path: str, data: dict | None = None) -> dict:
+    base = _service_url(env)
+    url = f"{base}{path}"
+    method = "POST" if data is not None else "GET"
+    body = json.dumps(data or {}).encode() if data is not None else None
+    req = urllib.request.Request(
+        url, data=body, method=method,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read())
+    except urllib.error.URLError as e:
+        raise UserError(f"Kunde inte nå clio-service ({base}): {e.reason}")
+    except Exception as e:
+        raise UserError(f"clio-service fel: {e}")
+    if not result.get("ok"):
+        raise UserError(result.get("error", "Okänt fel från clio-service"))
+    return result
+
+
+def _call(env, path: str, data: dict | None = None) -> str:
+    return _call_raw(env, path, data).get("text", "")
 
 
 class ClioInterviewTemplate(models.Model):
@@ -42,11 +80,16 @@ class ClioInterviewSession(models.Model):
         [("active", "Aktiv"), ("stopped", "Avslutad")],
         string="Status", default="active",
     )
-    created_at  = fields.Char(string="Startad", readonly=True)
-    updated_at  = fields.Char(string="Uppdaterad", readonly=True)
-    message_ids = fields.One2many(
+    created_at    = fields.Char(string="Startad",    readonly=True)
+    updated_at    = fields.Char(string="Uppdaterad", readonly=True)
+    message_ids   = fields.One2many(
         "clio.interview.message", "session_id", string="Dialog",
     )
+    summary_prompt = fields.Text(
+        string="Sammanfattningsinstruktion",
+        help="Lämna tom för standardsammanfattning. Ange annars vad du vill ha ut av sammanfattningen.",
+    )
+    summary_text  = fields.Text(string="Sammanfattning", readonly=True)
 
     @api.model
     def action_sync_sessions(self):
@@ -75,12 +118,28 @@ class ClioInterviewSession(models.Model):
                 "session_id":    self.id,
                 "direction":     m.get("direction", "inbound"),
                 "sender":        m.get("sender", ""),
-                "body":          m.get("body", ""),
+                "body":          m.get("body", "").strip(),
                 "date_received": (m.get("date_received") or "")[:16],
             }
             for m in result.get("messages", [])
         ]
         self.env["clio.interview.message"].create(vals)
+        return {
+            "type":      "ir.actions.act_window",
+            "res_model": self._name,
+            "res_id":    self.id,
+            "view_mode": "form",
+            "target":    "current",
+        }
+
+    def action_summarize(self):
+        if not self.thread_id:
+            raise UserError("Sessionen har inget tråd-ID.")
+        result = _call_raw(self.env, "/mail/interview/summarize", {
+            "thread_id": self.thread_id,
+            "prompt":    self.summary_prompt or "",
+        })
+        self.summary_text = result.get("text", "")
         return {
             "type":      "ir.actions.act_window",
             "res_model": self._name,
@@ -120,10 +179,9 @@ class ClioInterviewStartWizard(models.TransientModel):
         if not subject or not question:
             raise UserError("Ange ämne och öppningsfråga, eller välj en mall.")
 
-        raw    = self.recipients or ""
         emails = [
             e.strip()
-            for e in raw.replace(",", "\n").splitlines()
+            for e in (self.recipients or "").replace(",", "\n").splitlines()
             if e.strip() and "@" in e
         ]
         if not emails:
@@ -137,12 +195,11 @@ class ClioInterviewStartWizard(models.TransientModel):
                     "subject": subject,
                     "context": question,
                 })
-                results.append(f"✅ {email}")
+                results.append(f"OK {email}")
             except UserError as exc:
-                results.append(f"❌ {email}: {exc.args[0]}")
+                results.append(f"FEL {email}: {exc.args[0]}")
 
         self.result_text = "\n".join(results)
-        # Sync sessions so new ones appear in the list
         self.env["clio.interview.session"].action_sync_sessions()
         return {
             "type":      "ir.actions.act_window",

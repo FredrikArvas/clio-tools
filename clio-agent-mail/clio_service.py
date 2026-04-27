@@ -192,6 +192,92 @@ def _route_mail_interview_stop(data: dict) -> dict:
     return _dispatch("interview_stop", body_text=participant)
 
 
+def _route_mail_permissions_json(_data: dict) -> dict:
+    config = _get_config()
+    notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
+    page_id = config.get("mail", "permissions_notion_page_id", fallback="")
+    if not page_id:
+        return {"ok": False, "error": "permissions_notion_page_id saknas i clio.config"}
+    try:
+        from clio_access.notion_source import fetch_matrix
+        matrix = fetch_matrix(page_id, notion_token)
+        users = [
+            {
+                "email":        email,
+                "level":        entry["level"],
+                "accounts":     entry["accounts"],
+                "telegram_id":  entry.get("telegram_id"),
+                "kodord_scope": entry.get("kodord_scope", []),
+                "kodord_write": entry.get("kodord_write", []),
+            }
+            for email, entry in matrix["emails"].items()
+        ]
+        return {"ok": True, "users": users}
+    except Exception as e:
+        logger.error(f"permissions/json failed: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
+
+
+def _route_mail_permissions_update(data: dict) -> dict:
+    email = data.get("email", "").strip().lower()
+    if not email:
+        return {"ok": False, "error": "saknat fält: email"}
+    config = _get_config()
+    notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
+    page_id = config.get("mail", "permissions_notion_page_id", fallback="")
+    if not page_id:
+        return {"ok": False, "error": "permissions_notion_page_id saknas i clio.config"}
+    try:
+        from clio_access.notion_source import update_user_permission
+        update_user_permission(
+            page_id=page_id,
+            token=notion_token,
+            email=email,
+            level=data.get("level") or None,
+            accounts=data.get("accounts") or None,
+            kodord_scope=data.get("kodord_scope") or None,
+            kodord_write=data.get("kodord_write") or None,
+        )
+        return {"ok": True, "text": f"Behörighet uppdaterad för {email}"}
+    except Exception as e:
+        logger.error(f"permissions/update failed: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
+
+
+def _route_mail_interview_summarize(data: dict) -> dict:
+    thread_id = data.get("thread_id", "").strip()
+    prompt    = data.get("prompt", "").strip() or "Sammanfatta intervjusvaren kortfattat med punktlista."
+    if not thread_id:
+        return {"ok": False, "error": "saknat fält: thread_id"}
+    import state as st
+    messages = st.get_thread_history(thread_id)
+    if not messages:
+        return {"ok": False, "error": "Inga meddelanden hittades för denna tråd."}
+    dialog_parts = []
+    for m in messages:
+        role = "Intervjuare" if m.get("direction") == "outbound" else "Svarande"
+        body = (m.get("body") or "").strip()
+        if body:
+            dialog_parts.append(f"[{role}]: {body}")
+    if not dialog_parts:
+        return {"ok": False, "error": "Dialogen är tom."}
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            messages=[{
+                "role": "user",
+                "content": f"{prompt}\n\nDialog:\n\n" + "\n\n".join(dialog_parts),
+            }],
+        )
+        return {"ok": True, "text": response.content[0].text}
+    except Exception as e:
+        logger.error(f"interview/summarize failed: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
+
+
 def _route_mail_ncc_lista(_data: dict) -> dict:
     return _dispatch("ncc_lista")
 
@@ -535,6 +621,10 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("POST", "/mail/interview/thread"):       _route_mail_interview_thread,
     ("POST", "/mail/interview/start"):        _route_mail_interview_start,
     ("POST", "/mail/interview/stop"):         _route_mail_interview_stop,
+    ("POST", "/mail/interview/summarize"):   _route_mail_interview_summarize,
+    ("GET",  "/mail/permissions/json"):      _route_mail_permissions_json,
+    ("POST", "/mail/permissions/json"):      _route_mail_permissions_json,
+    ("POST", "/mail/permissions/update"):    _route_mail_permissions_update,
     ("GET",  "/mail/ncc/lista"):        _route_mail_ncc_lista,
     ("POST", "/mail/ncc/lista"):       _route_mail_ncc_lista,
     ("GET",  "/mail/ncc/lista/json"):  _route_mail_ncc_lista_json,

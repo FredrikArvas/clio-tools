@@ -90,12 +90,12 @@ class TestClassifierClio(unittest.TestCase):
         self.assertEqual(clf.action, ACTION_SEND_FOR_APPROVAL)
         self.assertEqual(clf.account_key, "clio")
 
-    # 3. Vitlistad utan ämneskod
+    # 3. Vitlistad utan ämneskod — vitlistade svaras autonomt (räcker att vara vitlistad)
     def test_vitlistad_ingen_kod(self):
         mail = _mail("clio@arvas.international", "kund@example.com",
                      subject="Vanlig fråga")
         clf = classify(mail, WHITELIST, self.cfg)
-        self.assertEqual(clf.action, ACTION_SEND_FOR_APPROVAL)
+        self.assertEqual(clf.action, ACTION_AUTO_SEND)
 
     # 4. Ej vitlistad med [CLIO-AUTO] — ska ändå ge standardsvar
     def test_ej_vitlistad_med_auto_kod(self):
@@ -133,11 +133,11 @@ class TestClassifierClio(unittest.TestCase):
         clf = classify(mail, set(), self.cfg)
         self.assertEqual(clf.action, ACTION_STANDARD_REPLY)
 
-    # 9. Okänt mottagarkonto — fallback
+    # 9. Okänt mottagarkonto — vitlistad avsändare ger AUTO_SEND oavsett konto
     def test_okant_konto_fallback(self):
         mail = _mail("okant@arvas.international", "kund@example.com")
         clf = classify(mail, WHITELIST, self.cfg)
-        self.assertEqual(clf.action, ACTION_STANDARD_REPLY)
+        self.assertEqual(clf.action, ACTION_AUTO_SEND)
 
 
 class TestClassifierInfo(unittest.TestCase):

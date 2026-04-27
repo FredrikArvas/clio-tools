@@ -12,7 +12,7 @@ Tabeller:
   interview_sessions    — pågående intervjudialoger via e-post
 """
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "state.db"
@@ -166,7 +166,7 @@ def save_mail(message_id, account, sender, subject, body,
               thread_id=None, in_reply_to=None, direction="inbound",
               db_path=None):
     """Sparar ett nytt mail. Ignorerar om message_id redan finns."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     effective_thread_id = thread_id or message_id
     with get_connection(db_path) as conn:
         conn.execute(
@@ -183,7 +183,7 @@ def save_mail(message_id, account, sender, subject, body,
 
 def update_status(message_id, status, db_path=None):
     """Uppdaterar status på ett mail."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             "UPDATE mail SET status = ?, updated_at = ? WHERE message_id = ?",
@@ -221,7 +221,7 @@ def get_waiting_mails_for_sender(sender_email: str, db_path=None) -> list:
 
 def save_approval(mail_id, draft, approval_message_id=None, fredrik_cc=None, db_path=None):
     """Sparar ett nytt godkännandeärende."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             """INSERT INTO approvals
@@ -247,7 +247,7 @@ def get_pending_approvals(db_path=None):
 
 def record_approval_response(approval_id, response, db_path=None):
     """Registrerar Fredriks JA/NEJ-svar på ett godkännandeärende."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             "UPDATE approvals SET responded_at = ?, response = ? WHERE id = ?",
@@ -258,7 +258,7 @@ def record_approval_response(approval_id, response, db_path=None):
 def save_learned_reply(original_subject, original_body, original_sender,
                        approved_reply, db_path=None):
     """Sparar ett av Fredrik godkänt svar som läroexempel."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             """INSERT INTO learned_replies
@@ -301,7 +301,7 @@ def get_pending_flagged_notifications(db_path=None) -> list:
 
 def record_flagged_response(notification_id, response, db_path=None):
     """Registrerar Fredriks svar på en flaggad notifiering."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             "UPDATE flagged_notifications SET responded_at = ?, response = ? WHERE id = ?",
@@ -311,7 +311,7 @@ def record_flagged_response(notification_id, response, db_path=None):
 
 def add_to_blacklist(email, db_path=None):
     """Lägger till en adress i svartlistan. Ignorerar om den redan finns."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             "INSERT OR IGNORE INTO blacklist (email, added_at) VALUES (?, ?)",
@@ -347,7 +347,7 @@ def upsert_partner(email: str, name: str = None, language: str = None,
     Skapar eller uppdaterar en partner. Returnerar det slutliga partner-objektet.
     Befintliga fält skrivs inte över om inget nytt värde skickas (None = behåll).
     """
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     existing = get_partner(email, db_path)
     if not existing:
         with get_connection(db_path) as conn:
@@ -422,7 +422,7 @@ def create_interview_session(thread_id: str, participant_email: str,
                               system_prompt: str = None,
                               db_path=None) -> dict:
     """Skapar en ny intervjusession. Returnerar det skapade objektet."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     prompt = system_prompt or _DEFAULT_INTERVIEW_PROMPT
     with get_connection(db_path) as conn:
         conn.execute(
@@ -450,7 +450,7 @@ def get_active_interview(participant_email: str, db_path=None) -> dict | None:
 
 def stop_interview_session(thread_id: str, db_path=None):
     """Markerar en intervjusession som avslutad."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             """UPDATE interview_sessions SET status = ?, updated_at = ?
@@ -478,7 +478,7 @@ def save_outbound_interview_reply(thread_id: str, account: str, sender: str,
                                    subject: str, body: str,
                                    message_id: str, db_path=None):
     """Sparar ett utgående intervjusvar i mail-tabellen för tråd-historik."""
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     with get_connection(db_path) as conn:
         conn.execute(
             """INSERT OR IGNORE INTO mail
