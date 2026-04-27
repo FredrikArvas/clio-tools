@@ -1,0 +1,461 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* clio_interview
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 18:30+0000\n"
+"PO-Revision-Date: 2026-04-27 18:30+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__account_key
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__account_key
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Account"
+msgstr "Konto"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__active
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__status__active
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_list
+msgid "Active"
+msgstr "Aktiv"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__close_at
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__close_at
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Auto-close"
+msgstr "Stäng automatiskt"
+
+#. module: clio_interview
+#: model:ir.ui.menu,name:clio_interview.menu_clio_interview_root
+msgid "Clio Interview"
+msgstr "Clio Intervju"
+
+#. module: clio_interview
+#: model:ir.actions.server,name:clio_interview.ir_cron_clio_interview_close_expired_ir_actions_server
+msgid "Clio Intervju — Stäng utgångna sessioner"
+msgstr "Clio Intervju — Stäng utgångna sessioner"
+
+#. module: clio_interview
+#: model:ir.model.fields,help:clio_interview.field_clio_interview_session__close_at
+msgid "Clio closes the session, generates a summary and sends it to you."
+msgstr "Clio stänger sessionen, genererar sammanfattning och skickar den till dig."
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Closes"
+msgstr "Stängs"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__compose_body
+msgid "Compose"
+msgstr "Skriv meddelande"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__create_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__create_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__create_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__create_uid
+msgid "Created by"
+msgstr "Skapad av"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__create_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__create_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__create_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__create_date
+msgid "Created on"
+msgstr "Skapad"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__custom_question
+msgid "Custom Opening Question"
+msgstr "Egen öppningsfråga"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__custom_subject
+msgid "Custom Subject"
+msgstr "Eget ämne"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__date_received
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Date"
+msgstr "Datum"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__direction
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Direction"
+msgstr "Riktning"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__display_name
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__display_name
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__display_name
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "E.g. Career talk Q2 2026"
+msgstr "T.ex. Karriärsamtal Q2 2026"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__participant_email
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Email"
+msgstr "E-post"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Fetches the conversation and sends it to Claude. Continue?"
+msgstr "Hämtar dialog och skickar till Claude. Fortsätta?"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__id
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__id
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__id
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__id
+msgid "ID"
+msgstr "ID"
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_message__direction__inbound
+msgid "Inbound"
+msgstr "Inkommande"
+
+#. module: clio_interview
+#: model:ir.model,name:clio_interview.model_clio_interview_message
+msgid "Interview Message"
+msgstr "Intervjumeddelande"
+
+#. module: clio_interview
+#: model:ir.model,name:clio_interview.model_clio_interview_session
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Interview Session"
+msgstr "Intervjusession"
+
+#. module: clio_interview
+#: model:ir.actions.act_window,name:clio_interview.action_clio_interview_sessions
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Interview Sessions"
+msgstr "Intervjusessioner"
+
+#. module: clio_interview
+#: model:ir.model,name:clio_interview.model_clio_interview_template
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_form
+msgid "Interview Template"
+msgstr "Intervjumall"
+
+#. module: clio_interview
+#: model:ir.actions.act_window,name:clio_interview.action_clio_interview_templates
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_list
+msgid "Interview Templates"
+msgstr "Intervjumallar"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__write_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__write_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__write_uid
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__write_uid
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__write_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__write_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__write_date
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__write_date
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Latest"
+msgstr "Senaste"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid ""
+"Leave empty for default summary — or describe what you want from the "
+"answers."
+msgstr "Lämna tom för standardsammanfattning — eller beskriv vad du vill ha ut av svaren."
+
+#. module: clio_interview
+#: model:ir.model.fields,help:clio_interview.field_clio_interview_session__summary_prompt
+msgid "Leave empty for default summary."
+msgstr "Lämna tom för standardsammanfattning."
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Leave empty for manual close"
+msgstr "Lämna tom för manuell stängning"
+
+#. module: clio_interview
+#: model:ir.model.fields,help:clio_interview.field_clio_interview_start_wizard__close_at
+msgid "Leave empty for manual close."
+msgstr "Lämna tom för manuell stängning."
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Load Messages"
+msgstr "Ladda dialog"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__body
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Message"
+msgstr "Meddelande"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__message_ids
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Messages"
+msgstr "Dialog"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__opening_question
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_list
+msgid "Opening Question"
+msgstr "Öppningsfråga"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Or enter manually"
+msgstr "Eller ange manuellt"
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_message__direction__outbound
+msgid "Outbound"
+msgstr "Utgående"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__partner_id
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Participant"
+msgstr "Deltagare"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__partner_ids
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Participants"
+msgstr "Deltagare"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Request Summary"
+msgstr "Begär sammanfattning"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__result_text
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Result"
+msgstr "Resultat"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Search and select contacts..."
+msgstr "Sök och välj kontakter..."
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Select Template"
+msgstr "Välj mall"
+
+#. module: clio_interview
+#: model:ir.model.fields,help:clio_interview.field_clio_interview_start_wizard__partner_ids
+msgid "Select one or more contacts. One session is created per participant."
+msgstr "Välj en eller flera kontakter. En session skapas per deltagare."
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Send"
+msgstr "Skicka"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Send Opening Message"
+msgstr "Skicka öppningsfråga"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__sender
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Sender"
+msgstr "Avsändare"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_message__session_id
+msgid "Session"
+msgstr "Session"
+
+#. module: clio_interview
+#: model:ir.ui.menu,name:clio_interview.menu_clio_interview_sessions
+msgid "Sessions"
+msgstr "Sessioner"
+
+#. module: clio_interview
+#: model:ir.actions.act_window,name:clio_interview.action_clio_interview_start_wizard
+#: model:ir.model,name:clio_interview.model_clio_interview_start_wizard
+#: model:ir.ui.menu,name:clio_interview.menu_clio_interview_start
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Start Interview"
+msgstr "Starta intervju"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__created_at
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Started"
+msgstr "Startad"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__status
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_list
+msgid "Status"
+msgstr "Status"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Stop Session"
+msgstr "Avsluta session"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Stop the interview session with this participant?"
+msgstr "Avsluta intervjusessionen med denna deltagare?"
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__status__stopped
+msgid "Stopped"
+msgstr "Avslutad"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__subject
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_list
+msgid "Subject"
+msgstr "Ämne"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__summary_text
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Summary"
+msgstr "Sammanfattning"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__summary_prompt
+msgid "Summary Prompt"
+msgstr "Sammanfattningsinstruktion"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_start_wizard__template_id
+msgid "Template"
+msgstr "Mall"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_start_wizard
+msgid "Template (optional)"
+msgstr "Mall (valfri)"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_template__name
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_form
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_template_list
+msgid "Template Name"
+msgstr "Mallnamn"
+
+#. module: clio_interview
+#: model:ir.ui.menu,name:clio_interview.menu_clio_interview_templates
+msgid "Templates"
+msgstr "Mallar"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__thread_id
+msgid "Thread ID"
+msgstr "Tråd-ID"
+
+#. module: clio_interview
+#: model:ir.model.fields,field_description:clio_interview.field_clio_interview_session__updated_at
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Updated"
+msgstr "Uppdaterad"
+
+#. module: clio_interview
+#: model_terms:ir.ui.view,arch_db:clio_interview.view_clio_interview_session_form
+msgid "Write your next question or message..."
+msgstr "Skriv nästa fråga eller meddelande..."
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__clio
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__clio
+msgid "clio@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__fredrik
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__fredrik
+msgid "fredrik@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__gsf
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__gsf
+msgid "gsf@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__gtff
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__gtff
+msgid "gtff@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__gtk
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__gtk
+msgid "gtk@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__krut
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__krut
+msgid "krut@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__ssf
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__ssf
+msgid "ssf@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__ulrika
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__ulrika
+msgid "ulrika@arvas.international"
+msgstr ""
+
+#. module: clio_interview
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_session__account_key__vimla
+#: model:ir.model.fields.selection,name:clio_interview.selection__clio_interview_start_wizard__account_key__vimla
+msgid "vimla@arvas.international"
+msgstr ""
