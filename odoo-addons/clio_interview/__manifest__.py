@@ -12,7 +12,7 @@
         "views/clio_interview_views.xml",
         "views/menu.xml",
     ],
-    "translations": ["i18n/sv.po"],
+    # translations laddas via Odoo Settings → Translations efter export/import
     "installable": True,
     "auto_install": False,
     "application":  True,
