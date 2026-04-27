@@ -1,0 +1,445 @@
+# Swedish translation for clio_job
+# Copyright (C) 2025 Arvas International AB
+msgid ""
+msgstr ""
+"Project-Id-Version: clio_job\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 20:49+0100\n"
+"PO-Revision-Date: 2026-04-27 20:49+0100\n"
+"Last-Translator: Clio <clio@arvas.international>\n"
+"Language-Team: Swedish <sv@li.org>\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Created by"
+msgstr "Skapad av"
+
+msgid "Created on"
+msgstr "Skapad"
+
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Name"
+msgstr "Namn"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Description"
+msgstr "Beskrivning"
+
+msgid "Notes"
+msgstr "Anteckningar"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "User"
+msgstr "Användare"
+
+msgid "Partner"
+msgstr "Kontakt"
+
+msgid "Company"
+msgstr "Företag"
+
+msgid "Email"
+msgstr "E-post"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Address"
+msgstr "Adress"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "Currency"
+msgstr "Valuta"
+
+msgid "Amount"
+msgstr "Belopp"
+
+msgid "Reference"
+msgstr "Referens"
+
+msgid "Category"
+msgstr "Kategori"
+
+msgid "Tag"
+msgstr "Tagg"
+
+msgid "Color"
+msgstr "Färg"
+
+msgid "Image"
+msgstr "Bild"
+
+msgid "Sequence"
+msgstr "Ordning"
+
+msgid "Priority"
+msgstr "Prioritet"
+
+msgid "State"
+msgstr "Tillstånd"
+
+msgid "Action"
+msgstr "Åtgärd"
+
+msgid "Model"
+msgstr "Modell"
+
+msgid "Field"
+msgstr "Fält"
+
+msgid "View"
+msgstr "Vy"
+
+msgid "Menu"
+msgstr "Meny"
+
+msgid "Report"
+msgstr "Rapport"
+
+msgid "Archive"
+msgstr "Arkivera"
+
+msgid "Unarchive"
+msgstr "Avarkivera"
+
+msgid "Confirm"
+msgstr "Bekräfta"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Save"
+msgstr "Spara"
+
+msgid "Delete"
+msgstr "Ta bort"
+
+msgid "Search"
+msgstr "Sök"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Group By"
+msgstr "Gruppera efter"
+
+msgid "New"
+msgstr "Ny"
+
+msgid "Edit"
+msgstr "Redigera"
+
+msgid "Close"
+msgstr "Stäng"
+
+msgid "Back"
+msgstr "Tillbaka"
+
+msgid "Next"
+msgstr "Nästa"
+
+msgid "Previous"
+msgstr "Föregående"
+
+msgid "Select"
+msgstr "Välj"
+
+msgid "Apply"
+msgstr "Tillämpa"
+
+msgid "Reset"
+msgstr "Återställ"
+
+msgid "Export"
+msgstr "Exportera"
+
+msgid "Import"
+msgstr "Importera"
+
+msgid "Print"
+msgstr "Skriv ut"
+
+msgid "Send"
+msgstr "Skicka"
+
+msgid "Refresh"
+msgstr "Uppdatera"
+
+msgid "Settings"
+msgstr "Inställningar"
+
+msgid "Configuration"
+msgstr "Konfiguration"
+
+msgid "Overview"
+msgstr "Översikt"
+
+msgid "Dashboard"
+msgstr "Instrumentpanel"
+
+msgid "Log"
+msgstr "Logg"
+
+msgid "Error"
+msgstr "Fel"
+
+msgid "Warning"
+msgstr "Varning"
+
+msgid "Info"
+msgstr "Information"
+
+msgid "Success"
+msgstr "Lyckades"
+
+msgid "Failed"
+msgstr "Misslyckades"
+
+msgid "Pending"
+msgstr "Väntar"
+
+msgid "Running"
+msgstr "Kör"
+
+msgid "Done"
+msgstr "Klar"
+
+msgid "Draft"
+msgstr "Utkast"
+
+msgid "Confirmed"
+msgstr "Bekräftad"
+
+msgid "Cancelled"
+msgstr "Avbruten"
+
+msgid "Job"
+msgstr "Jobb"
+
+msgid "Jobs"
+msgstr "Jobb"
+
+msgid "Article"
+msgstr "Artikel"
+
+msgid "Articles"
+msgstr "Artiklar"
+
+msgid "Match"
+msgstr "Matchning"
+
+msgid "Matches"
+msgstr "Matchningar"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Profiles"
+msgstr "Profiler"
+
+msgid "Score"
+msgstr "Poäng"
+
+msgid "Source"
+msgstr "Källa"
+
+msgid "Published"
+msgstr "Publicerad"
+
+msgid "First Seen"
+msgstr "Först sedd"
+
+msgid "Body Snippet"
+msgstr "Utdrag"
+
+msgid "Match Score"
+msgstr "Matchningspoäng"
+
+msgid "Is Matched"
+msgstr "Matchad"
+
+msgid "Fetch Jobs"
+msgstr "Hämta jobb"
+
+msgid "Run Matcher"
+msgstr "Kör matchning"
+
+msgid "Job Article"
+msgstr "Jobbartikel"
+
+msgid "Job Match"
+msgstr "Jobbmatchning"
+
+msgid "Job Profile"
+msgstr "Jobbprofil"
+
+msgid "Notify Email"
+msgstr "Notifieringsmail"
+
+msgid "Keywords"
+msgstr "Nyckelord"
+
+msgid "Excluded Keywords"
+msgstr "Exkluderade nyckelord"
+
+msgid "Min Score"
+msgstr "Minpoäng"
+
+msgid "Clio Job — Sedda artiklar"
+msgstr "Clio Job — Sedda artiklar"
+
+msgid "Clio Job — Matchad signal"
+msgstr "Clio Job — Matchad signal"
+
+msgid "Clio Job — Kandidatprofil"
+msgstr "Clio Job — Kandidatprofil"
+
+msgid "Artikel-ID"
+msgstr "Artikel-ID"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Rubrik"
+msgstr "Rubrik"
+
+msgid "Källa"
+msgstr "Källa"
+
+msgid "Publicerad"
+msgstr "Publicerad"
+
+msgid "Hämtad"
+msgstr "Hämtad"
+
+msgid "Utdrag"
+msgstr "Utdrag"
+
+msgid "Matchad"
+msgstr "Matchad"
+
+msgid "Kandidatprofil"
+msgstr "Kandidatprofil"
+
+msgid "Matchningspoäng"
+msgstr "Matchningspoäng"
+
+msgid "Skickad"
+msgstr "Skickad"
+
+msgid "Signaltyp"
+msgstr "Signaltyp"
+
+msgid "Rekommenderad åtgärd"
+msgstr "Rekommenderad åtgärd"
+
+msgid "Kontakt"
+msgstr "Kontakt"
+
+msgid "Rapport-e-post"
+msgstr "Rapport-e-post"
+
+msgid "Nuvarande roll"
+msgstr "Nuvarande roll"
+
+msgid "Senioritetsnivå"
+msgstr "Senioritetsnivå"
+
+msgid "Geografi"
+msgstr "Geografi"
+
+msgid "Hybrid OK"
+msgstr "Hybrid OK"
+
+msgid "Bakgrund"
+msgstr "Bakgrund"
+
+msgid "Utbildning"
+msgstr "Utbildning"
+
+msgid "Målroller"
+msgstr "Målroller"
+
+msgid "Signalnyckelord"
+msgstr "Signalnyckelord"
+
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgid "Matchningshistorik"
+msgstr "Matchningshistorik"
+
+msgid "Antal matchningar"
+msgstr "Antal matchningar"
+
+msgid "Clio Job — Matchningshistorik"
+msgstr "Clio Job — Matchningshistorik"
+
+msgid "Clio Job — Profiler"
+msgstr "Clio Job — Profiler"
+
+msgid "Artikelhistorik"
+msgstr "Artikelhistorik"
+
+msgid "Analys"
+msgstr "Analys"
+
+msgid "Teknisk info"
+msgstr "Teknisk info"
+
+msgid "Sök artiklar"
+msgstr "Sök artiklar"
+
+msgid "Matchade"
+msgstr "Matchade"
+
+msgid "Ej matchade"
+msgstr "Ej matchade"
+
+msgid "Hämtad idag"
+msgstr "Hämtad idag"
+
+msgid "Har utdrag"
+msgstr "Har utdrag"
+
+msgid "Clio Job"
+msgstr "Clio Job"
+
+msgid "Min profil"
+msgstr "Min profil"
+
+msgid "Alla profiler"
+msgstr "Alla profiler"
+
+msgid "Artiklar"
+msgstr "Artiklar"
+
+msgid "Kandidat"
+msgstr "Kandidat"
+
