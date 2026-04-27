@@ -182,7 +182,18 @@ def _route_mail_interview_start(data: dict) -> dict:
     lines = [f"till: {to}", f"ämne: {subject}"]
     if context:
         lines.append(context)
-    return _dispatch("interview_start", body_text="\n".join(lines))
+    result = _dispatch("interview_start", body_text="\n".join(lines))
+    if not result.get("ok"):
+        return result
+    import state as st
+    with st.get_connection() as conn:
+        row = conn.execute(
+            "SELECT thread_id FROM interview_sessions WHERE participant_email = ? AND status = 'active' ORDER BY started_at DESC LIMIT 1",
+            (to.lower(),),
+        ).fetchone()
+    if row:
+        result["thread_id"] = row["thread_id"]
+    return result
 
 
 def _route_mail_interview_stop(data: dict) -> dict:
