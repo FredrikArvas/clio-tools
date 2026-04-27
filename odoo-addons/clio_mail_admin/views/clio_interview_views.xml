@@ -88,11 +88,10 @@
           </group>
           <group string="Dialog">
             <field name="message_ids" nolabel="1" invisible="not message_ids">
-              <list>
+              <list decoration-info="direction == 'outbound'"
+                    decoration-success="direction == 'inbound'">
                 <field name="date_received" string="Datum"/>
-                <field name="direction"     string="Riktning" widget="badge"
-                       decoration-info="direction == 'outbound'"
-                       decoration-success="direction == 'inbound'"/>
+                <field name="direction"     string="Riktning" column_invisible="1"/>
                 <field name="sender"        string="Avsändare" optional="hide"/>
                 <field name="body"          string="Meddelande"/>
               </list>
