@@ -36,13 +36,6 @@
             sequence="35"/>
 
   <!-- Synliga för Clio Admin -->
-  <menuitem id="menu_cockpit_mail"
-            name="📧 Mail Admin"
-            parent="menu_clio_cockpit_root"
-            action="action_cockpit_mail"
-            groups="clio_cockpit.group_clio_admin"
-            sequence="40"/>
-
   <menuitem id="menu_cockpit_server"
             name="🖥️ Server"
             parent="menu_clio_cockpit_root"
