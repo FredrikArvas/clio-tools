@@ -268,21 +268,22 @@ class ClioInterviewStartWizard(models.TransientModel):
                 results.append(f"HOPPAR ÖVER {partner.name}: saknar e-post")
                 continue
             try:
-                _call(self.env, "/mail/interview/start", {
+                resp = _call(self.env, "/mail/interview/start", {
                     "to":      email,
                     "subject": subject,
                     "context": question,
                     "account": self.account_key or "clio",
                 })
-                # Skapa session i Odoo
                 session_vals = {
-                    "partner_id":         partner.id,
-                    "participant_email":  email,
-                    "account_key":        self.account_key or "clio",
-                    "status":             "active",
+                    "partner_id":        partner.id,
+                    "participant_email": email,
+                    "account_key":       self.account_key or "clio",
+                    "status":            "active",
                 }
                 if self.close_at:
                     session_vals["close_at"] = self.close_at
+                if resp.get("thread_id"):
+                    session_vals["thread_id"] = resp["thread_id"]
                 self.env["clio.interview.session"].create(session_vals)
                 results.append(f"OK {partner.name} <{email}>")
             except UserError as exc:
