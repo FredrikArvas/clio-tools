@@ -226,6 +226,8 @@ Skriv ett välkomnande, varmt öppningsmail som:
 - Presenterar syftet med intervjun kort (1–2 meningar)
 - Ställer den FÖRSTA frågan — en enda, öppen fråga
 - Inte avslöjar att det är ett automatiserat system (signaturen hanterar det)
+- Använder INTE markdown-formattering (inga **fetstil**, inga rubriker med #, ingen ämnesrad överst)
+- Börjar direkt med "Hej [förnamn]," — ingen inledande ämnesrad
 
 Ämne för intervjun: {subject}
 

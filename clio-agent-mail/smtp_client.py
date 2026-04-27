@@ -118,8 +118,16 @@ def send_email(
     _append_to_sent(config, from_account_key, raw_bytes)
 
 
+def _md_inline(text: str) -> str:
+    """Konverterar inline markdown (bold, italic) till HTML."""
+    import re
+    text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"\*(.+?)\*",     r"<em>\1</em>",          text)
+    return text
+
+
 def _to_html(text: str) -> str:
-    """Konverterar plain text till enkel HTML med bevarad struktur."""
+    """Konverterar plain text (med valfri markdown bold/italic) till HTML."""
     import html as html_lib
     lines = text.splitlines()
     out = ['<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#222;">']
@@ -130,17 +138,17 @@ def _to_html(text: str) -> str:
         elif escaped.startswith("&gt; "):
             out.append(
                 f'<blockquote style="margin:0 0 0 12px;padding:0 0 0 10px;'
-                f'border-left:3px solid #ccc;color:#555;">{escaped[5:]}</blockquote>'
+                f'border-left:3px solid #ccc;color:#555;">{_md_inline(escaped[5:])}</blockquote>'
             )
         elif escaped.startswith("&gt;"):
             out.append(
                 f'<blockquote style="margin:0 0 0 12px;padding:0 0 0 10px;'
-                f'border-left:3px solid #ccc;color:#555;">{escaped[4:]}</blockquote>'
+                f'border-left:3px solid #ccc;color:#555;">{_md_inline(escaped[4:])}</blockquote>'
             )
         elif escaped == "":
             out.append("<br>")
         else:
-            out.append(f"<p style='margin:0 0 6px 0;'>{escaped}</p>")
+            out.append(f"<p style='margin:0 0 6px 0;'>{_md_inline(escaped)}</p>")
     out.append("</div>")
     return "\n".join(out)
 
