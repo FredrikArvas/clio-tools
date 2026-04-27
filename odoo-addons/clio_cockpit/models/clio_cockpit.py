@@ -46,29 +46,29 @@ class ClioCockpit(models.TransientModel):
     display_name = fields.Char(default="Clio Cockpit", readonly=True)
 
     # ── Agentstatus ───────────────────────────────────────────────────────────
-    agent_status = fields.Text(string="Agentstatus", readonly=True)
+    agent_status = fields.Text(string="Agent Status", readonly=True)
 
     # ── RAG ───────────────────────────────────────────────────────────────────
-    rag_query  = fields.Char(string="Fråga")
-    rag_mode   = fields.Selection(selection="_get_rag_modes", string="Källa", default="clio_books")
-    rag_result = fields.Text(string="Svar", readonly=True)
+    rag_query  = fields.Char(string="Query")
+    rag_mode   = fields.Selection(selection="_get_rag_modes", string="Source", default="clio_books")
+    rag_result = fields.Text(string="Answer", readonly=True)
 
     # ── Bibliotek ─────────────────────────────────────────────────────────────
-    library_query  = fields.Char(string="Sök titel / författare")
-    library_result = fields.Text(string="Träffar", readonly=True)
+    library_query  = fields.Char(string="Search Title / Author")
+    library_result = fields.Text(string="Results", readonly=True)
 
     # ── Server ────────────────────────────────────────────────────────────────
-    server_summary      = fields.Text(string="Systeminformation", readonly=True)
-    server_updates      = fields.Text(string="Tillgängliga uppdateringar", readonly=True)
-    server_last_checked = fields.Datetime(string="Senast kontrollerad", readonly=True)
+    server_summary      = fields.Text(string="System Information", readonly=True)
+    server_updates      = fields.Text(string="Available Updates", readonly=True)
+    server_last_checked = fields.Datetime(string="Last Checked", readonly=True)
 
     # ── Mail Admin ────────────────────────────────────────────────────────────
-    mail_result       = fields.Text(string="Resultat", readonly=True)
-    email_input       = fields.Char(string="E-post")
-    decide_sender     = fields.Char(string="Avsändare")
-    interview_to      = fields.Char(string="Till")
-    interview_subject = fields.Char(string="Ämne", default="Intervju")
-    interview_context = fields.Text(string="Kontext")
+    mail_result       = fields.Text(string="Result", readonly=True)
+    email_input       = fields.Char(string="Email")
+    decide_sender     = fields.Char(string="Sender")
+    interview_to      = fields.Char(string="To")
+    interview_subject = fields.Char(string="Subject", default="Intervju")
+    interview_context = fields.Text(string="Context")
 
     # ── Agentstatus ───────────────────────────────────────────────────────────
 

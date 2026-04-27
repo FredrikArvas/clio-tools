@@ -22,23 +22,23 @@ class ClioJobArticle(models.Model):
     _rec_name    = "title"
 
     article_id = fields.Char(
-        string   = "Artikel-ID",
+        string   = "Article ID",
         required = True,
         index    = True,
         copy     = False,
         help     = "SHA256-hash av URL — unik nyckel för deduplicering.",
     )
     url = fields.Char(string="URL")
-    title = fields.Char(string="Rubrik")
-    source = fields.Char(string="Källa", index=True)
+    title = fields.Char(string="Title")
+    source = fields.Char(string="Source", index=True)
     published = fields.Datetime(
-        string = "Publicerad",
+        string = "Published",
         index  = True,
         help   = "Artikelns publiceringsdatum enligt källan.",
     )
-    first_seen = fields.Datetime(string="Hämtad", index=True)
+    first_seen = fields.Datetime(string="Fetched", index=True)
     body_snippet = fields.Text(
-        string = "Utdrag",
+        string = "Snippet",
         help   = "Upp till 1 000 tecken brödtext från artikeln.",
     )
     match_score = fields.Integer(
@@ -48,7 +48,7 @@ class ClioJobArticle(models.Model):
         help    = "0–100 från AI-analysen. -1 = ej analyserad (fel).",
     )
     is_matched = fields.Boolean(
-        string = "Matchad",
+        string = "Matched",
         default = False,
         index   = True,
         help    = "True om score ≥ tröskel och markerad relevant av AI.",

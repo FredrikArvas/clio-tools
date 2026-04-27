@@ -16,8 +16,8 @@ _logger = logging.getLogger(__name__)
 
 STATUS_SELECTION = [
     ("ok",      "OK"),
-    ("warning", "Varning"),
-    ("error",   "Fel"),
+    ("warning", "Warning"),
+    ("error",   "Error"),
 ]
 
 
@@ -28,13 +28,13 @@ class ClioToolHeartbeat(models.Model):
     _rec_name    = "tool_name"
 
     tool_name = fields.Char(
-        string="Verktyg",
+        string="Tool",
         required=True,
         index=True,
         help="Tekniskt namn, t.ex. 'clio-agent-job'.",
     )
     last_run = fields.Datetime(
-        string="Senaste körning",
+        string="Last Run",
         required=True,
         copy=False,
     )
@@ -45,12 +45,12 @@ class ClioToolHeartbeat(models.Model):
         default="ok",
     )
     items_processed = fields.Integer(
-        string="Bearbetade objekt",
+        string="Items Processed",
         default=0,
         help="Antal artiklar, poster eller objekt som behandlades.",
     )
     message = fields.Char(
-        string="Meddelande",
+        string="Message",
         help="Kort sammanfattning av körningen.",
     )
 

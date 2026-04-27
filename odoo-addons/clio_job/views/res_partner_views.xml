@@ -11,19 +11,19 @@
       <notebook position="inside">
         <page string="Clio Job" name="clio_job">
 
-          <group string="Jobbsignalbevakning">
+          <group string="Job Signal Monitoring">
             <field name="clio_job_watch"/>
           </group>
 
           <field name="clio_job_profile_ids"
-                 string="Kandidatprofil"
+                 string="Candidate Profile"
                  nolabel="1"
                  invisible="not clio_job_watch">
             <list>
-              <field name="role" string="Roll"/>
-              <field name="seniority" string="Senioritet"/>
-              <field name="geography" string="Geografi"/>
-              <field name="match_count" string="Matchningar"/>
+              <field name="role" string="Role"/>
+              <field name="seniority" string="Seniority"/>
+              <field name="geography" string="Geography"/>
+              <field name="match_count" string="Matches"/>
               <field name="active" optional="hide"/>
             </list>
           </field>

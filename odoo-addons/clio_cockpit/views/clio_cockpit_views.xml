@@ -8,12 +8,12 @@
     <field name="name">clio.cockpit.agenter</field>
     <field name="model">clio.cockpit</field>
     <field name="arch" type="xml">
-      <form string="Clio — Agenter">
+      <form string="Clio — Agents">
         <sheet>
-          <group string="Agentstatus">
+          <group string="Agent Status">
             <div class="o_row">
               <button name="action_refresh_status" type="object"
-                      string="↻ Uppdatera status" class="btn-secondary"/>
+                      string="↻ Refresh Status" class="btn-secondary"/>
             </div>
             <field name="agent_status" widget="text" nolabel="1"
                    invisible="not agent_status"
@@ -31,18 +31,18 @@
     <field name="name">clio.cockpit.rag</field>
     <field name="model">clio.cockpit</field>
     <field name="arch" type="xml">
-      <form string="Clio — RAG Kunskapsbas">
+      <form string="Clio — RAG Knowledge Base">
         <sheet>
-          <group string="Kunskapsbas">
+          <group string="Knowledge Base">
             <div style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
               <field name="rag_query"
-                     placeholder="Ställ en fråga… (Enter för att söka)"
+                     placeholder="Ask a question… (Enter to search)"
                      nolabel="1"
                      style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
               <field name="rag_mode" nolabel="1"
                      style="width:160px; border:none; border-left:1px solid #dee2e6; border-radius:0; box-shadow:none; background:#f8f9fa;"/>
               <button name="action_rag_search" type="object"
-                      string="🔍 Sök" class="btn-primary"
+                      string="🔍 Search" class="btn-primary"
                       style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
             </div>
             <field name="rag_result" widget="text" nolabel="1"
@@ -61,16 +61,16 @@
     <field name="name">clio.cockpit.bibliotek</field>
     <field name="model">clio.cockpit</field>
     <field name="arch" type="xml">
-      <form string="Clio — Bibliotek">
+      <form string="Clio — Library">
         <sheet>
-          <group string="Sök i biblioteket">
+          <group string="Search Library">
             <div style="display:flex; align-items:stretch; gap:0; border:1px solid #dee2e6; border-radius:6px; overflow:hidden; margin-bottom:12px;">
               <field name="library_query"
-                     placeholder="Titel eller författare… (Enter för att söka)"
+                     placeholder="Title or author… (Enter to search)"
                      nolabel="1"
                      style="flex:1; border:none; border-radius:0; box-shadow:none; font-size:1rem; padding:8px 12px;"/>
               <button name="action_library_search" type="object"
-                      string="🔍 Sök" class="btn-primary"
+                      string="🔍 Search" class="btn-primary"
                       style="border-radius:0; padding:8px 18px; white-space:nowrap;"/>
             </div>
             <field name="library_result" widget="text" nolabel="1"
@@ -91,34 +91,34 @@
     <field name="arch" type="xml">
       <form string="Clio — Mail Admin">
         <sheet>
-          <group string="Åtgärder">
+          <group string="Actions">
             <div class="o_row">
-              <button name="action_list"      type="object" string="Lista projekt"  class="btn-primary"/>
-              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
+              <button name="action_list"      type="object" string="List Projects"  class="btn-primary"/>
+              <button name="action_waiting"   type="object" string="Waiting Mail"   class="btn-secondary"/>
               <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
-              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
-              <button name="action_ncc_lista" type="object" string="NCC lista"      class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Whitelist"      class="btn-secondary"/>
+              <button name="action_ncc_lista" type="object" string="NCC List"       class="btn-secondary"/>
             </div>
             <field name="mail_result" widget="text" nolabel="1"
                    invisible="not mail_result"
                    style="font-family:monospace; white-space:pre-wrap; background:#f8f9fa; padding:12px; border-radius:6px; margin-top:8px;"/>
           </group>
 
-          <group string="Vitlista / Svartlista">
-            <field name="email_input" placeholder="namn@exempel.se"/>
+          <group string="Whitelist / Blacklist">
+            <field name="email_input" placeholder="name@example.com"/>
             <div class="o_row">
-              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
-              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+              <button name="action_whitelist_add" type="object" string="Add to Whitelist" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Blacklist"        class="btn-danger"/>
             </div>
           </group>
 
-          <group string="Intervju">
-            <field name="interview_to"      placeholder="deltagare@exempel.se"/>
-            <field name="interview_subject" placeholder="Ämne"/>
-            <field name="interview_context" placeholder="Valfri kontext / öppningsfråga"/>
+          <group string="Interview">
+            <field name="interview_to"      placeholder="participant@example.com"/>
+            <field name="interview_subject" placeholder="Subject"/>
+            <field name="interview_context" placeholder="Optional context / opening question"/>
             <div class="o_row">
-              <button name="action_interview_start" type="object" string="Starta intervju"  class="btn-primary"/>
-              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-warning"/>
+              <button name="action_interview_start" type="object" string="Start Interview" class="btn-primary"/>
+              <button name="action_interview_stop"  type="object" string="Stop Interview"  class="btn-warning"/>
             </div>
           </group>
         </sheet>
@@ -135,10 +135,10 @@
     <field name="arch" type="xml">
       <form string="Clio — Server">
         <sheet>
-          <group string="Systeminformation">
+          <group string="System Information">
             <div class="o_row">
               <button name="action_refresh_server" type="object"
-                      string="↻ Uppdatera" class="btn-secondary"/>
+                      string="↻ Refresh" class="btn-secondary"/>
               <field name="server_last_checked" nolabel="1" readonly="1"
                      invisible="not server_last_checked"
                      style="color:#888; font-size:0.85em; margin-left:12px;"/>
@@ -147,7 +147,7 @@
                    invisible="not server_summary"
                    style="font-family:monospace; white-space:pre; background:#f7f7f7; padding:10px; border-radius:6px; margin-top:8px;"/>
           </group>
-          <group string="Uppdateringar">
+          <group string="Updates">
             <field name="server_updates" widget="text" nolabel="1"
                    invisible="not server_updates"
                    style="font-family:monospace; white-space:pre-wrap; background:#fff8f0; padding:10px; border-radius:6px;"/>
@@ -161,7 +161,7 @@
        ACTIONS
   ══════════════════════════════════════════════════════════════════════ -->
   <record id="action_cockpit_agenter" model="ir.actions.act_window">
-    <field name="name">Agenter</field>
+    <field name="name">Agents</field>
     <field name="res_model">clio.cockpit</field>
     <field name="view_mode">form</field>
     <field name="view_id" ref="view_cockpit_agenter"/>
@@ -169,7 +169,7 @@
   </record>
 
   <record id="action_cockpit_rag" model="ir.actions.act_window">
-    <field name="name">RAG — Kunskapsbas</field>
+    <field name="name">RAG — Knowledge Base</field>
     <field name="res_model">clio.cockpit</field>
     <field name="view_mode">form</field>
     <field name="view_id" ref="view_cockpit_rag"/>
@@ -177,7 +177,7 @@
   </record>
 
   <record id="action_cockpit_bibliotek" model="ir.actions.act_window">
-    <field name="name">Bibliotek</field>
+    <field name="name">Library</field>
     <field name="res_model">clio.cockpit</field>
     <field name="view_mode">form</field>
     <field name="view_id" ref="view_cockpit_bibliotek"/>

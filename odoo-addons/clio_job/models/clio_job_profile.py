@@ -15,27 +15,27 @@ class ClioJobProfile(models.Model):
 
     partner_id = fields.Many2one(
         comodel_name="res.partner",
-        string="Kontakt",
+        string="Contact",
         required=True,
         ondelete="cascade",
         index=True,
         help="Den res.partner-post som profilen tillhör.",
     )
     report_email = fields.Char(
-        string="Rapport-e-post",
+        string="Report Email",
         help="E-postadress dit Clio skickar signalrapporter. "
              "Lämnas tomt → används partner-e-posten.",
     )
     role = fields.Char(
-        string="Nuvarande roll",
+        string="Current Role",
         help="Personens nuvarande jobbtitel eller roll.",
     )
     seniority = fields.Char(
-        string="Senioritetsnivå",
+        string="Seniority Level",
         help='T.ex. "Senior / Executive", "Junior", "Mid".',
     )
     geography = fields.Char(
-        string="Geografi",
+        string="Geography",
         help='Region eller stad, t.ex. "Stockholm".',
     )
     hybrid_ok = fields.Boolean(
@@ -44,34 +44,34 @@ class ClioJobProfile(models.Model):
         help="Kandidaten är öppen för hybridarbete.",
     )
     background = fields.Text(
-        string="Bakgrund",
+        string="Background",
         help="Karriärhistorik och erfarenheter — en post per rad.",
     )
     education = fields.Text(
-        string="Utbildning",
+        string="Education",
         help="Utbildningar och grader — en post per rad.",
     )
     target_roles = fields.Text(
-        string="Målroller",
+        string="Target Roles",
         help="Roller som kandidaten söker — en per rad.",
     )
     signal_keywords = fields.Text(
-        string="Signalnyckelord",
+        string="Signal Keywords",
         help="Nyckelord som Clio bevakar i nyhetsflöden — ett per rad.\n"
              'T.ex. "ny GD", "digital transformation", "förvärv".',
     )
     active = fields.Boolean(
-        string="Aktiv",
+        string="Active",
         default=True,
         help="Avmarkera för att arkivera profilen utan att radera den.",
     )
     match_ids = fields.One2many(
         comodel_name="clio.job.match",
         inverse_name="profile_id",
-        string="Matchningshistorik",
+        string="Match History",
     )
     match_count = fields.Integer(
-        string="Antal matchningar",
+        string="Match Count",
         compute="_compute_match_count",
         store=False,
     )

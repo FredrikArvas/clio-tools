@@ -6,7 +6,7 @@
     <field name="name">clio.graph.relation.list</field>
     <field name="model">res.partner.relation</field>
     <field name="arch" type="xml">
-      <list string="Nätverksrelationer">
+      <list string="Network Relations">
         <field name="left_partner_id"/>
         <field name="type_id"/>
         <field name="right_partner_id"/>
@@ -23,7 +23,7 @@
     <field name="name">clio.graph.relation.form</field>
     <field name="model">res.partner.relation</field>
     <field name="arch" type="xml">
-      <form string="Nätverksrelation">
+      <form string="Network Relation">
         <sheet>
           <group>
             <field name="left_partner_id"/>
@@ -32,7 +32,7 @@
             <field name="date_start"/>
             <field name="date_end"/>
           </group>
-          <group string="Neo4j Synk">
+          <group string="Neo4j Sync">
             <field name="sync_to_neo4j"/>
             <field name="neo4j_synced_at"/>
           </group>
@@ -43,7 +43,7 @@
 
   <!-- Action: öppnar relationslistvy -->
   <record id="action_clio_graph_relations" model="ir.actions.act_window">
-    <field name="name">Nätverksrelationer</field>
+    <field name="name">Network Relations</field>
     <field name="res_model">res.partner.relation</field>
     <field name="view_mode">list,form</field>
   </record>
