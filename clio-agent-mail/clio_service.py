@@ -77,8 +77,22 @@ def _synthetic_mail(body_text: str = "", subject: str = "clio-service") -> MailI
 
 
 def _dispatch(command: str, body_text: str = "", subject: str = "") -> dict:
+    import smtp_client as smtp_module
     mail = _synthetic_mail(body_text=body_text, subject=subject or command)
     result = cmd_module.dispatch(command, mail, _get_config())
+    for out in result.outbound:
+        try:
+            smtp_module.send_email(
+                config=_get_config(),
+                from_account_key=out.from_account_key,
+                to_addr=out.to_addr,
+                subject=out.subject,
+                body=out.body,
+                message_id=out.message_id or None,
+            )
+            logger.info(f"[service] SMTP skickat: {out.from_account_key} → {out.to_addr} | {out.subject[:60]}")
+        except Exception as e:
+            logger.error(f"[service] SMTP-fel för {out.to_addr}: {e}")
     return {
         "ok": True,
         "text": result.reply_body,
