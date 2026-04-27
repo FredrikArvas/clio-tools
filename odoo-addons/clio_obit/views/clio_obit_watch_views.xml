@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_watch_list" model="ir.ui.view">
+    <field name="name">clio.obit.watch.list</field>
+    <field name="model">clio.obit.watch</field>
+    <field name="arch" type="xml">
+      <list string="Bevakningar"
+            decoration-danger="priority == 'viktig'"
+            decoration-muted="priority == 'bra_att_veta'">
+        <field name="partner_id" string="Person"/>
+        <field name="partner_birth_name" string="Födelsenamn" optional="show"/>
+        <field name="priority" string="Prioritet" widget="badge"
+               decoration-danger="priority == 'viktig'"
+               decoration-warning="priority == 'normal'"
+               decoration-muted="priority == 'bra_att_veta'"/>
+        <field name="user_id" string="Bevakande användare" optional="show"/>
+        <field name="family_role" string="Familjeroll" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_watch_form" model="ir.ui.view">
+    <field name="name">clio.obit.watch.form</field>
+    <field name="model">clio.obit.watch</field>
+    <field name="arch" type="xml">
+      <form string="Bevakning">
+        <sheet>
+          <group>
+            <field name="partner_id" string="Bevakad person"
+                   options="{'no_create': True, 'no_open': False}"/>
+            <field name="user_id" string="Bevakande användare"
+                   options="{'no_create': True, 'no_open': False}"/>
+            <field name="priority"/>
+            <field name="family_role" placeholder="T.ex. farfar, faster, granne"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_watch_search" model="ir.ui.view">
+    <field name="name">clio.obit.watch.search</field>
+    <field name="model">clio.obit.watch</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="partner_id" string="Person"/>
+        <field name="partner_birth_name" string="Födelsenamn"/>
+        <filter name="viktig" string="Viktiga" domain="[('priority','=','viktig')]"/>
+        <filter name="normal" string="Normala" domain="[('priority','=','normal')]"/>
+        <separator/>
+        <filter name="mine" string="Mina bevakningar"
+                domain="[('user_id','=',uid)]"/>
+        <group expand="0" string="Gruppera">
+          <filter name="group_priority" string="Prioritet" context="{'group_by': 'priority'}"/>
+          <filter name="group_user"     string="Bevakare"  context="{'group_by': 'user_id'}" groups="base.group_system"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action: Mina bevakningar ───────────────────────────────────────── -->
+  <record id="action_clio_obit_watch_mine" model="ir.actions.act_window">
+    <field name="name">Bevakade</field>
+    <field name="res_model">clio.obit.watch</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'default_user_id': uid}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga bevakade personer ännu.
+      </p>
+      <p>
+        Importera ett GEDCOM-träd eller lägg till en bevakning manuellt.
+      </p>
+    </field>
+  </record>
+
+  <!-- ── Action: Alla bevakningar (admin) ───────────────────────────────── -->
+  <record id="action_clio_obit_watch_all" model="ir.actions.act_window">
+    <field name="name">Alla bevakningar</field>
+    <field name="res_model">clio.obit.watch</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Inga bevakningar registrerade.</p>
+    </field>
+  </record>
+
+</odoo>

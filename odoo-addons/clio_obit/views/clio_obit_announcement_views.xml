@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_announcement_list" model="ir.ui.view">
+    <field name="name">clio.obit.announcement.list</field>
+    <field name="model">clio.obit.announcement</field>
+    <field name="arch" type="xml">
+      <list string="Dödsannonser"
+            decoration-success="matched == True"
+            decoration-muted="is_duplicate == True"
+            default_order="published_date desc">
+        <field name="name"          string="Namn"/>
+        <field name="source_name"   string="Källa"      optional="show"/>
+        <field name="published_date" string="Publicerad" widget="date" optional="show"/>
+        <field name="hemort"        string="Hemort"     optional="show"/>
+        <field name="fodelsear"     string="Födelseår"  optional="show"/>
+        <field name="match_count"   string="Träffar"    optional="show"/>
+        <field name="matched"       string="Matchad"    widget="boolean_toggle" optional="show"/>
+        <field name="is_duplicate"  string="Duplikat"   widget="boolean_toggle" optional="show"/>
+        <field name="duplicate_of"  string="Duplikat av" optional="hide"/>
+        <field name="image"         string="Bild"       widget="boolean" optional="show"
+               column_invisible="True"/>
+        <field name="first_seen"    string="Hämtad"     widget="datetime" optional="hide"/>
+        <field name="mentioned_partner_ids" string="Nämnda" widget="many2many_tags" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Kanban-vy ──────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_announcement_kanban" model="ir.ui.view">
+    <field name="name">clio.obit.announcement.kanban</field>
+    <field name="model">clio.obit.announcement</field>
+    <field name="arch" type="xml">
+      <kanban default_order="published_date desc" class="o_kanban_small_column">
+        <field name="name"/>
+        <field name="source_name"/>
+        <field name="published_date"/>
+        <field name="hemort"/>
+        <field name="matched"/>
+        <field name="body_html"/>
+        <field name="body_snippet"/>
+        <field name="image"/>
+        <field name="url"/>
+        <field name="match_count"/>
+        <templates>
+          <t t-name="card">
+            <!-- Huvud: namn + matchningsbadge -->
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <strong class="o_kanban_record_title">
+                <field name="name"/>
+              </strong>
+              <t t-if="record.matched.raw_value">
+                <span class="badge rounded-pill text-bg-success ms-1">Träff</span>
+              </t>
+            </div>
+
+            <!-- Meta: källa, datum, hemort -->
+            <div class="text-muted small mb-2">
+              <field name="source_name"/>
+              <t t-if="record.published_date.raw_value">
+                · <field name="published_date"/>
+              </t>
+              <t t-if="record.hemort.raw_value">
+                · <field name="hemort"/>
+              </t>
+              <t t-if="record.match_count.raw_value &gt; 0">
+                · <field name="match_count"/> träff(ar)
+              </t>
+            </div>
+
+            <!-- Tidningsbild om tillgänglig -->
+            <t t-if="record.image.raw_value">
+              <div class="mb-2 text-center">
+                <field name="image" widget="image"
+                       options="{'img_class': 'img-fluid rounded', 'size': [0, 300]}"/>
+              </div>
+            </t>
+
+            <!-- Fullständig annonstext -->
+            <t t-if="record.body_html.raw_value">
+              <div class="border-top pt-2 obit-body-html">
+                <field name="body_html" widget="html" readonly="1"/>
+              </div>
+            </t>
+            <t t-elif="record.body_snippet.raw_value">
+              <div class="border-top pt-2 text-muted small">
+                <field name="body_snippet"/>
+              </div>
+            </t>
+            <t t-else="">
+              <div class="border-top pt-2 text-muted small fst-italic">
+                Ingen annonstext sparad — ej matchad annons
+              </div>
+            </t>
+
+            <!-- Länk till originalet -->
+            <t t-if="record.url.raw_value">
+              <div class="mt-2 small">
+                <a t-att-href="record.url.raw_value" target="_blank"
+                   class="text-decoration-none">
+                  Öppna original ↗
+                </a>
+              </div>
+            </t>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_announcement_form" model="ir.ui.view">
+    <field name="name">clio.obit.announcement.form</field>
+    <field name="model">clio.obit.announcement</field>
+    <field name="arch" type="xml">
+      <form string="Dödsannons">
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Namn"/></h1>
+          </div>
+          <group>
+            <group string="Annonsuppgifter">
+              <field name="source_name" string="Källa"/>
+              <field name="published_date" string="Publicerad"/>
+              <field name="fornamn"   string="Förnamn"/>
+              <field name="efternamn" string="Efternamn"/>
+              <field name="hemort"    string="Hemort"/>
+              <field name="fodelsear" string="Födelseår"/>
+              <field name="dodsar"    string="Dödsår" invisible="dodsar == 0"/>
+              <field name="url" string="URL" widget="url"/>
+            </group>
+            <group string="Bevakningsstatus">
+              <field name="matched" string="Matchad" widget="boolean_toggle"/>
+              <field name="match_count" string="Antal träffar"/>
+              <field name="first_seen" string="Hämtad av Clio"/>
+              <field name="duplicate_of" string="Duplikat av"
+                     options="{'no_create': True, 'no_open': False}"/>
+            </group>
+          </group>
+
+          <!-- Tidningsbild -->
+          <group string="Tidningsbild" invisible="not image">
+            <field name="image" widget="image" string="" nolabel="1"
+                   options="{'img_class': 'img-fluid rounded', 'size': [0, 600]}"/>
+          </group>
+
+          <!-- Annonstext -->
+          <group string="Annonstext">
+            <field name="body_html" string="" nolabel="1" widget="html" readonly="1"
+                   placeholder="(Ingen annonstext sparad — detaljsidan hämtas bara för matchade annonser)"/>
+          </group>
+
+          <!-- Matchningar -->
+          <field name="match_ids" string="Matchade bevakningar" nolabel="1">
+            <list>
+              <field name="partner_id" string="Bevakad person"/>
+              <field name="score" string="Poäng"/>
+              <field name="priority" string="Prioritet"/>
+              <field name="notified_at" string="Notifierad"/>
+              <field name="suppressed" string="Supprimerad" widget="boolean_toggle"/>
+            </list>
+          </field>
+
+          <!-- Nämnda personer -->
+          <field name="mentioned_partner_ids" string="Nämnda personer" nolabel="1">
+            <list>
+              <field name="name" string="Namn"/>
+              <field name="city" string="Ort" optional="show"/>
+            </list>
+          </field>
+
+          <!-- Teknisk info -->
+          <group string="Teknisk info" groups="base.group_system">
+            <field name="ann_id" string="Annons-ID" readonly="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_announcement_search" model="ir.ui.view">
+    <field name="name">clio.obit.announcement.search</field>
+    <field name="model">clio.obit.announcement</field>
+    <field name="arch" type="xml">
+      <search string="Sök dödsannonser">
+        <field name="name"        string="Namn"/>
+        <field name="efternamn"   string="Efternamn"/>
+        <field name="source_name" string="Källa"/>
+        <field name="hemort"      string="Hemort"/>
+        <field name="body_snippet" string="Annonstext"/>
+        <field name="mentioned_partner_ids" string="Nämnd person"/>
+
+        <!-- Matchningsfilter -->
+        <filter name="matched"   string="Matchade"
+                domain="[('matched','=',True)]"/>
+        <filter name="unmatched" string="Ej matchade"
+                domain="[('matched','=',False)]"/>
+        <filter name="no_duplicates" string="Ej duplikat"
+                domain="[('is_duplicate','=',False)]"/>
+        <filter name="duplicates" string="Duplikat"
+                domain="[('is_duplicate','=',True)]"/>
+        <separator/>
+
+        <!-- Bildfilter -->
+        <filter name="has_image" string="Med tidningsbild"
+                domain="[('image','!=',False)]"/>
+        <filter name="has_body"  string="Med annonstext"
+                domain="[('body_html','!=',False),('body_html','!=','')]"/>
+        <separator/>
+
+        <!-- Datumfilter -->
+        <filter name="today" string="Publicerad idag"
+                domain="[('published_date','=', context_today().strftime('%Y-%m-%d'))]"/>
+        <filter name="this_week" string="Denna vecka"
+                domain="[('published_date','&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+        <filter name="this_month" string="Denna månad"
+                domain="[('published_date','&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+        <separator/>
+
+        <group expand="0" string="Gruppera efter">
+          <filter name="group_source"    string="Källa"
+                  context="{'group_by': 'source_name'}"/>
+          <filter name="group_published" string="Publicerad"
+                  context="{'group_by': 'published_date:week'}"/>
+          <filter name="group_hemort"    string="Hemort"
+                  context="{'group_by': 'hemort'}"/>
+          <filter name="group_matched"   string="Matchad"
+                  context="{'group_by': 'matched'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_obit_announcement" model="ir.actions.act_window">
+    <field name="name">Dödsannonser</field>
+    <field name="res_model">clio.obit.announcement</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga dödsannonser registrerade ännu.
+      </p>
+      <p>
+        Annonser läggs till automatiskt när clio-agent-obit körs.
+      </p>
+    </field>
+  </record>
+
+  <!-- Action: bara matchade (för snabbåtkomst) -->
+  <record id="action_clio_obit_announcement_matched" model="ir.actions.act_window">
+    <field name="name">Matchade annonser</field>
+    <field name="res_model">clio.obit.announcement</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="domain">[('matched','=',True)]</field>
+    <field name="context">{}</field>
+  </record>
+
+</odoo>

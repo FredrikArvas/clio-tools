@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="group_clio_bevakare" model="res.groups">
+    <field name="name">Clio Bevakare</field>
+    <field name="category_id" ref="base.module_category_hidden"/>
+    <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    <field name="comment">
+      Användare med åtkomst till Clio Obit — kan se dödsannonser och matchningshistorik.
+    </field>
+  </record>
+
+</odoo>
