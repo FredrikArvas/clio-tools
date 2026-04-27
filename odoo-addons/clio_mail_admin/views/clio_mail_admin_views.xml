@@ -12,9 +12,8 @@
           <div class="oe_button_box" name="button_box"/>
           <group string="Kommandon">
             <div class="o_row">
-              <button name="action_waiting"   type="object" string="Väntande mail"  class="btn-secondary"/>
-              <button name="action_status"    type="object" string="Status"         class="btn-secondary"/>
-              <button name="action_whitelist" type="object" string="Vitlista"       class="btn-secondary"/>
+              <button name="action_status"    type="object" string="Status"   class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Vitlista" class="btn-secondary"/>
             </div>
           </group>
 
