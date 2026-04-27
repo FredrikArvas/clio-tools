@@ -3,7 +3,7 @@
 
   <!-- Toppnivå -->
   <menuitem id="menu_clio_root"
-            name="Clio"
+            name="Clio Agent Mail"
             sequence="90"/>
 
   <!-- Mail Admin (befintlig) -->
