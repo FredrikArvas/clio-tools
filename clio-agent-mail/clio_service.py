@@ -192,6 +192,117 @@ def _route_mail_interview_stop(data: dict) -> dict:
     return _dispatch("interview_stop", body_text=participant)
 
 
+def _route_mail_interview_send_message(data: dict) -> dict:
+    thread_id = data.get("thread_id", "").strip()
+    body      = data.get("body", "").strip()
+    if not thread_id or not body:
+        return {"ok": False, "error": "saknade fält: thread_id, body"}
+    import state as st, smtp_client, uuid
+    with st.get_connection() as conn:
+        session = conn.execute(
+            "SELECT participant_email, account_key FROM interview_sessions WHERE thread_id = ?",
+            (thread_id,)
+        ).fetchone()
+        last_msg = conn.execute(
+            "SELECT message_id, subject FROM mail WHERE thread_id = ? ORDER BY created_at DESC LIMIT 1",
+            (thread_id,)
+        ).fetchone()
+    if not session:
+        return {"ok": False, "error": "Session hittades inte."}
+    participant = session["participant_email"]
+    account_key = session["account_key"] or "clio"
+    in_reply_to = last_msg["message_id"] if last_msg else thread_id
+    subject = (last_msg["subject"] if last_msg else "Re: Intervju") or "Re: Intervju"
+    if not subject.startswith("Re:"):
+        subject = f"Re: {subject}"
+    new_msg_id = f"<clio-manual-{uuid.uuid4().hex[:12]}@arvas.international>"
+    try:
+        smtp_client.send_email(
+            config=_get_config(),
+            from_account_key=account_key,
+            to_addr=participant,
+            subject=subject,
+            body=body,
+            message_id=new_msg_id,
+            reply_to_message_id=in_reply_to,
+        )
+    except Exception as e:
+        return {"ok": False, "error": f"SMTP-fel: {e}"}
+    cfg = _get_config()
+    account_email = cfg.get("mail", f"imap_user_{account_key}", fallback=f"{account_key}@arvas.international")
+    st.save_outbound_interview_reply(
+        thread_id=thread_id,
+        account=account_email,
+        sender=account_email,
+        subject=subject,
+        body=body,
+        message_id=new_msg_id,
+    )
+    logger.info(f"[service] Manuellt intervjumeddelande skickat till {participant}")
+    return {"ok": True, "text": f"Skickat till {participant}"}
+
+
+def _route_mail_interview_close_and_summarize(data: dict) -> dict:
+    thread_id    = data.get("thread_id", "").strip()
+    prompt       = data.get("prompt", "").strip() or "Gör en komplett sammanfattning av intervjusvaren med punktlista."
+    notify_email = data.get("notify_email", "").strip() or _admin_email()
+    if not thread_id:
+        return {"ok": False, "error": "saknat fält: thread_id"}
+    import state as st
+    with st.get_connection() as conn:
+        session = conn.execute(
+            "SELECT participant_email, account_key FROM interview_sessions WHERE thread_id = ?",
+            (thread_id,)
+        ).fetchone()
+    if not session:
+        return {"ok": False, "error": "Session hittades inte."}
+    participant = session["participant_email"]
+    account_key = session["account_key"] or "clio"
+    # Stoppa sessionen
+    _route_mail_interview_stop({"participant": participant})
+    # Generera sammanfattning
+    messages = st.get_thread_history(thread_id)
+    if not messages:
+        return {"ok": False, "error": "Inga meddelanden i sessionen."}
+    dialog_parts = []
+    for m in messages:
+        role = "Intervjuare" if m.get("direction") == "outbound" else "Svarande"
+        body = (m.get("body") or "").strip()
+        if body:
+            dialog_parts.append(f"[{role}]: {body}")
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            messages=[{
+                "role": "user",
+                "content": f"{prompt}\n\nDeltagare: {participant}\n\nDialog:\n\n" + "\n\n".join(dialog_parts),
+            }],
+        )
+        summary = response.content[0].text
+    except Exception as e:
+        logger.error(f"close_and_summarize Claude-fel: {e}", exc_info=True)
+        return {"ok": False, "error": f"Claude-fel: {e}"}
+    # Skicka sammanfattning till den som skapade intervjun
+    try:
+        import smtp_client, uuid
+        msg_id = f"<clio-summary-{uuid.uuid4().hex[:12]}@arvas.international>"
+        smtp_client.send_email(
+            config=_get_config(),
+            from_account_key=account_key,
+            to_addr=notify_email,
+            subject=f"Intervjusammanfattning — {participant}",
+            body=summary,
+            message_id=msg_id,
+        )
+        logger.info(f"[service] Intervjusammanfattning skickad till {notify_email}")
+    except Exception as e:
+        logger.error(f"close_and_summarize SMTP-fel: {e}")
+    return {"ok": True, "text": summary}
+
+
 def _route_mail_permissions_json(_data: dict) -> dict:
     config = _get_config()
     notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
@@ -621,7 +732,9 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("POST", "/mail/interview/thread"):       _route_mail_interview_thread,
     ("POST", "/mail/interview/start"):        _route_mail_interview_start,
     ("POST", "/mail/interview/stop"):         _route_mail_interview_stop,
-    ("POST", "/mail/interview/summarize"):   _route_mail_interview_summarize,
+    ("POST", "/mail/interview/summarize"):          _route_mail_interview_summarize,
+    ("POST", "/mail/interview/send_message"):       _route_mail_interview_send_message,
+    ("POST", "/mail/interview/close_and_summarize"):_route_mail_interview_close_and_summarize,
     ("GET",  "/mail/permissions/json"):      _route_mail_permissions_json,
     ("POST", "/mail/permissions/json"):      _route_mail_permissions_json,
     ("POST", "/mail/permissions/update"):    _route_mail_permissions_update,

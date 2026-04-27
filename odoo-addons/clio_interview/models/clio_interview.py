@@ -10,6 +10,18 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_URL = "http://localhost:7200"
 
+_ACCOUNTS = [
+    ('clio',    'clio@arvas.international'),
+    ('ssf',     'ssf@arvas.international'),
+    ('krut',    'krut@arvas.international'),
+    ('gtff',    'gtff@arvas.international'),
+    ('gtk',     'gtk@arvas.international'),
+    ('gsf',     'gsf@arvas.international'),
+    ('vimla',   'vimla@arvas.international'),
+    ('fredrik', 'fredrik@arvas.international'),
+    ('ulrika',  'ulrika@arvas.international'),
+]
+
 
 def _service_url(env) -> str:
     return env["ir.config_parameter"].sudo().get_param(
@@ -73,23 +85,42 @@ class ClioInterviewSession(models.Model):
     _description = "Intervjusession"
     _order = "created_at desc"
 
-    thread_id         = fields.Char(string="Tråd-ID", readonly=True, index=True)
-    participant_email = fields.Char(string="Deltagare")
-    account_key       = fields.Char(string="Konto")
-    status            = fields.Selection(
+    thread_id    = fields.Char(string="Tråd-ID", readonly=True, index=True)
+    partner_id   = fields.Many2one("res.partner", string="Deltagare")
+    participant_email = fields.Char(
+        string="E-post",
+        compute="_compute_participant_email",
+        store=True,
+        readonly=False,
+    )
+    account_key  = fields.Selection(
+        _ACCOUNTS, string="Konto", default="clio",
+    )
+    status       = fields.Selection(
         [("active", "Aktiv"), ("stopped", "Avslutad")],
         string="Status", default="active",
     )
-    created_at    = fields.Char(string="Startad",    readonly=True)
-    updated_at    = fields.Char(string="Uppdaterad", readonly=True)
-    message_ids   = fields.One2many(
+    created_at   = fields.Char(string="Startad",    readonly=True)
+    updated_at   = fields.Char(string="Uppdaterad", readonly=True)
+    close_at     = fields.Datetime(
+        string="Stäng automatiskt",
+        help="Clio stänger sessionen, genererar sammanfattning och skickar den till dig.",
+    )
+    message_ids  = fields.One2many(
         "clio.interview.message", "session_id", string="Dialog",
     )
+    compose_body  = fields.Text(string="Skriv meddelande")
     summary_prompt = fields.Text(
         string="Sammanfattningsinstruktion",
-        help="Lämna tom för standardsammanfattning. Ange annars vad du vill ha ut av sammanfattningen.",
+        help="Lämna tom för standardsammanfattning.",
     )
     summary_text  = fields.Text(string="Sammanfattning", readonly=True)
+
+    @api.depends("partner_id")
+    def _compute_participant_email(self):
+        for rec in self:
+            if rec.partner_id and rec.partner_id.email:
+                rec.participant_email = rec.partner_id.email
 
     @api.model
     def action_sync_sessions(self):
@@ -132,6 +163,18 @@ class ClioInterviewSession(models.Model):
             "target":    "current",
         }
 
+    def action_send_message(self):
+        if not self.compose_body or not self.compose_body.strip():
+            raise UserError("Skriv ett meddelande innan du skickar.")
+        if not self.thread_id:
+            raise UserError("Sessionen saknar tråd-ID.")
+        _call_raw(self.env, "/mail/interview/send_message", {
+            "thread_id": self.thread_id,
+            "body":      self.compose_body.strip(),
+        })
+        self.compose_body = False
+        return self.action_load_messages()
+
     def action_summarize(self):
         if not self.thread_id:
             raise UserError("Sessionen har inget tråd-ID.")
@@ -159,6 +202,37 @@ class ClioInterviewSession(models.Model):
             "target":    "current",
         }
 
+    @api.model
+    def _cron_close_expired(self):
+        now = fields.Datetime.now()
+        expired = self.search([
+            ("status", "=", "active"),
+            ("close_at", "!=", False),
+            ("close_at", "<=", now),
+        ])
+        for session in expired:
+            notify_email = (
+                session.create_uid.partner_id.email
+                or session.create_uid.email
+                or ""
+            )
+            try:
+                result = _call_raw(self.env, "/mail/interview/close_and_summarize", {
+                    "thread_id":    session.thread_id,
+                    "prompt":       session.summary_prompt or "",
+                    "notify_email": notify_email,
+                })
+                session.summary_text = result.get("text", "")
+                session.status = "stopped"
+                logger.info(
+                    f"[clio_interview] Auto-stängd session {session.thread_id} "
+                    f"och sammanfattning skickad till {notify_email}"
+                )
+            except Exception as e:
+                logger.error(
+                    f"[clio_interview] Fel vid auto-stängning av {session.thread_id}: {e}"
+                )
+
 
 class ClioInterviewStartWizard(models.TransientModel):
     _name = "clio.interview.start.wizard"
@@ -167,9 +241,15 @@ class ClioInterviewStartWizard(models.TransientModel):
     template_id     = fields.Many2one("clio.interview.template", string="Mall")
     custom_subject  = fields.Char(string="Eget ämne")
     custom_question = fields.Text(string="Egen öppningsfråga")
-    recipients      = fields.Text(
-        string="Mottagare",
-        help="En e-postadress per rad. Samma fråga skickas till alla.",
+    partner_ids     = fields.Many2many(
+        "res.partner",
+        string="Deltagare",
+        help="Välj en eller flera kontakter. En session skapas per deltagare.",
+    )
+    account_key     = fields.Selection(_ACCOUNTS, string="Konto", default="clio")
+    close_at        = fields.Datetime(
+        string="Stäng automatiskt",
+        help="Lämna tom för manuell stängning.",
     )
     result_text     = fields.Text(string="Resultat", readonly=True)
 
@@ -178,29 +258,37 @@ class ClioInterviewStartWizard(models.TransientModel):
         question = (self.template_id.opening_question if self.template_id else self.custom_question or "").strip()
         if not subject or not question:
             raise UserError("Ange ämne och öppningsfråga, eller välj en mall.")
-
-        emails = [
-            e.strip()
-            for e in (self.recipients or "").replace(",", "\n").splitlines()
-            if e.strip() and "@" in e
-        ]
-        if not emails:
-            raise UserError("Ange minst en e-postadress.")
+        if not self.partner_ids:
+            raise UserError("Välj minst en deltagare.")
 
         results = []
-        for email in emails:
+        for partner in self.partner_ids:
+            email = (partner.email or "").strip()
+            if not email:
+                results.append(f"HOPPAR ÖVER {partner.name}: saknar e-post")
+                continue
             try:
                 _call(self.env, "/mail/interview/start", {
                     "to":      email,
                     "subject": subject,
                     "context": question,
+                    "account": self.account_key or "clio",
                 })
-                results.append(f"OK {email}")
+                # Skapa session i Odoo
+                session_vals = {
+                    "partner_id":         partner.id,
+                    "participant_email":  email,
+                    "account_key":        self.account_key or "clio",
+                    "status":             "active",
+                }
+                if self.close_at:
+                    session_vals["close_at"] = self.close_at
+                self.env["clio.interview.session"].create(session_vals)
+                results.append(f"OK {partner.name} <{email}>")
             except UserError as exc:
-                results.append(f"FEL {email}: {exc.args[0]}")
+                results.append(f"FEL {partner.name}: {exc.args[0]}")
 
         self.result_text = "\n".join(results)
-        self.env["clio.interview.session"].action_sync_sessions()
         return {
             "type":      "ir.actions.act_window",
             "res_model": self._name,

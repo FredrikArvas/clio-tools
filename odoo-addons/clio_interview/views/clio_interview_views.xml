@@ -51,11 +51,13 @@
       <list string="Intervjusessioner"
             decoration-success="status == 'active'"
             decoration-muted="status == 'stopped'">
-        <field name="created_at"        string="Startad"   optional="show"/>
-        <field name="account_key"       string="Konto"     optional="show"/>
-        <field name="participant_email" string="Deltagare"/>
-        <field name="status"            string="Status"    widget="badge"/>
-        <field name="updated_at"        string="Senaste"   optional="hide"/>
+        <field name="created_at"        string="Startad"     optional="show"/>
+        <field name="partner_id"        string="Deltagare"/>
+        <field name="participant_email" string="E-post"      optional="show"/>
+        <field name="account_key"       string="Konto"       optional="show"/>
+        <field name="status"            string="Status"      widget="badge"/>
+        <field name="close_at"          string="Stängs"      optional="show"/>
+        <field name="updated_at"        string="Senaste"     optional="hide"/>
       </list>
     </field>
   </record>
@@ -78,12 +80,15 @@
         <sheet>
           <group>
             <group>
-              <field name="participant_email" string="Deltagare"/>
+              <field name="partner_id"        string="Deltagare"
+                     options="{'no_create': True}"/>
+              <field name="participant_email" string="E-post" readonly="1"/>
               <field name="account_key"       string="Konto"/>
             </group>
             <group>
-              <field name="created_at"  string="Startad"    readonly="1"/>
-              <field name="updated_at"  string="Uppdaterad" readonly="1"/>
+              <field name="created_at" string="Startad"          readonly="1"/>
+              <field name="updated_at" string="Uppdaterad"       readonly="1"/>
+              <field name="close_at"   string="Stäng automatiskt"/>
             </group>
           </group>
 
@@ -98,6 +103,16 @@
                 <field name="body"          string="Meddelande"/>
               </list>
             </field>
+            <div invisible="status == 'stopped'" style="margin-top: 8px;">
+              <field name="compose_body" nolabel="1" widget="text"
+                     style="min-height: 80px;"
+                     placeholder="Skriv nästa fråga eller meddelande..."/>
+              <div class="o_row" style="margin-top: 6px;">
+                <button name="action_send_message" type="object"
+                        string="Skicka" class="btn-primary"
+                        invisible="not compose_body"/>
+              </div>
+            </div>
           </group>
 
           <!-- Sammanfattning -->
@@ -139,18 +154,27 @@
                    options="{'no_create': True}"/>
           </group>
           <group string="Eller ange manuellt">
-            <field name="custom_subject"  string="Ämne"
+            <field name="custom_subject" string="Ämne"
                    invisible="template_id != False"
                    placeholder="T.ex. Karriärsamtal Q2 2026"/>
             <field name="custom_question" string="Öppningsfråga" widget="text"
                    invisible="template_id != False"
-                   style="min-height: 80px;"
-                   placeholder="Vad är din viktigaste prioritering det närmaste kvartalet?"/>
+                   style="min-height: 80px;"/>
           </group>
-          <group string="Mottagare">
-            <field name="recipients" nolabel="1" widget="text"
-                   style="min-height: 80px;"
-                   placeholder="carl@capgemini.com&#10;anna@exempel.se&#10;..."/>
+          <group string="Deltagare">
+            <field name="partner_ids" nolabel="1"
+                   widget="many2many_tags"
+                   options="{'no_create': True}"
+                   placeholder="Sök och välj kontakter..."/>
+          </group>
+          <group>
+            <group>
+              <field name="account_key" string="Konto"/>
+            </group>
+            <group>
+              <field name="close_at" string="Stäng automatiskt"
+                     placeholder="Lämna tom för manuell stängning"/>
+            </group>
           </group>
           <div class="o_row" style="margin: 8px 0;">
             <button name="action_start" type="object"
