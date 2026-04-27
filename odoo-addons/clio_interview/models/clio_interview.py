@@ -56,65 +56,65 @@ def _call(env, path: str, data: dict | None = None) -> str:
 
 class ClioInterviewTemplate(models.Model):
     _name = "clio.interview.template"
-    _description = "Intervjumall"
+    _description = "Interview Template"
     _order = "name"
 
-    name             = fields.Char(string="Mallnamn", required=True)
-    subject          = fields.Char(string="Ämne", required=True)
-    opening_question = fields.Text(string="Öppningsfråga", required=True)
+    name             = fields.Char(string="Template Name", required=True)
+    subject          = fields.Char(string="Subject", required=True)
+    opening_question = fields.Text(string="Opening Question", required=True)
     active           = fields.Boolean(default=True)
 
 
 class ClioInterviewMessage(models.TransientModel):
     _name = "clio.interview.message"
-    _description = "Intervjumeddelande"
+    _description = "Interview Message"
     _order = "id"
 
     session_id    = fields.Many2one("clio.interview.session", ondelete="cascade")
     direction     = fields.Selection(
-        [("inbound", "Inkommande"), ("outbound", "Utgående")],
-        string="Riktning",
+        [("inbound", "Inbound"), ("outbound", "Outbound")],
+        string="Direction",
     )
-    sender        = fields.Char(string="Avsändare")
-    body          = fields.Text(string="Meddelande")
-    date_received = fields.Char(string="Datum")
+    sender        = fields.Char(string="Sender")
+    body          = fields.Text(string="Message")
+    date_received = fields.Char(string="Date")
 
 
 class ClioInterviewSession(models.Model):
     _name = "clio.interview.session"
-    _description = "Intervjusession"
+    _description = "Interview Session"
     _order = "created_at desc"
 
-    thread_id    = fields.Char(string="Tråd-ID", readonly=True, index=True)
-    partner_id   = fields.Many2one("res.partner", string="Deltagare")
+    thread_id    = fields.Char(string="Thread ID", readonly=True, index=True)
+    partner_id   = fields.Many2one("res.partner", string="Participant")
     participant_email = fields.Char(
-        string="E-post",
+        string="Email",
         compute="_compute_participant_email",
         store=True,
         readonly=False,
     )
     account_key  = fields.Selection(
-        _ACCOUNTS, string="Konto", default="clio",
+        _ACCOUNTS, string="Account", default="clio",
     )
     status       = fields.Selection(
-        [("active", "Aktiv"), ("stopped", "Avslutad")],
+        [("active", "Active"), ("stopped", "Stopped")],
         string="Status", default="active",
     )
-    created_at   = fields.Char(string="Startad",    readonly=True)
-    updated_at   = fields.Char(string="Uppdaterad", readonly=True)
+    created_at   = fields.Char(string="Started",    readonly=True)
+    updated_at   = fields.Char(string="Updated", readonly=True)
     close_at     = fields.Datetime(
-        string="Stäng automatiskt",
-        help="Clio stänger sessionen, genererar sammanfattning och skickar den till dig.",
+        string="Auto-close",
+        help="Clio closes the session, generates a summary and sends it to you.",
     )
     message_ids  = fields.One2many(
-        "clio.interview.message", "session_id", string="Dialog",
+        "clio.interview.message", "session_id", string="Messages",
     )
-    compose_body  = fields.Text(string="Skriv meddelande")
+    compose_body  = fields.Text(string="Compose")
     summary_prompt = fields.Text(
-        string="Sammanfattningsinstruktion",
-        help="Lämna tom för standardsammanfattning.",
+        string="Summary Prompt",
+        help="Leave empty for default summary.",
     )
-    summary_text  = fields.Text(string="Sammanfattning", readonly=True)
+    summary_text  = fields.Text(string="Summary", readonly=True)
 
     @api.depends("partner_id")
     def _compute_participant_email(self):
@@ -236,22 +236,22 @@ class ClioInterviewSession(models.Model):
 
 class ClioInterviewStartWizard(models.TransientModel):
     _name = "clio.interview.start.wizard"
-    _description = "Starta intervju"
+    _description = "Start Interview"
 
-    template_id     = fields.Many2one("clio.interview.template", string="Mall")
-    custom_subject  = fields.Char(string="Eget ämne")
-    custom_question = fields.Text(string="Egen öppningsfråga")
+    template_id     = fields.Many2one("clio.interview.template", string="Template")
+    custom_subject  = fields.Char(string="Custom Subject")
+    custom_question = fields.Text(string="Custom Opening Question")
     partner_ids     = fields.Many2many(
         "res.partner",
-        string="Deltagare",
-        help="Välj en eller flera kontakter. En session skapas per deltagare.",
+        string="Participants",
+        help="Select one or more contacts. One session is created per participant.",
     )
-    account_key     = fields.Selection(_ACCOUNTS, string="Konto", default="clio")
+    account_key     = fields.Selection(_ACCOUNTS, string="Account", default="clio")
     close_at        = fields.Datetime(
-        string="Stäng automatiskt",
-        help="Lämna tom för manuell stängning.",
+        string="Auto-close",
+        help="Leave empty for manual close.",
     )
-    result_text     = fields.Text(string="Resultat", readonly=True)
+    result_text     = fields.Text(string="Result", readonly=True)
 
     def action_start(self):
         subject  = (self.template_id.subject          if self.template_id else self.custom_subject  or "").strip()

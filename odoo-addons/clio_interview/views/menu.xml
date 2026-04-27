@@ -2,23 +2,23 @@
 <odoo>
 
   <menuitem id="menu_clio_interview_root"
-            name="Clio Intervju"
+            name="Clio Interview"
             sequence="91"/>
 
   <menuitem id="menu_clio_interview_sessions"
-            name="Sessioner"
+            name="Sessions"
             parent="menu_clio_interview_root"
             action="action_clio_interview_sessions"
             sequence="10"/>
 
   <menuitem id="menu_clio_interview_templates"
-            name="Mallar"
+            name="Templates"
             parent="menu_clio_interview_root"
             action="action_clio_interview_templates"
             sequence="20"/>
 
   <menuitem id="menu_clio_interview_start"
-            name="Starta intervju"
+            name="Start Interview"
             parent="menu_clio_interview_root"
             action="action_clio_interview_start_wizard"
             sequence="30"/>

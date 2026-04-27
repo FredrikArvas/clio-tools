@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- ── Mallar ─────────────────────────────────────────────────────────── -->
+  <!-- ── Templates ──────────────────────────────────────────────────────── -->
 
   <record id="view_clio_interview_template_list" model="ir.ui.view">
     <field name="name">clio.interview.template.list</field>
     <field name="model">clio.interview.template</field>
     <field name="arch" type="xml">
-      <list string="Intervjumallar">
-        <field name="name"             string="Mallnamn"/>
-        <field name="subject"          string="Ämne"/>
-        <field name="opening_question" string="Öppningsfråga"/>
-        <field name="active"           string="Aktiv" widget="boolean"/>
+      <list string="Interview Templates">
+        <field name="name"             string="Template Name"/>
+        <field name="subject"          string="Subject"/>
+        <field name="opening_question" string="Opening Question"/>
+        <field name="active"           string="Active" widget="boolean"/>
       </list>
     </field>
   </record>
@@ -20,14 +20,14 @@
     <field name="name">clio.interview.template.form</field>
     <field name="model">clio.interview.template</field>
     <field name="arch" type="xml">
-      <form string="Intervjumall">
+      <form string="Interview Template">
         <sheet>
           <group>
-            <field name="name"    string="Mallnamn"/>
-            <field name="subject" string="Ämne"/>
-            <field name="active"  string="Aktiv" widget="boolean_toggle"/>
+            <field name="name"    string="Template Name"/>
+            <field name="subject" string="Subject"/>
+            <field name="active"  string="Active" widget="boolean_toggle"/>
           </group>
-          <group string="Öppningsfråga">
+          <group string="Opening Question">
             <field name="opening_question" nolabel="1" widget="text"
                    style="min-height: 120px;"/>
           </group>
@@ -37,27 +37,27 @@
   </record>
 
   <record id="action_clio_interview_templates" model="ir.actions.act_window">
-    <field name="name">Intervjumallar</field>
+    <field name="name">Interview Templates</field>
     <field name="res_model">clio.interview.template</field>
     <field name="view_mode">list,form</field>
   </record>
 
-  <!-- ── Sessioner ──────────────────────────────────────────────────────── -->
+  <!-- ── Sessions ───────────────────────────────────────────────────────── -->
 
   <record id="view_clio_interview_session_list" model="ir.ui.view">
     <field name="name">clio.interview.session.list</field>
     <field name="model">clio.interview.session</field>
     <field name="arch" type="xml">
-      <list string="Intervjusessioner"
+      <list string="Interview Sessions"
             decoration-success="status == 'active'"
             decoration-muted="status == 'stopped'">
-        <field name="created_at"        string="Startad"     optional="show"/>
-        <field name="partner_id"        string="Deltagare"/>
-        <field name="participant_email" string="E-post"      optional="show"/>
-        <field name="account_key"       string="Konto"       optional="show"/>
+        <field name="created_at"        string="Started"     optional="show"/>
+        <field name="partner_id"        string="Participant"/>
+        <field name="participant_email" string="Email"       optional="show"/>
+        <field name="account_key"       string="Account"     optional="show"/>
         <field name="status"            string="Status"      widget="badge"/>
-        <field name="close_at"          string="Stängs"      optional="show"/>
-        <field name="updated_at"        string="Senaste"     optional="hide"/>
+        <field name="close_at"          string="Closes"      optional="show"/>
+        <field name="updated_at"        string="Latest"      optional="hide"/>
       </list>
     </field>
   </record>
@@ -66,64 +66,64 @@
     <field name="name">clio.interview.session.form</field>
     <field name="model">clio.interview.session</field>
     <field name="arch" type="xml">
-      <form string="Intervjusession">
+      <form string="Interview Session">
         <header>
           <button name="action_load_messages" type="object"
-                  string="Ladda dialog" class="btn-primary"/>
+                  string="Load Messages" class="btn-primary"/>
           <button name="action_stop" type="object"
-                  string="Avsluta session" class="btn-warning"
+                  string="Stop Session" class="btn-warning"
                   invisible="status == 'stopped'"
-                  confirm="Avsluta intervjusessionen med denna deltagare?"/>
+                  confirm="Stop the interview session with this participant?"/>
           <field name="status" widget="statusbar"
                  statusbar_visible="active,stopped"/>
         </header>
         <sheet>
           <group>
             <group>
-              <field name="partner_id"        string="Deltagare"
+              <field name="partner_id"        string="Participant"
                      options="{'no_create': True}"/>
-              <field name="participant_email" string="E-post" readonly="1"/>
-              <field name="account_key"       string="Konto"/>
+              <field name="participant_email" string="Email" readonly="1"/>
+              <field name="account_key"       string="Account"/>
             </group>
             <group>
-              <field name="created_at" string="Startad"          readonly="1"/>
-              <field name="updated_at" string="Uppdaterad"       readonly="1"/>
-              <field name="close_at"   string="Stäng automatiskt"/>
+              <field name="created_at" string="Started"    readonly="1"/>
+              <field name="updated_at" string="Updated"    readonly="1"/>
+              <field name="close_at"   string="Auto-close"/>
             </group>
           </group>
 
-          <!-- Dialog -->
-          <group string="Dialog">
+          <!-- Messages -->
+          <group string="Messages">
             <field name="message_ids" nolabel="1" invisible="not message_ids">
               <list decoration-info="direction == 'outbound'"
                     decoration-success="direction == 'inbound'">
-                <field name="date_received" string="Datum"/>
-                <field name="direction"     string="Riktning" column_invisible="1"/>
-                <field name="sender"        string="Avsändare" optional="hide"/>
-                <field name="body"          string="Meddelande"/>
+                <field name="date_received" string="Date"/>
+                <field name="direction"     string="Direction" column_invisible="1"/>
+                <field name="sender"        string="Sender" optional="hide"/>
+                <field name="body"          string="Message"/>
               </list>
             </field>
             <div invisible="status == 'stopped'" style="margin-top: 8px;">
               <field name="compose_body" nolabel="1" widget="text"
                      style="min-height: 80px;"
-                     placeholder="Skriv nästa fråga eller meddelande..."/>
+                     placeholder="Write your next question or message..."/>
               <div class="o_row" style="margin-top: 6px;">
                 <button name="action_send_message" type="object"
-                        string="Skicka" class="btn-primary"
+                        string="Send" class="btn-primary"
                         invisible="not compose_body"/>
               </div>
             </div>
           </group>
 
-          <!-- Sammanfattning -->
-          <group string="Sammanfattning">
+          <!-- Summary -->
+          <group string="Summary">
             <field name="summary_prompt" nolabel="1" widget="text"
                    style="min-height: 60px;"
-                   placeholder="Lämna tom för standardsammanfattning — eller beskriv vad du vill ha ut av svaren."/>
+                   placeholder="Leave empty for default summary — or describe what you want from the answers."/>
             <div class="o_row" style="margin: 6px 0 10px;">
               <button name="action_summarize" type="object"
-                      string="Begär sammanfattning" class="btn-secondary"
-                      confirm="Hämtar dialog och skickar till Claude. Fortsätta?"/>
+                      string="Request Summary" class="btn-secondary"
+                      confirm="Fetches the conversation and sends it to Claude. Continue?"/>
             </div>
             <field name="summary_text" nolabel="1" widget="text" readonly="1"
                    invisible="not summary_text"
@@ -136,51 +136,51 @@
   </record>
 
   <record id="action_clio_interview_sessions" model="ir.actions.act_window">
-    <field name="name">Intervjusessioner</field>
+    <field name="name">Interview Sessions</field>
     <field name="res_model">clio.interview.session</field>
     <field name="view_mode">list,form</field>
   </record>
 
-  <!-- ── Starta intervju-wizard ─────────────────────────────────────────── -->
+  <!-- ── Start interview wizard ─────────────────────────────────────────── -->
 
   <record id="view_clio_interview_start_wizard" model="ir.ui.view">
     <field name="name">clio.interview.start.wizard.form</field>
     <field name="model">clio.interview.start.wizard</field>
     <field name="arch" type="xml">
-      <form string="Starta intervju">
+      <form string="Start Interview">
         <sheet>
-          <group string="Mall (valfri)">
-            <field name="template_id" string="Välj mall"
+          <group string="Template (optional)">
+            <field name="template_id" string="Select Template"
                    options="{'no_create': True}"/>
           </group>
-          <group string="Eller ange manuellt">
-            <field name="custom_subject" string="Ämne"
+          <group string="Or enter manually">
+            <field name="custom_subject" string="Subject"
                    invisible="template_id != False"
-                   placeholder="T.ex. Karriärsamtal Q2 2026"/>
-            <field name="custom_question" string="Öppningsfråga" widget="text"
+                   placeholder="E.g. Career talk Q2 2026"/>
+            <field name="custom_question" string="Opening Question" widget="text"
                    invisible="template_id != False"
                    style="min-height: 80px;"/>
           </group>
-          <group string="Deltagare">
+          <group string="Participants">
             <field name="partner_ids" nolabel="1"
                    widget="many2many_tags"
                    options="{'no_create': True}"
-                   placeholder="Sök och välj kontakter..."/>
+                   placeholder="Search and select contacts..."/>
           </group>
           <group>
             <group>
-              <field name="account_key" string="Konto"/>
+              <field name="account_key" string="Account"/>
             </group>
             <group>
-              <field name="close_at" string="Stäng automatiskt"
-                     placeholder="Lämna tom för manuell stängning"/>
+              <field name="close_at" string="Auto-close"
+                     placeholder="Leave empty for manual close"/>
             </group>
           </group>
           <div class="o_row" style="margin: 8px 0;">
             <button name="action_start" type="object"
-                    string="Skicka öppningsfråga" class="btn-primary"/>
+                    string="Send Opening Message" class="btn-primary"/>
           </div>
-          <group string="Resultat" invisible="not result_text">
+          <group string="Result" invisible="not result_text">
             <field name="result_text" nolabel="1" widget="text" readonly="1"
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
@@ -190,7 +190,7 @@
   </record>
 
   <record id="action_clio_interview_start_wizard" model="ir.actions.act_window">
-    <field name="name">Starta intervju</field>
+    <field name="name">Start Interview</field>
     <field name="res_model">clio.interview.start.wizard</field>
     <field name="view_mode">form</field>
     <field name="target">new</field>
