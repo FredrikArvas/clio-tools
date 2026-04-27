@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_interview_template,clio.interview.template,model_clio_interview_template,base.group_system,1,1,1,1
+access_clio_interview_session,clio.interview.session,model_clio_interview_session,base.group_system,1,1,1,1
+access_clio_interview_message,clio.interview.message,model_clio_interview_message,base.group_system,1,1,1,1
+access_clio_interview_start_wizard,clio.interview.start.wizard,model_clio_interview_start_wizard,base.group_system,1,1,1,1

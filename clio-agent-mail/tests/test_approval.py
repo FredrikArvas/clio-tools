@@ -57,6 +57,7 @@ def _pending_row(response=None):
         "sender": "kund@example.com",
         "subject": "[CLIO-DRAFT] Fråga",
         "body": "Hej, jag undrar om ert erbjudande.",
+        "fredrik_cc": None,
     }[key]
     return row
 

@@ -13,28 +13,5 @@
             action="action_clio_mail_admin"
             sequence="10"/>
 
-  <!-- Intervjuer -->
-  <menuitem id="menu_clio_interview_root"
-            name="Intervjuer"
-            parent="menu_clio_root"
-            sequence="20"/>
-
-  <menuitem id="menu_clio_interview_sessions"
-            name="Sessioner"
-            parent="menu_clio_interview_root"
-            action="action_clio_interview_sessions"
-            sequence="10"/>
-
-  <menuitem id="menu_clio_interview_templates"
-            name="Mallar"
-            parent="menu_clio_interview_root"
-            action="action_clio_interview_templates"
-            sequence="20"/>
-
-  <menuitem id="menu_clio_interview_start"
-            name="Starta intervju"
-            parent="menu_clio_interview_root"
-            action="action_clio_interview_start_wizard"
-            sequence="30"/>
 
 </odoo>

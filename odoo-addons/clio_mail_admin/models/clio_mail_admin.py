@@ -43,6 +43,40 @@ def _call(env, path: str, data: dict | None = None) -> str:
     return _call_raw(env, path, data).get("text", "")
 
 
+class ClioPermLine(models.TransientModel):
+    _name = "clio.perm.line"
+    _description = "Behörighetsrad"
+    _order = "email"
+
+    admin_id        = fields.Many2one("clio.mail.admin", ondelete="cascade")
+    email           = fields.Char(string="E-post")
+    level           = fields.Selection([
+        ("admin",       "Admin"),
+        ("write",       "Skriv"),
+        ("coded",       "Kodord"),
+        ("whitelisted", "Vitlistad"),
+        ("denied",      "Nekad"),
+    ], string="Nivå")
+    accounts_raw    = fields.Char(string="Konton", help="Kommaseparerade account_key, eller * för alla")
+    kodord_read_raw = fields.Char(string="Läs (kodord)", help="Kodord med enbart läsrätt")
+    kodord_rw_raw   = fields.Char(string="Läs+Skriv (kodord)", help="Kodord med skrivrätt")
+
+    def action_save(self):
+        accounts = [a.strip() for a in (self.accounts_raw or "").split(",") if a.strip() and a.strip() != "*"]
+        read_only = [k.strip() for k in (self.kodord_read_raw or "").split(",") if k.strip()]
+        rw        = [k.strip() for k in (self.kodord_rw_raw   or "").split(",") if k.strip()]
+        kodord_scope = read_only + rw
+        _call(self.env, "/mail/permissions/update", {
+            "email":        self.email,
+            "level":        self.level,
+            "accounts":     accounts,
+            "kodord_scope": kodord_scope,
+            "kodord_write": rw,
+        })
+        parent = self.admin_id
+        return parent.action_load_permissions()
+
+
 class ClioNccLine(models.TransientModel):
     _name = "clio.ncc.line"
     _description = "Clio NCC-rad"
@@ -104,6 +138,7 @@ class ClioMailAdmin(models.TransientModel):
     result_text = fields.Text(string="Resultat", readonly=True)
     ncc_ids     = fields.One2many("clio.ncc.line",    "admin_id", string="Projekt")
     waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Väntande")
+    perm_ids    = fields.One2many("clio.perm.line",   "admin_id", string="Behörigheter")
 
     # Fält för åtgärder med argument
     email_input       = fields.Char(string="E-post")
@@ -260,6 +295,25 @@ class ClioMailAdmin(models.TransientModel):
             "participant": self.interview_to,
         })
         self.interview_to = False
+        return self._reopen()
+
+    def action_load_permissions(self):
+        self.perm_ids.unlink()
+        result = _call_raw(self.env, "/mail/permissions/json")
+        vals = []
+        for u in result.get("users", []):
+            rw_set    = set(u.get("kodord_write", []))
+            scope     = u.get("kodord_scope", [])
+            read_only = [k for k in scope if k not in rw_set]
+            vals.append({
+                "admin_id":        self.id,
+                "email":           u["email"],
+                "level":           u.get("level", "whitelisted"),
+                "accounts_raw":    ",".join(u.get("accounts", [])) or "*",
+                "kodord_read_raw": ",".join(read_only),
+                "kodord_rw_raw":   ",".join(u.get("kodord_write", [])),
+            })
+        self.env["clio.perm.line"].create(vals)
         return self._reopen()
 
     # ── Hjälpmetod ────────────────────────────────────────────────────────────

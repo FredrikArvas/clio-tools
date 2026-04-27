@@ -77,6 +77,26 @@
             </div>
           </group>
 
+          <!-- Behörighetsmatris -->
+          <group string="Behörighetsmatris">
+            <div class="o_row" style="margin-bottom: 8px;">
+              <button name="action_load_permissions" type="object" string="Hämta behörigheter" class="btn-primary"/>
+            </div>
+            <field name="perm_ids" nolabel="1" invisible="not perm_ids">
+              <list editable="top"
+                    decoration-danger="level == 'denied'"
+                    decoration-success="level in ('admin', 'write')"
+                    decoration-info="level == 'coded'">
+                <field name="email"           string="E-post"/>
+                <field name="level"           string="Nivå" widget="selection"/>
+                <field name="accounts_raw"    string="Konton"           optional="show"/>
+                <field name="kodord_read_raw" string="Läs (kodord)"     optional="show"/>
+                <field name="kodord_rw_raw"   string="Läs+Skriv (kodord)" optional="show"/>
+                <button name="action_save" type="object" string="Spara"
+                        icon="fa-save" class="btn-sm btn-success"/>
+              </list>
+            </field>
+          </group>
 
         </sheet>
       </form>

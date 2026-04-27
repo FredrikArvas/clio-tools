@@ -51,11 +51,11 @@
       <list string="Intervjusessioner"
             decoration-success="status == 'active'"
             decoration-muted="status == 'stopped'">
-        <field name="created_at"        string="Startad"    optional="show"/>
-        <field name="account_key"       string="Konto"      optional="show"/>
+        <field name="created_at"        string="Startad"   optional="show"/>
+        <field name="account_key"       string="Konto"     optional="show"/>
         <field name="participant_email" string="Deltagare"/>
-        <field name="status" string="Status" widget="badge"/>
-        <field name="updated_at"        string="Senaste"    optional="hide"/>
+        <field name="status"            string="Status"    widget="badge"/>
+        <field name="updated_at"        string="Senaste"   optional="hide"/>
       </list>
     </field>
   </record>
@@ -86,6 +86,8 @@
               <field name="updated_at"  string="Uppdaterad" readonly="1"/>
             </group>
           </group>
+
+          <!-- Dialog -->
           <group string="Dialog">
             <field name="message_ids" nolabel="1" invisible="not message_ids">
               <list decoration-info="direction == 'outbound'"
@@ -97,6 +99,22 @@
               </list>
             </field>
           </group>
+
+          <!-- Sammanfattning -->
+          <group string="Sammanfattning">
+            <field name="summary_prompt" nolabel="1" widget="text"
+                   style="min-height: 60px;"
+                   placeholder="Lämna tom för standardsammanfattning — eller beskriv vad du vill ha ut av svaren."/>
+            <div class="o_row" style="margin: 6px 0 10px;">
+              <button name="action_summarize" type="object"
+                      string="Begär sammanfattning" class="btn-secondary"
+                      confirm="Hämtar dialog och skickar till Claude. Fortsätta?"/>
+            </div>
+            <field name="summary_text" nolabel="1" widget="text" readonly="1"
+                   invisible="not summary_text"
+                   style="font-family: monospace; white-space: pre-wrap; background: #f7f2e8; padding: 8px; border-radius: 4px;"/>
+          </group>
+
         </sheet>
       </form>
     </field>
@@ -132,7 +150,7 @@
           <group string="Mottagare">
             <field name="recipients" nolabel="1" widget="text"
                    style="min-height: 80px;"
-                   placeholder="frippe@capgemini.com&#10;anna@exempel.se&#10;..."/>
+                   placeholder="carl@capgemini.com&#10;anna@exempel.se&#10;..."/>
           </group>
           <div class="o_row" style="margin: 8px 0;">
             <button name="action_start" type="object"
