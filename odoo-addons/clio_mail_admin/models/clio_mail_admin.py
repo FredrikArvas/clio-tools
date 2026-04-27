@@ -45,21 +45,21 @@ def _call(env, path: str, data: dict | None = None) -> str:
 
 class ClioPermLine(models.TransientModel):
     _name = "clio.perm.line"
-    _description = "Behörighetsrad"
+    _description = "Permission Row"
     _order = "email"
 
     admin_id        = fields.Many2one("clio.mail.admin", ondelete="cascade")
-    email           = fields.Char(string="E-post")
+    email           = fields.Char(string="Email")
     level           = fields.Selection([
         ("admin",       "Admin"),
-        ("write",       "Skriv"),
-        ("coded",       "Kodord"),
-        ("whitelisted", "Vitlistad"),
-        ("denied",      "Nekad"),
-    ], string="Nivå")
-    accounts_raw    = fields.Char(string="Konton", help="Kommaseparerade account_key, eller * för alla")
-    kodord_read_raw = fields.Char(string="Läs (kodord)", help="Kodord med enbart läsrätt")
-    kodord_rw_raw   = fields.Char(string="Läs+Skriv (kodord)", help="Kodord med skrivrätt")
+        ("write",       "Write"),
+        ("coded",       "Keyword"),
+        ("whitelisted", "Whitelisted"),
+        ("denied",      "Denied"),
+    ], string="Level")
+    accounts_raw    = fields.Char(string="Accounts", help="Kommaseparerade account_key, eller * för alla")
+    kodord_read_raw = fields.Char(string="Read (keyword)", help="Kodord med enbart läsrätt")
+    kodord_rw_raw   = fields.Char(string="Read+Write (keyword)", help="Kodord med skrivrätt")
 
     def action_save(self):
         accounts = [a.strip() for a in (self.accounts_raw or "").split(",") if a.strip() and a.strip() != "*"]
@@ -79,29 +79,29 @@ class ClioPermLine(models.TransientModel):
 
 class ClioNccLine(models.TransientModel):
     _name = "clio.ncc.line"
-    _description = "Clio NCC-rad"
+    _description = "Clio NCC Row"
     _order = "id"
 
     admin_id   = fields.Many2one("clio.mail.admin", ondelete="cascade")
-    nr         = fields.Char(string="Nr")
-    sfar       = fields.Char(string="Sfär")
-    kodord     = fields.Char(string="Kodord")
-    name       = fields.Char(string="Projektnamn")
+    nr         = fields.Char(string="No.")
+    sfar       = fields.Char(string="Sphere")
+    kodord     = fields.Char(string="Keyword")
+    name       = fields.Char(string="Project Name")
     ncc_ok     = fields.Boolean(string="NCC")
     status_raw = fields.Char(string="Status")
 
 
 class ClioWaitingLine(models.TransientModel):
     _name = "clio.waiting.line"
-    _description = "Väntande mail"
+    _description = "Waiting Mail"
     _order = "id"
 
     admin_id      = fields.Many2one("clio.mail.admin", ondelete="cascade")
     selected      = fields.Boolean(string="")
-    sender        = fields.Char(string="Avsändare")
-    subject       = fields.Char(string="Ämne")
-    date_received = fields.Char(string="Datum")
-    account       = fields.Char(string="Konto")
+    sender        = fields.Char(string="Sender")
+    subject       = fields.Char(string="Subject")
+    date_received = fields.Char(string="Date")
+    account       = fields.Char(string="Account")
 
     def _decide(self, action: str):
         _call(self.env, "/mail/waiting/decide", {"sender": self.sender, "action": action})
@@ -135,17 +135,17 @@ class ClioMailAdmin(models.TransientModel):
     _name = "clio.mail.admin"
     _description = "Clio Mail Admin"
 
-    result_text = fields.Text(string="Resultat", readonly=True)
-    ncc_ids     = fields.One2many("clio.ncc.line",    "admin_id", string="Projekt")
-    waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Väntande")
-    perm_ids    = fields.One2many("clio.perm.line",   "admin_id", string="Behörigheter")
+    result_text = fields.Text(string="Result", readonly=True)
+    ncc_ids     = fields.One2many("clio.ncc.line",    "admin_id", string="Projects")
+    waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Waiting")
+    perm_ids    = fields.One2many("clio.perm.line",   "admin_id", string="Permissions")
 
-    # Fält för åtgärder med argument
-    email_input       = fields.Char(string="E-post")
-    decide_sender     = fields.Char(string="Avsändare")
-    interview_to      = fields.Char(string="Till")
-    interview_subject = fields.Char(string="Ämne", default="Intervju")
-    interview_context = fields.Text(string="Kontext")
+    # Fields for actions with arguments
+    email_input       = fields.Char(string="Email")
+    decide_sender     = fields.Char(string="Sender")
+    interview_to      = fields.Char(string="To")
+    interview_subject = fields.Char(string="Subject", default="Intervju")
+    interview_context = fields.Text(string="Context")
 
     # ── Enkla kommandon ───────────────────────────────────────────────────────
 

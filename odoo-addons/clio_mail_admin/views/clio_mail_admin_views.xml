@@ -8,91 +8,91 @@
       <form string="Clio Mail Admin">
         <sheet>
 
-          <!-- Snabbknappar -->
+          <!-- Quick actions -->
           <div class="oe_button_box" name="button_box"/>
-          <group string="Kommandon">
+          <group string="Commands">
             <div class="o_row">
-              <button name="action_status"    type="object" string="Status"   class="btn-secondary"/>
-              <button name="action_whitelist" type="object" string="Vitlista" class="btn-secondary"/>
+              <button name="action_status"    type="object" string="Status"    class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Whitelist" class="btn-secondary"/>
             </div>
           </group>
 
-          <!-- Resultat -->
-          <group string="Resultat">
+          <!-- Result -->
+          <group string="Result">
             <field name="result_text" widget="text" nolabel="1"
                    invisible="not result_text"
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
 
-          <!-- NCC-lista -->
-          <group string="Projektlista / NCC">
+          <!-- NCC list -->
+          <group string="Project List / NCC">
             <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_ncc" type="object" string="Hämta NCC-lista" class="btn-primary"/>
+              <button name="action_load_ncc" type="object" string="Load NCC List" class="btn-primary"/>
             </div>
             <field name="ncc_ids" nolabel="1" invisible="not ncc_ids">
               <list decoration-success="ncc_ok == True"
                     decoration-danger="ncc_ok == False"
                                        default_order="id">
-                <field name="nr"         optional="show"  string="Nr"/>
-                <field name="sfar"       optional="show"  string="Sfär"/>
-                <field name="kodord"                      string="Kodord"/>
-                <field name="name"                        string="Projektnamn"/>
+                <field name="nr"         optional="show"  string="No."/>
+                <field name="sfar"       optional="show"  string="Sphere"/>
+                <field name="kodord"                      string="Keyword"/>
+                <field name="name"                        string="Project Name"/>
                 <field name="ncc_ok"     widget="boolean" string="NCC" readonly="1"/>
                 <field name="status_raw" optional="hide"  string="Status"/>
               </list>
             </field>
           </group>
 
-          <!-- Väntande mail -->
-          <group string="Väntande mail">
+          <!-- Waiting mail -->
+          <group string="Waiting Mail">
             <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_waiting"   type="object" string="Hämta väntande" class="btn-primary"/>
-              <button name="action_bulk_vitlista"  type="object" string="Vitlista valda"  class="btn-success"/>
-              <button name="action_bulk_svartlista" type="object" string="Svartlista valda" class="btn-danger"/>
-              <button name="action_bulk_behall"    type="object" string="Behåll valda"   class="btn-secondary"/>
+              <button name="action_load_waiting"   type="object" string="Load Waiting"      class="btn-primary"/>
+              <button name="action_bulk_vitlista"  type="object" string="Whitelist Selected" class="btn-success"/>
+              <button name="action_bulk_svartlista" type="object" string="Blacklist Selected" class="btn-danger"/>
+              <button name="action_bulk_behall"    type="object" string="Keep Selected"     class="btn-secondary"/>
             </div>
             <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
               <list editable="top">
-                <field name="selected"      string=""          widget="boolean_toggle"/>
-                <field name="date_received" string="Datum"     readonly="1" optional="show"/>
-                <field name="account"       string="Konto"     readonly="1" optional="show"/>
-                <field name="sender"        string="Avsändare" readonly="1"/>
-                <field name="subject"       string="Ämne"      readonly="1"/>
-                <button name="action_vitlista"    type="object" string="Vitlista"
+                <field name="selected"      string=""       widget="boolean_toggle"/>
+                <field name="date_received" string="Date"   readonly="1" optional="show"/>
+                <field name="account"       string="Account" readonly="1" optional="show"/>
+                <field name="sender"        string="Sender" readonly="1"/>
+                <field name="subject"       string="Subject" readonly="1"/>
+                <button name="action_vitlista"    type="object" string="Whitelist"
                         icon="fa-check"   class="btn-sm btn-success"/>
-                <button name="action_svartlista"  type="object" string="Svartlista"
+                <button name="action_svartlista"  type="object" string="Blacklist"
                         icon="fa-ban"     class="btn-sm btn-danger"/>
-                <button name="action_behall"      type="object" string="Behåll"
+                <button name="action_behall"      type="object" string="Keep"
                         icon="fa-clock-o" class="btn-sm btn-secondary"/>
               </list>
             </field>
           </group>
 
-          <!-- Vitlista / svartlista -->
-          <group string="Vitlista / Svartlista">
-            <field name="email_input" placeholder="namn@exempel.se"/>
+          <!-- Whitelist / blacklist -->
+          <group string="Whitelist / Blacklist">
+            <field name="email_input" placeholder="name@example.com"/>
             <div class="o_row">
-              <button name="action_whitelist_add" type="object" string="Lägg till vitlista" class="btn-success"/>
-              <button name="action_blacklist"     type="object" string="Svartlista"         class="btn-danger"/>
+              <button name="action_whitelist_add" type="object" string="Add to Whitelist" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Blacklist"        class="btn-danger"/>
             </div>
           </group>
 
-          <!-- Behörighetsmatris -->
-          <group string="Behörighetsmatris">
+          <!-- Permission matrix -->
+          <group string="Permission Matrix">
             <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_permissions" type="object" string="Hämta behörigheter" class="btn-primary"/>
+              <button name="action_load_permissions" type="object" string="Load Permissions" class="btn-primary"/>
             </div>
             <field name="perm_ids" nolabel="1" invisible="not perm_ids">
               <list editable="top"
                     decoration-danger="level == 'denied'"
                     decoration-success="level in ('admin', 'write')"
                     decoration-info="level == 'coded'">
-                <field name="email"           string="E-post"/>
-                <field name="level"           string="Nivå" widget="selection"/>
-                <field name="accounts_raw"    string="Konton"           optional="show"/>
-                <field name="kodord_read_raw" string="Läs (kodord)"     optional="show"/>
-                <field name="kodord_rw_raw"   string="Läs+Skriv (kodord)" optional="show"/>
-                <button name="action_save" type="object" string="Spara"
+                <field name="email"           string="Email"/>
+                <field name="level"           string="Level" widget="selection"/>
+                <field name="accounts_raw"    string="Accounts"              optional="show"/>
+                <field name="kodord_read_raw" string="Read (keyword)"        optional="show"/>
+                <field name="kodord_rw_raw"   string="Read+Write (keyword)"  optional="show"/>
+                <button name="action_save" type="object" string="Save"
                         icon="fa-save" class="btn-sm btn-success"/>
               </list>
             </field>

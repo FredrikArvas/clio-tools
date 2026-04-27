@@ -15,30 +15,30 @@ class ClioJobMatch(models.Model):
 
     profile_id = fields.Many2one(
         comodel_name="clio.job.profile",
-        string="Kandidatprofil",
+        string="Candidate Profile",
         required=True,
         ondelete="cascade",
         index=True,
     )
     article_url = fields.Char(
-        string="Artikel-URL",
+        string="Article URL",
     )
     article_title = fields.Char(
-        string="Rubrik",
+        string="Title",
     )
     signal_type = fields.Char(
-        string="Signaltyp",
+        string="Signal Type",
         help='T.ex. "ny_gd", "förvärv", "digitaliseringsprogram".',
     )
     match_score = fields.Integer(
-        string="Matchningspoäng",
+        string="Match Score",
         help="0–100. Rapport skickades vid poäng ≥ konfigurerat tröskel (default 50).",
     )
     sent_at = fields.Datetime(
-        string="Skickad",
+        string="Sent",
         help="Tidsstämpel för när rapporten skickades till kandidaten.",
     )
     recommended_action = fields.Char(
-        string="Rekommenderad åtgärd",
+        string="Recommended Action",
         help='T.ex. "kontakta_nu", "bevaka_3_mån".',
     )

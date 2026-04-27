@@ -7,12 +7,12 @@
     <field name="model">clio.job.match</field>
     <field name="arch" type="xml">
       <list create="false">
-        <field name="sent_at" string="Skickad"/>
-        <field name="profile_id" string="Kandidat"/>
-        <field name="article_title" string="Rubrik"/>
-        <field name="signal_type" string="Signaltyp"/>
-        <field name="match_score" string="Poäng"/>
-        <field name="recommended_action" string="Åtgärd"/>
+        <field name="sent_at" string="Sent"/>
+        <field name="profile_id" string="Candidate"/>
+        <field name="article_title" string="Title"/>
+        <field name="signal_type" string="Signal Type"/>
+        <field name="match_score" string="Score"/>
+        <field name="recommended_action" string="Action"/>
       </list>
     </field>
   </record>
@@ -40,7 +40,7 @@
 
   <!-- Menypost -->
   <record id="action_clio_job_match" model="ir.actions.act_window">
-    <field name="name">Clio Job — Matchningshistorik</field>
+    <field name="name">Clio Job — Match History</field>
     <field name="res_model">clio.job.match</field>
     <field name="view_mode">list,form</field>
   </record>

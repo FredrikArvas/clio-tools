@@ -6,16 +6,16 @@
     <field name="name">clio.job.article.list</field>
     <field name="model">clio.job.article</field>
     <field name="arch" type="xml">
-      <list string="Artikelhistorik"
+      <list string="Article History"
             decoration-success="is_matched == True"
             decoration-muted="match_score &lt; 0"
             default_order="match_score desc">
         <field name="match_score" string="Score" optional="show"/>
-        <field name="published" string="Publicerad" widget="date" optional="show"/>
-        <field name="source" string="Källa" optional="show"/>
-        <field name="title" string="Rubrik"/>
-        <field name="is_matched" string="Matchad" widget="boolean_toggle" optional="show"/>
-        <field name="first_seen" string="Hämtad" widget="datetime" optional="hide"/>
+        <field name="published" string="Published" widget="date" optional="show"/>
+        <field name="source" string="Source" optional="show"/>
+        <field name="title" string="Title"/>
+        <field name="is_matched" string="Matched" widget="boolean_toggle" optional="show"/>
+        <field name="first_seen" string="Fetched" widget="datetime" optional="hide"/>
       </list>
     </field>
   </record>
@@ -25,28 +25,28 @@
     <field name="name">clio.job.article.form</field>
     <field name="model">clio.job.article</field>
     <field name="arch" type="xml">
-      <form string="Artikel">
+      <form string="Article">
         <sheet>
           <group>
-            <group string="Artikel">
-              <field name="title" string="Rubrik"/>
+            <group string="Article">
+              <field name="title" string="Title"/>
               <field name="url" string="URL" widget="url"/>
-              <field name="source" string="Källa"/>
-              <field name="published" string="Publicerad"/>
+              <field name="source" string="Source"/>
+              <field name="published" string="Published"/>
             </group>
-            <group string="Analys">
+            <group string="Analysis">
               <field name="match_score" string="Score (0–100)"/>
-              <field name="is_matched" string="Matchad"/>
-              <field name="first_seen" string="Hämtad av Clio"/>
+              <field name="is_matched" string="Matched"/>
+              <field name="first_seen" string="Fetched by Clio"/>
             </group>
           </group>
-          <group string="Utdrag">
+          <group string="Snippet">
             <field name="body_snippet" string="" nolabel="1"
                    widget="text" readonly="1"
-                   placeholder="(Ingen brödtext sparad — artiklar hämtade innan v3.2 saknar utdrag)"/>
+                   placeholder="(No body text saved — articles fetched before v3.2 have no snippet)"/>
           </group>
-          <group string="Teknisk info" groups="base.group_system">
-            <field name="article_id" string="Artikel-ID" readonly="id"/>
+          <group string="Technical Info" groups="base.group_system">
+            <field name="article_id" string="Article ID" readonly="id"/>
           </group>
         </sheet>
       </form>
@@ -58,18 +58,18 @@
     <field name="name">clio.job.article.search</field>
     <field name="model">clio.job.article</field>
     <field name="arch" type="xml">
-      <search string="Sök artiklar">
-        <field name="title" string="Rubrik"/>
-        <field name="source" string="Källa"/>
-        <field name="body_snippet" string="Utdrag"/>
+      <search string="Search Articles">
+        <field name="title" string="Title"/>
+        <field name="source" string="Source"/>
+        <field name="body_snippet" string="Snippet"/>
 
-        <!-- Matchningsfilter -->
-        <filter name="matched" string="Matchade" domain="[('is_matched','=',True)]"/>
-        <filter name="unmatched" string="Ej matchade"
+        <!-- Match filters -->
+        <filter name="matched" string="Matched" domain="[('is_matched','=',True)]"/>
+        <filter name="unmatched" string="Not Matched"
                 domain="[('is_matched','=',False),('match_score','&gt;=',0)]"/>
         <separator/>
 
-        <!-- Scorefilter -->
+        <!-- Score filters -->
         <filter name="score_high" string="Score ≥ 70"
                 domain="[('match_score','&gt;=',70)]"/>
         <filter name="score_medium" string="Score 50–69"
@@ -78,18 +78,18 @@
                 domain="[('match_score','&gt;=',0),('match_score','&lt;',50)]"/>
         <separator/>
 
-        <!-- Datumfilter -->
-        <filter name="today" string="Hämtad idag"
+        <!-- Date filters -->
+        <filter name="today" string="Fetched Today"
                 domain="[('first_seen','&gt;=', (context_today()).strftime('%Y-%m-%d'))]"/>
-        <filter name="has_snippet" string="Har utdrag"
+        <filter name="has_snippet" string="Has Snippet"
                 domain="[('body_snippet','!=',False),('body_snippet','!=','')]"/>
 
-        <group expand="0" string="Gruppera efter">
-          <filter name="group_source" string="Källa"
+        <group expand="0" string="Group By">
+          <filter name="group_source" string="Source"
                   context="{'group_by': 'source'}"/>
-          <filter name="group_date" string="Hämtad"
+          <filter name="group_date" string="Fetched"
                   context="{'group_by': 'first_seen:day'}"/>
-          <filter name="group_published" string="Publicerad"
+          <filter name="group_published" string="Published"
                   context="{'group_by': 'published:day'}"/>
         </group>
       </search>
@@ -98,7 +98,7 @@
 
   <!-- ── Action ─────────────────────────────────────────────────────────── -->
   <record id="action_clio_job_article" model="ir.actions.act_window">
-    <field name="name">Artiklar</field>
+    <field name="name">Articles</field>
     <field name="res_model">clio.job.article</field>
     <field name="view_mode">list,form</field>
     <field name="context">{}</field>

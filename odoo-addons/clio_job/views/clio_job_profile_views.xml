@@ -11,7 +11,7 @@
         <field name="role"/>
         <field name="seniority"/>
         <field name="geography"/>
-        <field name="match_count" string="Matchningar"/>
+        <field name="match_count" string="Matches"/>
         <field name="active" optional="hide"/>
       </list>
     </field>
@@ -24,54 +24,54 @@
     <field name="arch" type="xml">
       <form>
         <sheet>
-          <group string="Kontakt">
+          <group string="Contact">
             <field name="partner_id"/>
-            <field name="report_email" placeholder="Lämna tomt → används partner-e-posten"/>
+            <field name="report_email" placeholder="Leave empty → partner email is used"/>
             <field name="active"/>
           </group>
 
-          <group string="Profil">
-            <field name="role" placeholder="Nuvarande jobbtitel eller roll"/>
-            <field name="seniority" placeholder='T.ex. "Senior / Executive"'/>
-            <field name="geography" placeholder='T.ex. "Stockholm"'/>
+          <group string="Profile">
+            <field name="role" placeholder="Current job title or role"/>
+            <field name="seniority" placeholder='E.g. "Senior / Executive"'/>
+            <field name="geography" placeholder='E.g. "Stockholm"'/>
             <field name="hybrid_ok"/>
           </group>
 
           <notebook>
-            <page string="Bakgrund &amp; Utbildning">
-              <group string="Karriärhistorik" col="1">
+            <page string="Background &amp; Education">
+              <group string="Career History" col="1">
                 <field name="background"
-                       placeholder="En post per rad"
+                       placeholder="One entry per line"
                        nolabel="1"/>
               </group>
-              <group string="Utbildning" col="1">
+              <group string="Education" col="1">
                 <field name="education"
-                       placeholder="En post per rad"
+                       placeholder="One entry per line"
                        nolabel="1"/>
               </group>
             </page>
 
-            <page string="Bevakningsinställningar">
-              <group string="Målroller" col="1">
+            <page string="Monitoring Settings">
+              <group string="Target Roles" col="1">
                 <field name="target_roles"
-                       placeholder="En roll per rad"
+                       placeholder="One role per line"
                        nolabel="1"/>
               </group>
-              <group string="Signalnyckelord" col="1">
+              <group string="Signal Keywords" col="1">
                 <field name="signal_keywords"
-                       placeholder="Ett nyckelord per rad (t.ex. ny GD, förvärv)"
+                       placeholder="One keyword per line (e.g. new CEO, acquisition)"
                        nolabel="1"/>
               </group>
             </page>
 
-            <page string="Matchningshistorik">
+            <page string="Match History">
               <field name="match_ids" nolabel="1">
                 <list create="false" delete="false">
-                  <field name="sent_at" string="Skickad"/>
-                  <field name="article_title" string="Rubrik"/>
-                  <field name="signal_type" string="Signaltyp"/>
-                  <field name="match_score" string="Poäng"/>
-                  <field name="recommended_action" string="Åtgärd"/>
+                  <field name="sent_at" string="Sent"/>
+                  <field name="article_title" string="Title"/>
+                  <field name="signal_type" string="Signal Type"/>
+                  <field name="match_score" string="Score"/>
+                  <field name="recommended_action" string="Action"/>
                   <field name="article_url" string="URL"/>
                 </list>
               </field>
@@ -84,7 +84,7 @@
 
   <!-- Menypost -->
   <record id="action_clio_job_profile" model="ir.actions.act_window">
-    <field name="name">Clio Job — Profiler</field>
+    <field name="name">Clio Job — Profiles</field>
     <field name="res_model">clio.job.profile</field>
     <field name="view_mode">list,form</field>
   </record>
