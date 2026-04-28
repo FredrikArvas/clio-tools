@@ -1,0 +1,612 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* clio_job
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 19:52+0000\n"
+"PO-Revision-Date: 2026-04-27 19:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: clio_job
+#: model:res.groups,comment:clio_job.group_clio_kandidat
+msgid ""
+"\n"
+"      Intern användare med begränsad åtkomst — kan bara läsa och redigera\n"
+"      sin egna Clio Job-profil och se sina egna matchningar.\n"
+"    "
+msgstr ""
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "(No body text saved — articles fetched before v3.2 have no snippet)"
+msgstr "(No body text saved — articles fetched before v3.2 have no snippet)"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__match_score
+msgid "0–100 från AI-analysen. -1 = ej analyserad (fel)."
+msgstr "0–100 från AI-analysen. -1 = ej analyserad (fel)."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_match__match_score
+msgid ""
+"0–100. Rapport skickades vid poäng ≥ konfigurerat tröskel (default 50)."
+msgstr ""
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Action"
+msgstr "Åtgärd"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__active
+msgid "Active"
+msgstr "Aktiv"
+
+#. module: clio_job
+#: model:ir.ui.menu,name:clio_job.menu_clio_job_profiler
+msgid "Alla profiler"
+msgstr "Alla profiler"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Analysis"
+msgstr "Analys"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Article"
+msgstr "Artikel"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+msgid "Article History"
+msgstr "Artikelhistorik"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__article_id
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Article ID"
+msgstr "Artikel-ID"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__article_url
+msgid "Article URL"
+msgstr "Artikel-URL"
+
+#. module: clio_job
+#: model:ir.actions.act_window,name:clio_job.action_clio_job_article
+msgid "Articles"
+msgstr "Artiklar"
+
+#. module: clio_job
+#: model:ir.model.constraint,message:clio_job.constraint_clio_job_article_article_id_uniq
+msgid "Artikel-ID måste vara unikt."
+msgstr "Artikel-ID måste vara unikt."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__published
+msgid "Artikelns publiceringsdatum enligt källan."
+msgstr "Artikelns publiceringsdatum enligt källan."
+
+#. module: clio_job
+#: model:ir.ui.menu,name:clio_job.menu_clio_job_artiklar
+msgid "Artiklar"
+msgstr "Artiklar"
+
+#. module: clio_job
+#: model_terms:ir.actions.act_window,help:clio_job.action_clio_job_article
+msgid "Artiklar läggs till automatiskt när clio-agent-job körs."
+msgstr "Artiklar läggs till automatiskt när clio-agent-job körs."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__active
+msgid "Avmarkera för att arkivera profilen utan att radera den."
+msgstr "Avmarkera för att arkivera profilen utan att radera den."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__background
+msgid "Background"
+msgstr "Bakgrund"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Background & Education"
+msgstr "Bakgrund & Utbildning"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+msgid "Candidate"
+msgstr "Kandidat"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__profile_id
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Candidate Profile"
+msgstr "Kandidatprofil"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Career History"
+msgstr "Karriärhistorik"
+
+#. module: clio_job
+#: model:ir.ui.menu,name:clio_job.menu_clio_job_root
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Clio Job"
+msgstr "Clio Job"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_res_partner__clio_job_profile_ids
+#: model:ir.model.fields,field_description:clio_job.field_res_users__clio_job_profile_ids
+msgid "Clio Job Profiles"
+msgstr "Clio Job-profiler"
+
+#. module: clio_job
+#: model:ir.model,name:clio_job.model_clio_job_profile
+msgid "Clio Job — Kandidatprofil"
+msgstr "Clio Job — Kandidatprofil"
+
+#. module: clio_job
+#: model:ir.actions.act_window,name:clio_job.action_clio_job_match
+msgid "Clio Job — Match History"
+msgstr "Clio Job — Matchningshistorik"
+
+#. module: clio_job
+#: model:ir.model,name:clio_job.model_clio_job_match
+msgid "Clio Job — Matchad signal"
+msgstr "Clio Job — Matchad signal"
+
+#. module: clio_job
+#: model:ir.actions.act_window,name:clio_job.action_clio_job_profile
+msgid "Clio Job — Profiles"
+msgstr "Clio Job — Profiler"
+
+#. module: clio_job
+#: model:ir.model,name:clio_job.model_clio_job_article
+msgid "Clio Job — Sedda artiklar"
+msgstr "Clio Job — Sedda artiklar"
+
+#. module: clio_job
+#: model:res.groups,name:clio_job.group_clio_kandidat
+msgid "Clio Kandidat"
+msgstr "Clio Kandidat"
+
+#. module: clio_job
+#: model:ir.model,name:clio_job.model_res_partner
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__partner_id
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Contact"
+msgstr "Kontakt"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__create_uid
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__create_uid
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__create_uid
+msgid "Created by"
+msgstr "Skapad av"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__create_date
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__create_date
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__create_date
+msgid "Created on"
+msgstr "Skapad"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__role
+msgid "Current Role"
+msgstr "Nuvarande roll"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Current job title or role"
+msgstr "Nuvarande jobbtitel eller roll"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__partner_id
+msgid "Den res.partner-post som profilen tillhör."
+msgstr "Den res.partner-post som profilen tillhör."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__display_name
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__display_name
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__report_email
+msgid ""
+"E-postadress dit Clio skickar signalrapporter. Lämnas tomt → används "
+"partner-e-posten."
+msgstr ""
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "E.g. \"Senior / Executive\""
+msgstr "E.g. \"Senior / Executive\"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "E.g. \"Stockholm\""
+msgstr "E.g. \"Stockholm\"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__education
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Education"
+msgstr "Utbildning"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__first_seen
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Fetched"
+msgstr "Hämtad"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Fetched Today"
+msgstr "Hämtad idag"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Fetched by Clio"
+msgstr "Hämtad av Clio"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_res_partner__clio_job_watch
+#: model:ir.model.fields,help:clio_job.field_res_users__clio_job_watch
+msgid ""
+"Flagga för Clio job-agent: skicka förändringssignaler till den här personen."
+msgstr ""
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__geography
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Geography"
+msgstr "Geografi"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Group By"
+msgstr "Gruppera efter"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Has Snippet"
+msgstr "Har utdrag"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__hybrid_ok
+msgid "Hybrid OK"
+msgstr "Hybrid OK"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__id
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__id
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__id
+msgid "ID"
+msgstr "ID"
+
+#. module: clio_job
+#: model_terms:ir.actions.act_window,help:clio_job.action_clio_job_article
+msgid "Inga artiklar registrerade ännu."
+msgstr "Inga artiklar registrerade ännu."
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Job Signal Monitoring"
+msgstr "Bevakning av jobsignaler"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__hybrid_ok
+msgid "Kandidaten är öppen för hybridarbete."
+msgstr "Kandidaten är öppen för hybridarbete."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__background
+msgid "Karriärhistorik och erfarenheter — en post per rad."
+msgstr "Karriärhistorik och erfarenheter — en post per rad."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__write_uid
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__write_uid
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__write_uid
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__write_date
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__write_date
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__write_date
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Leave empty → partner email is used"
+msgstr "Lämna tomt → partnerns e-post används"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__match_count
+msgid "Match Count"
+msgstr "Antal matchningar"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__match_ids
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Match History"
+msgstr "Matchningshistorik"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__match_score
+msgid "Match Score"
+msgstr "Matchningspoäng"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__is_matched
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Matched"
+msgstr "Matchad"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Matches"
+msgstr "Matchningar"
+
+#. module: clio_job
+#: model:ir.ui.menu,name:clio_job.menu_clio_job_matchningar
+msgid "Matchningshistorik"
+msgstr "Matchningshistorik"
+
+#. module: clio_job
+#: model:ir.ui.menu,name:clio_job.menu_clio_job_min_profil
+msgid "Min profil"
+msgstr "Min profil"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_res_partner__clio_job_watch
+#: model:ir.model.fields,field_description:clio_job.field_res_users__clio_job_watch
+msgid "Monitor Job Signals"
+msgstr "Bevaka jobsignaler"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Monitoring Settings"
+msgstr "Övervakningsinställningar"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Not Matched"
+msgstr "Ej matchad"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__signal_keywords
+msgid ""
+"Nyckelord som Clio bevakar i nyhetsflöden — ett per rad.\n"
+"T.ex. \"ny GD\", \"digital transformation\", \"förvärv\"."
+msgstr ""
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "One entry per line"
+msgstr "En post per rad"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "One keyword per line (e.g. new CEO, acquisition)"
+msgstr "Ett nyckelord per rad (t.ex. ny VD, förvärv)"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "One role per line"
+msgstr "En roll per rad"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__role
+msgid "Personens nuvarande jobbtitel eller roll."
+msgstr "Personens nuvarande jobbtitel eller roll."
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Profile"
+msgstr "Profil"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__published
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Published"
+msgstr "Publicerad"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__recommended_action
+msgid "Recommended Action"
+msgstr "Rekommenderad åtgärd"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__geography
+msgid "Region eller stad, t.ex. \"Stockholm\"."
+msgstr "Region eller stad, t.ex. \"Stockholm\"."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__report_email
+msgid "Report Email"
+msgstr "Rapportmejl"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Role"
+msgstr "Roll"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__target_roles
+msgid "Roller som kandidaten söker — en per rad."
+msgstr "Roller som kandidaten söker — en per rad."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__article_id
+msgid "SHA256-hash av URL — unik nyckel för deduplicering."
+msgstr "SHA256-hash av URL — unik nyckel för deduplicering."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__match_score
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__score_display
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Score"
+msgstr "Poäng"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Score (0–100)"
+msgstr "Poäng (0–100)"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Score 50–69"
+msgstr "Poäng 50–69"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Score < 50"
+msgstr "Poäng < 50"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Score ≥ 70"
+msgstr "Poäng ≥ 70"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Search Articles"
+msgstr "Sök artiklar"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_partner_form_clio_job
+msgid "Seniority"
+msgstr "Senioritet"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__seniority
+msgid "Seniority Level"
+msgstr "Senioritetsnivå"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__sent_at
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Sent"
+msgstr "Skickad"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__signal_keywords
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Signal Keywords"
+msgstr "Signalnyckelord"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__signal_type
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Signal Type"
+msgstr "Signaltyp"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__body_snippet
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Snippet"
+msgstr "Utdrag"
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__source
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+msgid "Source"
+msgstr "Källa"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__seniority
+msgid "T.ex. \"Senior / Executive\", \"Junior\", \"Mid\"."
+msgstr "T.ex. \"Senior / Executive\", \"Junior\", \"Mid\"."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_match__recommended_action
+msgid "T.ex. \"kontakta_nu\", \"bevaka_3_mån\"."
+msgstr "T.ex. \"kontakta_nu\", \"bevaka_3_mån\"."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_match__signal_type
+msgid "T.ex. \"ny_gd\", \"förvärv\", \"digitaliseringsprogram\"."
+msgstr "T.ex. \"ny_gd\", \"förvärv\", \"digitaliseringsprogram\"."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_profile__target_roles
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Target Roles"
+msgstr "Målroller"
+
+#. module: clio_job
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+msgid "Technical Info"
+msgstr "Teknisk info"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_match__sent_at
+msgid "Tidsstämpel för när rapporten skickades till kandidaten."
+msgstr "Tidsstämpel för när rapporten skickades till kandidaten."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__title
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_match__article_title
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_list
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_search
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_match_tree
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "Title"
+msgstr "Rubrik"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__is_matched
+msgid "True om score ≥ tröskel och markerad relevant av AI."
+msgstr "True om score ≥ tröskel och markerad relevant av AI."
+
+#. module: clio_job
+#: model:ir.model.fields,field_description:clio_job.field_clio_job_article__url
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_article_form
+#: model_terms:ir.ui.view,arch_db:clio_job.view_clio_job_profile_form
+msgid "URL"
+msgstr "URL"
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__body_snippet
+msgid "Upp till 1 000 tecken brödtext från artikeln."
+msgstr "Upp till 1 000 tecken brödtext från artikeln."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_profile__education
+msgid "Utbildningar och grader — en post per rad."
+msgstr "Utbildningar och grader — en post per rad."
+
+#. module: clio_job
+#: model:ir.model.fields,help:clio_job.field_clio_job_article__score_display
+msgid "Visar '—' för ej analyserade, annars score i %."
+msgstr "Visar '—' för ej analyserade, annars score i %."

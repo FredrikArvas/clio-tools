@@ -1,0 +1,345 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* clio_mail_admin
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 19:52+0000\n"
+"PO-Revision-Date: 2026-04-27 19:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__account
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Account"
+msgstr "Konto"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__accounts_raw
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Accounts"
+msgstr "Konton"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Add to Whitelist"
+msgstr "Lägg till i vitlista"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__admin_id
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__admin_id
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__admin_id
+#: model:ir.model.fields.selection,name:clio_mail_admin.selection__clio_perm_line__level__admin
+msgid "Admin"
+msgstr "Admin"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Blacklist"
+msgstr "Svartlista"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Blacklist Selected"
+msgstr "Svartlista valda"
+
+#. module: clio_mail_admin
+#: model:ir.ui.menu,name:clio_mail_admin.menu_clio_root
+msgid "Clio Agent Mail"
+msgstr "Clio Agent Mail"
+
+#. module: clio_mail_admin
+#: model:ir.actions.act_window,name:clio_mail_admin.action_clio_mail_admin
+#: model:ir.model,name:clio_mail_admin.model_clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Clio Mail Admin"
+msgstr "Clio Mail Admin"
+
+#. module: clio_mail_admin
+#: model:ir.model,name:clio_mail_admin.model_clio_ncc_line
+msgid "Clio NCC Row"
+msgstr "Clio NCC-rad"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Commands"
+msgstr "Kommandon"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__interview_context
+msgid "Context"
+msgstr "Kontext"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__create_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__create_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__create_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__create_uid
+msgid "Created by"
+msgstr "Skapad av"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__create_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__create_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__create_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__create_date
+msgid "Created on"
+msgstr "Skapad"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__date_received
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Date"
+msgstr "Datum"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields.selection,name:clio_mail_admin.selection__clio_perm_line__level__denied
+msgid "Denied"
+msgstr "Nekad"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__display_name
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__display_name
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__display_name
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__email_input
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__email
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Email"
+msgstr "E-post"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__id
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__id
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__id
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__id
+msgid "ID"
+msgstr "ID"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Keep"
+msgstr "Behåll"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Keep Selected"
+msgstr "Behåll valda"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__kodord
+#: model:ir.model.fields.selection,name:clio_mail_admin.selection__clio_perm_line__level__coded
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Keyword"
+msgstr "Kodord"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,help:clio_mail_admin.field_clio_perm_line__kodord_read_raw
+msgid "Kodord med enbart läsrätt"
+msgstr "Kodord med enbart läsrätt"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,help:clio_mail_admin.field_clio_perm_line__kodord_rw_raw
+msgid "Kodord med skrivrätt"
+msgstr "Kodord med skrivrätt"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,help:clio_mail_admin.field_clio_perm_line__accounts_raw
+msgid "Kommaseparerade account_key, eller * för alla"
+msgstr "Kommaseparerade account_key, eller * för alla"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__write_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__write_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__write_uid
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__write_uid
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__write_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__write_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__write_date
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__write_date
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__level
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Level"
+msgstr "Nivå"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Load NCC List"
+msgstr "Ladda NCC-lista"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Load Permissions"
+msgstr "Ladda behörigheter"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Load Waiting"
+msgstr "Ladda väntande"
+
+#. module: clio_mail_admin
+#: model:ir.ui.menu,name:clio_mail_admin.menu_clio_mail_admin
+msgid "Mail Admin"
+msgstr "Mail Admin"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__ncc_ok
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "NCC"
+msgstr "NCC"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__nr
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "No."
+msgstr "Nr"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Permission Matrix"
+msgstr "Behörighetsmatris"
+
+#. module: clio_mail_admin
+#: model:ir.model,name:clio_mail_admin.model_clio_perm_line
+msgid "Permission Row"
+msgstr "Behörighetsrad"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__perm_ids
+msgid "Permissions"
+msgstr "Behörigheter"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Project List / NCC"
+msgstr "Projektlista / NCC"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__name
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Project Name"
+msgstr "Projektnamn"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__ncc_ids
+msgid "Projects"
+msgstr "Projekt"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__kodord_read_raw
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Read (keyword)"
+msgstr "Läs (kodord)"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_perm_line__kodord_rw_raw
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Read+Write (keyword)"
+msgstr "Läs+Skriv (kodord)"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__result_text
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Result"
+msgstr "Resultat"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Save"
+msgstr "Spara"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__selected
+msgid "Selected"
+msgstr "Valda"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__decide_sender
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__sender
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Sender"
+msgstr "Avsändare"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__sfar
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Sphere"
+msgstr "Sfär"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_ncc_line__status_raw
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Status"
+msgstr "Status"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__interview_subject
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_waiting_line__subject
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Subject"
+msgstr "Ämne"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__interview_to
+msgid "To"
+msgstr "Till"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields,field_description:clio_mail_admin.field_clio_mail_admin__waiting_ids
+msgid "Waiting"
+msgstr "Väntar"
+
+#. module: clio_mail_admin
+#: model:ir.model,name:clio_mail_admin.model_clio_waiting_line
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Waiting Mail"
+msgstr "Väntande mail"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Whitelist"
+msgstr "Vitlista"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Whitelist / Blacklist"
+msgstr "Vitlista / Svartlista"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "Whitelist Selected"
+msgstr "Vitlista valda"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields.selection,name:clio_mail_admin.selection__clio_perm_line__level__whitelisted
+msgid "Whitelisted"
+msgstr "Vitlistad"
+
+#. module: clio_mail_admin
+#: model:ir.model.fields.selection,name:clio_mail_admin.selection__clio_perm_line__level__write
+msgid "Write"
+msgstr "Skriv"
+
+#. module: clio_mail_admin
+#: model_terms:ir.ui.view,arch_db:clio_mail_admin.view_clio_mail_admin_form
+msgid "name@example.com"
+msgstr "name@example.com"

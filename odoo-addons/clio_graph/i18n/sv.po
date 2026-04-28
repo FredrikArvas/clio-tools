@@ -1,0 +1,103 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* clio_graph
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 19:52+0000\n"
+"PO-Revision-Date: 2026-04-27 19:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: clio_graph
+#: model:ir.ui.menu,name:clio_graph.menu_clio_graph_root
+msgid "Clio Graph"
+msgstr "Clio Graph"
+
+#. module: clio_graph
+#: model:ir.model.fields,field_description:clio_graph.field_res_partner_relation__neo4j_synced_at
+msgid "Last Synced"
+msgstr "Senast synkad"
+
+#. module: clio_graph
+#: model:ir.model.fields,help:clio_graph.field_res_partner_relation__sync_to_neo4j
+msgid "Markera om denna relation ska speglas till Neo4j-grafsdatabasen."
+msgstr "Markera om denna relation ska speglas till Neo4j-grafsdatabasen."
+
+#. module: clio_graph
+#: model_terms:ir.ui.view,arch_db:clio_graph.view_clio_graph_relation_form
+msgid "Neo4j Sync"
+msgstr "Neo4j Synk"
+
+#. module: clio_graph
+#: model_terms:ir.ui.view,arch_db:clio_graph.view_clio_graph_relation_form
+msgid "Network Relation"
+msgstr "Nätverksrelation"
+
+#. module: clio_graph
+#: model:ir.actions.act_window,name:clio_graph.action_clio_graph_relations
+#: model_terms:ir.ui.view,arch_db:clio_graph.view_clio_graph_relation_list
+msgid "Network Relations"
+msgstr "Nätverksrelationer"
+
+#. module: clio_graph
+#: model:ir.ui.menu,name:clio_graph.menu_clio_graph_relationer
+msgid "Nätverksrelationer"
+msgstr "Nätverksrelationer"
+
+#. module: clio_graph
+#: model:ir.model,name:clio_graph.model_res_partner_relation
+msgid "Partner relation"
+msgstr "Partnerrelation"
+
+#. module: clio_graph
+#: model:ir.model.fields,field_description:clio_graph.field_res_partner_relation__sync_to_neo4j
+msgid "Sync to Neo4j"
+msgstr "Synka till Neo4j"
+
+#. module: clio_graph
+#: model:ir.model.fields,help:clio_graph.field_res_partner_relation__neo4j_synced_at
+msgid "Tidpunkt när relationen senast skrevs till Neo4j."
+msgstr "Tidpunkt när relationen senast skrevs till Neo4j."
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name_inverse:clio_graph.rel_type_bor
+msgid "bor där"
+msgstr "bor där"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name:clio_graph.rel_type_bor
+msgid "bor på"
+msgstr "bor på"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name_inverse:clio_graph.rel_type_medlem
+msgid "har medlem"
+msgstr "har medlem"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name_inverse:clio_graph.rel_type_kanner
+msgid "känd av"
+msgstr "känd av"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name:clio_graph.rel_type_kanner
+msgid "känner"
+msgstr "känner"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name:clio_graph.rel_type_medlem
+msgid "är medlem i"
+msgstr "är medlem i"
+
+#. module: clio_graph
+#: model:res.partner.relation.type,name:clio_graph.rel_type_aker
+#: model:res.partner.relation.type,name_inverse:clio_graph.rel_type_aker
+msgid "åker med"
+msgstr "åker med"
