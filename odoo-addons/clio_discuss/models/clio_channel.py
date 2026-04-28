@@ -71,6 +71,8 @@ class ClioDiscussChannel(models.Model):
             'clio_discuss.agent_url', 'http://localhost:8100/message'
         )
         shared_secret = config.get_param('clio_discuss.shared_secret', '')
+        bot_login     = config.get_param('clio_discuss.bot_login', 'clio-bot')
+        bot_password  = config.get_param('clio_discuss.bot_password', '')
 
         payload = json.dumps({
             'message':      body_text,
@@ -78,6 +80,9 @@ class ClioDiscussChannel(models.Model):
             'sender_name':  sender_name,
             'channel_id':   channel_id,
             'secret':       shared_secret,
+            'db':           self.env.cr.dbname,
+            'bot_login':    bot_login,
+            'bot_password': bot_password,
         }).encode()
 
         def _call_agent():

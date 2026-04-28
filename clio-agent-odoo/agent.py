@@ -169,10 +169,18 @@ def _build_reply(message: str, sender_name: str, rag_context: str = "") -> str:
 # Meddelandehantering
 # ---------------------------------------------------------------------------
 
-def _process(message: str, sender_email: str, sender_name: str, channel_id: int):
+def _process(
+    message: str,
+    sender_email: str,
+    sender_name: str,
+    channel_id: int,
+    db: str | None = None,
+    bot_login: str | None = None,
+    bot_password: str | None = None,
+):
     level = _check_access(sender_email)
-    logger.info('Meddelande från %s (nivå: %s) i kanal %d: %s',
-                sender_email, level, channel_id, message[:80])
+    logger.info('Meddelande från %s (nivå: %s) i kanal %d@%s: %s',
+                sender_email, level, channel_id, db or '?', message[:80])
 
     if level == 'denied':
         reply = f'Hej {sender_name} — du har tyvärr inte behörighet att använda Clio här.'
@@ -189,7 +197,13 @@ def _process(message: str, sender_email: str, sender_name: str, channel_id: int)
             reply = 'Tekniskt fel — kunde inte generera svar. Försök igen.'
 
     try:
-        post_reply(channel_id=channel_id, text=reply)
+        post_reply(
+            channel_id=channel_id,
+            text=reply,
+            db=db,
+            bot_login=bot_login,
+            bot_password=bot_password,
+        )
     except Exception as exc:
         logger.error('Kunde inte posta svar i Odoo: %s', exc)
 
@@ -210,13 +224,16 @@ def handle_message():
     sender_email = (data.get('sender_email') or '').strip()
     sender_name  = (data.get('sender_name') or sender_email).strip()
     channel_id   = data.get('channel_id')
+    db           = (data.get('db') or '').strip() or None
+    bot_login    = (data.get('bot_login') or '').strip() or None
+    bot_password = (data.get('bot_password') or '').strip() or None
 
     if not message or not sender_email or not channel_id:
         return jsonify({'error': 'message, sender_email och channel_id krävs'}), 400
 
     t = threading.Thread(
         target=_process,
-        args=(message, sender_email, sender_name, channel_id),
+        args=(message, sender_email, sender_name, channel_id, db, bot_login, bot_password),
         daemon=True,
     )
     t.start()
