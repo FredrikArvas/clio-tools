@@ -32,19 +32,19 @@ _BOT_PASSWORD = os.environ.get('ODOO_BOT_PASSWORD',  '')
 _session_cache: dict[str, str] = {}
 
 
-def _get_session() -> str:
+def _get_session(db: str, bot_login: str, bot_password: str) -> str:
     """Returnerar en cachad Odoo session-id för Clio Bot."""
-    cache_key = f'{_ODOO_URL}/{_ODOO_DB}/{_BOT_LOGIN}'
+    cache_key = f'{_ODOO_URL}/{db}/{bot_login}'
     if cache_key not in _session_cache:
         from pyodoo_connect import connect_odoo
-        sid = connect_odoo(_ODOO_URL, _ODOO_DB, _BOT_LOGIN, _BOT_PASSWORD)
+        sid = connect_odoo(_ODOO_URL, db, bot_login, bot_password)
         if not sid:
             raise RuntimeError(
-                f'Odoo-autentisering misslyckades för {_BOT_LOGIN}. '
-                'Kontrollera ODOO_BOT_LOGIN och ODOO_BOT_PASSWORD i .env.'
+                f'Odoo-autentisering misslyckades för {bot_login}@{db}. '
+                'Kontrollera clio_discuss.bot_password i Odoo-konfigurationen.'
             )
         _session_cache[cache_key] = sid
-        logger.debug('Ny Odoo-session skapad för Clio Bot')
+        logger.debug('Ny Odoo-session skapad för %s@%s', bot_login, db)
     return _session_cache[cache_key]
 
 
@@ -69,11 +69,21 @@ def _md_to_html(text: str) -> str:
         return ''.join(parts) if parts else f'<p>{html_lib.escape(text)}</p>'
 
 
-def post_reply(channel_id: int, text: str) -> None:
+def post_reply(
+    channel_id: int,
+    text: str,
+    db: str | None = None,
+    bot_login: str | None = None,
+    bot_password: str | None = None,
+) -> None:
     """Postar text som meddelande i angiven discuss.channel."""
     import requests
 
-    sid = _get_session()
+    _db       = db or _ODOO_DB
+    _login    = bot_login or _BOT_LOGIN
+    _password = bot_password or _BOT_PASSWORD
+
+    sid = _get_session(_db, _login, _password)
     html_body = _md_to_html(text)
 
     resp = requests.post(
@@ -99,7 +109,7 @@ def post_reply(channel_id: int, text: str) -> None:
 
     result = data.get('result')
     if result is None and not data.get('error'):
-        cache_key = f'{_ODOO_URL}/{_ODOO_DB}/{_BOT_LOGIN}'
+        cache_key = f'{_ODOO_URL}/{_db}/{_login}'
         _session_cache.pop(cache_key, None)
 
-    logger.info('Svar postat i kanal %d (%d tecken)', channel_id, len(text))
+    logger.info('Svar postat i kanal %d@%s (%d tecken)', channel_id, _db, len(text))
