@@ -1,0 +1,438 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* clio_cockpit
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-27 19:52+0000\n"
+"PO-Revision-Date: 2026-04-27 19:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Actions"
+msgstr "Åtgärder"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Add to Whitelist"
+msgstr "Lägg till i vitlista"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_clio_tool_heartbeat
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Agent Health"
+msgstr "Agenthälsa"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__agent_status
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_agenter
+msgid "Agent Status"
+msgstr "Agentstatus"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_cockpit_agenter
+msgid "Agents"
+msgstr "Agenter"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__rag_result
+msgid "Answer"
+msgstr "Svar"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,help:clio_cockpit.field_clio_tool_heartbeat__items_processed
+msgid "Antal artiklar, poster eller objekt som behandlades."
+msgstr "Antal artiklar, poster eller objekt som behandlades."
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_rag
+msgid "Ask a question… (Enter to search)"
+msgstr "Ställ en fråga… (Enter för att söka)"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__server_updates
+msgid "Available Updates"
+msgstr "Tillgängliga uppdateringar"
+
+#. module: clio_cockpit
+#: model:ir.module.category,description:clio_cockpit.module_category_clio
+msgid "Behörigheter för Clio Cockpit och agenter"
+msgstr "Behörigheter för Clio Cockpit och agenter"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Blacklist"
+msgstr "Svartlista"
+
+#. module: clio_cockpit
+#: model:ir.module.category,name:clio_cockpit.module_category_clio
+msgid "Clio"
+msgstr "Clio"
+
+#. module: clio_cockpit
+#: model:res.groups,name:clio_cockpit.group_clio_admin
+msgid "Clio Admin"
+msgstr "Clio Admin"
+
+#. module: clio_cockpit
+#: model:ir.model,name:clio_cockpit.model_clio_cockpit
+#: model:ir.ui.menu,name:clio_cockpit.menu_clio_cockpit_root
+msgid "Clio Cockpit"
+msgstr "Clio Cockpit"
+
+#. module: clio_cockpit
+#: model:res.groups,name:clio_cockpit.group_clio_user
+msgid "Clio User"
+msgstr "Clio-användare"
+
+#. module: clio_cockpit
+#: model:ir.model,name:clio_cockpit.model_clio_tool_heartbeat
+msgid "Clio — Agenthälsa"
+msgstr "Clio — Agenthälsa"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_agenter
+msgid "Clio — Agents"
+msgstr "Clio — Agenter"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_bibliotek
+msgid "Clio — Library"
+msgstr "Clio — Bibliotek"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Clio — Mail Admin"
+msgstr "Clio — Mail Admin"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_rag
+msgid "Clio — RAG Knowledge Base"
+msgstr "Clio — RAG Kunskapsbas"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_server
+msgid "Clio — Server"
+msgstr "Clio — Server"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__interview_context
+msgid "Context"
+msgstr "Kontext"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__create_uid
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__create_uid
+msgid "Created by"
+msgstr "Skapad av"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__create_date
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__create_date
+msgid "Created on"
+msgstr "Skapad"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+msgid "Details"
+msgstr "Detaljer"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__display_name
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__display_name
+msgid "Display Name"
+msgstr "Visningsnamn"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__email_input
+msgid "Email"
+msgstr "E-post"
+
+#. module: clio_cockpit
+#: model:ir.model.fields.selection,name:clio_cockpit.selection__clio_tool_heartbeat__status__error
+msgid "Error"
+msgstr "Fel"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__id
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__id
+msgid "ID"
+msgstr "ID"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Interview"
+msgstr "Intervju"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Items"
+msgstr "Objekt"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__items_processed
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+msgid "Items Processed"
+msgstr "Bearbetade objekt"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_rag
+msgid "Knowledge Base"
+msgstr "Kunskapsbas"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,help:clio_cockpit.field_clio_tool_heartbeat__message
+msgid "Kort sammanfattning av körningen."
+msgstr "Kort sammanfattning av körningen."
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__server_last_checked
+msgid "Last Checked"
+msgstr "Senast kontrollerad"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__last_run
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Last Run"
+msgstr "Senaste körning"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__write_uid
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__write_uid
+msgid "Last Updated by"
+msgstr "Senast uppdaterad av"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__write_date
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__write_date
+msgid "Last Updated on"
+msgstr "Senast uppdaterad"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_cockpit_bibliotek
+msgid "Library"
+msgstr "Bibliotek"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "List Projects"
+msgstr "Visa projekt"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_cockpit_mail
+msgid "Mail Admin"
+msgstr "Mail Admin"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__message
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Message"
+msgstr "Meddelande"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "NCC List"
+msgstr "NCC-lista"
+
+#. module: clio_cockpit
+#: model:ir.model.fields.selection,name:clio_cockpit.selection__clio_tool_heartbeat__status__ok
+msgid "OK"
+msgstr "OK"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Optional context / opening question"
+msgstr "Valfri kontext / inledningsfråga"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__rag_query
+msgid "Query"
+msgstr "Fråga"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_cockpit_rag
+msgid "RAG — Knowledge Base"
+msgstr "RAG — Kunskapsbas"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__mail_result
+msgid "Result"
+msgstr "Resultat"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__library_result
+msgid "Results"
+msgstr "Träffar"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+msgid "Run"
+msgstr "Kör"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_bibliotek
+msgid "Search Library"
+msgstr "Sök i biblioteket"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__library_query
+msgid "Search Title / Author"
+msgstr "Sök titel / författare"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__decide_sender
+msgid "Sender"
+msgstr "Avsändare"
+
+#. module: clio_cockpit
+#: model:ir.actions.act_window,name:clio_cockpit.action_cockpit_server
+msgid "Server"
+msgstr "Server"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__rag_mode
+msgid "Source"
+msgstr "Källa"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Start Interview"
+msgstr "Starta intervju"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__status
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_form
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Status"
+msgstr "Status"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__status_icon
+msgid "Status Icon"
+msgstr "Statusikon"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Stop Interview"
+msgstr "Avsluta intervju"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__interview_subject
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Subject"
+msgstr "Ämne"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Sync System Status"
+msgstr "Synka systemstatus"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__server_summary
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_server
+msgid "System Information"
+msgstr "Systeminformation"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,help:clio_cockpit.field_clio_tool_heartbeat__tool_name
+msgid "Tekniskt namn, t.ex. 'clio-agent-job'."
+msgstr "Tekniskt namn, t.ex. 'clio-agent-job'."
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_bibliotek
+msgid "Title or author… (Enter to search)"
+msgstr "Titel eller författare… (Enter för att söka)"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_cockpit__interview_to
+msgid "To"
+msgstr "Till"
+
+#. module: clio_cockpit
+#: model:ir.model.fields,field_description:clio_cockpit.field_clio_tool_heartbeat__tool_name
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_clio_tool_heartbeat_list
+msgid "Tool"
+msgstr "Verktyg"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_server
+msgid "Updates"
+msgstr "Uppdateringar"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Waiting Mail"
+msgstr "Väntande mail"
+
+#. module: clio_cockpit
+#: model:ir.model.fields.selection,name:clio_cockpit.selection__clio_tool_heartbeat__status__warning
+msgid "Warning"
+msgstr "Varning"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Whitelist"
+msgstr "Vitlista"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "Whitelist / Blacklist"
+msgstr "Vitlista / Svartlista"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "name@example.com"
+msgstr "name@example.com"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_mail
+msgid "participant@example.com"
+msgstr "participant@example.com"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_server
+msgid "↻ Refresh"
+msgstr "↻ Uppdatera"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_agenter
+msgid "↻ Refresh Status"
+msgstr "↻ Uppdatera status"
+
+#. module: clio_cockpit
+#: model:ir.ui.menu,name:clio_cockpit.menu_cockpit_heartbeat
+msgid "💓 Agenthälsa"
+msgstr "💓 Agenthälsa"
+
+#. module: clio_cockpit
+#: model:ir.ui.menu,name:clio_cockpit.menu_cockpit_bibliotek
+msgid "📚 Bibliotek"
+msgstr "📚 Bibliotek"
+
+#. module: clio_cockpit
+#: model:ir.ui.menu,name:clio_cockpit.menu_cockpit_rag
+msgid "🔍 RAG"
+msgstr "🔍 RAG"
+
+#. module: clio_cockpit
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_bibliotek
+#: model_terms:ir.ui.view,arch_db:clio_cockpit.view_cockpit_rag
+msgid "🔍 Search"
+msgstr "🔍 Sök"
+
+#. module: clio_cockpit
+#: model:ir.ui.menu,name:clio_cockpit.menu_cockpit_server
+msgid "🖥️ Server"
+msgstr "🖥️ Server"
