@@ -1,6 +1,6 @@
 {
     'name': 'Clio AIAB — Installationsprofil',
-    'version': '18.0.2.0.0',
+    'version': '18.0.3.0.0',
     'summary': 'Meta-modul: installerar alla Clio-moduler för AIAB-databasen',
     'author': 'Arvas International AB',
     'depends': [
@@ -12,6 +12,7 @@
         'clio_mail_admin',
         'clio_obit',
         'clio_theme',
+        'l10n_se_ssn',
     ],
     'post_init_hook': 'post_init_hook',
     'installable': True,
