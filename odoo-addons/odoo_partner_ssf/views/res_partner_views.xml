@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ===== LISTVY: lägg till Bolag + visa Roller som standard ===== -->
+    <record id="view_partner_tree_ssf" model="ir.ui.view">
+        <field name="name">res.partner.list.ssf</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <!-- Lägg till Bolag (parent_id) direkt efter Namn -->
+            <xpath expr="//list/field[@name='complete_name']" position="after">
+                <field name="parent_id" string="Bolag" optional="show"/>
+            </xpath>
+            <!-- Gör Roller (category_id) synliga som standard -->
+            <xpath expr="//list/field[@name='category_id']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
