@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -60,17 +60,3 @@ class ClioJobArticle(models.Model):
 
     # ── Beräknade fält ────────────────────────────────────────────────────────
 
-    score_display = fields.Char(
-        string  = "Score",
-        compute = "_compute_score_display",
-        store   = False,
-        help    = "Visar '—' för ej analyserade, annars score i %.",
-    )
-
-    @api.depends("match_score")
-    def _compute_score_display(self):
-        for rec in self:
-            if rec.match_score < 0:
-                rec.score_display = "—"
-            else:
-                rec.score_display = f"{rec.match_score} %"
