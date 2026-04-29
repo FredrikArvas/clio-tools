@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_competition_list" model="ir.ui.view">
+        <field name="name">ssf.competition.list</field>
+        <field name="model">ssf.competition</field>
+        <field name="arch" type="xml">
+            <list string="Tävlingar" create="false" edit="false" delete="false"
+                  default_order="date desc">
+                <field name="name" string="Namn"/>
+                <field name="sector_id" string="Gren"/>
+                <field name="season_id" string="Säsong"/>
+                <field name="date" string="Datum"/>
+                <field name="event_id" string="Evenemang" optional="show"/>
+                <field name="competition_status" string="Status"/>
+                <field name="entry_count" string="Anmälningar"/>
+                <field name="result_count" string="Resultat"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_competition_form" model="ir.ui.view">
+        <field name="name">ssf.competition.form</field>
+        <field name="model">ssf.competition</field>
+        <field name="arch" type="xml">
+            <form string="Tävling" create="false" edit="false">
+                <header>
+                    <button name="action_sync_results"
+                            string="Synkronisera resultat"
+                            type="object"
+                            class="btn-secondary"
+                            title="Visar kommando för att synkronisera resultat från SSFTA"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="event_id" readonly="1"/>
+                            <field name="sector_id" readonly="1"/>
+                            <field name="season_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="competition_status" readonly="1"/>
+                            <field name="last_entry_date" readonly="1"/>
+                            <field name="entry_open" readonly="1"/>
+                            <field name="live_results_link" readonly="1" widget="url"/>
+                        </group>
+                    </group>
+                    <group string="Statistik">
+                        <field name="entry_count" readonly="1"/>
+                        <field name="result_count" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Klasser/Grenar" name="ccds">
+                            <field name="ccd_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" string="Klass / Disciplin"/>
+                                    <field name="distance" string="Distans"/>
+                                    <field name="fis_codex" string="FIS Codex" optional="hide"/>
+                                    <field name="non_member_entry" string="Icke-medl." optional="hide"/>
+                                    <field name="foreign_entry" string="Utländska" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Resultatlistor" name="results">
+                            <field name="ccd_ids" readonly="1" nolabel="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" string="Klass/Gren"/>
+                                    <field name="result_list_ids">
+                                        <list create="false" edit="false" delete="false">
+                                            <field name="class_name" string="Klass"/>
+                                            <field name="discipline_name" string="Disciplin"/>
+                                            <field name="participants_registered" string="Reg."/>
+                                            <field name="participants_started" string="Start"/>
+                                            <field name="participants_completed" string="Full."/>
+                                        </list>
+                                    </field>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ssf_competition_list" model="ir.actions.act_window">
+        <field name="name">Tävlingar</field>
+        <field name="res_model">ssf.competition</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"search_default_current_season": 1, "create": false}</field>
+    </record>
+
+    <record id="view_ssf_competition_search" model="ir.ui.view">
+        <field name="name">ssf.competition.search</field>
+        <field name="model">ssf.competition</field>
+        <field name="arch" type="xml">
+            <search string="Sök tävlingar">
+                <field name="name" string="Namn"/>
+                <field name="event_id" string="Evenemang"/>
+                <filter string="Säsong 2025/26" name="current_season"
+                        domain="[('season_id.ssfta_id', '=', 18)]"/>
+                <filter string="Säsong 2024/25" name="prev_season"
+                        domain="[('season_id.ssfta_id', '=', 19)]"/>
+                <separator/>
+                <filter string="Anmälan öppen" name="entry_open"
+                        domain="[('entry_open', '=', True)]"/>
+                <separator/>
+                <filter string="Godkända" name="status_approved"
+                        domain="[('competition_status', '=', '3')]"/>
+                <filter string="Genomförda" name="status_performed"
+                        domain="[('competition_status', '=', '6')]"/>
+                <filter string="Inställda" name="status_cancelled"
+                        domain="[('competition_status', '=', '8')]"/>
+                <separator/>
+                <filter string="Alpine" name="sector_alpine"
+                        domain="[('sector_id.sector_code', '=', 'AL')]"/>
+                <filter string="Längd" name="sector_cc"
+                        domain="[('sector_id.sector_code', '=', 'CC')]"/>
+                <filter string="Snowboard" name="sector_sb"
+                        domain="[('sector_id.sector_code', '=', 'SB')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Gren" name="group_sector" context="{'group_by': 'sector_id'}"/>
+                    <filter string="Säsong" name="group_season" context="{'group_by': 'season_id'}"/>
+                    <filter string="Evenemang" name="group_event" context="{'group_by': 'event_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

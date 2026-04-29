@@ -1,0 +1,21 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ssf_sector_user,ssf.sector user,model_ssf_sector,base.group_user,1,0,0,0
+access_ssf_sector_admin,ssf.sector admin,model_ssf_sector,base.group_system,1,1,1,1
+access_ssf_season_user,ssf.season user,model_ssf_season,base.group_user,1,0,0,0
+access_ssf_season_admin,ssf.season admin,model_ssf_season,base.group_system,1,1,1,1
+access_ssf_discipline_user,ssf.discipline user,model_ssf_discipline,base.group_user,1,0,0,0
+access_ssf_discipline_admin,ssf.discipline admin,model_ssf_discipline,base.group_system,1,1,1,1
+access_ssf_comp_class_user,ssf.comp.class user,model_ssf_comp_class,base.group_user,1,0,0,0
+access_ssf_comp_class_admin,ssf.comp.class admin,model_ssf_comp_class,base.group_system,1,1,1,1
+access_ssf_event_user,ssf.event user,model_ssf_event,base.group_user,1,0,0,0
+access_ssf_event_admin,ssf.event admin,model_ssf_event,base.group_system,1,1,1,1
+access_ssf_competition_user,ssf.competition user,model_ssf_competition,base.group_user,1,0,0,0
+access_ssf_competition_admin,ssf.competition admin,model_ssf_competition,base.group_system,1,1,1,1
+access_ssf_comp_ccd_user,ssf.comp.ccd user,model_ssf_comp_ccd,base.group_user,1,0,0,0
+access_ssf_comp_ccd_admin,ssf.comp.ccd admin,model_ssf_comp_ccd,base.group_system,1,1,1,1
+access_ssf_result_list_user,ssf.result.list user,model_ssf_result_list,base.group_user,1,0,0,0
+access_ssf_result_list_admin,ssf.result.list admin,model_ssf_result_list,base.group_system,1,1,1,1
+access_ssf_result_user,ssf.result user,model_ssf_result,base.group_user,1,0,0,0
+access_ssf_result_admin,ssf.result admin,model_ssf_result,base.group_system,1,1,1,1
+access_ssf_entry_user,ssf.entry user,model_ssf_entry,base.group_user,1,0,0,0
+access_ssf_entry_admin,ssf.entry admin,model_ssf_entry,base.group_system,1,1,1,1

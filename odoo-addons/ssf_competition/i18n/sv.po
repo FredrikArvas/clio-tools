@@ -1,0 +1,704 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* ssf_competition
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20260409\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-29 06:00+0000\n"
+"PO-Revision-Date: 2026-04-29 06:00+0000\n"
+"Last-Translator: Arvas International AB\n"
+"Language-Team: Swedish <sv@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Alpine"
+msgstr "Alpine"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+msgid "Anmalan oppen"
+msgstr "Anmälan öppen"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+msgid "Anmalningar"
+msgstr "Anmälningar"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Arrangor"
+msgstr "Arrangör"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__bib
+msgid "Bib"
+msgstr "Startnummer"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__birth_year
+msgid "Birth Year"
+msgstr "Födelseår"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__city
+msgid "City"
+msgstr "Ort"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__class_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__class_name
+msgid "Class"
+msgstr "Klass"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__ccd_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__ccd_id
+msgid "Class/Discipline"
+msgstr "Klass/Gren"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__ccd_ids
+msgid "Classes/Disciplines"
+msgstr "Klasser/Grenar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__club
+msgid "Club"
+msgstr "Klubb"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__club_id
+msgid "Club (link)"
+msgstr "Klubb (länk)"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__sector_code
+msgid "Code"
+msgstr "Kod"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__competition_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__competition_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__competition_id
+msgid "Competition"
+msgstr "Tävling"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__competition_count
+msgid "Competition Count"
+msgstr "Antal tävlingar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__competition_ids
+msgid "Competitions"
+msgstr "Tävlingar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__participants_completed
+msgid "Completed"
+msgstr "Fullföljda"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__date
+msgid "Date"
+msgstr "Datum"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+msgid "Datum"
+msgstr "Datum"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__difference
+msgid "Diff"
+msgstr "Diff"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Disciplin"
+msgstr "Disciplin"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__discipline_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__discipline_name
+msgid "Discipline"
+msgstr "Disciplin"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+msgid "Discipliner"
+msgstr "Discipliner"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__display_order
+msgid "Display Order"
+msgstr "Visningsordning"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__distance
+msgid "Distance"
+msgstr "Distans"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Distans"
+msgstr "Distans"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_sector_list
+msgid "Dold"
+msgstr "Dold"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__email
+msgid "Email"
+msgstr "E-post"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__end_date
+msgid "End Date"
+msgstr "Slutdatum"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__entry_ids
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__entry_count
+msgid "Entries"
+msgstr "Anmälningar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__entry_date
+msgid "Entry Date"
+msgstr "Anmälningsdatum"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__entry_fee
+msgid "Entry Fee"
+msgstr "Anmälningsavgift"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__entry_open
+msgid "Entry Open"
+msgstr "Anmälan öppen"
+
+#. module: ssf_competition
+#: model:ir.actions.act_window,name:ssf_competition.action_ssf_event_list
+#: model:ir.ui.menu,name:ssf_competition.menu_ssf_events
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+msgid "Evenemang"
+msgstr "Evenemang"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__event_id
+msgid "Event"
+msgstr "Evenemang"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__fis_code
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__fis_sector_code
+msgid "FIS Code"
+msgstr "FIS-kod"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__fis_codex
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "FIS Codex"
+msgstr "FIS Codex"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__fis_points
+msgid "FIS Points"
+msgstr "FIS-poäng"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_sector_list
+msgid "FIS-kod"
+msgstr "FIS-kod"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__final
+msgid "Final"
+msgstr "Final"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__firstname
+msgid "First Name"
+msgstr "Förnamn"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__foreign_entry
+msgid "Foreign Entry"
+msgstr "Utländsk anmälan"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Freestyle"
+msgstr "Freestyle"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Full."
+msgstr "Full."
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__gender
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__gender
+msgid "Gender"
+msgstr "Kön"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Gren"
+msgstr "Gren"
+
+#. module: ssf_competition
+#: model:ir.actions.act_window,name:ssf_competition.action_ssf_sector_list
+#: model:ir.ui.menu,name:ssf_competition.menu_ssf_sectors
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_sector_list
+msgid "Grenar"
+msgstr "Grenar"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Gruppera efter"
+msgstr "Gruppera efter"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__hidden
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__hidden
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__hidden
+msgid "Hidden"
+msgstr "Dold"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Icke-medl."
+msgstr "Icke-medl."
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Klass"
+msgstr "Klass"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Klass / Disciplin"
+msgstr "Klass / Disciplin"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Klass/Gren"
+msgstr "Klass/Gren"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Klasser/Grenar"
+msgstr "Klasser/Grenar"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_sector_list
+msgid "Kod"
+msgstr "Kod"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+msgid "Kort namn"
+msgstr "Kortnamn"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+msgid "Lag"
+msgstr "Laganmälan"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Langd"
+msgstr "Längd"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__last_entry_date
+msgid "Last Entry Date"
+msgstr "Sista anmälningsdag"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__lastname
+msgid "Last Name"
+msgstr "Efternamn"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__live_results_link
+msgid "Live Results"
+msgstr "Live-resultat"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__local_name
+msgid "Local Name"
+msgstr "Lokalt namn"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__to_age
+msgid "Max Age"
+msgstr "Högsta ålder"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__from_age
+msgid "Min Age"
+msgstr "Lägsta ålder"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_season__name
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__name
+msgid "Name"
+msgstr "Namn"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_discipline_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_sector_list
+msgid "Namn"
+msgstr "Namn"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__nation
+msgid "Nation"
+msgstr "Nation"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__non_member_entry
+msgid "Non-Member Entry"
+msgstr "Icke-medl. anmälan"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__note
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__note
+msgid "Note"
+msgstr "Notering"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__organization_id
+msgid "Organization"
+msgstr "Förening"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__organizer_id
+msgid "Organizer"
+msgstr "Arrangör"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Ort"
+msgstr "Ort"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+msgid "Ovrigt"
+msgstr "Övrigt"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__paid_fee
+msgid "Paid Fee"
+msgstr "Betald avgift"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__payment_status
+msgid "Payment Status"
+msgstr "Betalningsstatus"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__person_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__person_id
+msgid "Person"
+msgstr "Person"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__place
+msgid "Place"
+msgstr "Plats"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__points
+msgid "Points"
+msgstr "Poäng"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__rank
+msgid "Rank"
+msgstr "Placering"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Reg."
+msgstr "Reg."
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__participants_registered
+msgid "Registered"
+msgstr "Registrerade"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__result_list_id
+msgid "Result List"
+msgstr "Resultatlista"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__result_list_ids
+msgid "Result Lists"
+msgstr "Resultatlistor"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+msgid "Resultat"
+msgstr "Resultat"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Resultatlistor"
+msgstr "Resultatlistor"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__result_count
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__result_ids
+msgid "Results"
+msgstr "Resultat"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_comp_ccd
+msgid "SSF Class x Discipline (CCD)"
+msgstr "SSF Klass x Gren (CCD)"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_competition
+msgid "SSF Competition"
+msgstr "SSF Tävling"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_comp_class
+msgid "SSF Competition Class"
+msgstr "SSF Tävlingsklass"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_discipline
+msgid "SSF Discipline"
+msgstr "SSF Disciplin"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_entry
+msgid "SSF Entry"
+msgstr "SSF Anmälan"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_event
+msgid "SSF Event"
+msgstr "SSF Evenemang"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_result
+msgid "SSF Result"
+msgstr "SSF Resultat"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_result_list
+msgid "SSF Result List"
+msgstr "SSF Resultatlista"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_season
+msgid "SSF Season"
+msgstr "SSF Säsong"
+
+#. module: ssf_competition
+#: model:ir.model,name:ssf_competition.model_ssf_sector
+msgid "SSF Sector"
+msgstr "SSF Gren"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_ccd__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_season__ssfta_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__ssfta_id
+msgid "SSFTA ID"
+msgstr "SSFTA ID"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Sasong"
+msgstr "Säsong"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Sasong 2025/26"
+msgstr "Säsong 2025/26"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__season_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__season_id
+msgid "Season"
+msgstr "Säsong"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__sector_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__sector_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__sector_id
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__sector_id
+msgid "Sector"
+msgstr "Gren"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__short_name
+msgid "Short Name"
+msgstr "Kortnamn"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Snowboard"
+msgstr "Snowboard"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_search
+msgid "Sok evenemang"
+msgstr "Sök evenemang"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_search
+msgid "Sok tavlingar"
+msgstr "Sök tävlingar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_comp_class__sort_order
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__sort_order
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_sector__sort_order
+msgid "Sort Order"
+msgstr "Sorteringsordning"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Start"
+msgstr "Start"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__start_date
+msgid "Start Date"
+msgstr "Startdatum"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result_list__participants_started
+msgid "Started"
+msgstr "Startande"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Statistik"
+msgstr "Statistik"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_competition__competition_status
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__event_status
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__status
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+msgid "Status"
+msgstr "Status"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Synkronisera resultat"
+msgstr "Synkronisera resultat"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Tavling"
+msgstr "Tävling"
+
+#. module: ssf_competition
+#: model:ir.actions.act_window,name:ssf_competition.action_ssf_competition_list
+#: model:ir.ui.menu,name:ssf_competition.menu_ssf_competition_root
+#: model:ir.ui.menu,name:ssf_competition.menu_ssf_competitions
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_list
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_form
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_event_list
+msgid "Tavlingar"
+msgstr "Tävlingar"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_discipline__team_entry
+msgid "Team Entry"
+msgstr "Laganmälan"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_result__time
+msgid "Time"
+msgstr "Tid"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__event_type
+msgid "Type"
+msgstr "Typ"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__unregistered
+msgid "Unregistered"
+msgstr "Avanmäld"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_entry__unreg_date
+msgid "Unregistration Date"
+msgstr "Avanmälningsdatum"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Utlandska"
+msgstr "Utländska"
+
+#. module: ssf_competition
+#: model_terms:ir.ui.view,arch_db:ssf_competition.view_ssf_competition_form
+msgid "Visar kommando for att synkronisera resultat fran SSFTA"
+msgstr "Visar kommando för att synkronisera resultat från SSFTA"
+
+#. module: ssf_competition
+#: model:ir.model.fields,field_description:ssf_competition.field_ssf_event__website
+msgid "Website"
+msgstr "Webbplats"
+

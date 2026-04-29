@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_sector_list" model="ir.ui.view">
+        <field name="name">ssf.sector.list</field>
+        <field name="model">ssf.sector</field>
+        <field name="arch" type="xml">
+            <list string="Grenar" create="false" edit="false" delete="false">
+                <field name="sector_code" string="Kod"/>
+                <field name="name" string="Namn"/>
+                <field name="fis_sector_code" string="FIS-kod"/>
+                <field name="hidden" string="Dold"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ssf_sector_list" model="ir.actions.act_window">
+        <field name="name">Grenar</field>
+        <field name="res_model">ssf.sector</field>
+        <field name="view_mode">list</field>
+        <field name="context">{"create": false}</field>
+    </record>
+
+    <record id="view_ssf_discipline_list" model="ir.ui.view">
+        <field name="name">ssf.discipline.list</field>
+        <field name="model">ssf.discipline</field>
+        <field name="arch" type="xml">
+            <list string="Discipliner" create="false" edit="false" delete="false">
+                <field name="sector_id" string="Gren"/>
+                <field name="name" string="Namn"/>
+                <field name="short_name" string="Kort namn"/>
+                <field name="team_entry" string="Lag"/>
+                <field name="hidden" string="Dold"/>
+            </list>
+        </field>
+    </record>
+</odoo>

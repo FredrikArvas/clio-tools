@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_ssf_competition_root"
+              name="Tavlingar"
+              sequence="30"/>
+
+    <menuitem id="menu_ssf_events"
+              name="Evenemang"
+              parent="menu_ssf_competition_root"
+              sequence="10"
+              action="action_ssf_event_list"/>
+
+    <menuitem id="menu_ssf_competitions"
+              name="Tavlingar"
+              parent="menu_ssf_competition_root"
+              sequence="20"
+              action="action_ssf_competition_list"/>
+
+    <menuitem id="menu_ssf_sectors"
+              name="Grenar"
+              parent="menu_ssf_competition_root"
+              sequence="90"
+              action="action_ssf_sector_list"/>
+</odoo>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_event_list" model="ir.ui.view">
+        <field name="name">ssf.event.list</field>
+        <field name="model">ssf.event</field>
+        <field name="arch" type="xml">
+            <list string="Evenemang" create="false" edit="false" delete="false"
+                  default_order="start_date desc">
+                <field name="name" string="Namn"/>
+                <field name="sector_id" string="Gren"/>
+                <field name="season_id" string="Säsong"/>
+                <field name="start_date" string="Datum"/>
+                <field name="city" string="Ort"/>
+                <field name="organizer_id" string="Arrangör" optional="show"/>
+                <field name="event_status" string="Status"/>
+                <field name="competition_count" string="Tävlingar"/>
+                <field name="entry_count" string="Anmälningar" optional="show"/>
+                <field name="result_count" string="Resultat" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_event_kanban" model="ir.ui.view">
+        <field name="name">ssf.event.kanban</field>
+        <field name="model">ssf.event</field>
+        <field name="arch" type="xml">
+            <kanban default_order="start_date desc" create="false">
+                <field name="name"/>
+                <field name="sector_id"/>
+                <field name="city"/>
+                <field name="start_date"/>
+                <field name="competition_count"/>
+                <field name="event_status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="fw-bolder fs-6"><field name="name"/></div>
+                        <div class="text-muted small">
+                            <field name="sector_id"/> · <field name="city"/>
+                        </div>
+                        <div class="small"><field name="start_date"/></div>
+                        <div class="mt-1">
+                            <span class="badge text-bg-secondary me-1">
+                                <field name="competition_count"/> tävlingar
+                            </span>
+                            <field name="event_status"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_ssf_event_calendar" model="ir.ui.view">
+        <field name="name">ssf.event.calendar</field>
+        <field name="model">ssf.event</field>
+        <field name="arch" type="xml">
+            <calendar string="Evenemang" date_start="start_date" date_stop="end_date"
+                      color="sector_id" create="false" event_open_popup="false">
+                <field name="name"/>
+                <field name="city"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_ssf_event_form" model="ir.ui.view">
+        <field name="name">ssf.event.form</field>
+        <field name="model">ssf.event</field>
+        <field name="arch" type="xml">
+            <form string="Evenemang" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sector_id" readonly="1"/>
+                            <field name="season_id" readonly="1"/>
+                            <field name="start_date" readonly="1"/>
+                            <field name="end_date" readonly="1"/>
+                            <field name="event_status" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="city" readonly="1"/>
+                            <field name="place" readonly="1"/>
+                            <field name="organizer_id" readonly="1"/>
+                            <field name="email" readonly="1" widget="email"/>
+                            <field name="website" readonly="1" widget="url"/>
+                        </group>
+                    </group>
+                    <group string="Statistik">
+                        <field name="competition_count" readonly="1"/>
+                        <field name="entry_count" readonly="1"/>
+                        <field name="result_count" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Tävlingar" name="competitions">
+                            <field name="competition_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" string="Namn"/>
+                                    <field name="date" string="Datum"/>
+                                    <field name="competition_status" string="Status"/>
+                                    <field name="entry_count" string="Anmälningar"/>
+                                    <field name="result_count" string="Resultat"/>
+                                    <field name="live_results_link" string="Live" widget="url" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Övrigt" name="misc">
+                            <field name="note" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ssf_event_list" model="ir.actions.act_window">
+        <field name="name">Evenemang</field>
+        <field name="res_model">ssf.event</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
+        <field name="context">{"search_default_current_season": 1, "create": false}</field>
+    </record>
+
+    <record id="view_ssf_event_search" model="ir.ui.view">
+        <field name="name">ssf.event.search</field>
+        <field name="model">ssf.event</field>
+        <field name="arch" type="xml">
+            <search string="Sök evenemang">
+                <field name="name" string="Namn"/>
+                <field name="city" string="Ort"/>
+                <field name="organizer_id" string="Arrangör"/>
+                <filter string="Säsong 2025/26" name="current_season"
+                        domain="[('season_id.ssfta_id', '=', 18)]"/>
+                <filter string="Säsong 2024/25" name="prev_season"
+                        domain="[('season_id.ssfta_id', '=', 19)]"/>
+                <separator/>
+                <filter string="Godkända" name="status_approved"
+                        domain="[('event_status', '=', '3')]"/>
+                <filter string="Genomförda" name="status_performed"
+                        domain="[('event_status', '=', '6')]"/>
+                <filter string="Inställda" name="status_cancelled"
+                        domain="[('event_status', '=', '8')]"/>
+                <separator/>
+                <filter string="Alpine" name="sector_alpine"
+                        domain="[('sector_id.sector_code', '=', 'AL')]"/>
+                <filter string="Längd" name="sector_cc"
+                        domain="[('sector_id.sector_code', '=', 'CC')]"/>
+                <filter string="Snowboard" name="sector_sb"
+                        domain="[('sector_id.sector_code', '=', 'SB')]"/>
+                <filter string="Freestyle" name="sector_fs"
+                        domain="[('sector_id.sector_code', '=', 'FS')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Gren" name="group_sector" context="{'group_by': 'sector_id'}"/>
+                    <filter string="Säsong" name="group_season" context="{'group_by': 'season_id'}"/>
+                    <filter string="Ort" name="group_city" context="{'group_by': 'city'}"/>
+                    <filter string="Arrangör" name="group_organizer" context="{'group_by': 'organizer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>
