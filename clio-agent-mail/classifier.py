@@ -26,6 +26,19 @@ ACTION_FAQ_CHECK         = "FAQ_CHECK"
 ACTION_SELF_QUERY        = "SELF_QUERY"
 ACTION_OBIT_IMPORT       = "OBIT_IMPORT"
 ACTION_INTERVIEW         = "INTERVIEW"
+ACTION_IGNORE            = "IGNORE"
+
+# Adressmönster som alltid ignoreras (bounces, auto-replies, system-mail)
+_IGNORE_PATTERNS = (
+    "mailer-daemon",
+    "postmaster",
+    "no-reply",
+    "noreply",
+    "do-not-reply",
+    "donotreply",
+    "auto-reply",
+    "autoreply",
+)
 
 
 @dataclass
@@ -97,6 +110,15 @@ def classify(mail_item, whitelist: set, config) -> Classification:
             action=ACTION_FAQ_CHECK,
             reason=t("mail_reason_faq"),
             account_key="info",
+        )
+
+    # ── Bounce/system-mail — ignoreras alltid ───────────────────────────────
+    sender_lower = sender_email.lower()
+    if any(pat in sender_lower for pat in _IGNORE_PATTERNS):
+        return Classification(
+            action=ACTION_IGNORE,
+            reason="Bounce/system-mail — ignoreras",
+            account_key=account_key,
         )
 
     # ── [clio-obit] — prioriteras före behörighetscheck (gäller alla avsändare) ──

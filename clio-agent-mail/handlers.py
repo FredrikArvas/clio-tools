@@ -121,6 +121,11 @@ def process_mail(mail_item, config, dry_run: bool = False):
         elif clf.action == classifier.ACTION_OBIT_IMPORT:
             _handle_obit_import(mail_item, clf, config, dry_run)
 
+        elif clf.action == classifier.ACTION_IGNORE:
+            logger.info(f"[ignore] {mail_item.sender} — bounce/system-mail, ingen åtgärd")
+            from state import update_status, STATUS_SENT
+            update_status(mail_item.message_id, STATUS_SENT)
+
     except Exception as e:
         logger.error(f"Error handling {mail_item.message_id}: {e}", exc_info=True)
 
