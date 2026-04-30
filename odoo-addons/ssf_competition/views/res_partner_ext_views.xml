@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_ssf_iol_roles_form" model="ir.ui.view">
+        <field name="name">res.partner.ssf.iol.roles</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="contacts.res_partner_view_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <!-- Visas på PERSON-kort -->
+                <page string="IOL-roller" name="iol_roles_person"
+                      invisible="is_company == True">
+                    <field name="iol_role_ids" readonly="1">
+                        <list create="false" edit="false" delete="false">
+                            <field name="organization_id" string="Organisation"/>
+                            <field name="role_name" string="Roll"/>
+                        </list>
+                    </field>
+                </page>
+                <!-- Visas på ORGANISATION-kort -->
+                <page string="IOL-roller" name="iol_roles_org"
+                      invisible="is_company == False">
+                    <field name="iol_org_role_ids" readonly="1">
+                        <list create="false" edit="false" delete="false">
+                            <field name="person_id" string="Person"/>
+                            <field name="role_name" string="Roll"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
