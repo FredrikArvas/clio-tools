@@ -35,4 +35,10 @@
             groups="clio_cockpit.group_clio_admin"
             sequence="50"/>
 
+  <menuitem id="menu_cockpit_db_sizes"
+            name="💾 Databasstorlekar"
+            parent="menu_clio_cockpit_root"
+            action="clio_cockpit.action_open_db_sizes"
+            groups="clio_cockpit.group_clio_admin"/>
+
 </odoo>

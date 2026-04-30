@@ -1,6 +1,6 @@
 {
     "name":        "Clio Cockpit",
-    "version":     "18.0.3.0.0",
+    "version":     "18.0.4.0.0",
     "category":    "Extra Tools",
     "summary":     "Samlad kontrollpanel för alla clio-agenter — flik-design med behörighetsstyrning.",
     "author":      "Fredrik Arvas / Arvas International AB",
@@ -10,6 +10,7 @@
         "security/security.xml",
         "security/ir.model.access.csv",
         "views/clio_cockpit_views.xml",
+        "views/clio_db_size_views.xml",
         "views/clio_tool_heartbeat_views.xml",
         "views/menu.xml",
     ],
