@@ -39,6 +39,62 @@
     </field>
   </record>
 
+  <!-- Kanbanvy -->
+  <record id="view_uap_witness_kanban" model="ir.ui.view">
+    <field name="name">uap.witness.kanban</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="witness_type">
+        <field name="name"/>
+        <field name="credibility"/>
+        <field name="status"/>
+        <field name="encounter_count"/>
+        <templates>
+          <t t-name="card">
+            <div class="fw-bold">
+              <field name="name"/>
+            </div>
+            <div class="mt-1">
+              <span class="badge rounded-pill text-bg-primary me-1">
+                <field name="credibility"/>
+              </span>
+              <span class="badge rounded-pill text-bg-secondary">
+                <field name="encounter_count"/> enc.
+              </span>
+            </div>
+            <div class="text-muted small" t-if="record.status.value">
+              <field name="status"/>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- Grafvy -->
+  <record id="view_uap_witness_graph" model="ir.ui.view">
+    <field name="name">uap.witness.graph</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <graph string="Witnesses" type="bar">
+        <field name="witness_type" type="row"/>
+        <field name="credibility" type="col"/>
+      </graph>
+    </field>
+  </record>
+
+  <!-- Pivotvy -->
+  <record id="view_uap_witness_pivot" model="ir.ui.view">
+    <field name="name">uap.witness.pivot</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <pivot string="Witnesses">
+        <field name="witness_type" type="row"/>
+        <field name="credibility" type="col"/>
+      </pivot>
+    </field>
+  </record>
+
   <!-- Sökvy -->
   <record id="view_uap_witness_search" model="ir.ui.view">
     <field name="name">uap.witness.search</field>
@@ -60,7 +116,7 @@
   <record id="action_uap_witness" model="ir.actions.act_window">
     <field name="name">Witnesses</field>
     <field name="res_model">uap.witness</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,graph,pivot,form</field>
     <field name="search_view_id" ref="view_uap_witness_search"/>
   </record>
 
