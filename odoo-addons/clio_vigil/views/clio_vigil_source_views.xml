@@ -81,11 +81,54 @@
     </field>
   </record>
 
+  <!-- ── Kanbanvy ──────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_source_kanban" model="ir.ui.view">
+    <field name="name">clio.vigil.source.kanban</field>
+    <field name="model">clio.vigil.source</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="domain"
+              class="o_kanban_small_column">
+        <field name="name"/>
+        <field name="domain"/>
+        <field name="source_type"/>
+        <field name="maturity"/>
+        <field name="weight"/>
+        <field name="active"/>
+        <field name="url"/>
+        <templates>
+          <t t-name="card">
+            <div class="fw-bold fs-6"><field name="name"/></div>
+            <div class="mt-1">
+              <field name="source_type" widget="badge"/>
+              <field name="maturity"    widget="badge" class="ms-1"/>
+            </div>
+            <div class="text-muted small mt-1">
+              Vikt: <field name="weight"/>
+              <span t-if="!record.active.raw_value" class="badge bg-secondary ms-2">Pausad</span>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ── Diagramvy ──────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_source_graph" model="ir.ui.view">
+    <field name="name">clio.vigil.source.graph</field>
+    <field name="model">clio.vigil.source</field>
+    <field name="arch" type="xml">
+      <graph string="Källor per domän" type="bar">
+        <field name="domain"   type="row"/>
+        <field name="maturity" type="col"/>
+      </graph>
+    </field>
+  </record>
+
   <!-- ── Action ─────────────────────────────────────────────────────────── -->
   <record id="action_clio_vigil_source" model="ir.actions.act_window">
     <field name="name">Källor</field>
     <field name="res_model">clio.vigil.source</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,form,graph</field>
     <field name="context">{'search_default_active': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">

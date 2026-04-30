@@ -145,13 +145,58 @@
     </field>
   </record>
 
+  <!-- ── Kanbanvy ──────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_item_kanban" model="ir.ui.view">
+    <field name="name">clio.vigil.item.kanban</field>
+    <field name="model">clio.vigil.item</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="state"
+              class="o_kanban_small_column">
+        <field name="title"/>
+        <field name="domain"/>
+        <field name="source_name"/>
+        <field name="priority_score"/>
+        <field name="state"/>
+        <field name="published_at"/>
+        <field name="summary"/>
+        <templates>
+          <t t-name="card">
+            <div class="fw-bold fs-6 text-truncate">
+              <field name="title"/>
+            </div>
+            <div class="mt-1">
+              <field name="domain" widget="badge"/>
+              <span class="text-muted ms-2 small"><field name="source_name"/></span>
+            </div>
+            <div class="text-muted small mt-1">
+              Prio: <field name="priority_score"/>
+              &nbsp;·&nbsp;<field name="published_at" widget="date"/>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ── Diagramvy ──────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_item_graph" model="ir.ui.view">
+    <field name="name">clio.vigil.item.graph</field>
+    <field name="model">clio.vigil.item</field>
+    <field name="arch" type="xml">
+      <graph string="Objekt per tillstånd" type="bar">
+        <field name="state"  type="row"/>
+        <field name="domain" type="col"/>
+      </graph>
+    </field>
+  </record>
+
   <!-- ── Actions ────────────────────────────────────────────────────────── -->
 
   <!-- Kö: ej klara objekt -->
   <record id="action_clio_vigil_item_queue" model="ir.actions.act_window">
     <field name="name">Kö</field>
     <field name="res_model">clio.vigil.item</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,form,graph</field>
     <field name="domain">[('state','in',['discovered','filtered_in','queued','transcribing','transcribed'])]</field>
     <field name="context">{'search_default_in_queue': 1}</field>
     <field name="help" type="html">
@@ -165,7 +210,7 @@
   <record id="action_clio_vigil_item_ready" model="ir.actions.act_window">
     <field name="name">Klara objekt</field>
     <field name="res_model">clio.vigil.item</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,form,graph</field>
     <field name="domain">[('state','in',['indexed','notified'])]</field>
     <field name="context">{'search_default_has_summary': 1}</field>
     <field name="help" type="html">
@@ -183,7 +228,7 @@
   <record id="action_clio_vigil_item_all" model="ir.actions.act_window">
     <field name="name">Alla objekt</field>
     <field name="res_model">clio.vigil.item</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,form,graph</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">
         Inga bevakningsobjekt ännu.
