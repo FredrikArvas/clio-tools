@@ -50,8 +50,8 @@ def _get_conn():
     )
 
 
-def _upsert(Model, rows: list[dict], key: str = "ssfta_id", dry_run: bool = False) -> tuple[int, int]:
-    """Batch-upsert: creates i batchar om BATCH, writes per rad (ovanliga)."""
+def _upsert(Model, rows: list[dict], key: str = "ssfta_id", dry_run: bool = False, skip_updates: bool = False) -> tuple[int, int]:
+    """Batch-upsert: creates i batchar om BATCH, writes per rad (ovanliga). skip_updates hoppar write()."""
     created = updated = 0
     for i in range(0, len(rows), BATCH):
         batch = rows[i:i + BATCH]
@@ -68,7 +68,7 @@ def _upsert(Model, rows: list[dict], key: str = "ssfta_id", dry_run: bool = Fals
         created += len(to_create)
 
         for odoo_id, row in to_update:
-            if not dry_run:
+            if not dry_run and not skip_updates:
                 Model.browse(odoo_id).write(row)
         updated += len(to_update)
 
@@ -235,6 +235,7 @@ def sync_events(
     seasons: list[int] | None,
     sector_ids: list[int] | None,
     district_ids: list[int] | None,
+    skip_updates: bool = False,
 ) -> str:
     """Returnerar event_where för att återanvända i competitions + CCDs."""
     event_where = _build_event_where(seasons, sector_ids, district_ids)
@@ -292,12 +293,12 @@ def sync_events(
             "event_type_label":   r["EventTypeName"] or "",
         })
 
-    c, u = _upsert(env["ssf.event"], rows, dry_run=dry_run)
+    c, u = _upsert(env["ssf.event"], rows, dry_run=dry_run, skip_updates=skip_updates)
     print(f"  Events:      {c} skapade, {u} uppdaterade  (totalt {len(rows)})")
     return event_where
 
 
-def sync_competitions(env, dry_run: bool, event_where: str):
+def sync_competitions(env, dry_run: bool, event_where: str, skip_updates: bool = False):
     """Laddar bara tävlingar vars event matchar event_where."""
     comp_filter = (
         f"WHERE Event IN (SELECT ID FROM Events {event_where})"
@@ -333,11 +334,11 @@ def sync_competitions(env, dry_run: bool, event_where: str):
             "live_results_link": r["LiveResultsLink"] or "",
         })
 
-    c, u = _upsert(env["ssf.competition"], rows, dry_run=dry_run)
+    c, u = _upsert(env["ssf.competition"], rows, dry_run=dry_run, skip_updates=skip_updates)
     print(f"  Competitions:{c} skapade, {u} uppdaterade  (hoppade: {skipped})")
 
 
-def sync_ccds(env, dry_run: bool, event_where: str):
+def sync_ccds(env, dry_run: bool, event_where: str, skip_updates: bool = False):
     """Laddar bara CCDs vars tävling matchar event_where."""
     ccd_filter = (
         f"WHERE Competition IN ("
@@ -377,7 +378,7 @@ def sync_ccds(env, dry_run: bool, event_where: str):
             "foreign_entry": bool(r["ForeignEntry"]),
         })
 
-    c, u = _upsert(env["ssf.comp.ccd"], rows, dry_run=dry_run)
+    c, u = _upsert(env["ssf.comp.ccd"], rows, dry_run=dry_run, skip_updates=skip_updates)
     print(f"  CCDs:        {c} skapade, {u} uppdaterade  (hoppade: {skipped})")
 
 
@@ -389,6 +390,8 @@ def main():
     parser.add_argument("--db", default=None)
     parser.add_argument("--clear", action="store_true",
                         help="Radera befintliga events/tavlingar/CCDs innan sync")
+    parser.add_argument("--skip-updates", action="store_true",
+                        help="Hoppa over write() pa befintliga poster (snabb inkrementell sync)")
     parser.add_argument("--season", default=None,
                         help="Kommasep. Season.ID, t.ex. 18,19")
     parser.add_argument("--sector", default=None,
@@ -427,9 +430,10 @@ def main():
     sync_seasons(env, dr)
     sync_disciplines(env, dr)
     sync_classes(env, dr)
-    event_where = sync_events(env, dr, seasons=seasons, sector_ids=sector_ids, district_ids=district_ids)
-    sync_competitions(env, dr, event_where)
-    sync_ccds(env, dr, event_where)
+    su = args.skip_updates
+    event_where = sync_events(env, dr, seasons=seasons, sector_ids=sector_ids, district_ids=district_ids, skip_updates=su)
+    sync_competitions(env, dr, event_where, skip_updates=su)
+    sync_ccds(env, dr, event_where, skip_updates=su)
     print("Klar.")
 
 
