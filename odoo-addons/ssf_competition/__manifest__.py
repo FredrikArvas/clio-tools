@@ -1,6 +1,6 @@
 {
     "name": "SSF - Competition Module",
-    "version": "18.0.1.9.0",
+    "version": "18.0.1.10.0",
     "summary": "SSF competition data (Events, Competitions, Results) synced from SSFTA.",
     "author": "Arvas International AB",
     "depends": ["contacts"],
