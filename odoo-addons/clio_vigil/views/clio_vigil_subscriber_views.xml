@@ -6,7 +6,7 @@
   <record id="action_clio_vigil_subscriber" model="ir.actions.act_window">
     <field name="name">Prenumeranter</field>
     <field name="res_model">clio.vigil.subscriber</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">list,kanban,form,graph</field>
     <field name="context">{'search_default_active': 1}</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">
@@ -22,9 +22,64 @@
   <record id="action_clio_vigil_delivery_sub" model="ir.actions.act_window">
     <field name="name">Leveranser</field>
     <field name="res_model">clio.vigil.delivery</field>
-    <field name="view_mode">list</field>
+    <field name="view_mode">list,graph</field>
     <field name="domain">[('subscriber_id','=',active_id)]</field>
     <field name="context">{'default_subscriber_id': active_id}</field>
+  </record>
+
+  <!-- ── Kanbanvy prenumeranter ────────────────────────────────────────── -->
+  <record id="view_clio_vigil_subscriber_kanban" model="ir.ui.view">
+    <field name="name">clio.vigil.subscriber.kanban</field>
+    <field name="model">clio.vigil.subscriber</field>
+    <field name="arch" type="xml">
+      <kanban>
+        <field name="partner_id"/>
+        <field name="effective_email"/>
+        <field name="follows_ufo"/>
+        <field name="follows_ai"/>
+        <field name="delivery_count"/>
+        <field name="active"/>
+        <templates>
+          <t t-name="card">
+            <div class="fw-bold fs-6"><field name="partner_id"/></div>
+            <div class="text-muted small"><field name="effective_email"/></div>
+            <div class="mt-1">
+              <span t-if="record.follows_ufo.raw_value"
+                    class="badge text-bg-warning me-1">UFO/UAP</span>
+              <span t-if="record.follows_ai.raw_value"
+                    class="badge text-bg-info">AI</span>
+            </div>
+            <div class="text-muted small mt-1">
+              <field name="delivery_count"/> leveranser
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ── Diagramvy prenumeranter ────────────────────────────────────────── -->
+  <record id="view_clio_vigil_subscriber_graph" model="ir.ui.view">
+    <field name="name">clio.vigil.subscriber.graph</field>
+    <field name="model">clio.vigil.subscriber</field>
+    <field name="arch" type="xml">
+      <graph string="Prenumeranter per domän" type="bar">
+        <field name="follows_ufo" type="row"/>
+        <field name="follows_ai"  type="col"/>
+      </graph>
+    </field>
+  </record>
+
+  <!-- ── Diagramvy leveranser ───────────────────────────────────────────── -->
+  <record id="view_clio_vigil_delivery_graph" model="ir.ui.view">
+    <field name="name">clio.vigil.delivery.graph</field>
+    <field name="model">clio.vigil.delivery</field>
+    <field name="arch" type="xml">
+      <graph string="Leveranser över tid" type="bar">
+        <field name="digest_date"   type="row"/>
+        <field name="subscriber_id" type="col"/>
+      </graph>
+    </field>
   </record>
 
   <!-- ── Listvy prenumeranter ───────────────────────────────────────────── -->
