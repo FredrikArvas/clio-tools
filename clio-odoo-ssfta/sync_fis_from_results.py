@@ -30,20 +30,26 @@ from clio_odoo import connect
 BATCH = 500
 
 
+def _m2o_id(val):
+    """Normalisera Many2one-värde från search_read ([id, name] eller False) till int eller False."""
+    if isinstance(val, (list, tuple)):
+        return val[0]
+    return val or False
+
+
 def _upsert(Model, rows: list[dict], key1: str, key2: str, dry_run: bool) -> tuple[int, int]:
-    """Upsert med sammansatt nyckel (key1, key2)."""
+    """Upsert med sammansatt nyckel (key1, key2). key2 kan vara Many2one (returneras som [id,name])."""
     created = updated = 0
     for i in range(0, len(rows), BATCH):
         batch = rows[i:i + BATCH]
-        pairs = [(r[key1], r[key2]) for r in batch]
 
         # Sök befintliga via key1-värden (sedan filtrera i Python på key2)
         key1_vals = list({r[key1] for r in batch})
         existing_recs = Model.search_read([[key1, "in", key1_vals]], [key1, key2, "id"])
-        existing = {(r[key1], r[key2] if r[key2] else False): r["id"] for r in existing_recs}
+        existing = {(r[key1], _m2o_id(r[key2])): r["id"] for r in existing_recs}
 
-        to_create = [r for r in batch if (r[key1], r[key2]) not in existing]
-        to_update = [(existing[(r[key1], r[key2])], r) for r in batch if (r[key1], r[key2]) in existing]
+        to_create = [r for r in batch if (r[key1], r.get(key2)) not in existing]
+        to_update = [(existing[(r[key1], r.get(key2))], r) for r in batch if (r[key1], r.get(key2)) in existing]
 
         if to_create and not dry_run:
             Model.create(to_create)
