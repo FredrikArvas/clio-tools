@@ -19,3 +19,5 @@ access_ssf_result_user,ssf.result user,model_ssf_result,base.group_user,1,0,0,0
 access_ssf_result_admin,ssf.result admin,model_ssf_result,base.group_system,1,1,1,1
 access_ssf_entry_user,ssf.entry user,model_ssf_entry,base.group_user,1,0,0,0
 access_ssf_entry_admin,ssf.entry admin,model_ssf_entry,base.group_system,1,1,1,1
+access_ssf_iol_role_user,ssf.iol.role user,model_ssf_iol_role,base.group_user,1,0,0,0
+access_ssf_iol_role_admin,ssf.iol.role admin,model_ssf_iol_role,base.group_system,1,1,1,1

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List-vy -->
+    <record id="ssf_iol_role_list" model="ir.ui.view">
+        <field name="name">ssf.iol.role.list</field>
+        <field name="model">ssf.iol.role</field>
+        <field name="arch" type="xml">
+            <list string="IOL-roller" create="false" edit="false">
+                <field name="person_id"/>
+                <field name="organization_id"/>
+                <field name="role_name" string="Roll"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Sökvy -->
+    <record id="ssf_iol_role_search" model="ir.ui.view">
+        <field name="name">ssf.iol.role.search</field>
+        <field name="model">ssf.iol.role</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="person_id"/>
+                <field name="organization_id"/>
+                <field name="role_name" string="Roll"/>
+                <filter string="Utövare" name="utovare"
+                        domain="[('role_name', 'ilike', 'Utövare')]"/>
+                <filter string="Ordförande" name="ordf"
+                        domain="[('role_name', '=', 'Ordförande')]"/>
+                <filter string="Kassör" name="kassor"
+                        domain="[('role_name', '=', 'Kassör')]"/>
+                <filter string="Ledare" name="ledare"
+                        domain="[('role_name', 'ilike', 'ledare')]"/>
+                <filter string="Admin" name="admin"
+                        domain="[('role_name', 'ilike', 'admin')]"/>
+                <separator/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Roll"         name="group_role"
+                            context="{'group_by': 'role_name'}"/>
+                    <filter string="Organisation" name="group_org"
+                            context="{'group_by': 'organization_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="ssf_iol_role_action" model="ir.actions.act_window">
+        <field name="name">IOL-roller</field>
+        <field name="res_model">ssf.iol.role</field>
+        <field name="view_mode">list</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menypost -->
+    <menuitem id="menu_ssf_iol_roles"
+              name="IOL-roller"
+              parent="menu_ssf_competition_root"
+              action="ssf_iol_role_action"
+              sequence="40"/>
+</odoo>

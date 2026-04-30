@@ -8,3 +8,4 @@ from . import ssf_comp_ccd
 from . import ssf_result_list
 from . import ssf_result
 from . import ssf_entry
+from . import ssf_iol_role
