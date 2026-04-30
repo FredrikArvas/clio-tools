@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <data noupdate="1">
+  <data noupdate="0">
 
-    <!-- QWeb-mall för Examensbyrån startsida -->
     <record id="view_examensbyran_home" model="ir.ui.view">
       <field name="name">examensbyran.home</field>
       <field name="type">qweb</field>
@@ -12,28 +11,68 @@
           <t t-call="website.layout">
             <div id="wrap">
 
+              <style>
+                .eb-hero        { background-color: #1D2B4F; color: #F7F2E8; }
+                .eb-gold        { color: #9B7E3E; }
+                .eb-btn-gold    { background-color: #9B7E3E; color: #F7F2E8; border: none; }
+                .eb-btn-gold:hover { background-color: #7A6230; color: #F7F2E8; }
+                .eb-cream       { background-color: #F7F2E8; }
+                .eb-beige       { background-color: #EDE5D0; }
+                .eb-card-gold   { border-color: #C8A84B !important; }
+                .eb-card-muted  { border-color: #BFB89A !important; }
+                .eb-step-badge  { background-color: #1D2B4F; color: #C8A84B; font-weight: bold; width: 2.2rem; height: 2.2rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; font-size: 1rem; }
+                .eb-divider     { border-top: 2px solid #C8A84B; width: 60px; margin: 1rem auto 1.5rem; }
+                .eb-philosophy  { background-color: #1D2B4F; color: #EDE5D0; }
+                .eb-philosophy blockquote { border-left: 3px solid #9B7E3E; padding-left: 1.2rem; font-style: italic; color: #C8A84B; }
+              </style>
+
               <!-- Hero -->
-              <section class="bg-dark text-white py-5">
+              <section class="eb-hero py-5">
                 <div class="container py-4">
                   <div class="row">
                     <div class="col-lg-8">
-                      <h1 class="display-4 fw-bold">Examensbyrån</h1>
-                      <p class="lead mt-3 mb-4">
+                      <p class="text-uppercase small mb-2" style="letter-spacing:.15em; color:#C8A84B;">Bevakningstjänst</p>
+                      <h1 class="display-4 fw-bold" style="color:#F7F2E8;">Examensbyrån</h1>
+                      <p class="lead mt-3 mb-4" style="color:#C8C0AE;">
                         Vi bevakar dödsannonser — du slipper missa det som spelar roll.
                       </p>
-                      <a href="/contactus" class="btn btn-light btn-lg">Kom i kontakt</a>
+                      <a href="/contactus" class="btn eb-btn-gold btn-lg px-4">Kom i kontakt</a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Filosofi — varför heter det Examensbyrån? -->
+              <section class="eb-philosophy py-5">
+                <div class="container">
+                  <div class="row justify-content-center">
+                    <div class="col-lg-7 text-center">
+                      <p class="text-uppercase small mb-2" style="letter-spacing:.15em; color:#9B7E3E;">Tanken bakom namnet</p>
+                      <h2 class="h3 mb-3 fw-bold" style="color:#F7F2E8;">Varför heter det Examensbyrån?</h2>
+                      <div class="eb-divider"></div>
+                      <blockquote class="mb-4 text-start mx-auto" style="max-width:520px;">
+                        Vi är ett medvetande som tar plats i en kropp — för att lära oss något.
+                        Livet är skolan. Döden är examen.
+                      </blockquote>
+                      <p style="color:#C8C0AE;">
+                        I den synen är ett dödsfall inte ett slut utan en fullbordad kurs.
+                        Examensbyrån tar sin uppgift på allvar: att registrera och bevaka de
+                        ögonblick när någon i din omgivning tar examen från livets skola —
+                        och se till att du inte missar det.
+                      </p>
                     </div>
                   </div>
                 </div>
               </section>
 
               <!-- Om tjänsten -->
-              <section class="py-5">
+              <section class="eb-cream py-5">
                 <div class="container">
                   <div class="row justify-content-center">
                     <div class="col-lg-8 text-center">
-                      <h2 class="h3 mb-4">Automatiserad dödsannonsbevakning</h2>
-                      <p class="lead">
+                      <h2 class="h3 mb-2 fw-bold" style="color:#1D2B4F;">Automatiserad dödsannonsbevakning</h2>
+                      <div class="eb-divider"></div>
+                      <p class="lead" style="color:#3D2E0A;">
                         Examensbyrån är en bevakningstjänst som kontinuerligt söker igenom
                         publicerade dödsannonser och matchar dem mot dina registrerade kontakter.
                         Du väljer vem vi håller koll på. Vi meddelar dig när det händer något.
@@ -44,34 +83,35 @@
               </section>
 
               <!-- Hur det fungerar -->
-              <section class="bg-light py-5">
+              <section class="eb-beige py-5">
                 <div class="container">
-                  <h2 class="h3 text-center mb-5">Hur det fungerar</h2>
-                  <div class="row g-4">
+                  <h2 class="h3 text-center mb-2 fw-bold" style="color:#1D2B4F;">Hur det fungerar</h2>
+                  <div class="eb-divider"></div>
+                  <div class="row g-4 mt-1">
                     <div class="col-md-4">
                       <div class="d-flex align-items-start gap-3">
-                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">1</span>
+                        <div class="eb-step-badge">1</div>
                         <div>
-                          <h5 class="fw-bold">Registrera</h5>
-                          <p class="mb-0">Lägg in de kontakter du vill bevaka i systemet.</p>
+                          <h5 class="fw-bold" style="color:#1D2B4F;">Registrera</h5>
+                          <p class="mb-0" style="color:#3D2E0A;">Lägg in de kontakter du vill bevaka i systemet.</p>
                         </div>
                       </div>
                     </div>
                     <div class="col-md-4">
                       <div class="d-flex align-items-start gap-3">
-                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">2</span>
+                        <div class="eb-step-badge">2</div>
                         <div>
-                          <h5 class="fw-bold">Vi söker</h5>
-                          <p class="mb-0">Systemet skannar dagligen aktuella dödsannonser.</p>
+                          <h5 class="fw-bold" style="color:#1D2B4F;">Vi söker</h5>
+                          <p class="mb-0" style="color:#3D2E0A;">Systemet skannar dagligen aktuella dödsannonser.</p>
                         </div>
                       </div>
                     </div>
                     <div class="col-md-4">
                       <div class="d-flex align-items-start gap-3">
-                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">3</span>
+                        <div class="eb-step-badge">3</div>
                         <div>
-                          <h5 class="fw-bold">Du notifieras</h5>
-                          <p class="mb-0">
+                          <h5 class="fw-bold" style="color:#1D2B4F;">Du notifieras</h5>
+                          <p class="mb-0" style="color:#3D2E0A;">
                             Direkt vid träff, eller som daglig sammanfattning —
                             du väljer prioritet.
                           </p>
@@ -83,35 +123,36 @@
               </section>
 
               <!-- Prioriteringslägen -->
-              <section class="py-5">
+              <section class="eb-cream py-5">
                 <div class="container">
-                  <h2 class="h3 text-center mb-5">Prioriteringslägen</h2>
-                  <div class="row g-3 justify-content-center">
+                  <h2 class="h3 text-center mb-2 fw-bold" style="color:#1D2B4F;">Prioriteringslägen</h2>
+                  <div class="eb-divider"></div>
+                  <div class="row g-3 justify-content-center mt-1">
                     <div class="col-md-4">
-                      <div class="card h-100 border-danger">
+                      <div class="card h-100 eb-card-gold" style="background:#F7F2E8;">
                         <div class="card-body">
-                          <h5 class="card-title text-danger fw-bold">Viktig</h5>
-                          <p class="card-text">
+                          <h5 class="card-title fw-bold eb-gold">Viktig</h5>
+                          <p class="card-text" style="color:#3D2E0A;">
                             Omedelbar e-post så snart en bevakad person hittas i dödsannonser.
                           </p>
                         </div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="card h-100 border-warning">
+                      <div class="card h-100 eb-card-muted" style="background:#F7F2E8;">
                         <div class="card-body">
-                          <h5 class="card-title text-warning fw-bold">Normal</h5>
-                          <p class="card-text">
+                          <h5 class="card-title fw-bold" style="color:#5A4A2A;">Normal</h5>
+                          <p class="card-text" style="color:#3D2E0A;">
                             Daglig sammanfattning av alla träffar från föregående dygn.
                           </p>
                         </div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="card h-100 border-secondary">
+                      <div class="card h-100" style="background:#F7F2E8; border-color:#D0C9B8 !important;">
                         <div class="card-body">
-                          <h5 class="card-title text-secondary fw-bold">Bra att veta</h5>
-                          <p class="card-text">
+                          <h5 class="card-title fw-bold" style="color:#7A7060;">Bra att veta</h5>
+                          <p class="card-text" style="color:#3D2E0A;">
                             Periodisk rapport — för kontakter där timing är mindre kritisk.
                           </p>
                         </div>
@@ -122,27 +163,28 @@
               </section>
 
               <!-- Målgrupper -->
-              <section class="bg-light py-5">
+              <section class="eb-beige py-5">
                 <div class="container">
-                  <h2 class="h3 text-center mb-5">Vem tjänar på tjänsten?</h2>
-                  <div class="row g-4">
+                  <h2 class="h3 text-center mb-2 fw-bold" style="color:#1D2B4F;">Vem tjänar på tjänsten?</h2>
+                  <div class="eb-divider"></div>
+                  <div class="row g-4 mt-1">
                     <div class="col-md-4">
-                      <h5 class="fw-bold">Juridikbyråer &amp; dödsbon</h5>
-                      <p>
+                      <h5 class="fw-bold eb-gold">Juridikbyråer &amp; dödsbon</h5>
+                      <p style="color:#3D2E0A;">
                         Snabb och tillförlitlig information vid ett dödsfall. Undvik att missa
                         viktiga händelser som påverkar ärenden och mandat.
                       </p>
                     </div>
                     <div class="col-md-4">
-                      <h5 class="fw-bold">Finansiella institutioner</h5>
-                      <p>
+                      <h5 class="fw-bold eb-gold">Finansiella institutioner</h5>
+                      <p style="color:#3D2E0A;">
                         Automatiserad kontroll av kundregister mot publicerade dödsannonser.
                         Minskar manuellt arbete och risk för fördröjda åtgärder.
                       </p>
                     </div>
                     <div class="col-md-4">
-                      <h5 class="fw-bold">Privatpersoner</h5>
-                      <p>
+                      <h5 class="fw-bold eb-gold">Privatpersoner</h5>
+                      <p style="color:#3D2E0A;">
                         Bevaka åldrande släktingar eller gamla bekanta utan dagligt manuellt
                         sökande. Få besked när det verkligen händer.
                       </p>
@@ -152,13 +194,13 @@
               </section>
 
               <!-- CTA -->
-              <section class="py-5 text-center">
+              <section class="eb-hero py-5 text-center">
                 <div class="container">
-                  <h2 class="h3 mb-3">Intresserad?</h2>
-                  <p class="lead mb-4">
+                  <h2 class="h3 mb-3 fw-bold" style="color:#F7F2E8;">Intresserad?</h2>
+                  <p class="lead mb-4" style="color:#C8C0AE;">
                     Kontakta oss för mer information och tillgång till tjänsten.
                   </p>
-                  <a href="/contactus" class="btn btn-primary btn-lg">Kom i kontakt</a>
+                  <a href="/contactus" class="btn eb-btn-gold btn-lg px-4">Kom i kontakt</a>
                 </div>
               </section>
 
@@ -168,7 +210,6 @@
       </field>
     </record>
 
-    <!-- website.page — publicerar sidan på /examensbyran -->
     <record id="page_examensbyran_home" model="website.page">
       <field name="view_id" ref="view_examensbyran_home"/>
       <field name="url">/examensbyran</field>
