@@ -4,23 +4,23 @@
               name="Tavlingar"
               sequence="30"/>
 
+    <menuitem id="menu_ssf_cups"
+              name="Serier"
+              parent="menu_ssf_competition_root"
+              sequence="10"
+              action="action_ssf_cup_list"/>
+
     <menuitem id="menu_ssf_events"
               name="Evenemang"
               parent="menu_ssf_competition_root"
-              sequence="10"
+              sequence="20"
               action="action_ssf_event_list"/>
 
     <menuitem id="menu_ssf_competitions"
               name="Tavlingar"
               parent="menu_ssf_competition_root"
-              sequence="20"
-              action="action_ssf_competition_list"/>
-
-    <menuitem id="menu_ssf_cups"
-              name="Serier"
-              parent="menu_ssf_competition_root"
               sequence="30"
-              action="action_ssf_cup_list"/>
+              action="action_ssf_competition_list"/>
 
     <menuitem id="menu_ssf_fis_competitors"
               name="FIS-akare"
