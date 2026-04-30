@@ -110,3 +110,31 @@ class ClioVigilItem(models.Model):
     _sql_constraints = [
         ("url_uniq", "UNIQUE(url)", "Objekt-URL måste vara unik."),
     ]
+
+    # ── Åtgärder ─────────────────────────────────────────────────────────────
+
+    def action_boost(self):
+        """Boostar objektet till toppen av transkriptionskön (prio 999)."""
+        self.ensure_one()
+        self.write({
+            "priority_score": 999.0,
+            "state": "queued",
+        })
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": "Boostade!",
+                "message": f"'{self.title or self.url[:60]}' boostad till toppen av kön.",
+                "type": "success",
+                "sticky": False,
+            },
+        }
+
+    def action_reset_to_discovered(self):
+        """Återställer objektet till discovered (börja om)."""
+        self.ensure_one()
+        self.write({
+            "state": "discovered",
+            "priority_score": 0.0,
+        })

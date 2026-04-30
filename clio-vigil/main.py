@@ -619,10 +619,22 @@ def main():
     # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
     try:
         from odoo_writer import get_odoo_env, sync_items_from_conn, write_sources, write_heartbeat
+        from odoo_reader import pull_state_changes
         _odoo_env = get_odoo_env()
     except Exception as _e:
-        logger.warning("odoo_writer saknas eller anslutning misslyckades: %s", _e)
+        logger.warning("odoo_writer/reader saknas eller anslutning misslyckades: %s", _e)
         _odoo_env = None
+
+    def _odoo_pull(label: str = "") -> None:
+        """Hämtar tillståndsändringar från Odoo → SQLite. Kraschsäkert."""
+        if _odoo_env is None:
+            return
+        try:
+            n = pull_state_changes(_odoo_env, conn)
+            if n:
+                logger.info("Odoo→SQLite %s: %d rader uppdaterade", label, n)
+        except Exception as _pe:
+            logger.warning("Odoo-pull misslyckades (%s): %s", label, _pe)
 
     def _odoo_sync(label: str = "") -> None:
         """Synkar aktuella pipeline-objekt till Odoo. Kraschsäkert."""
@@ -682,6 +694,7 @@ def main():
         print(f"\n✓ Räknade om priority_score för {n} objekt (inkl. tidsfaktor)")
 
     elif args.run or args.full:
+        _odoo_pull("före insamling")
         domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]
         for domain_id in domains:
             try:
@@ -693,6 +706,7 @@ def main():
         _odoo_sync("efter filter")
 
     if args.transcribe or args.full:
+        _odoo_pull("före transkription")
         from transcriber import run_transcription_queue
         counts = run_transcription_queue(conn, domain=args.domain, max_items=args.max)
         logger.info(
@@ -702,12 +716,14 @@ def main():
         _odoo_sync("efter transkription")
 
     if args.summarize or args.full:
+        _odoo_pull("före summering")
         from summarizer import run_summarizer
         counts = run_summarizer(conn, domain=args.domain, max_items=args.max)
         logger.info(f"Summering: {counts['done']} klara, {counts['failed']} misslyckade")
         _odoo_sync("efter summering")
 
     if args.index or args.full:
+        _odoo_pull("före indexering")
         from indexer import run_indexer
         counts = run_indexer(conn, domain=args.domain, max_items=args.max)
         logger.info(f"Indexering: {counts['indexed']} indexerade, {counts['failed']} misslyckade")
@@ -735,6 +751,7 @@ def main():
             )
 
     if args.digest or args.full:
+        _odoo_pull("före digest")
         from notifier import run_digest
         counts = run_digest(conn, domain=args.domain, dry_run=args.dry_run)
         logger.info(f"Digest: {counts['items']} objekt skickade")
