@@ -5,9 +5,9 @@
     <record id="view_examensbyran_home" model="ir.ui.view">
       <field name="name">examensbyran.home</field>
       <field name="type">qweb</field>
-      <field name="key">odo_examensbyran_web.view_examensbyran_home</field>
+      <field name="key">odoo_examensbyran_web.view_examensbyran_home</field>
       <field name="arch" type="xml">
-        <t t-name="odo_examensbyran_web.view_examensbyran_home">
+        <t t-name="odoo_examensbyran_web.view_examensbyran_home">
           <t t-call="website.layout">
             <div id="wrap">
 
