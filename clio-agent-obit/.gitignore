@@ -1,0 +1,4 @@
+.env
+geni_relations.json
+__pycache__/
+*.pyc
