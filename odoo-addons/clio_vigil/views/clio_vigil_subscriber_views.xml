@@ -55,7 +55,7 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-envelope-o"
-                    context="{'search_default_subscriber_id': active_id}">
+                    context="{'search_default_subscriber_id': id}">
               <field name="delivery_count" widget="statinfo" string="Leveranser"/>
             </button>
           </div>
