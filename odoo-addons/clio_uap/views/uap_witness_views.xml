@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_uap_witness_tree" model="ir.ui.view">
+    <field name="name">uap.witness.list</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="witness_type"/>
+        <field name="credibility"/>
+        <field name="language"/>
+        <field name="status"/>
+        <field name="encounter_count" string="Encounters"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_uap_witness_form" model="ir.ui.view">
+    <field name="name">uap.witness.form</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="%(action_uap_encounter)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-globe">
+              <field name="encounter_count" widget="statinfo" string="Encounters"/>
+            </button>
+          </div>
+          <group string="Witness">
+            <field name="name"/>
+            <field name="witness_type"/>
+            <field name="credibility"/>
+          </group>
+          <group string="Details">
+            <field name="status"/>
+            <field name="language"/>
+            <field name="url" widget="url" placeholder="https://"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sökvy -->
+  <record id="view_uap_witness_search" model="ir.ui.view">
+    <field name="name">uap.witness.search</field>
+    <field name="model">uap.witness</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <filter string="Military" name="military" domain="[('witness_type','=','military')]"/>
+        <filter string="Tier 1" name="tier1" domain="[('credibility','=','tier_1')]"/>
+        <group expand="0" string="Group By">
+          <filter string="Type" name="by_type" context="{'group_by': 'witness_type'}"/>
+          <filter string="Credibility" name="by_cred" context="{'group_by': 'credibility'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_uap_witness" model="ir.actions.act_window">
+    <field name="name">Witnesses</field>
+    <field name="res_model">uap.witness</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_uap_witness_search"/>
+  </record>
+
+</odoo>

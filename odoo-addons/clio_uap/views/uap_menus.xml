@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Toppmeny -->
+  <menuitem id="menu_uap_root"
+            name="UAP"
+            sequence="90"/>
+
+  <!-- Encounters -->
+  <menuitem id="menu_uap_encounters"
+            name="Encounters"
+            parent="menu_uap_root"
+            action="action_uap_encounter"
+            sequence="10"/>
+
+  <!-- Sources -->
+  <menuitem id="menu_uap_sources"
+            name="Sources"
+            parent="menu_uap_root"
+            action="action_uap_source"
+            sequence="20"/>
+
+  <!-- Witnesses -->
+  <menuitem id="menu_uap_witnesses"
+            name="Witnesses"
+            parent="menu_uap_root"
+            action="action_uap_witness"
+            sequence="30"/>
+
+  <!-- Verification Log -->
+  <menuitem id="menu_uap_verification"
+            name="Verification Log"
+            parent="menu_uap_root"
+            action="action_uap_verification"
+            sequence="40"/>
+
+</odoo>

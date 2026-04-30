@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_uap_source_tree" model="ir.ui.view">
+    <field name="name">uap.source.list</field>
+    <field name="model">uap.source</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="source_id"/>
+        <field name="name"/>
+        <field name="source_type"/>
+        <field name="tier"/>
+        <field name="language"/>
+        <field name="published_date"/>
+        <field name="encounter_count" string="Encounters"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_uap_source_form" model="ir.ui.view">
+    <field name="name">uap.source.form</field>
+    <field name="model">uap.source</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="%(action_uap_encounter)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-globe">
+              <field name="encounter_count" widget="statinfo" string="Encounters"/>
+            </button>
+          </div>
+          <group string="Identification">
+            <field name="source_id" placeholder="ufo-se_1974_vallentuna"/>
+            <field name="name"/>
+            <field name="source_type"/>
+            <field name="tier"/>
+          </group>
+          <group string="Details">
+            <field name="url" widget="url" placeholder="https://"/>
+            <field name="published_date"/>
+            <field name="language"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sökvy -->
+  <record id="view_uap_source_search" model="ir.ui.view">
+    <field name="name">uap.source.search</field>
+    <field name="model">uap.source</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <field name="source_id"/>
+        <filter string="Tier 1" name="tier1" domain="[('tier','=','tier_1')]"/>
+        <filter string="Tier 2" name="tier2" domain="[('tier','=','tier_2')]"/>
+        <group expand="0" string="Group By">
+          <filter string="Type" name="by_type" context="{'group_by': 'source_type'}"/>
+          <filter string="Tier" name="by_tier" context="{'group_by': 'tier'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_uap_source" model="ir.actions.act_window">
+    <field name="name">Sources</field>
+    <field name="res_model">uap.source</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_uap_source_search"/>
+  </record>
+
+</odoo>

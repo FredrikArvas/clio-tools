@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_uap_verification_tree" model="ir.ui.view">
+    <field name="name">uap.verification.list</field>
+    <field name="model">uap.verification</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="encounter_id"/>
+        <field name="change_date"/>
+        <field name="changed_by"/>
+        <field name="field_name"/>
+        <field name="verification_status"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_uap_verification_form" model="ir.ui.view">
+    <field name="name">uap.verification.form</field>
+    <field name="model">uap.verification</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group string="Reference">
+            <field name="name"/>
+            <field name="encounter_id"/>
+            <field name="change_date"/>
+            <field name="changed_by"/>
+            <field name="verification_status"/>
+          </group>
+          <group string="Change">
+            <field name="field_name"/>
+          </group>
+          <group string="Values" col="2">
+            <group string="Before" col="1">
+              <field name="original_value" nolabel="1" placeholder="Original value"/>
+            </group>
+            <group string="After" col="1">
+              <field name="updated_value" nolabel="1" placeholder="Updated value"/>
+            </group>
+          </group>
+          <group string="Reason" col="1">
+            <field name="reason" nolabel="1"/>
+          </group>
+          <group string="Source">
+            <field name="source_link" widget="url" placeholder="https://"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sökvy -->
+  <record id="view_uap_verification_search" model="ir.ui.view">
+    <field name="name">uap.verification.search</field>
+    <field name="model">uap.verification</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="encounter_id"/>
+        <field name="changed_by"/>
+        <field name="field_name"/>
+        <filter string="Verified" name="verified" domain="[('verification_status','=','verified')]"/>
+        <filter string="Pending" name="pending" domain="[('verification_status','=','pending')]"/>
+        <group expand="0" string="Group By">
+          <filter string="Encounter" name="by_encounter" context="{'group_by': 'encounter_id'}"/>
+          <filter string="Status" name="by_status" context="{'group_by': 'verification_status'}"/>
+          <filter string="Changed By" name="by_changed_by" context="{'group_by': 'changed_by'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_uap_verification" model="ir.actions.act_window">
+    <field name="name">Verification Log</field>
+    <field name="res_model">uap.verification</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_uap_verification_search"/>
+  </record>
+
+</odoo>
