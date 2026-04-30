@@ -30,6 +30,9 @@
                decoration-info="state == 'transcribed'"
                decoration-muted="state == 'filtered_out'"/>
         <field name="summary"        string="Sammanfattning" optional="hide"/>
+        <button name="action_boost" type="object" icon="fa-bolt"
+                string="Boosta" title="Boosta till toppen av kön"
+                invisible="state in ('transcribing','transcribed','indexed','notified')"/>
       </list>
     </field>
   </record>
@@ -40,6 +43,26 @@
     <field name="model">clio.vigil.item</field>
     <field name="arch" type="xml">
       <form string="Bevakningsobjekt">
+        <header>
+          <button name="action_boost"
+                  string="⚡ Boosta till kön"
+                  type="object"
+                  class="btn-primary"
+                  invisible="state in ('queued', 'transcribing', 'transcribed', 'indexed', 'notified')"
+                  confirm="Boosta detta objekt till toppen av transkriptionskön?"/>
+          <button name="action_boost"
+                  string="⚡ Boosta (prioritet 999)"
+                  type="object"
+                  invisible="state not in ('queued', 'filtered_in')"
+                  confirm="Sätt prioritet 999 och flytta till toppen av kön?"/>
+          <button name="action_reset_to_discovered"
+                  string="↩ Återställ"
+                  type="object"
+                  groups="base.group_system"
+                  confirm="Återställ objektet till 'discovered'? Transkription och summering rensas inte automatiskt."/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="filtered_in,queued,transcribed,indexed,notified"/>
+        </header>
         <sheet>
           <group>
             <group string="Objekt">
