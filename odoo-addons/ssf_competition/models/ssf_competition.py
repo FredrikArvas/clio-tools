@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 COMP_STATUS = [
     ('1', 'Ny'),
@@ -28,18 +28,29 @@ class SsfCompetition(models.Model):
     entry_open = fields.Boolean(string="Entry Open", readonly=True)
     live_results_link = fields.Char(string="Live Results", readonly=True)
     ccd_ids = fields.One2many("ssf.comp.ccd", "competition_id", string="Classes/Disciplines")
-    entry_count = fields.Integer(string="Entries", compute="_compute_counts", store=False)
-    result_count = fields.Integer(string="Results", compute="_compute_counts", store=False)
 
+    # store=True → sorterbara i listvy + snabb aggregering
+    # @api.depends-kedjan: entry/result skapas → ccd → competition räknas om
+    entry_count = fields.Integer(
+        string="Entries", compute="_compute_counts", store=True
+    )
+    result_count = fields.Integer(
+        string="Results", compute="_compute_counts", store=True
+    )
+
+    @api.depends("ccd_ids.entry_ids", "ccd_ids.result_list_ids.result_ids")
     def _compute_counts(self):
         Entry = self.env["ssf.entry"]
         Result = self.env["ssf.result"]
+        RL = self.env["ssf.result.list"]
         for rec in self:
             ccd_ids = rec.ccd_ids.ids
             if ccd_ids:
                 rec.entry_count = Entry.search_count([("ccd_id", "in", ccd_ids)])
-                rl_ids = self.env["ssf.result.list"].search([("ccd_id", "in", ccd_ids)]).ids
-                rec.result_count = Result.search_count([("result_list_id", "in", rl_ids)]) if rl_ids else 0
+                rl_ids = RL.search([("ccd_id", "in", ccd_ids)]).ids
+                rec.result_count = Result.search_count(
+                    [("result_list_id", "in", rl_ids)]
+                ) if rl_ids else 0
             else:
                 rec.entry_count = 0
                 rec.result_count = 0

@@ -13,9 +13,15 @@ class SsfSector(models.Model):
     sort_order = fields.Integer(string="Sort Order", readonly=True)
     fis_sector_code = fields.Char(string="FIS Code", readonly=True)
 
-    event_count = fields.Integer(string="Evenemang", compute="_compute_counts")
-    competition_count = fields.Integer(string="Tävlingar", compute="_compute_counts")
+    # store=True krävs för att graf-vyn ska kunna aggregera
+    event_count = fields.Integer(
+        string="Evenemang", compute="_compute_counts", store=True
+    )
+    competition_count = fields.Integer(
+        string="Tävlingar", compute="_compute_counts", store=True
+    )
 
+    @api.depends()
     def _compute_counts(self):
         for rec in self:
             rec.event_count = self.env["ssf.event"].search_count(

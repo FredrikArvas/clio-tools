@@ -5,13 +5,25 @@
         <field name="model">ssf.sector</field>
         <field name="arch" type="xml">
             <list string="Grenar" create="false" edit="false" delete="false">
-                <field name="sector_code" string="Kod"/>
                 <field name="name" string="Namn"/>
+                <field name="sector_code" string="Kod"/>
                 <field name="fis_sector_code" string="FIS-kod"/>
                 <field name="event_count" string="Evenemang"/>
                 <field name="competition_count" string="Tävlingar"/>
                 <field name="hidden" string="Dold"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_sector_graph" model="ir.ui.view">
+        <field name="name">ssf.sector.graph</field>
+        <field name="model">ssf.sector</field>
+        <field name="arch" type="xml">
+            <graph string="Grenar" type="bar" stacked="0">
+                <field name="name" type="row"/>
+                <field name="event_count" type="measure" string="Evenemang"/>
+                <field name="competition_count" type="measure" string="Tävlingar"/>
+            </graph>
         </field>
     </record>
 
@@ -49,11 +61,24 @@
         </field>
     </record>
 
+    <record id="view_ssf_sector_search" model="ir.ui.view">
+        <field name="name">ssf.sector.search</field>
+        <field name="model">ssf.sector</field>
+        <field name="arch" type="xml">
+            <search string="Sök grenar">
+                <field name="name" string="Namn"/>
+                <field name="sector_code" string="Kod"/>
+                <filter string="Dölj dolda" name="hide_hidden"
+                        domain="[('hidden', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
     <record id="action_ssf_sector_list" model="ir.actions.act_window">
         <field name="name">Grenar</field>
         <field name="res_model">ssf.sector</field>
-        <field name="view_mode">list,form</field>
-        <field name="context">{"create": false}</field>
+        <field name="view_mode">list,graph,form</field>
+        <field name="context">{"create": false, "search_default_hide_hidden": 1}</field>
     </record>
 
     <record id="view_ssf_discipline_list" model="ir.ui.view">
