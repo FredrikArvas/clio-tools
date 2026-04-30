@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class SsfResultList(models.Model):
@@ -16,3 +16,10 @@ class SsfResultList(models.Model):
     participants_started = fields.Integer(string="Started", readonly=True)
     participants_completed = fields.Integer(string="Completed", readonly=True)
     result_ids = fields.One2many("ssf.result", "result_list_id", string="Results")
+    name = fields.Char(string='Namn', compute='_compute_name')
+
+    @api.depends('class_name', 'discipline_name', 'ssfta_id')
+    def _compute_name(self):
+        for rec in self:
+            parts = [p for p in [rec.class_name, rec.discipline_name] if p]
+            rec.name = ' / '.join(parts) if parts else str(rec.ssfta_id or '')

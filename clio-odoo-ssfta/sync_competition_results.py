@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
 
 import pymssql
@@ -47,21 +48,37 @@ def _get_conn():
     )
 
 
-def _upsert(Model, rows: list[dict], key: str = "ssfta_id", dry_run: bool = False) -> tuple[int, int]:
+def _odoo_retry(fn, retries=3, delay=3):
+    """Kör fn() med upp till `retries` försök vid OdooConnectionError."""
+    from pyodoo_connect.odoo import OdooConnectionError
+    for attempt in range(retries):
+        try:
+            return fn()
+        except OdooConnectionError as e:
+            if attempt < retries - 1:
+                print(f"    [retry {attempt+1}/{retries}] Anslutningsfel: {e} — väntar {delay}s...")
+                time.sleep(delay)
+                delay *= 2
+            else:
+                raise
+
+
+def _upsert(Model, rows: list[dict], key: str = "ssfta_id", dry_run: bool = False, create_only: bool = False) -> tuple[int, int]:
     created = updated = 0
     for i in range(0, len(rows), BATCH):
         batch = rows[i:i + BATCH]
         ids = [r[key] for r in batch]
-        existing = {r[key]: r["id"] for r in Model.search_read([[key, "in", ids]], [key, "id"])}
+        existing = {r[key]: r["id"] for r in _odoo_retry(lambda: Model.search_read([[key, "in", ids]], [key, "id"]))}
         to_create = [r for r in batch if r[key] not in existing]
         to_update = [(existing[r[key]], r) for r in batch if r[key] in existing]
         if to_create and not dry_run:
-            Model.create(to_create)
+            _odoo_retry(lambda: Model.create(to_create))
         created += len(to_create)
-        for odoo_id, row in to_update:
-            if not dry_run:
-                Model.browse(odoo_id).write(row)
-        updated += len(to_update)
+        if not create_only:
+            for odoo_id, row in to_update:
+                if not dry_run:
+                    _odoo_retry(lambda: Model.browse(odoo_id).write(row))
+            updated += len(to_update)
     return created, updated
 
 
@@ -73,6 +90,16 @@ def _get_competition_ssfta_ids(env, competition_ids: list[int] = None, event_ids
     elif event_ids:
         domain = [("event_id.ssfta_id", "in", event_ids)]
     recs = env["ssf.competition"].search_read(domain, ["ssfta_id", "id"])
+    return [(r["ssfta_id"], r["id"]) for r in recs]
+
+
+
+def _get_competition_pairs_for_season(env, season_ssfta_id: int) -> list[tuple[int, int]]:
+    """Returnerar (ssfta_id, odoo_id) for alla tavlingar i en sasong."""
+    recs = env["ssf.competition"].search_read(
+        [("season_id.ssfta_id", "=", season_ssfta_id)],
+        ["ssfta_id", "id"],
+    )
     return [(r["ssfta_id"], r["id"]) for r in recs]
 
 
@@ -246,7 +273,7 @@ def sync_entries(env, comp_ssfta_id: int, ccd_map: dict, dry_run: bool):
             "note": r["Note"] or "",
         })
 
-    c, u = _upsert(env["ssf.entry"], rows, dry_run=dry_run)
+    c, u = _upsert(env["ssf.entry"], rows, dry_run=dry_run, create_only=True)
     print(f"    Entries:     {c} skapade, {u} uppdaterade  (totalt {len(rows)})")
 
 
@@ -268,11 +295,12 @@ def main():
     parser = argparse.ArgumentParser(description="Synkar resultat/anmalningar per tavling")
     parser.add_argument("--competition-id", type=int, help="SSFTA Competition.ID")
     parser.add_argument("--event-id", type=int, help="SSFTA Event.ID (synkar alla tavlingar)")
+    parser.add_argument("--season", type=int, help="SSFTA Season.ID")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--db", default=None)
     args = parser.parse_args()
 
-    if not args.competition_id and not args.event_id:
+    if not args.competition_id and not args.event_id and not args.season:
         print("Ange --competition-id eller --event-id")
         sys.exit(1)
 
@@ -280,9 +308,12 @@ def main():
     dr = args.dry_run
     mode = "[DRY-RUN] " if dr else ""
 
-    competition_ids = [args.competition_id] if args.competition_id else None
-    event_ids = [args.event_id] if args.event_id else None
-    pairs = _get_competition_ssfta_ids(env, competition_ids, event_ids)
+    if args.season:
+        pairs = _get_competition_pairs_for_season(env, args.season)
+    else:
+        competition_ids = [args.competition_id] if args.competition_id else None
+        event_ids = [args.event_id] if args.event_id else None
+        pairs = _get_competition_ssfta_ids(env, competition_ids, event_ids)
 
     if not pairs:
         print("Inga matching tavlingar i Odoo. Kör sync_competition_meta.py först.")

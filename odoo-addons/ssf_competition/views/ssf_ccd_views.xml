@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════════════════
+         ssf.result.list — Form (öppnas från CCD-formen)
+         Visar alla resultat i en resultatlista
+    ══════════════════════════════════════════════════════ -->
+    <record id="view_ssf_result_list_form" model="ir.ui.view">
+        <field name="name">ssf.result.list.form</field>
+        <field name="model">ssf.result.list</field>
+        <field name="arch" type="xml">
+            <form string="Resultatlista" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ccd_id" readonly="1"/>
+                            <field name="competition_id" readonly="1"/>
+                            <field name="final" readonly="1"/>
+                        </group>
+                        <group string="Deltagare">
+                            <field name="participants_registered" readonly="1" string="Anmälda"/>
+                            <field name="participants_started" readonly="1" string="Startade"/>
+                            <field name="participants_completed" readonly="1" string="Fullföljde"/>
+                        </group>
+                    </group>
+                    <field name="result_ids" readonly="1" nolabel="1">
+                        <list create="false" edit="false" delete="false"
+                              default_order="rank,display_order">
+                            <field name="rank" string="Plac."/>
+                            <field name="bib" string="Nr" optional="show"/>
+                            <field name="firstname" string="Förnamn"/>
+                            <field name="lastname" string="Efternamn"/>
+                            <field name="birth_year" string="Födelseår" optional="hide"/>
+                            <field name="nation" string="Nation" optional="show"/>
+                            <field name="club" string="Klubb"/>
+                            <field name="club_id" string="Klubb (länk)" optional="hide"/>
+                            <field name="person_id" string="Person (länk)" optional="hide"/>
+                            <field name="status" string="Status"/>
+                            <field name="time" string="Tid"/>
+                            <field name="difference" string="Diff" optional="show"/>
+                            <field name="points" string="Poäng" optional="hide"/>
+                            <field name="fis_points" string="FIS-poäng" optional="hide"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════
+         ssf.comp.ccd — Form (öppnas från Competition-formen)
+         Visar CCD-info + resultatlistor + anmälningar
+    ══════════════════════════════════════════════════════ -->
+    <record id="view_ssf_comp_ccd_form" model="ir.ui.view">
+        <field name="name">ssf.comp.ccd.form</field>
+        <field name="model">ssf.comp.ccd</field>
+        <field name="arch" type="xml">
+            <form string="Klass / Disciplin" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="competition_id" readonly="1"/>
+                            <field name="class_id" readonly="1"/>
+                            <field name="discipline_id" readonly="1"/>
+                            <field name="distance" readonly="1" string="Distans"/>
+                        </group>
+                        <group>
+                            <field name="fis_codex" readonly="1" string="FIS Codex"/>
+                            <field name="non_member_entry" readonly="1" string="Icke-medl. anmälan"/>
+                            <field name="foreign_entry" readonly="1" string="Utländsk anmälan"/>
+                            <field name="ssfta_id" readonly="1" string="SSFTA ID"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Resultatlistor" name="result_lists">
+                            <field name="result_list_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="class_name" string="Klass"/>
+                                    <field name="discipline_name" string="Disciplin"/>
+                                    <field name="final" string="Final" optional="hide"/>
+                                    <field name="participants_registered" string="Anmälda"/>
+                                    <field name="participants_started" string="Startade"/>
+                                    <field name="participants_completed" string="Fullföljde"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Anmälningar" name="entries">
+                            <field name="entry_ids" readonly="1">
+                                <list create="false" edit="false" delete="false"
+                                      default_order="entry_date">
+                                    <field name="person_id" string="Person"/>
+                                    <field name="organization_id" string="Klubb"/>
+                                    <field name="entry_date" string="Anm.datum"/>
+                                    <field name="entry_fee" string="Avgift" optional="hide"/>
+                                    <field name="paid_fee" string="Betalt" optional="hide"/>
+                                    <field name="payment_status" string="Bet.status" optional="show"/>
+                                    <field name="unregistered" string="Avanmäld"/>
+                                    <field name="unreg_date" string="Avanm.datum" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
