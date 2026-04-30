@@ -70,10 +70,8 @@
                 <filter string="Ej rapporterade" name="no_report"
                         domain="[('report_date', '=', False)]"/>
                 <group expand="0" string="Gruppera efter">
-                    <filter string="Gren" name="group_sector"
-                            context="{'group_by': 'competition_id.event_id.sector_id'}"/>
-                    <filter string="Säsong" name="group_season"
-                            context="{'group_by': 'competition_id.event_id.season_id'}"/>
+                    <filter string="Tävling" name="group_competition"
+                            context="{'group_by': 'competition_id'}"/>
                     <filter string="Rapportmånad" name="group_report_month"
                             context="{'group_by': 'report_date:month'}"/>
                 </group>
