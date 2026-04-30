@@ -170,7 +170,7 @@
             </div>
             <div class="text-muted small mt-1">
               Prio: <field name="priority_score"/>
-              &nbsp;·&nbsp;<field name="published_at" widget="date"/>
+              &#160;·&#160;<field name="published_at" widget="date"/>
             </div>
           </t>
         </templates>
