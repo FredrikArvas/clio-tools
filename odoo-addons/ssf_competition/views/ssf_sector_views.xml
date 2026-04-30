@@ -8,15 +8,51 @@
                 <field name="sector_code" string="Kod"/>
                 <field name="name" string="Namn"/>
                 <field name="fis_sector_code" string="FIS-kod"/>
+                <field name="event_count" string="Evenemang"/>
+                <field name="competition_count" string="Tävlingar"/>
                 <field name="hidden" string="Dold"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_sector_form" model="ir.ui.view">
+        <field name="name">ssf.sector.form</field>
+        <field name="model">ssf.sector</field>
+        <field name="arch" type="xml">
+            <form string="Gren" create="false" edit="false">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_events" type="object"
+                                class="oe_stat_button" icon="fa-trophy">
+                            <field name="event_count" widget="statinfo" string="Evenemang"/>
+                        </button>
+                        <button name="action_view_competitions" type="object"
+                                class="oe_stat_button" icon="fa-flag">
+                            <field name="competition_count" widget="statinfo" string="Tävlingar"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sector_code" readonly="1" string="Kod"/>
+                            <field name="fis_sector_code" readonly="1" string="FIS-kod"/>
+                        </group>
+                        <group>
+                            <field name="ssfta_id" readonly="1" string="SSFTA ID"/>
+                            <field name="hidden" readonly="1" string="Dold"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
         </field>
     </record>
 
     <record id="action_ssf_sector_list" model="ir.actions.act_window">
         <field name="name">Grenar</field>
         <field name="res_model">ssf.sector</field>
-        <field name="view_mode">list</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{"create": false}</field>
     </record>
 
