@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_clio_cockpit_user,clio.cockpit (user),model_clio_cockpit,base.group_user,1,1,1,1
 access_clio_tool_heartbeat_user,clio.tool.heartbeat (user),model_clio_tool_heartbeat,clio_cockpit.group_clio_user,1,0,0,0
 access_clio_tool_heartbeat_admin,clio.tool.heartbeat (admin),model_clio_tool_heartbeat,clio_cockpit.group_clio_admin,1,1,1,1
+access_clio_db_size_admin,clio.db.size (admin),model_clio_db_size,clio_cockpit.group_clio_admin,1,1,1,1
