@@ -6,7 +6,7 @@ After=network.target
 Type=oneshot
 User=clioadmin
 WorkingDirectory=/home/clioadmin/git/clio-tools/clio-vigil
-ExecStart=/home/clioadmin/git/clio-tools/.venv/bin/python main.py --run --domain ufo
+ExecStart=/home/clioadmin/git/clio-tools/.venv/bin/python main.py --run --domain ufo --classify-uap --max 50
 StandardOutput=append:/home/clioadmin/logs/clio-vigil-uap.log
 StandardError=append:/home/clioadmin/logs/clio-vigil-uap.log
 

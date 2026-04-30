@@ -24,6 +24,14 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
 
 _BASE_DIR = Path(__file__).parent
 
+# clio-uap must be first in sys.path to shadow the clio-tools/config/ package
+_ROOT_DIR = _BASE_DIR.parent
+for _p in [str(_ROOT_DIR), str(_BASE_DIR)]:
+    if _p in sys.path:
+        sys.path.remove(_p)
+sys.path.insert(0, str(_ROOT_DIR))
+sys.path.insert(0, str(_BASE_DIR))
+
 
 def _banner():
     print("=" * 60)
@@ -76,10 +84,12 @@ def cmd_import(args):
     # --- Steg 3: Importera Sources ---
     print("[IMPORT] Sources")
     source_id_map: dict[str, int] = {}
+    source_name_map: dict[str, int] = {}
     for row in sources:
         odoo_id = upsert_source(env, row, dry_run=dry_run)
         if odoo_id:
             source_id_map[row["source_id"]] = odoo_id
+            source_name_map[row["name"]] = odoo_id
     print(f"  → {len(sources)} sources importerade\n")
 
     # --- Steg 4: Importera Witnesses ---
@@ -95,13 +105,20 @@ def cmd_import(args):
     print("[IMPORT] Encounters")
     encounter_id_map: dict[str, int] = {}
     country_cache: dict[str, int] = {}
+    enc_ok = 0
+    RECONNECT_EVERY = 100  # återanslut för att undvika session-timeout
 
-    for row in encounters:
-        # Resolva sources
+    for i, row in enumerate(encounters):
+        # Periodic reconnect to avoid Odoo session timeout on large imports
+        if not dry_run and i > 0 and i % RECONNECT_EVERY == 0:
+            print(f"    [{i}/{len(encounters)}] Återansluter till Odoo...")
+            env = get_env()
+
+        # Resolva sources (by name, since encounters reference sources by display name)
         src_ids = [
-            source_id_map[sn]
+            source_name_map[sn]
             for sn in row.get("_source_names", [])
-            if sn in source_id_map
+            if sn in source_name_map
         ]
         # Resolva witnesses
         wit_ids = [
@@ -123,10 +140,17 @@ def cmd_import(args):
                 country_cache[country_name] = results[0]["id"] if results else False
             row["country_id"] = country_cache.get(country_name, False)
 
-        odoo_id = upsert_encounter(env, row, src_ids, wit_ids, dry_run=dry_run)
+        try:
+            odoo_id = upsert_encounter(env, row, src_ids, wit_ids, dry_run=dry_run)
+        except Exception as e:
+            print(f"    [FEL] {row.get('encounter_id', '?')}: {e}")
+            if not dry_run:
+                env = get_env()  # reconnect after error
+            continue
         if odoo_id:
             encounter_id_map[row["encounter_id"]] = odoo_id
-    print(f"  → {len(encounters)} encounters importerade\n")
+            enc_ok += 1
+    print(f"  → {enc_ok}/{len(encounters)} encounters importerade\n")
 
     # --- Steg 6: Importera Verifications ---
     print("[IMPORT] Verification Log")
@@ -151,6 +175,7 @@ def cmd_import(args):
 
 def cmd_stats(args):
     """Visa antal poster per UAP-modell i Odoo."""
+    import config  # loads .env including ODOO_DB=uapdb
     from odoo_sync import get_env, get_model_counts
     print("\n[stats] Ansluter till Odoo...")
     env = get_env()

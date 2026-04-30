@@ -12,10 +12,17 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Force-load local config.py (avoids shadowing by clio-tools/config/ package)
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("uap_config", Path(__file__).parent / "config.py")
+_uap_config = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_uap_config)
 
 
 def _neo4j_driver():
-    import config
+    config = _uap_config
     try:
         from neo4j import GraphDatabase
     except ImportError:

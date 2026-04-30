@@ -175,18 +175,25 @@ def load_witnesses(data_path: Path) -> list[dict]:
 
 def load_encounters(data_path: Path) -> list[dict]:
     """
-    Läs Incidents 2 *.csv → lista av encounter-dicts.
-    Varje dict innehåller nyckeln '_source_names' och '_witness_names'
-    för att resolva relationer i migrationsskriptet.
+    Läs Incidents *.csv → lista av encounter-dicts.
+    Föredrar Incidents.zip (905 rader, schema: Description) framför
+    Incidents 2.zip (58 rader, schema: Description_EN/SV/Original).
+    Varje dict innehåller '_source_names' och '_witness_names'.
     """
-    zip_path = _find_zip(data_path, "Incidents 2")
+    # Föredra Incidents.zip (full dataset) — matcha INTE "Incidents 2"
+    zip_path = None
+    for p in data_path.rglob("*.zip"):
+        name_lower = p.name.lower()
+        if "incidents" in name_lower and "incidents 2" not in name_lower:
+            zip_path = p
+            break
     if not zip_path:
-        # Fallback: leta i Incidents.zip
-        zip_path = _find_zip(data_path, "Incidents")
-        if not zip_path:
-            print(f"[VARNING] Hittade inte 'Incidents' zip i {data_path}")
-            return []
+        zip_path = _find_zip(data_path, "Incidents 2")
+    if not zip_path:
+        print(f"[VARNING] Hittade inte 'Incidents' zip i {data_path}")
+        return []
 
+    print(f"[migrate] Laddar encounters från: {zip_path.name}")
     raw = _find_csv_in_zip(zip_path, "Incidents")
     if not raw:
         return []
@@ -231,7 +238,8 @@ def load_encounters(data_path: Path) -> list[dict]:
             "location":              r.get("Location", "").strip() or False,
             "title_en":              r.get("Title_EN", "").strip() or False,
             "title_original":        r.get("Title_Original", "").strip() or False,
-            "description_en":        r.get("Description_EN", "").strip() or False,
+            # Stöder båda scheman: Description (Incidents.zip) och Description_EN (Incidents 2.zip)
+            "description_en":        (r.get("Description_EN") or r.get("Description", "")).strip() or False,
             "description_sv":        r.get("Description_SV", "").strip() or False,
             "description_original":  r.get("Description_Original", "").strip() or False,
             "language_original":     lang_map.get(lang_raw, "other") if lang_raw else False,

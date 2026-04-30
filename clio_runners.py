@@ -33,6 +33,7 @@ from clio_run_obit     import run_obit
 from clio_run_job      import run_job
 from clio_run_graph    import run_graph
 from clio_run_odoo     import run_odoo
+from clio_run_gmail    import run_gmail
 
 try:
     from config.clio_utils import t
@@ -81,6 +82,9 @@ def run_tool(tool: dict, state: dict) -> None:
             return
         if name == "clio-agent-odoo":
             run_odoo(tool, state)
+            return
+        if name == "clio-agent-gmail":
+            run_gmail(tool, state)
             return
 
     if not tool["script"].exists():
