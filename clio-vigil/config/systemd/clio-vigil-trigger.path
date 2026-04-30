@@ -1,0 +1,8 @@
+[Unit]
+Description=Bevaka clio-vigil trigger-fil (Odoo → pipeline)
+
+[Path]
+PathChanged=/home/clioadmin/clio-tools/clio-vigil/data/.vigil_trigger
+
+[Install]
+WantedBy=multi-user.target
