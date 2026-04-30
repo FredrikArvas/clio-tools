@@ -44,7 +44,7 @@ class ClioVigilSubscriber(models.Model):
         string = "Leveranser",
     )
     delivery_count = fields.Integer(
-        string  = "Leveranser",
+        string  = "Antal leveranser",
         compute = "_compute_delivery_count",
     )
 

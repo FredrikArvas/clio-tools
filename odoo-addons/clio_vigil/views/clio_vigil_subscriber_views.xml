@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <!-- ── Actions (definieras först så att form-vyn kan referera dem) ──────── -->
+
+  <record id="action_clio_vigil_subscriber" model="ir.actions.act_window">
+    <field name="name">Prenumeranter</field>
+    <field name="res_model">clio.vigil.subscriber</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga prenumeranter ännu.
+      </p>
+      <p>
+        Skapa en prenumerant kopplad till en kontakt och välj
+        vilka domäner (UFO/UAP, AI-modeller) de ska följa.
+      </p>
+    </field>
+  </record>
+
+  <record id="action_clio_vigil_delivery_sub" model="ir.actions.act_window">
+    <field name="name">Leveranser</field>
+    <field name="res_model">clio.vigil.delivery</field>
+    <field name="view_mode">list</field>
+    <field name="domain">[('subscriber_id','=',active_id)]</field>
+    <field name="context">{'default_subscriber_id': active_id}</field>
+  </record>
+
+  <!-- ── Listvy prenumeranter ───────────────────────────────────────────── -->
   <record id="view_clio_vigil_subscriber_list" model="ir.ui.view">
     <field name="name">clio.vigil.subscriber.list</field>
     <field name="model">clio.vigil.subscriber</field>
@@ -47,7 +73,6 @@
             </group>
           </group>
 
-          <!-- Sökord -->
           <notebook>
             <page string="Sökord" name="keywords">
               <field name="keyword_ids" string="">
@@ -99,32 +124,6 @@
         <field name="digest_date"   string="Digestdatum" optional="show"/>
       </list>
     </field>
-  </record>
-
-  <!-- ── Actions ────────────────────────────────────────────────────────── -->
-
-  <record id="action_clio_vigil_subscriber" model="ir.actions.act_window">
-    <field name="name">Prenumeranter</field>
-    <field name="res_model">clio.vigil.subscriber</field>
-    <field name="view_mode">list,form</field>
-    <field name="context">{'search_default_active': 1}</field>
-    <field name="help" type="html">
-      <p class="o_view_nocontent_smiling_face">
-        Inga prenumeranter ännu.
-      </p>
-      <p>
-        Skapa en prenumerant kopplad till en kontakt och välj
-        vilka domäner (UFO/UAP, AI-modeller) de ska följa.
-      </p>
-    </field>
-  </record>
-
-  <record id="action_clio_vigil_delivery_sub" model="ir.actions.act_window">
-    <field name="name">Leveranser</field>
-    <field name="res_model">clio.vigil.delivery</field>
-    <field name="view_mode">list</field>
-    <field name="domain">[('subscriber_id','=',active_id)]</field>
-    <field name="context">{'default_subscriber_id': active_id}</field>
   </record>
 
 </odoo>
