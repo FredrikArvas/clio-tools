@@ -19,6 +19,8 @@ SECTOR_VISUAL = {
 }
 DEFAULT_VISUAL = {'emoji': '🏅', 'c1': '#1A252F', 'c2': '#2C3E50'}
 
+CURRENT_SEASON_SSFTA_ID = 18  # 2025/26 — uppdatera vid säsongsskifte
+
 
 class SsfSector(models.Model):
     _name = "ssf.sector"
@@ -39,10 +41,39 @@ class SsfSector(models.Model):
         string="Tävlingar", compute="_compute_counts", store=True
     )
 
+    # Innevarande säsong (CURRENT_SEASON_SSFTA_ID)
+    cs_event_count = fields.Integer(
+        string="Evenemang (säsong)", compute="_compute_cs_counts", store=True
+    )
+    cs_competition_count = fields.Integer(
+        string="Tävlingar (säsong)", compute="_compute_cs_counts", store=True
+    )
+
     # Visuella fält för kanban
     sport_emoji  = fields.Char(string="Emoji",  compute="_compute_visual", store=True)
     sport_color  = fields.Char(string="Färg 1", compute="_compute_visual", store=True)
     sport_color2 = fields.Char(string="Färg 2", compute="_compute_visual", store=True)
+
+    @api.depends()
+    def _compute_cs_counts(self):
+        if not self.ids:
+            return
+        sql = (
+            "SELECT e.sector_id,"
+            " COUNT(DISTINCT e.id) AS ev_cnt,"
+            " COUNT(DISTINCT c.id) AS co_cnt"
+            " FROM ssf_event e"
+            " LEFT JOIN ssf_competition c ON c.event_id = e.id"
+            " JOIN ssf_season s ON e.season_id = s.id"
+            " WHERE e.sector_id IN %s AND s.ssfta_id = %s"
+            " GROUP BY e.sector_id"
+        )
+        self.env.cr.execute(sql, [tuple(self.ids), CURRENT_SEASON_SSFTA_ID])
+        data = {row[0]: (row[1], row[2]) for row in self.env.cr.fetchall()}
+        for rec in self:
+            ev, co = data.get(rec.id, (0, 0))
+            rec.cs_event_count       = int(ev or 0)
+            rec.cs_competition_count = int(co or 0)
 
     @api.depends("sector_code")
     def _compute_visual(self):
