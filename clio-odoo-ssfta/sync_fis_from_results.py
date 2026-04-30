@@ -63,7 +63,6 @@ def build_fis_competitors(env, nation: str, dry_run: bool):
         [
             ("fis_code", "!=", 0),
             ("nation", "=", nation),
-            ("person_id", "!=", False),
         ],
         ["person_id", "fis_code", "fis_points", "nation", "result_list_id"],
         limit=0,
@@ -126,14 +125,16 @@ def build_fis_competitors(env, nation: str, dry_run: bool):
             pts = 0.0
 
         if key not in best or (date_str and date_str > (best[key]["date"] or "")):
-            best[key] = {
+            entry = {
                 "fis_code": fis_code,
                 "discipline_id": disc_id,
-                "person_id": r["person_id"][0],
                 "nation": r["nation"] or nation,
                 "fis_points": pts,
                 "date": date_str,
             }
+            if r["person_id"]:
+                entry["person_id"] = r["person_id"][0]
+            best[key] = entry
 
     print(f"  Unika (fis_code, disciplin)-kombinationer: {len(best)}  (hoppade {skipped})")
 
