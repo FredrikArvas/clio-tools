@@ -10,3 +10,4 @@ access_clio_vigil_keyword_admin,clio.vigil.keyword admin,model_clio_vigil_keywor
 access_clio_vigil_delivery_user,clio.vigil.delivery user,model_clio_vigil_delivery,base.group_user,1,0,0,0
 access_clio_vigil_delivery_admin,clio.vigil.delivery admin,model_clio_vigil_delivery,base.group_system,1,1,1,1
 access_clio_vigil_set_state_wizard_user,clio.vigil.set.state.wizard user,model_clio_vigil_set_state_wizard,base.group_user,1,1,1,1
+access_clio_vigil_pipeline_user,clio.vigil.pipeline user,model_clio_vigil_pipeline,base.group_user,1,1,1,1

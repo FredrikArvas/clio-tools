@@ -10,6 +10,7 @@
         'views/clio_vigil_item_views.xml',
         'views/clio_vigil_subscriber_views.xml',
         'views/clio_vigil_wizard_views.xml',
+        'views/clio_vigil_pipeline_views.xml',
         'views/menu.xml',
     ],
     'installable': True,

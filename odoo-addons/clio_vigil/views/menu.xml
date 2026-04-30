@@ -7,6 +7,14 @@
             sequence="85"
             groups="base.group_user"/>
 
+  <!-- ── Undermeny: Pipeline ───────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_pipeline"
+            name="Pipeline"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_pipeline"
+            sequence="1"
+            groups="base.group_system"/>
+
   <!-- ── Undermeny: Prenumeranter ──────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_subscribers"
             name="Prenumeranter"

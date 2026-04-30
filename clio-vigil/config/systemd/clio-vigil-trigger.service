@@ -1,0 +1,12 @@
+[Unit]
+Description=Kör clio-vigil pipeline-steg (on-demand trigger från Odoo)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=clioadmin
+WorkingDirectory=/home/clioadmin/clio-tools
+ExecStart=/usr/bin/python3 clio-vigil/trigger_runner.py
+EnvironmentFile=/home/clioadmin/clio-tools/.env
+StandardOutput=journal
+StandardError=journal
