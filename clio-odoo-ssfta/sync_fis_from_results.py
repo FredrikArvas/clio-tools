@@ -142,14 +142,15 @@ def build_fis_competitors(env, nation: str, dry_run: bool):
     for data in best.values():
         row = {
             "fis_code": data["fis_code"],
-            "person_id": data["person_id"],
             "nation": data["nation"],
             "fis_points": data["fis_points"],
             "source": "ssfta_derived",
         }
-        if data["discipline_id"]:
+        if data.get("person_id"):
+            row["person_id"] = data["person_id"]
+        if data.get("discipline_id"):
             row["discipline_id"] = data["discipline_id"]
-        if data["date"]:
+        if data.get("date"):
             row["list_date"] = data["date"]
         rows.append(row)
 
