@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_cup_list" model="ir.ui.view">
+        <field name="name">ssf.cup.list</field>
+        <field name="model">ssf.cup</field>
+        <field name="arch" type="xml">
+            <list string="Tävlingsserier" create="false" edit="false" delete="false">
+                <field name="name" string="Namn"/>
+                <field name="sector_id" string="Gren"/>
+                <field name="season_id" string="Säsong"/>
+                <field name="geographical_scope" string="Räckvidd"/>
+                <field name="organizer_id" string="Arrangör"/>
+                <field name="email" string="E-post"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_cup_form" model="ir.ui.view">
+        <field name="name">ssf.cup.form</field>
+        <field name="model">ssf.cup</field>
+        <field name="arch" type="xml">
+            <form string="Tävlingsserie" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sector_id" readonly="1" string="Gren"/>
+                            <field name="season_id" readonly="1" string="Säsong"/>
+                            <field name="geographical_scope" readonly="1" string="Räckvidd"/>
+                        </group>
+                        <group>
+                            <field name="organizer_id" readonly="1" string="Arrangör"/>
+                            <field name="email" readonly="1" string="E-post"/>
+                            <field name="ssfta_id" readonly="1" string="SSFTA ID"/>
+                        </group>
+                    </group>
+                    <group string="Beskrivning">
+                        <field name="description" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ssf_cup_search" model="ir.ui.view">
+        <field name="name">ssf.cup.search</field>
+        <field name="model">ssf.cup</field>
+        <field name="arch" type="xml">
+            <search string="Sök serier">
+                <field name="name" string="Namn"/>
+                <field name="sector_id" string="Gren"/>
+                <field name="season_id" string="Säsong"/>
+                <field name="organizer_id" string="Arrangör"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Gren" name="group_sector"
+                            context="{'group_by': 'sector_id'}"/>
+                    <filter string="Säsong" name="group_season"
+                            context="{'group_by': 'season_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ssf_cup_list" model="ir.actions.act_window">
+        <field name="name">Tävlingsserier</field>
+        <field name="res_model">ssf.cup</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"create": false}</field>
+    </record>
+</odoo>

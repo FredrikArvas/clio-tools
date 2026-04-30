@@ -1,7 +1,7 @@
 """
 sync_competition_meta.py -- Synkar tävlingsmetadata från SSFTA till Odoo ssf-db.
 
-Ordning: Sectors -> Seasons -> Disciplines -> Classes -> Events -> Competitions -> CCDs
+Ordning: Sectors -> Seasons -> Disciplines -> Classes -> Cups -> Events -> Competitions -> CCDs
 Filtren begränsar Events (och därigenom Competitions + CCDs via SQL-subquery).
 
 Körning:
@@ -228,6 +228,42 @@ def sync_classes(env, dry_run: bool):
     print(f"  Classes:     {c} skapade, {u} uppdaterade")
 
 
+def sync_cups(env, dry_run: bool = False):
+    conn = _get_conn()
+    cur = conn.cursor(as_dict=True)
+    cur.execute("""
+        SELECT c.ID, c.Name, c.Sector, c.Season, c.GeographicalScope,
+               c.Email, c.Description, o.rfid AS organizer_rfid
+        FROM Cups c
+        LEFT JOIN Organizations o ON o.ID = c.Organizer
+    """)
+    rows_raw = cur.fetchall()
+    conn.close()
+
+    sector_map = {r["ssfta_id"]: r["id"] for r in env["ssf.sector"].search_read([], ["ssfta_id", "id"])}
+    season_map = {r["ssfta_id"]: r["id"] for r in env["ssf.season"].search_read([], ["ssfta_id", "id"])}
+    partner_map = {}
+    for p in env["res.partner"].search_read([("ref", "like", "ssfta-")], ["id", "ref"]):
+        rfid = (p["ref"] or "")[len("ssfta-"):]
+        partner_map[rfid.upper()] = p["id"]
+
+    rows = [
+        {
+            "ssfta_id":            r["ID"],
+            "name":                r["Name"] or f"Serie {r['ID']}",
+            "sector_id":           sector_map.get(r["Sector"]) or False,
+            "season_id":           season_map.get(r["Season"]) or False,
+            "geographical_scope":  str(r["GeographicalScope"]) if r["GeographicalScope"] else False,
+            "organizer_id":        partner_map.get((r["organizer_rfid"] or "").upper()) or False,
+            "email":               r["Email"] or "",
+            "description":         r["Description"] or "",
+        }
+        for r in rows_raw
+    ]
+    c, u = _upsert(env["ssf.cup"], rows, dry_run=dry_run)
+    print(f"  Cups:        {c} skapade, {u} uppdaterade")
+
+
 # ─── Events / Competitions / CCDs (filtreras av event_where) ─────────────────
 
 def sync_events(
@@ -430,6 +466,7 @@ def main():
     sync_seasons(env, dr)
     sync_disciplines(env, dr)
     sync_classes(env, dr)
+    sync_cups(env, dr)
     su = args.skip_updates
     event_where = sync_events(env, dr, seasons=seasons, sector_ids=sector_ids, district_ids=district_ids, skip_updates=su)
     sync_competitions(env, dr, event_where, skip_updates=su)

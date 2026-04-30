@@ -21,3 +21,7 @@ access_ssf_entry_user,ssf.entry user,model_ssf_entry,base.group_user,1,0,0,0
 access_ssf_entry_admin,ssf.entry admin,model_ssf_entry,base.group_system,1,1,1,1
 access_ssf_iol_role_user,ssf.iol.role user,model_ssf_iol_role,base.group_user,1,0,0,0
 access_ssf_iol_role_admin,ssf.iol.role admin,model_ssf_iol_role,base.group_system,1,1,1,1
+access_ssf_cup_user,ssf.cup user,model_ssf_cup,base.group_user,1,0,0,0
+access_ssf_cup_admin,ssf.cup admin,model_ssf_cup,base.group_system,1,1,1,1
+access_ssf_person_sector_user,ssf.person.sector user,model_ssf_person_sector,base.group_user,1,0,0,0
+access_ssf_person_sector_admin,ssf.person.sector admin,model_ssf_person_sector,base.group_system,1,1,1,1

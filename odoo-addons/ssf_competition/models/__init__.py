@@ -9,3 +9,7 @@ from . import ssf_result_list
 from . import ssf_result
 from . import ssf_entry
 from . import ssf_iol_role
+from . import ssf_person_sector
+from . import res_partner_ext
+from . import ssf_cup
+from . import ssf_fis_competitor

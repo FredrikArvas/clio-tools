@@ -16,6 +16,12 @@
               sequence="20"
               action="action_ssf_competition_list"/>
 
+    <menuitem id="menu_ssf_cups"
+              name="Serier"
+              parent="menu_ssf_competition_root"
+              sequence="30"
+              action="action_ssf_cup_list"/>
+
     <menuitem id="menu_ssf_sectors"
               name="Grenar"
               parent="menu_ssf_competition_root"
