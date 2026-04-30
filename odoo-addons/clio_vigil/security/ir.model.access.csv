@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_vigil_source_user,clio.vigil.source user,model_clio_vigil_source,base.group_user,1,0,0,0
+access_clio_vigil_source_admin,clio.vigil.source admin,model_clio_vigil_source,base.group_system,1,1,1,1
+access_clio_vigil_item_user,clio.vigil.item user,model_clio_vigil_item,base.group_user,1,0,0,0
+access_clio_vigil_item_admin,clio.vigil.item admin,model_clio_vigil_item,base.group_system,1,1,1,1

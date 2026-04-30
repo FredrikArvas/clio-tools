@@ -595,6 +595,8 @@ def main():
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
+    parser.add_argument("--classify-uap", action="store_true", help="Klassificera queued UFO-items och skapa pending Odoo-encounters")
+    parser.add_argument("--seed-sources", action="store_true", help="Importera YAML-källkonfiguration till Odoo (engångsimport)")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
@@ -606,13 +608,55 @@ def main():
         args.run, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
-        args.recompute_priorities,
+        args.recompute_priorities, args.classify_uap, args.seed_sources,
     ])
     if not any_action:
         _interactive_menu()
         sys.exit(0)
 
     conn = init_db()
+
+    # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
+    try:
+        from odoo_writer import get_odoo_env, sync_items_from_conn, write_sources, write_heartbeat
+        _odoo_env = get_odoo_env()
+    except Exception as _e:
+        logger.warning("odoo_writer saknas eller anslutning misslyckades: %s", _e)
+        _odoo_env = None
+
+    def _odoo_sync(label: str = "") -> None:
+        """Synkar aktuella pipeline-objekt till Odoo. Kraschsäkert."""
+        if _odoo_env is None:
+            return
+        try:
+            n = sync_items_from_conn(_odoo_env, conn)
+            if n:
+                logger.info("Odoo-sync %s: %d objekt", label, n)
+        except Exception as _se:
+            logger.warning("Odoo-sync misslyckades (%s): %s", label, _se)
+
+    if args.seed_sources:
+        if _odoo_env is None:
+            logger.error("--seed-sources kräver Odoo-anslutning.")
+        else:
+            all_sources = []
+            for domain_id in get_all_domains():
+                try:
+                    cfg = load_domain_config(domain_id)
+                except Exception:
+                    continue
+                for s in cfg.get("sources", {}).get("rss", []):
+                    all_sources.append({**s, "domain": domain_id, "source_type": "rss"})
+                for s in cfg.get("sources", {}).get("youtube_channels", []):
+                    url = s.get("channel_id", "")
+                    if url and not url.startswith("http"):
+                        url = f"https://www.youtube.com/{url}"
+                    all_sources.append({
+                        **s, "url": url,
+                        "domain": domain_id, "source_type": "youtube",
+                    })
+            n = write_sources(_odoo_env, all_sources)
+            print(f"✓ {n} källor importerade till Odoo.")
 
     if args.stats:
         print_stats(conn, args.domain)
@@ -646,6 +690,7 @@ def main():
                 logger.error(e)
             except Exception as e:
                 logger.error(f"Pipeline-fel [{domain_id}]: {e}", exc_info=True)
+        _odoo_sync("efter filter")
 
     if args.transcribe or args.full:
         from transcriber import run_transcription_queue
@@ -654,21 +699,58 @@ def main():
             f"Transkription: {counts['completed']} klara, "
             f"{counts['preempted']} preempterade, {counts['failed']} misslyckade"
         )
+        _odoo_sync("efter transkription")
 
     if args.summarize or args.full:
         from summarizer import run_summarizer
         counts = run_summarizer(conn, domain=args.domain, max_items=args.max)
         logger.info(f"Summering: {counts['done']} klara, {counts['failed']} misslyckade")
+        _odoo_sync("efter summering")
 
     if args.index or args.full:
         from indexer import run_indexer
         counts = run_indexer(conn, domain=args.domain, max_items=args.max)
         logger.info(f"Indexering: {counts['indexed']} indexerade, {counts['failed']} misslyckade")
+        _odoo_sync("efter indexering")
+
+    if args.classify_uap or args.full:
+        import sys as _sys, os as _os
+        from pathlib import Path as _Path
+        _sys.path.insert(0, str(_Path(__file__).parent.parent / "clio-uap"))
+        _sys.path.insert(0, str(_Path(__file__).parent.parent))
+        from classifiers.uap_pipeline import run_uap_classifier
+        try:
+            import sys as _s2
+            _s2.path.insert(0, str(_Path(__file__).parent.parent / "clio_odoo"))
+            from clio_odoo import connect as _odoo_connect
+            _odoo_env = _odoo_connect()
+        except Exception as _e:
+            logger.error(f"Odoo-anslutning misslyckades: {_e}")
+            _odoo_env = None
+        if _odoo_env or args.dry_run:
+            counts = run_uap_classifier(conn, _odoo_env, max_items=args.max, dry_run=args.dry_run)
+            logger.info(
+                f"UAP-klassificering: {counts['classified']} klassificerade, "
+                f"{counts['imported']} importerade till Odoo"
+            )
 
     if args.digest or args.full:
         from notifier import run_digest
         counts = run_digest(conn, domain=args.domain, dry_run=args.dry_run)
         logger.info(f"Digest: {counts['items']} objekt skickade")
+        _odoo_sync("efter digest")
+
+    # Heartbeat — alltid vid körning med pipeline-steg
+    if _odoo_env is not None and any([
+        args.run, args.transcribe, args.summarize,
+        args.index, args.digest, args.full,
+    ]):
+        try:
+            total = sum(conn.execute("SELECT COUNT(*) FROM vigil_items").fetchone())
+            write_heartbeat(_odoo_env, status="ok", items_processed=total,
+                            message=f"{total} objekt i vigil.db")
+        except Exception as _he:
+            logger.warning("Heartbeat misslyckades: %s", _he)
 
     conn.close()
 
