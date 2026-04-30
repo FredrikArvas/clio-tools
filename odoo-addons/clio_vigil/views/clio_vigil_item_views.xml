@@ -69,7 +69,7 @@
                    widget="text" readonly="1"
                    placeholder="(Ingen sammanfattning ännu — körs efter transkription)"/>
           </group>
-          <group string="Transkript (utdrag)" attrs="{'invisible': [('transcript_snippet','=',False)]}">
+          <group string="Transkript (utdrag)" invisible="not transcript_snippet">
             <field name="transcript_snippet" string="" nolabel="1"
                    widget="text" readonly="1"/>
           </group>
