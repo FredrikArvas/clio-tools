@@ -753,8 +753,10 @@ def main():
     if args.digest or args.full:
         _odoo_pull("före digest")
         from notifier import run_digest
-        counts = run_digest(conn, domain=args.domain, dry_run=args.dry_run)
-        logger.info(f"Digest: {counts['items']} objekt skickade")
+        counts = run_digest(conn, domain=args.domain, dry_run=args.dry_run,
+                            odoo_env=_odoo_env)
+        subs_info = f", {counts['subscribers']} prenumeranter" if "subscribers" in counts else ""
+        logger.info(f"Digest: {counts['items']} objekt skickade{subs_info}")
         _odoo_sync("efter digest")
 
     # Heartbeat — alltid vid körning med pipeline-steg
