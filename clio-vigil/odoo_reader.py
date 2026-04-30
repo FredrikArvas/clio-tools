@@ -132,3 +132,69 @@ def pull_state_changes(odoo_env, conn) -> int:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def load_subscribers(odoo_env) -> list[dict]:
+    """
+    Läser aktiva prenumeranter från Odoo.
+
+    Returnerar lista med dicts:
+        id, email, follows_ufo, follows_ai,
+        keywords: [{keyword, weight, domain}, ...]
+    """
+    if odoo_env is None:
+        return []
+
+    try:
+        subs = odoo_env["clio.vigil.subscriber"].search_read(
+            [("active", "=", True)],
+            ["id", "partner_id", "email", "follows_ufo", "follows_ai", "keyword_ids"],
+        )
+    except Exception as exc:
+        _logger.warning("load_subscribers: kunde inte läsa prenumeranter: %s", exc)
+        return []
+
+    result = []
+    for s in subs:
+        # Effektiv e-post: explicit override eller hämta från partner
+        email = s.get("email") or ""
+        if not email:
+            partner = s.get("partner_id")
+            if partner and isinstance(partner, (list, tuple)):
+                try:
+                    p = odoo_env["res.partner"].search_read(
+                        [("id", "=", partner[0])], ["email"], limit=1
+                    )
+                    if p:
+                        email = p[0].get("email") or ""
+                except Exception:
+                    pass
+
+        # Sökord
+        keywords = []
+        kw_ids = s.get("keyword_ids", [])
+        if kw_ids:
+            try:
+                kw_rows = odoo_env["clio.vigil.keyword"].search_read(
+                    [("id", "in", kw_ids)],
+                    ["keyword", "weight", "domain"],
+                )
+                keywords = [
+                    {"keyword": k["keyword"], "weight": k["weight"], "domain": k["domain"]}
+                    for k in kw_rows
+                ]
+            except Exception as exc:
+                _logger.warning(
+                    "load_subscribers: sökord för prenumerant %d: %s", s["id"], exc
+                )
+
+        result.append({
+            "id":          s["id"],
+            "email":       email,
+            "follows_ufo": bool(s.get("follows_ufo")),
+            "follows_ai":  bool(s.get("follows_ai")),
+            "keywords":    keywords,
+        })
+
+    _logger.info("load_subscribers: %d aktiva prenumeranter laddade", len(result))
+    return result

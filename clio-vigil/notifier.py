@@ -171,15 +171,17 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
 # ---------------------------------------------------------------------------
 
 def send_digest(subject: str, plain: str, html: str,
+                to_addr: Optional[str] = None,
                 dry_run: bool = False) -> bool:
     """Skickar digest-mail via clio_core.mail. Returnerar True vid lyckat sändning."""
+    to = to_addr or DIGEST_TO
     if dry_run:
-        logger.info(f"[DRY-RUN] Skulle skicka: {subject}")
-        print(f"\n{'='*60}\n{plain}\n{'='*60}")
+        logger.info(f"[DRY-RUN] Skulle skicka till {to}: {subject}")
+        print(f"\n{'='*60}\n[Till: {to}]\n{plain}\n{'='*60}")
         return True
 
     from clio_core import mail
-    return mail.send(DIGEST_TO, subject, plain, html)
+    return mail.send(to, subject, plain, html)
 
 
 # ---------------------------------------------------------------------------
@@ -197,13 +199,26 @@ def _mark_notified(conn, item_ids: list[int]) -> None:
 # ---------------------------------------------------------------------------
 
 def run_digest(conn, domain: Optional[str] = None,
-               dry_run: bool = False, limit: int = 30) -> dict:
+               dry_run: bool = False, limit: int = 30,
+               odoo_env=None) -> dict:
     """
     Hämtar fynd, bygger digest, skickar mail och markerar som notifierade.
-    Returnerar räknare.
-    """
-    items = _fetch_digest_items(conn, domain=domain, limit=limit)
 
+    Om odoo_env är satt och det finns aktiva prenumeranter → per-prenumerant-läge.
+    Annars → fallback till DIGEST_TO från .env.
+
+    Returnerar räknare: sent, items, (subscribers om Odoo-läge).
+    """
+    if odoo_env is not None:
+        return _run_digest_odoo(conn, odoo_env, domain=domain,
+                                dry_run=dry_run, limit=limit)
+    return _run_digest_fallback(conn, domain=domain, dry_run=dry_run, limit=limit)
+
+
+def _run_digest_fallback(conn, domain: Optional[str] = None,
+                         dry_run: bool = False, limit: int = 30) -> dict:
+    """Enkel digest till DIGEST_TO (ursprungligt beteende)."""
+    items = _fetch_digest_items(conn, domain=domain, limit=limit)
     if not items:
         logger.info("Inga nya fynd att rapportera")
         return {"sent": 0, "items": 0}
@@ -215,6 +230,85 @@ def run_digest(conn, domain: Optional[str] = None,
         _mark_notified(conn, [item["id"] for item in items])
 
     return {"sent": 1 if ok else 0, "items": len(items)}
+
+
+def _run_digest_odoo(conn, odoo_env, domain: Optional[str] = None,
+                     dry_run: bool = False, limit: int = 30) -> dict:
+    """
+    Per-prenumerant-digest driven av Odoo.
+
+    Flöde:
+      1. Läs aktiva prenumeranter från Odoo.
+      2. Hämta alla indexed-objekt (ännu ej notifierade).
+      3. Per prenumerant: filtrera på domäner de följer.
+      4. Bygg och skicka individuell digest.
+      5. Skapa delivery-poster i Odoo.
+      6. Markera levererade objekt som notified i SQLite.
+
+    Faller tillbaka på _run_digest_fallback om inga prenumeranter finns.
+    """
+    from odoo_reader import load_subscribers
+    from odoo_writer import write_deliveries
+
+    subscribers = load_subscribers(odoo_env)
+    if not subscribers:
+        logger.info("Inga aktiva prenumeranter i Odoo — fallback till DIGEST_TO")
+        return _run_digest_fallback(conn, domain=domain, dry_run=dry_run, limit=limit)
+
+    all_items = _fetch_digest_items(conn, domain=domain, limit=limit)
+    if not all_items:
+        logger.info("Inga nya fynd att rapportera")
+        return {"sent": 0, "items": 0, "subscribers": len(subscribers)}
+
+    today      = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    now_str    = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    total_sent = 0
+    all_deliveries: list[dict] = []
+    notified_ids: set[int] = set()
+
+    for sub in subscribers:
+        email = sub["email"]
+        if not email:
+            logger.warning(
+                "Prenumerant %d (Odoo) saknar e-post — hoppar över", sub["id"]
+            )
+            continue
+
+        # Filtrera på vilka domäner prenumeranten följer
+        sub_items = [
+            item for item in all_items
+            if (item["domain"] == "ufo" and sub["follows_ufo"])
+            or (item["domain"] == "ai"  and sub["follows_ai"])
+        ]
+        if not sub_items:
+            continue
+
+        subject, plain, html = build_digest(sub_items, domain)
+        ok = send_digest(subject, plain, html, to_addr=email, dry_run=dry_run)
+
+        if ok:
+            total_sent += 1
+            for item in sub_items:
+                notified_ids.add(item["id"])
+                all_deliveries.append({
+                    "subscriber_odoo_id": sub["id"],
+                    "item_url":           item["url"],
+                    "delivered_at":       now_str,
+                    "digest_date":        today,
+                })
+
+    # Skriv delivery-poster och uppdatera SQLite
+    if not dry_run:
+        if all_deliveries:
+            write_deliveries(odoo_env, all_deliveries)
+        if notified_ids:
+            _mark_notified(conn, list(notified_ids))
+
+    return {
+        "sent":        total_sent,
+        "items":       len(notified_ids),
+        "subscribers": len(subscribers),
+    }
 
 
 # ---------------------------------------------------------------------------

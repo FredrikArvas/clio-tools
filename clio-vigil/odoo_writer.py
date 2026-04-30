@@ -193,6 +193,63 @@ def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None) -> int
 
 
 # ---------------------------------------------------------------------------
+# Leveransposter
+# ---------------------------------------------------------------------------
+
+def write_deliveries(odoo_env, deliveries: list[dict]) -> int:
+    """
+    Skapar leveransposter i clio.vigil.delivery.
+
+    Varje dict ska ha:
+        subscriber_odoo_id  — int, Odoo-id för prenumeranten
+        item_url            — str, URL för bevakningsobjektet
+        delivered_at        — str, ISO-tid
+        digest_date         — str, YYYY-MM-DD (valfritt)
+
+    Returnerar antal skapade poster.
+    """
+    if odoo_env is None or not deliveries:
+        return 0
+
+    Delivery = odoo_env["clio.vigil.delivery"]
+    Item     = odoo_env["clio.vigil.item"]
+    created  = 0
+
+    for d in deliveries:
+        try:
+            item = Item.search_read([("url", "=", d["item_url"])], ["id"], limit=1)
+            if not item:
+                continue
+            item_id       = item[0]["id"]
+            subscriber_id = d["subscriber_odoo_id"]
+
+            existing = Delivery.search_read(
+                [("subscriber_id", "=", subscriber_id), ("item_id", "=", item_id)],
+                ["id"],
+                limit=1,
+            )
+            if existing:
+                continue
+
+            Delivery.create({
+                "subscriber_id": subscriber_id,
+                "item_id":       item_id,
+                "delivered_at":  d.get("delivered_at") or _utcnow_str(),
+                "digest_date":   d.get("digest_date") or False,
+            })
+            created += 1
+        except Exception as exc:
+            _logger.warning(
+                "write_deliveries: fel för %s → sub %s: %s",
+                d.get("item_url", "?")[:60], d.get("subscriber_odoo_id"), exc,
+            )
+
+    if created:
+        _logger.info("write_deliveries: %d leveransposter skapade", created)
+    return created
+
+
+# ---------------------------------------------------------------------------
 # Heartbeat
 # ---------------------------------------------------------------------------
 

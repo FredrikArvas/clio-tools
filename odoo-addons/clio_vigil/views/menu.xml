@@ -7,6 +7,13 @@
             sequence="85"
             groups="base.group_user"/>
 
+  <!-- ── Undermeny: Prenumeranter ──────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_subscribers"
+            name="Prenumeranter"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_subscriber"
+            sequence="5"/>
+
   <!-- ── Undermeny: Källor ──────────────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_sources"
             name="Källor"

@@ -3,3 +3,9 @@ access_clio_vigil_source_user,clio.vigil.source user,model_clio_vigil_source,bas
 access_clio_vigil_source_admin,clio.vigil.source admin,model_clio_vigil_source,base.group_system,1,1,1,1
 access_clio_vigil_item_user,clio.vigil.item user,model_clio_vigil_item,base.group_user,1,0,0,0
 access_clio_vigil_item_admin,clio.vigil.item admin,model_clio_vigil_item,base.group_system,1,1,1,1
+access_clio_vigil_subscriber_user,clio.vigil.subscriber user,model_clio_vigil_subscriber,base.group_user,1,0,0,0
+access_clio_vigil_subscriber_admin,clio.vigil.subscriber admin,model_clio_vigil_subscriber,base.group_system,1,1,1,1
+access_clio_vigil_keyword_user,clio.vigil.keyword user,model_clio_vigil_keyword,base.group_user,1,0,0,0
+access_clio_vigil_keyword_admin,clio.vigil.keyword admin,model_clio_vigil_keyword,base.group_system,1,1,1,1
+access_clio_vigil_delivery_user,clio.vigil.delivery user,model_clio_vigil_delivery,base.group_user,1,0,0,0
+access_clio_vigil_delivery_admin,clio.vigil.delivery admin,model_clio_vigil_delivery,base.group_system,1,1,1,1

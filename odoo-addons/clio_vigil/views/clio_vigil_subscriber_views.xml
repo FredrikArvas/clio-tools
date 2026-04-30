@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_subscriber_list" model="ir.ui.view">
+    <field name="name">clio.vigil.subscriber.list</field>
+    <field name="model">clio.vigil.subscriber</field>
+    <field name="arch" type="xml">
+      <list string="Prenumeranter">
+        <field name="partner_id"       string="Kontakt"/>
+        <field name="effective_email"  string="E-post"/>
+        <field name="follows_ufo"      string="UFO/UAP"     widget="boolean_toggle"/>
+        <field name="follows_ai"       string="AI-modeller" widget="boolean_toggle"/>
+        <field name="delivery_count"   string="Leveranser"/>
+        <field name="active"           string="Aktiv"       widget="boolean_toggle" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_subscriber_form" model="ir.ui.view">
+    <field name="name">clio.vigil.subscriber.form</field>
+    <field name="model">clio.vigil.subscriber</field>
+    <field name="arch" type="xml">
+      <form string="Prenumerant">
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="%(action_clio_vigil_delivery_sub)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-envelope-o"
+                    context="{'search_default_subscriber_id': active_id}">
+              <field name="delivery_count" widget="statinfo" string="Leveranser"/>
+            </button>
+          </div>
+          <field name="active" widget="boolean_toggle" class="float-end"/>
+          <group>
+            <group string="Kontakt">
+              <field name="partner_id"      string="Kontakt"/>
+              <field name="email"           string="E-post (override)"
+                     placeholder="Lämna tomt = använd kontaktens e-post"/>
+              <field name="effective_email" string="Effektiv e-post" readonly="1"/>
+            </group>
+            <group string="Domäner">
+              <field name="follows_ufo" string="UFO/UAP"/>
+              <field name="follows_ai"  string="AI-modeller"/>
+            </group>
+          </group>
+
+          <!-- Sökord -->
+          <notebook>
+            <page string="Sökord" name="keywords">
+              <field name="keyword_ids" string="">
+                <list editable="bottom">
+                  <field name="keyword" string="Sökord"/>
+                  <field name="weight"  string="Vikt"/>
+                  <field name="domain"  string="Domän"/>
+                </list>
+              </field>
+            </page>
+            <page string="Leveranser" name="deliveries">
+              <field name="delivery_ids" readonly="1" string="">
+                <list>
+                  <field name="delivered_at" string="Skickad"/>
+                  <field name="item_id"      string="Objekt"/>
+                  <field name="digest_date"  string="Digestdatum"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_subscriber_search" model="ir.ui.view">
+    <field name="name">clio.vigil.subscriber.search</field>
+    <field name="model">clio.vigil.subscriber</field>
+    <field name="arch" type="xml">
+      <search string="Sök prenumeranter">
+        <field name="partner_id" string="Kontakt"/>
+        <filter name="active"      string="Aktiva"       domain="[('active','=',True)]"/>
+        <filter name="follows_ufo" string="UFO/UAP"      domain="[('follows_ufo','=',True)]"/>
+        <filter name="follows_ai"  string="AI-modeller"  domain="[('follows_ai','=',True)]"/>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Listvy leveranser (standalone) ────────────────────────────────── -->
+  <record id="view_clio_vigil_delivery_list" model="ir.ui.view">
+    <field name="name">clio.vigil.delivery.list</field>
+    <field name="model">clio.vigil.delivery</field>
+    <field name="arch" type="xml">
+      <list string="Leveranser" default_order="delivered_at desc">
+        <field name="delivered_at"  string="Skickad"/>
+        <field name="subscriber_id" string="Prenumerant"/>
+        <field name="item_id"       string="Objekt"/>
+        <field name="digest_date"   string="Digestdatum" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
+
+  <record id="action_clio_vigil_subscriber" model="ir.actions.act_window">
+    <field name="name">Prenumeranter</field>
+    <field name="res_model">clio.vigil.subscriber</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga prenumeranter ännu.
+      </p>
+      <p>
+        Skapa en prenumerant kopplad till en kontakt och välj
+        vilka domäner (UFO/UAP, AI-modeller) de ska följa.
+      </p>
+    </field>
+  </record>
+
+  <record id="action_clio_vigil_delivery_sub" model="ir.actions.act_window">
+    <field name="name">Leveranser</field>
+    <field name="res_model">clio.vigil.delivery</field>
+    <field name="view_mode">list</field>
+    <field name="domain">[('subscriber_id','=',active_id)]</field>
+    <field name="context">{'default_subscriber_id': active_id}</field>
+  </record>
+
+</odoo>

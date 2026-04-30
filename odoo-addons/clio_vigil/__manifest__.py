@@ -8,6 +8,7 @@
         'security/ir.model.access.csv',
         'views/clio_vigil_source_views.xml',
         'views/clio_vigil_item_views.xml',
+        'views/clio_vigil_subscriber_views.xml',
         'views/menu.xml',
     ],
     'installable': True,
