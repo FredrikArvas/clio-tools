@@ -12,7 +12,7 @@ _ROOT_DIR = _BASE_DIR.parent
 # Ladda .env
 try:
     from dotenv import load_dotenv
-    load_dotenv(_ROOT_DIR / ".env")
+    load_dotenv(_ROOT_DIR / ".env", override=True)
     load_dotenv(_BASE_DIR / ".env", override=True)
 except ImportError:
     pass
@@ -45,6 +45,11 @@ CLAUDE_MODEL       = "claude-sonnet-4-6"
 # OpenAI (för embeddings)
 OPENAI_API_KEY     = os.getenv("OPENAI_API_KEY", "")
 EMBEDDING_MODEL    = "text-embedding-3-small"
+
+# Video-analys
+VIDEO_FRAMES_PER_SEC       = float(os.getenv("UAP_FRAMES_PER_SEC", "2"))
+VIDEO_VISION_MODEL         = os.getenv("UAP_VISION_MODEL", "claude-sonnet-4-6")
+VIDEO_CONFIDENCE_THRESHOLD = float(os.getenv("UAP_CONFIDENCE_THRESHOLD", "0.7"))
 
 # Källmapp för UAP-data
 UAP_DATA_PATH = Path(os.getenv(

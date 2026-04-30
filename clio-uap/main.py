@@ -249,6 +249,55 @@ def cmd_sync_neo4j(args):
     return 0
 
 
+def cmd_analyze(args):
+    """Analysera slow-motion-video frame-by-frame med Claude Vision."""
+    import config
+    from video_analyzer import analyze_video, print_report
+
+    video_path = args.video
+    if not Path(video_path).exists():
+        print(f"[FEL] Filen finns inte: {video_path}")
+        return 1
+
+    result = analyze_video(
+        video_path=video_path,
+        fps=args.fps,
+        keep_frames=args.keep_frames,
+        start=args.start,
+        end=args.end,
+    )
+    print_report(result)
+
+    flagged = result.flagged_frames
+    if flagged and not args.no_odoo:
+        answer = input(
+            f"Skapa encounter-utkast i Odoo för {len(flagged)} flaggade frame(s)? [y/N]: "
+        ).strip().lower()
+        if answer == "y":
+            import json as _json
+            from odoo_sync import get_env, create_draft_encounter
+            env = get_env()
+            fname = Path(video_path).stem
+            summary = [
+                {
+                    "frame": fr.frame_index,
+                    "notes": fr.frame_notes,
+                    "objects": fr.objects,
+                }
+                for fr in flagged
+            ]
+            odoo_id = create_draft_encounter(env, {
+                "title_en": f"[VIDEO] {fname}",
+                "notes": _json.dumps(summary, ensure_ascii=False, indent=2),
+            })
+            if odoo_id:
+                print(f"[OK] Encounter skapad i Odoo (ID: {odoo_id})")
+            else:
+                print("[FEL] Kunde inte skapa encounter i Odoo.")
+
+    return 0
+
+
 def cmd_sync_qdrant(args):
     """Indexera UAP-encounters i Qdrant."""
     from qdrant_index import index_all
@@ -283,6 +332,21 @@ def parse_args(argv=None) -> argparse.Namespace:
     p_qdrant = sub.add_parser("sync-qdrant", help="Indexera i Qdrant")
     p_qdrant.add_argument("--dry-run", action="store_true")
 
+    # analyze
+    p_analyze = sub.add_parser("analyze", help="Analysera slow-motion-video med Claude Vision")
+    p_analyze.add_argument("--video", required=True,
+                           help="Sökväg till videofil (.mov, .mp4)")
+    p_analyze.add_argument("--fps", type=float, default=None,
+                           help="Frames per speluppspelningssekund (standard: 2)")
+    p_analyze.add_argument("--start", default=None,
+                           help="Starttid, t.ex. '3:56' eller '236'")
+    p_analyze.add_argument("--end", default=None,
+                           help="Sluttid, t.ex. '4:08' eller '248'")
+    p_analyze.add_argument("--no-odoo", action="store_true",
+                           help="Skapa inte encounter-utkast i Odoo")
+    p_analyze.add_argument("--keep-frames", action="store_true",
+                           help="Behåll extraherade frames efter analys")
+
     return p.parse_args(argv)
 
 
@@ -299,6 +363,7 @@ def main(argv=None) -> None:
         "validate":    cmd_validate,
         "sync-neo4j":  cmd_sync_neo4j,
         "sync-qdrant": cmd_sync_qdrant,
+        "analyze":     cmd_analyze,
     }
     func = dispatch.get(args.command)
     if func:

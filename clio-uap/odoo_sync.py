@@ -118,6 +118,13 @@ def upsert_verification(env, row: dict, encounter_odoo_id: int, dry_run: bool = 
         return _to_id(Verification.create(vals))
 
 
+def create_draft_encounter(env, data: dict) -> int | None:
+    """Skapa ett utkast till uap.encounter från videoanalys. Returnerar Odoo-ID."""
+    Encounter = env["uap.encounter"]
+    vals = {k: v for k, v in data.items() if v not in (None, "", False)}
+    return _to_id(Encounter.create(vals))
+
+
 def get_model_counts(env) -> dict[str, int]:
     """Räkna poster per UAP-modell."""
     counts = {}
