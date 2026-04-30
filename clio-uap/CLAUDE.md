@@ -41,7 +41,8 @@ Addons-sökväg på servern: `~/git/clio-tools/odoo-addons/`
 ## Källdata
 
 `C:\Users\fredr\Dropbox\projekt\UAP\UAP Research project\`
-- Incidents 2.zip — 86 encounters
-- Sources 2.zip — 63 sources
-- NHI-disclousreProject.zip — 25 witnesses
-- VerificationLog.zip — 153 verifications
+- Incidents.zip — 904 encounters (primär, föredras av migrate.py)
+- Notion Export/Sources 2.zip — 64 sources (hittad via rglob)
+- NHI-disclousreProject.zip — 26 witnesses
+- VerificationLog.zip — 141 verifications (13 kopplade till PPXL-encounters)
+- Notion Export/Incidents 2.zip — 58 encounters (äldre delmängd, ignoreras)

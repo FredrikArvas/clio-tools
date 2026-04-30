@@ -24,14 +24,6 @@
     <field name="arch" type="xml">
       <form>
         <sheet>
-          <div class="oe_button_box" name="button_box">
-            <button name="%(action_uap_encounter)d"
-                    type="action"
-                    class="oe_stat_button"
-                    icon="fa-globe">
-              <field name="encounter_count" widget="statinfo" string="Encounters"/>
-            </button>
-          </div>
           <group string="Witness">
             <field name="name"/>
             <field name="witness_type"/>

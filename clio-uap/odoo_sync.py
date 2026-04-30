@@ -9,6 +9,22 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
+def _to_id(result) -> int | None:
+    """Extrahera int-ID från OdooRecord/OdooRecordset/int returnerat av create()."""
+    if result is None:
+        return None
+    if isinstance(result, int):
+        return result
+    if hasattr(result, "id"):
+        return int(result.id)
+    if hasattr(result, "ids") and result.ids:
+        return int(result.ids[0])
+    try:
+        return int(result)
+    except (TypeError, ValueError):
+        return None
+
+
 def get_env():
     from clio_odoo import connect
     return connect()
@@ -21,14 +37,15 @@ def upsert_source(env, row: dict, dry_run: bool = False) -> int | None:
         return None
 
     Source = env["uap.source"]
-    existing = Source.search([("source_id", "=", row["source_id"])])
+    existing = Source.search_read([("source_id", "=", row["source_id"])], ["id"])
     vals = {k: v for k, v in row.items() if v not in (None, "", False) or k == "name"}
 
     if existing:
-        Source.write(existing, vals)
-        return existing[0]
+        ids = [r["id"] for r in existing]
+        Source.write(ids, vals)
+        return ids[0]
     else:
-        return Source.create(vals)
+        return _to_id(Source.create(vals))
 
 
 def upsert_witness(env, row: dict, dry_run: bool = False) -> int | None:
@@ -38,14 +55,15 @@ def upsert_witness(env, row: dict, dry_run: bool = False) -> int | None:
         return None
 
     Witness = env["uap.witness"]
-    existing = Witness.search([("name", "=", row["name"])])
+    existing = Witness.search_read([("name", "=", row["name"])], ["id"])
     vals = {k: v for k, v in row.items() if v not in (None, "", False) or k == "name"}
 
     if existing:
-        Witness.write(existing, vals)
-        return existing[0]
+        ids = [r["id"] for r in existing]
+        Witness.write(ids, vals)
+        return ids[0]
     else:
-        return Witness.create(vals)
+        return _to_id(Witness.create(vals))
 
 
 def upsert_encounter(
@@ -61,7 +79,7 @@ def upsert_encounter(
         return None
 
     Encounter = env["uap.encounter"]
-    existing = Encounter.search([("encounter_id", "=", row["encounter_id"])])
+    existing = Encounter.search_read([("encounter_id", "=", row["encounter_id"])], ["id"])
 
     vals = {k: v for k, v in row.items() if v not in (None, "", False) or k == "encounter_id"}
     if source_ids:
@@ -70,10 +88,11 @@ def upsert_encounter(
         vals["witness_ids"] = [(6, 0, witness_ids)]
 
     if existing:
-        Encounter.write(existing, vals)
-        return existing[0]
+        ids = [r["id"] for r in existing]
+        Encounter.write(ids, vals)
+        return ids[0]
     else:
-        return Encounter.create(vals)
+        return _to_id(Encounter.create(vals))
 
 
 def upsert_verification(env, row: dict, encounter_odoo_id: int, dry_run: bool = False) -> int | None:
@@ -83,19 +102,20 @@ def upsert_verification(env, row: dict, encounter_odoo_id: int, dry_run: bool = 
         return None
 
     Verification = env["uap.verification"]
-    existing = Verification.search([
+    existing = Verification.search_read([
         ("name", "=", row["name"]),
         ("encounter_id", "=", encounter_odoo_id),
-    ])
+    ], ["id"])
 
     vals = {k: v for k, v in row.items() if v not in (None, "", False) or k == "name"}
     vals["encounter_id"] = encounter_odoo_id
 
     if existing:
-        Verification.write(existing, vals)
-        return existing[0]
+        ids = [r["id"] for r in existing]
+        Verification.write(ids, vals)
+        return ids[0]
     else:
-        return Verification.create(vals)
+        return _to_id(Verification.create(vals))
 
 
 def get_model_counts(env) -> dict[str, int]:
@@ -103,8 +123,7 @@ def get_model_counts(env) -> dict[str, int]:
     counts = {}
     for model in ["uap.encounter", "uap.source", "uap.witness", "uap.verification"]:
         try:
-            ids = env[model].search([])
-            counts[model] = len(ids)
+            counts[model] = env[model].search_count([])
         except Exception:
             counts[model] = -1
     return counts

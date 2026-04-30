@@ -12,6 +12,13 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Force-load local config.py (avoids shadowing by clio-tools/config/ package)
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("uap_config", Path(__file__).parent / "config.py")
+_uap_config = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_uap_config)
 
 
 COLLECTION_NAME = "vigil_uap"
@@ -19,7 +26,7 @@ VECTOR_SIZE     = 1536  # text-embedding-3-small
 
 
 def _qdrant_client():
-    import config
+    config = _uap_config
     try:
         from qdrant_client import QdrantClient
     except ImportError:
@@ -28,7 +35,7 @@ def _qdrant_client():
 
 
 def _embed(texts: list[str]) -> list[list[float]]:
-    import config
+    config = _uap_config
     try:
         from openai import OpenAI
     except ImportError:
@@ -133,12 +140,12 @@ def search(query: str, top_k: int = 5, filters: dict | None = None) -> list[dict
         ]
         qdrant_filter = Filter(must=conditions)
 
-    results = client.search(
+    results = client.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=embedding,
+        query=embedding,
         limit=top_k,
         query_filter=qdrant_filter,
-    )
+    ).points
     return [{"score": r.score, **r.payload} for r in results]
 
 

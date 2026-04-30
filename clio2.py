@@ -236,6 +236,15 @@ TOOLS = [
         "custom_runner": True,
     },
     {
+        "nr":           11,
+        "name":         "clio-agent-gmail",
+        "desc":         "Gmail-bilage-hämtare — laddar ned PDF:er från konfigurerade avsändare",
+        "script":       ROOT / "clio-agent-gmail" / "main.py",
+        "status":       "active",
+        "needs_folder": False,
+        "custom_runner": True,
+    },
+    {
         "nr":           12,
         "name":         "clio-privfin",
         "desc":         "Privatekonomin — importera kontoutdrag, kategorisera, rapporter",
