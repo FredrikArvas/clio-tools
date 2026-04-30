@@ -10,7 +10,8 @@ Env-variabler (.env.ssfta + .env):
   ODOO_DB         → används om ODOO_PG_DSN saknas (dbname, övriga defaultar)
 
 Körning:
-    python3 sync_person_sectors.py             # live
+    python3 sync_person_sectors.py             # live (kräver direkt PostgreSQL-access)
+    python3 sync_person_sectors.py --orm       # via Odoo ORM (långsammare, ingen direkt DB-access)
     python3 sync_person_sectors.py --dry-run
     python3 sync_person_sectors.py --db ssf_t2
 """
@@ -132,6 +133,36 @@ def insert_batches(pg, pairs: list[tuple[int, int]], dry_run: bool) -> tuple[int
     return inserted, conflicts
 
 
+def insert_batches_orm(env, pairs: list[tuple[int, int]], dry_run: bool) -> tuple[int, int]:
+    """Batch-create via Odoo ORM (långsammare, kräver ingen direkt DB-access)."""
+    if dry_run:
+        print(f"  [DRY] Skulle skapa {len(pairs)} poster via ORM")
+        return len(pairs), 0
+
+    Model = env["ssf.person.sector"]
+    existing = {
+        (r["person_id"], r["sector_id"])
+        for r in Model.search_read([], ["person_id", "sector_id"])
+    }
+    print(f"  {len(existing)} befintliga poster i ssf.person.sector")
+
+    to_create = [
+        {"person_id": pid, "sector_id": sid}
+        for pid, sid in pairs
+        if (pid, sid) not in existing
+    ]
+    print(f"  {len(to_create)} nya att skapa, {len(pairs) - len(to_create)} redan finns")
+
+    created = 0
+    for start in range(0, len(to_create), BATCH):
+        batch = to_create[start:start + BATCH]
+        Model.create(batch)
+        created += len(batch)
+        if created % 10000 == 0:
+            print(f"  ... {created}/{len(to_create)} skapade")
+    return created, len(pairs) - len(to_create)
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
@@ -140,6 +171,8 @@ def main():
     parser = argparse.ArgumentParser(description="Synkar PersonSector → ssf_person_sector")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--db", default=None, help="Odoo-databasnamn (override ODOO_DB)")
+    parser.add_argument("--orm", action="store_true",
+                        help="Använd Odoo ORM istf. direkt psycopg2 (kräver ingen direkt DB-access)")
     args = parser.parse_args()
 
     print("Hämtar PersonSector från SSFTA...")
@@ -167,16 +200,21 @@ def main():
         pairs.append((pid, sid))
     print(f"  {len(pairs)} par att infoga | saknar person: {missing_person} | saknar sektor: {missing_sector}")
 
-    print("Ansluter till Odoo-PostgreSQL (direkt)...")
-    pg = _pg_conn(db=args.db or os.environ.get("ODOO_DB", "ssf"))
+    if args.orm:
+        print("Skapar poster via ORM...")
+        inserted, conflicts = insert_batches_orm(env, pairs, args.dry_run)
+    else:
+        print("Ansluter till Odoo-PostgreSQL (direkt)...")
+        pg = _pg_conn(db=args.db or os.environ.get("ODOO_DB", "ssf"))
+        print("Infogar batchar...")
+        inserted, conflicts = insert_batches(pg, pairs, args.dry_run)
+        pg.close()
 
-    print("Infogar batchar...")
-    inserted, conflicts = insert_batches(pg, pairs, args.dry_run)
-    pg.close()
-
-    print(f"\nKlar: {inserted} insatta, {conflicts} konflikter (redan finns)")
+    print(f"\nKlar: {inserted} insatta/skapade, {conflicts} konflikter/redan finns")
     if args.dry_run:
         print("  (--dry-run, ingen data skrevs)")
+    if args.orm:
+        print("  (--orm-läge, direkt DB-access användes ej)")
 
 
 if __name__ == "__main__":
