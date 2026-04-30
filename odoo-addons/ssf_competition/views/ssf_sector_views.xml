@@ -15,6 +15,171 @@
         </field>
     </record>
 
+    <!-- ══ KANBAN — over the top ══════════════════════════════════════════ -->
+    <record id="view_ssf_sector_kanban" model="ir.ui.view">
+        <field name="name">ssf.sector.kanban</field>
+        <field name="model">ssf.sector</field>
+        <field name="arch" type="xml">
+            <kanban default_order="competition_count desc" create="false"
+                    class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="sector_code"/>
+                <field name="fis_sector_code"/>
+                <field name="event_count"/>
+                <field name="competition_count"/>
+                <field name="sport_emoji"/>
+                <field name="sport_color"/>
+                <field name="sport_color2"/>
+                <field name="hidden"/>
+                <templates>
+                    <t t-name="card">
+                        <!-- ── Hero-header med gradient + emoji + namn ── -->
+                        <div t-attf-style="
+                            background: linear-gradient(145deg, #{record.sport_color.value} 0%, #{record.sport_color2.value} 100%);
+                            margin: -12px -12px 0 -12px;
+                            padding: 20px 16px 16px 16px;
+                            border-radius: 6px 6px 0 0;
+                            min-height: 110px;
+                            position: relative;
+                        ">
+                            <!-- Kod-badge övre höger -->
+                            <span style="
+                                position: absolute; top: 12px; right: 12px;
+                                background: rgba(255,255,255,0.18);
+                                color: white;
+                                font-size: 0.75rem;
+                                font-weight: 700;
+                                letter-spacing: 0.08em;
+                                padding: 3px 10px;
+                                border-radius: 20px;
+                                border: 1px solid rgba(255,255,255,0.3);
+                            ">
+                                <t t-esc="record.sector_code.value"/>
+                            </span>
+
+                            <!-- Emoji -->
+                            <div style="font-size: 3.2rem; line-height: 1; margin-bottom: 8px;">
+                                <t t-esc="record.sport_emoji.value"/>
+                            </div>
+
+                            <!-- Sportnamn -->
+                            <div style="
+                                color: white;
+                                font-size: 1.35rem;
+                                font-weight: 800;
+                                letter-spacing: -0.01em;
+                                text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+                            ">
+                                <t t-esc="record.name.value"/>
+                            </div>
+                        </div>
+
+                        <!-- ── Stats-sektion ── -->
+                        <div style="display: flex; gap: 10px; padding: 14px 0 10px 0;">
+                            <!-- Evenemang -->
+                            <div style="
+                                flex: 1;
+                                background: #F4F6F9;
+                                border-radius: 8px;
+                                padding: 12px 8px;
+                                text-align: center;
+                            ">
+                                <div style="
+                                    font-size: 2.2rem;
+                                    font-weight: 900;
+                                    color: #1A252F;
+                                    line-height: 1;
+                                ">
+                                    <t t-esc="record.event_count.value"/>
+                                </div>
+                                <div style="
+                                    font-size: 0.7rem;
+                                    font-weight: 600;
+                                    color: #7F8C8D;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.06em;
+                                    margin-top: 4px;
+                                ">
+                                    Evenemang
+                                </div>
+                            </div>
+
+                            <!-- Tävlingar -->
+                            <div style="
+                                flex: 1;
+                                background: #F4F6F9;
+                                border-radius: 8px;
+                                padding: 12px 8px;
+                                text-align: center;
+                            ">
+                                <div style="
+                                    font-size: 2.2rem;
+                                    font-weight: 900;
+                                    color: #1A252F;
+                                    line-height: 1;
+                                ">
+                                    <t t-esc="record.competition_count.value"/>
+                                </div>
+                                <div style="
+                                    font-size: 0.7rem;
+                                    font-weight: 600;
+                                    color: #7F8C8D;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.06em;
+                                    margin-top: 4px;
+                                ">
+                                    Tävlingar
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Footer: FIS-kod + knappar ── -->
+                        <div style="
+                            border-top: 1px solid #ECF0F1;
+                            padding-top: 10px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        ">
+                            <span style="font-size: 0.72rem; color: #95A5A6;">
+                                <t t-if="record.fis_sector_code.value">
+                                    FIS: <t t-esc="record.fis_sector_code.value"/>
+                                </t>
+                            </span>
+                            <div style="display: flex; gap: 6px;">
+                                <button name="action_view_events" type="object"
+                                        style="
+                                            font-size: 0.72rem;
+                                            padding: 3px 10px;
+                                            border-radius: 4px;
+                                            border: 1px solid #BDC3C7;
+                                            background: white;
+                                            cursor: pointer;
+                                            color: #2C3E50;
+                                        ">
+                                    Evenemang →
+                                </button>
+                                <button name="action_view_competitions" type="object"
+                                        t-attf-style="
+                                            font-size: 0.72rem;
+                                            padding: 3px 10px;
+                                            border-radius: 4px;
+                                            border: none;
+                                            background: #{record.sport_color2.value};
+                                            cursor: pointer;
+                                            color: white;
+                                            font-weight: 600;
+                                        ">
+                                    Tävlingar →
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="view_ssf_sector_graph" model="ir.ui.view">
         <field name="name">ssf.sector.graph</field>
         <field name="model">ssf.sector</field>
@@ -44,7 +209,10 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <h1><field name="name" readonly="1"/></h1>
+                        <h1>
+                            <field name="sport_emoji" readonly="1" nolabel="1"/>
+                            <field name="name" readonly="1"/>
+                        </h1>
                     </div>
                     <group>
                         <group>
@@ -77,7 +245,7 @@
     <record id="action_ssf_sector_list" model="ir.actions.act_window">
         <field name="name">Grenar</field>
         <field name="res_model">ssf.sector</field>
-        <field name="view_mode">list,graph,form</field>
+        <field name="view_mode">kanban,list,graph,form</field>
         <field name="context">{"create": false, "search_default_hide_hidden": 1}</field>
     </record>
 
