@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_fis_competitor_list" model="ir.ui.view">
+        <field name="name">ssf.fis.competitor.list</field>
+        <field name="model">ssf.fis.competitor</field>
+        <field name="arch" type="xml">
+            <list string="FIS-åkare" create="false" edit="false" delete="false">
+                <field name="fis_code" string="FIS-kod"/>
+                <field name="person_id" string="Person"/>
+                <field name="nation" string="Nation"/>
+                <field name="discipline_id" string="Disciplin"/>
+                <field name="fis_points" string="FIS-poäng" digits="[8,2]"/>
+                <field name="fis_rank" string="Ranking" optional="show"/>
+                <field name="list_date" string="Listdatum" optional="show"/>
+                <field name="source" string="Källa" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_fis_competitor_form" model="ir.ui.view">
+        <field name="name">ssf.fis.competitor.form</field>
+        <field name="model">ssf.fis.competitor</field>
+        <field name="arch" type="xml">
+            <form string="FIS-åkare" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="fis_code" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="person_id" readonly="1" string="Person"/>
+                            <field name="nation" readonly="1" string="Nation"/>
+                            <field name="discipline_id" readonly="1" string="Disciplin"/>
+                        </group>
+                        <group>
+                            <field name="fis_points" readonly="1" string="FIS-poäng"/>
+                            <field name="fis_rank" readonly="1" string="Ranking"/>
+                            <field name="list_date" readonly="1" string="Listdatum"/>
+                            <field name="source" readonly="1" string="Källa"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ssf_fis_competitor_search" model="ir.ui.view">
+        <field name="name">ssf.fis.competitor.search</field>
+        <field name="model">ssf.fis.competitor</field>
+        <field name="arch" type="xml">
+            <search string="Sök FIS-åkare">
+                <field name="fis_code" string="FIS-kod"/>
+                <field name="person_id" string="Person"/>
+                <field name="nation" string="Nation"/>
+                <field name="discipline_id" string="Disciplin"/>
+                <filter string="Bara SWE" name="filter_swe" domain="[('nation','=','SWE')]"/>
+                <filter string="Från FIS API" name="filter_api" domain="[('source','=','fis_api')]"/>
+                <filter string="Härledd från SSFTA" name="filter_ssfta" domain="[('source','=','ssfta_derived')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Disciplin" name="group_discipline"
+                            context="{'group_by': 'discipline_id'}"/>
+                    <filter string="Nation" name="group_nation"
+                            context="{'group_by': 'nation'}"/>
+                    <filter string="Källa" name="group_source"
+                            context="{'group_by': 'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ssf_fis_competitor_list" model="ir.actions.act_window">
+        <field name="name">FIS-åkare</field>
+        <field name="res_model">ssf.fis.competitor</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('nation','=','SWE')]</field>
+        <field name="context">{"create": false, "search_default_filter_swe": 1}</field>
+    </record>
+</odoo>
