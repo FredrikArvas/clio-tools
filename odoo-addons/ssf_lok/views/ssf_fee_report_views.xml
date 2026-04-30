@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_fee_report_list" model="ir.ui.view">
+        <field name="name">ssf.fee.report.list</field>
+        <field name="model">ssf.fee.report</field>
+        <field name="arch" type="xml">
+            <list string="LOK-stödsrapporter" create="false" edit="false" delete="false"
+                  decoration-danger="claim > 0"
+                  decoration-success="claim &lt;= 0 and paid_date != False">
+                <field name="competition_id" string="Tävling"/>
+                <field name="report_date" string="Rapportdatum"/>
+                <field name="reference" string="IOL-referens"/>
+                <field name="report_amount" string="Rapporterat (kr)" sum="Totalt rapporterat"/>
+                <field name="paid_amount" string="Utbetalt (kr)" sum="Totalt utbetalt"/>
+                <field name="claim" string="Utestående (kr)" sum="Totalt utestående"/>
+                <field name="paid_date" string="Utbetalt datum" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_fee_report_form" model="ir.ui.view">
+        <field name="name">ssf.fee.report.form</field>
+        <field name="model">ssf.fee.report</field>
+        <field name="arch" type="xml">
+            <form string="LOK-stödsrapport" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="competition_id" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Rapport">
+                            <field name="reference" readonly="1" string="IOL-referens"/>
+                            <field name="report_date" readonly="1"/>
+                            <field name="report_amount" readonly="1"/>
+                            <field name="ssfta_id" readonly="1"/>
+                        </group>
+                        <group string="Utbetalning">
+                            <field name="paid_amount" readonly="1"/>
+                            <field name="paid_date" readonly="1"/>
+                            <field name="claim" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Per distrikt" name="values">
+                            <field name="value_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="district_id" string="Distrikt"/>
+                                    <field name="competitors" string="Deltagare"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ssf_fee_report_search" model="ir.ui.view">
+        <field name="name">ssf.fee.report.search</field>
+        <field name="model">ssf.fee.report</field>
+        <field name="arch" type="xml">
+            <search string="Sök LOK-rapporter">
+                <field name="competition_id" string="Tävling"/>
+                <field name="reference" string="IOL-referens"/>
+                <separator/>
+                <filter string="Utestående" name="outstanding"
+                        domain="[('claim', '&gt;', 0)]"/>
+                <filter string="Utbetalda" name="paid"
+                        domain="[('paid_date', '!=', False)]"/>
+                <filter string="Ej rapporterade" name="no_report"
+                        domain="[('report_date', '=', False)]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Gren" name="group_sector"
+                            context="{'group_by': 'competition_id.event_id.sector_id'}"/>
+                    <filter string="Säsong" name="group_season"
+                            context="{'group_by': 'competition_id.event_id.season_id'}"/>
+                    <filter string="Rapportmånad" name="group_report_month"
+                            context="{'group_by': 'report_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ssf_fee_report_graph" model="ir.ui.view">
+        <field name="name">ssf.fee.report.graph</field>
+        <field name="model">ssf.fee.report</field>
+        <field name="arch" type="xml">
+            <graph string="LOK-stöd" type="bar">
+                <field name="competition_id" type="row" string="Tävling"/>
+                <field name="report_amount" type="measure" string="Rapporterat (kr)"/>
+                <field name="paid_amount" type="measure" string="Utbetalt (kr)"/>
+                <field name="claim" type="measure" string="Utestående (kr)"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_ssf_fee_report_pivot" model="ir.ui.view">
+        <field name="name">ssf.fee.report.pivot</field>
+        <field name="model">ssf.fee.report</field>
+        <field name="arch" type="xml">
+            <pivot string="LOK-stöd" display_quantity="true">
+                <field name="competition_id" type="row" string="Tävling"/>
+                <field name="report_amount" type="measure" string="Rapporterat (kr)"/>
+                <field name="paid_amount" type="measure" string="Utbetalt (kr)"/>
+                <field name="claim" type="measure" string="Utestående (kr)"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_ssf_fee_report_list" model="ir.actions.act_window">
+        <field name="name">LOK-stödsrapporter</field>
+        <field name="res_model">ssf.fee.report</field>
+        <field name="view_mode">list,graph,pivot,form</field>
+        <field name="search_view_id" ref="view_ssf_fee_report_search"/>
+        <field name="context">{"search_default_outstanding": 1, "create": false}</field>
+    </record>
+</odoo>

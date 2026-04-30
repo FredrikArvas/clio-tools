@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_ssf_lok_root"
+              name="LOK-stöd"
+              sequence="40"/>
+
+    <menuitem id="menu_ssf_fee_reports"
+              name="Rapporter"
+              parent="menu_ssf_lok_root"
+              sequence="10"
+              action="action_ssf_fee_report_list"/>
+</odoo>

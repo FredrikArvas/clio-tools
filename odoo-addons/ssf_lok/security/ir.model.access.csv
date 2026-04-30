@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ssf_fee_report_user,ssf.fee.report user,model_ssf_fee_report,base.group_user,1,0,0,0
+access_ssf_fee_report_admin,ssf.fee.report admin,model_ssf_fee_report,base.group_system,1,1,1,1
+access_ssf_fee_report_value_user,ssf.fee.report.value user,model_ssf_fee_report_value,base.group_user,1,0,0,0
+access_ssf_fee_report_value_admin,ssf.fee.report.value admin,model_ssf_fee_report_value,base.group_system,1,1,1,1
