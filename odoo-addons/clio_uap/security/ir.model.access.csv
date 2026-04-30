@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_uap_encounter_user,uap.encounter user,model_uap_encounter,base.group_user,1,0,0,0
+access_uap_encounter_admin,uap.encounter admin,model_uap_encounter,base.group_system,1,1,1,1
+access_uap_source_user,uap.source user,model_uap_source,base.group_user,1,0,0,0
+access_uap_source_admin,uap.source admin,model_uap_source,base.group_system,1,1,1,1
+access_uap_witness_user,uap.witness user,model_uap_witness,base.group_user,1,0,0,0
+access_uap_witness_admin,uap.witness admin,model_uap_witness,base.group_system,1,1,1,1
+access_uap_verification_user,uap.verification user,model_uap_verification,base.group_user,1,0,0,0
+access_uap_verification_admin,uap.verification admin,model_uap_verification,base.group_system,1,1,1,1

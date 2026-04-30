@@ -1,0 +1,20 @@
+{
+    "name":        "Clio UAP Tracking",
+    "version":     "18.0.1.0.0",
+    "category":    "Research",
+    "summary":     "UAP encounter tracking and classification system (Notion → Odoo migration).",
+    "author":      "Fredrik Arvas / Arvas International AB",
+    "license":     "LGPL-3",
+    "depends":     ["base", "contacts"],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/uap_source_views.xml",
+        "views/uap_witness_views.xml",
+        "views/uap_encounter_views.xml",
+        "views/uap_verification_views.xml",
+        "views/uap_menus.xml",
+    ],
+    "installable": True,
+    "auto_install": False,
+    "application":  True,
+}
