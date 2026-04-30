@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_non_member_list" model="ir.ui.view">
+        <field name="name">ssf.non.member.list</field>
+        <field name="model">ssf.non.member</field>
+        <field name="arch" type="xml">
+            <list string="Motionärer" create="false" edit="false" delete="false">
+                <field name="firstname" string="Förnamn"/>
+                <field name="lastname" string="Efternamn"/>
+                <field name="gender" string="Kön"/>
+                <field name="birthdate" string="Födelsedag"/>
+                <field name="nationality" string="Nationalitet"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_non_member_form" model="ir.ui.view">
+        <field name="name">ssf.non.member.form</field>
+        <field name="model">ssf.non.member</field>
+        <field name="arch" type="xml">
+            <form string="Motionär" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Person">
+                            <field name="firstname" readonly="1"/>
+                            <field name="lastname" readonly="1"/>
+                            <field name="gender" readonly="1"/>
+                            <field name="birthdate" readonly="1"/>
+                        </group>
+                        <group string="Övrigt">
+                            <field name="nationality" readonly="1"/>
+                            <field name="co_address" readonly="1"/>
+                            <field name="ssfta_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ssf_non_member_search" model="ir.ui.view">
+        <field name="name">ssf.non.member.search</field>
+        <field name="model">ssf.non.member</field>
+        <field name="arch" type="xml">
+            <search string="Sök motionärer">
+                <field name="name" string="Namn"/>
+                <field name="nationality" string="Nationalitet"/>
+                <separator/>
+                <filter string="Utländska" name="foreign"
+                        domain="[('nationality', '!=', 'SWE')]"/>
+                <filter string="Svensk" name="swedish"
+                        domain="[('nationality', '=', 'SWE')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Nationalitet" name="group_nationality"
+                            context="{'group_by': 'nationality'}"/>
+                    <filter string="Kön" name="group_gender"
+                            context="{'group_by': 'gender'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_ssf_non_member_list" model="ir.actions.act_window">
+        <field name="name">Motionärer</field>
+        <field name="res_model">ssf.non.member</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ssf_non_member_search"/>
+        <field name="context">{"create": false}</field>
+    </record>
+
+    <menuitem id="menu_ssf_non_members"
+              name="Motionärer"
+              parent="menu_ssf_competition_root"
+              sequence="45"
+              action="action_ssf_non_member_list"/>
+</odoo>

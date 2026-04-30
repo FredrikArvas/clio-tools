@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_ssf_payments"
+              name="Betalningar"
+              parent="ssf_competition.menu_ssf_competition_root"
+              sequence="50"
+              action="action_ssf_payment_list"/>
+</odoo>

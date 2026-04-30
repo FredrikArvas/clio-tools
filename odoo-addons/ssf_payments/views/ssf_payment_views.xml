@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_ssf_payment_list" model="ir.ui.view">
+        <field name="name">ssf.payment.list</field>
+        <field name="model">ssf.payment</field>
+        <field name="arch" type="xml">
+            <list string="Betalningar" create="false" edit="false" delete="false">
+                <field name="organization_id" string="Förening"/>
+                <field name="event_id" string="Evenemang"/>
+                <field name="date" string="Datum"/>
+                <field name="amount" string="Belopp (kr)" sum="Totalt"/>
+                <field name="status" string="Status"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ssf_payment_form" model="ir.ui.view">
+        <field name="name">ssf.payment.form</field>
+        <field name="model">ssf.payment</field>
+        <field name="arch" type="xml">
+            <form string="Betalning" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Betalning">
+                            <field name="organization_id" readonly="1" string="Förening"/>
+                            <field name="event_id" readonly="1" string="Evenemang"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                        <group string="Belopp">
+                            <field name="amount" readonly="1"/>
+                            <field name="status" readonly="1"/>
+                            <field name="order_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Anmälningar" name="entries">
+                            <field name="entry_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="entry_id" string="Anmälan"/>
+                                    <field name="team_entry" string="Laganmälan ID"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ssf_payment_search" model="ir.ui.view">
+        <field name="name">ssf.payment.search</field>
+        <field name="model">ssf.payment</field>
+        <field name="arch" type="xml">
+            <search string="Sök betalningar">
+                <field name="organization_id" string="Förening"/>
+                <field name="event_id" string="Evenemang"/>
+                <separator/>
+                <filter string="Accepterade" name="accepted"
+                        domain="[('status', '=', 'ACCEPTED')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter string="Förening" name="group_org"
+                            context="{'group_by': 'organization_id'}"/>
+                    <filter string="Evenemang" name="group_event"
+                            context="{'group_by': 'event_id'}"/>
+                    <filter string="Månad" name="group_month"
+                            context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ssf_payment_graph" model="ir.ui.view">
+        <field name="name">ssf.payment.graph</field>
+        <field name="model">ssf.payment</field>
+        <field name="arch" type="xml">
+            <graph string="Betalningar" type="bar">
+                <field name="organization_id" type="row" string="Förening"/>
+                <field name="amount" type="measure" string="Belopp (kr)"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_ssf_payment_pivot" model="ir.ui.view">
+        <field name="name">ssf.payment.pivot</field>
+        <field name="model">ssf.payment</field>
+        <field name="arch" type="xml">
+            <pivot string="Betalningar" display_quantity="true">
+                <field name="organization_id" type="row" string="Förening"/>
+                <field name="event_id" type="col" string="Evenemang"/>
+                <field name="amount" type="measure" string="Belopp (kr)"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_ssf_payment_list" model="ir.actions.act_window">
+        <field name="name">Betalningar</field>
+        <field name="res_model">ssf.payment</field>
+        <field name="view_mode">list,graph,pivot,form</field>
+        <field name="search_view_id" ref="view_ssf_payment_search"/>
+        <field name="context">{"search_default_accepted": 1, "create": false}</field>
+    </record>
+</odoo>

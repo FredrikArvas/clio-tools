@@ -13,3 +13,4 @@ from . import ssf_person_sector
 from . import res_partner_ext
 from . import ssf_cup
 from . import ssf_fis_competitor
+from . import ssf_non_member

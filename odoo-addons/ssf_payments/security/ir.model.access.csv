@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ssf_payment_user,ssf.payment user,model_ssf_payment,base.group_user,1,0,0,0
+access_ssf_payment_admin,ssf.payment admin,model_ssf_payment,base.group_system,1,1,1,1
+access_ssf_payment_entry_user,ssf.payment.entry user,model_ssf_payment_entry,base.group_user,1,0,0,0
+access_ssf_payment_entry_admin,ssf.payment.entry admin,model_ssf_payment_entry,base.group_system,1,1,1,1
