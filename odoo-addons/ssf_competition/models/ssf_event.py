@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 EVENT_STATUS = [
     ('1', 'Ny'),
@@ -32,14 +32,25 @@ class SsfEvent(models.Model):
     email = fields.Char(string="Email", readonly=True)
     website = fields.Char(string="Website", readonly=True)
     competition_ids = fields.One2many("ssf.competition", "event_id", string="Competitions")
-    competition_count = fields.Integer(string="Competition Count", compute="_compute_competition_count")
-    entry_count = fields.Integer(string="Entries", compute="_compute_counts")
-    result_count = fields.Integer(string="Results", compute="_compute_counts")
 
+    # store=True → sorterbara i listvy
+    competition_count = fields.Integer(
+        string="Competition Count", compute="_compute_competition_count", store=True
+    )
+    entry_count = fields.Integer(
+        string="Entries", compute="_compute_counts", store=True
+    )
+    result_count = fields.Integer(
+        string="Results", compute="_compute_counts", store=True
+    )
+
+    @api.depends("competition_ids")
     def _compute_competition_count(self):
         for rec in self:
             rec.competition_count = len(rec.competition_ids)
 
+    # Kaskad: competition.entry_count/result_count → event räknas om automatiskt
+    @api.depends("competition_ids.entry_count", "competition_ids.result_count")
     def _compute_counts(self):
         for rec in self:
             rec.entry_count = sum(c.entry_count for c in rec.competition_ids)
