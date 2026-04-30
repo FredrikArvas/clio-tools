@@ -69,6 +69,7 @@ def extract_text(path: Path) -> str:
     if ext == ".pdf":   return extract_pdf(path)
     if ext == ".docx":  return extract_docx(path)
     if ext == ".pptx":  return extract_pptx(path)
+    if ext == ".md":    return path.read_text(encoding="utf-8", errors="replace")
     return ""
 
 # ---------------------------------------------------------------------------
