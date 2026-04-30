@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!-- QWeb-mall för Examensbyrån startsida -->
+    <record id="view_examensbyran_home" model="ir.ui.view">
+      <field name="name">examensbyran.home</field>
+      <field name="type">qweb</field>
+      <field name="key">odo_examensbyran_web.view_examensbyran_home</field>
+      <field name="arch" type="xml">
+        <t t-name="odo_examensbyran_web.view_examensbyran_home">
+          <t t-call="website.layout">
+            <div id="wrap">
+
+              <!-- Hero -->
+              <section class="bg-dark text-white py-5">
+                <div class="container py-4">
+                  <div class="row">
+                    <div class="col-lg-8">
+                      <h1 class="display-4 fw-bold">Examensbyrån</h1>
+                      <p class="lead mt-3 mb-4">
+                        Vi bevakar dödsannonser — du slipper missa det som spelar roll.
+                      </p>
+                      <a href="/contactus" class="btn btn-light btn-lg">Kom i kontakt</a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Om tjänsten -->
+              <section class="py-5">
+                <div class="container">
+                  <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                      <h2 class="h3 mb-4">Automatiserad dödsannonsbevakning</h2>
+                      <p class="lead">
+                        Examensbyrån är en bevakningstjänst som kontinuerligt söker igenom
+                        publicerade dödsannonser och matchar dem mot dina registrerade kontakter.
+                        Du väljer vem vi håller koll på. Vi meddelar dig när det händer något.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Hur det fungerar -->
+              <section class="bg-light py-5">
+                <div class="container">
+                  <h2 class="h3 text-center mb-5">Hur det fungerar</h2>
+                  <div class="row g-4">
+                    <div class="col-md-4">
+                      <div class="d-flex align-items-start gap-3">
+                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">1</span>
+                        <div>
+                          <h5 class="fw-bold">Registrera</h5>
+                          <p class="mb-0">Lägg in de kontakter du vill bevaka i systemet.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="d-flex align-items-start gap-3">
+                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">2</span>
+                        <div>
+                          <h5 class="fw-bold">Vi söker</h5>
+                          <p class="mb-0">Systemet skannar dagligen aktuella dödsannonser.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="d-flex align-items-start gap-3">
+                        <span class="badge bg-primary rounded-circle fs-5 px-3 py-2 flex-shrink-0">3</span>
+                        <div>
+                          <h5 class="fw-bold">Du notifieras</h5>
+                          <p class="mb-0">
+                            Direkt vid träff, eller som daglig sammanfattning —
+                            du väljer prioritet.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Prioriteringslägen -->
+              <section class="py-5">
+                <div class="container">
+                  <h2 class="h3 text-center mb-5">Prioriteringslägen</h2>
+                  <div class="row g-3 justify-content-center">
+                    <div class="col-md-4">
+                      <div class="card h-100 border-danger">
+                        <div class="card-body">
+                          <h5 class="card-title text-danger fw-bold">Viktig</h5>
+                          <p class="card-text">
+                            Omedelbar e-post så snart en bevakad person hittas i dödsannonser.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="card h-100 border-warning">
+                        <div class="card-body">
+                          <h5 class="card-title text-warning fw-bold">Normal</h5>
+                          <p class="card-text">
+                            Daglig sammanfattning av alla träffar från föregående dygn.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="card h-100 border-secondary">
+                        <div class="card-body">
+                          <h5 class="card-title text-secondary fw-bold">Bra att veta</h5>
+                          <p class="card-text">
+                            Periodisk rapport — för kontakter där timing är mindre kritisk.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Målgrupper -->
+              <section class="bg-light py-5">
+                <div class="container">
+                  <h2 class="h3 text-center mb-5">Vem tjänar på tjänsten?</h2>
+                  <div class="row g-4">
+                    <div class="col-md-4">
+                      <h5 class="fw-bold">Juridikbyråer &amp; dödsbon</h5>
+                      <p>
+                        Snabb och tillförlitlig information vid ett dödsfall. Undvik att missa
+                        viktiga händelser som påverkar ärenden och mandat.
+                      </p>
+                    </div>
+                    <div class="col-md-4">
+                      <h5 class="fw-bold">Finansiella institutioner</h5>
+                      <p>
+                        Automatiserad kontroll av kundregister mot publicerade dödsannonser.
+                        Minskar manuellt arbete och risk för fördröjda åtgärder.
+                      </p>
+                    </div>
+                    <div class="col-md-4">
+                      <h5 class="fw-bold">Privatpersoner</h5>
+                      <p>
+                        Bevaka åldrande släktingar eller gamla bekanta utan dagligt manuellt
+                        sökande. Få besked när det verkligen händer.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- CTA -->
+              <section class="py-5 text-center">
+                <div class="container">
+                  <h2 class="h3 mb-3">Intresserad?</h2>
+                  <p class="lead mb-4">
+                    Kontakta oss för mer information och tillgång till tjänsten.
+                  </p>
+                  <a href="/contactus" class="btn btn-primary btn-lg">Kom i kontakt</a>
+                </div>
+              </section>
+
+            </div>
+          </t>
+        </t>
+      </field>
+    </record>
+
+    <!-- website.page — publicerar sidan på /examensbyran -->
+    <record id="page_examensbyran_home" model="website.page">
+      <field name="view_id" ref="view_examensbyran_home"/>
+      <field name="url">/examensbyran</field>
+      <field name="is_published" eval="True"/>
+    </record>
+
+  </data>
+</odoo>
