@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Rotmeny ────────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_root"
+            name="Clio Vigil"
+            sequence="85"
+            groups="base.group_user"/>
+
+  <!-- ── Undermeny: Källor ──────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_sources"
+            name="Källor"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_source"
+            sequence="10"/>
+
+  <!-- ── Undermeny: Kö ──────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_queue"
+            name="Kö"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_item_queue"
+            sequence="20"/>
+
+  <!-- ── Undermeny: Klara objekt ────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_ready"
+            name="Klara objekt"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_item_ready"
+            sequence="30"/>
+
+  <!-- ── Undermeny: Alla objekt ─────────────────────────────────────────── -->
+  <menuitem id="menu_clio_vigil_all"
+            name="Alla objekt"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_item_all"
+            sequence="40"/>
+
+</odoo>

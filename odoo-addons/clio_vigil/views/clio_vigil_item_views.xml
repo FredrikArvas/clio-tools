@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_item_list" model="ir.ui.view">
+    <field name="name">clio.vigil.item.list</field>
+    <field name="model">clio.vigil.item</field>
+    <field name="arch" type="xml">
+      <list string="Bevakningsobjekt"
+            decoration-success="state in ('indexed', 'notified')"
+            decoration-warning="state in ('queued', 'transcribing')"
+            decoration-info="state == 'transcribed'"
+            decoration-muted="state == 'filtered_out'"
+            default_order="priority_score desc">
+        <field name="priority_score" string="Prio" optional="show"/>
+        <field name="published_at"   string="Publicerat" widget="date" optional="show"/>
+        <field name="domain"         string="Domän" widget="badge"
+               decoration-info="domain == 'ai'"
+               decoration-warning="domain == 'ufo'"/>
+        <field name="source_name"    string="Källa" optional="show"/>
+        <field name="source_maturity" string="Mognad" widget="badge"
+               decoration-success="source_maturity == 'akademisk'"
+               decoration-info="source_maturity == 'etablerad'"
+               decoration-warning="source_maturity == 'tidig'"
+               optional="show"/>
+        <field name="title"          string="Titel"/>
+        <field name="state"          string="Tillstånd" widget="badge"
+               decoration-success="state in ('indexed','notified')"
+               decoration-warning="state in ('queued','transcribing')"
+               decoration-info="state == 'transcribed'"
+               decoration-muted="state == 'filtered_out'"/>
+        <field name="summary"        string="Sammanfattning" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_item_form" model="ir.ui.view">
+    <field name="name">clio.vigil.item.form</field>
+    <field name="model">clio.vigil.item</field>
+    <field name="arch" type="xml">
+      <form string="Bevakningsobjekt">
+        <sheet>
+          <group>
+            <group string="Objekt">
+              <field name="title"       string="Titel"/>
+              <field name="url"         string="URL" widget="url"/>
+              <field name="published_at" string="Publicerat"/>
+              <field name="duration_seconds" string="Längd (s)" optional="hide"/>
+            </group>
+            <group string="Källa">
+              <field name="domain"          string="Domän"/>
+              <field name="source_type"     string="Typ"/>
+              <field name="source_name"     string="Källa"/>
+              <field name="source_maturity" string="Mognad"/>
+            </group>
+          </group>
+          <group>
+            <group string="Bearbetning">
+              <field name="state"           string="Tillstånd"/>
+              <field name="relevance_score" string="Relevansscore"/>
+              <field name="priority_score"  string="Prioritet"/>
+              <field name="created_at"      string="Skapad"    readonly="1"/>
+              <field name="notified_at"     string="Notifierad" readonly="1"/>
+            </group>
+          </group>
+          <group string="Sammanfattning">
+            <field name="summary" string="" nolabel="1"
+                   widget="text" readonly="1"
+                   placeholder="(Ingen sammanfattning ännu — körs efter transkription)"/>
+          </group>
+          <group string="Transkript (utdrag)" attrs="{'invisible': [('transcript_snippet','=',False)]}">
+            <field name="transcript_snippet" string="" nolabel="1"
+                   widget="text" readonly="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_item_search" model="ir.ui.view">
+    <field name="name">clio.vigil.item.search</field>
+    <field name="model">clio.vigil.item</field>
+    <field name="arch" type="xml">
+      <search string="Sök bevakningsobjekt">
+        <field name="title"       string="Titel"/>
+        <field name="source_name" string="Källa"/>
+        <field name="summary"     string="Sammanfattning"/>
+
+        <!-- Köfilter -->
+        <filter name="in_queue" string="I kö"
+                domain="[('state','in',['filtered_in','queued','transcribing','transcribed'])]"/>
+        <filter name="ready" string="Klara"
+                domain="[('state','in',['indexed','notified'])]"/>
+        <filter name="notified" string="Skickade"
+                domain="[('state','=','notified')]"/>
+        <filter name="filtered_out" string="Filtrerades bort"
+                domain="[('state','=','filtered_out')]"/>
+        <separator/>
+
+        <!-- Domänfilter -->
+        <filter name="ufo" string="UFO/UAP" domain="[('domain','=','ufo')]"/>
+        <filter name="ai"  string="AI"      domain="[('domain','=','ai')]"/>
+        <separator/>
+
+        <!-- Mognad -->
+        <filter name="etablerad" string="Etablerad+"
+                domain="[('source_maturity','in',['etablerad','akademisk'])]"/>
+
+        <!-- Har sammanfattning -->
+        <filter name="has_summary" string="Har sammanfattning"
+                domain="[('summary','!=',False),('summary','!=','')]"/>
+
+        <group expand="0" string="Gruppera">
+          <filter name="group_state"    string="Tillstånd"  context="{'group_by': 'state'}"/>
+          <filter name="group_domain"   string="Domän"      context="{'group_by': 'domain'}"/>
+          <filter name="group_source"   string="Källa"      context="{'group_by': 'source_name'}"/>
+          <filter name="group_published" string="Publicerat" context="{'group_by': 'published_at:day'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
+
+  <!-- Kö: ej klara objekt -->
+  <record id="action_clio_vigil_item_queue" model="ir.actions.act_window">
+    <field name="name">Kö</field>
+    <field name="res_model">clio.vigil.item</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('state','in',['discovered','filtered_in','queued','transcribing','transcribed'])]</field>
+    <field name="context">{'search_default_in_queue': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Kön är tom — alla objekt är klara eller filtrerade.
+      </p>
+    </field>
+  </record>
+
+  <!-- Klara objekt: indexerade och notifierade -->
+  <record id="action_clio_vigil_item_ready" model="ir.actions.act_window">
+    <field name="name">Klara objekt</field>
+    <field name="res_model">clio.vigil.item</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('state','in',['indexed','notified'])]</field>
+    <field name="context">{'search_default_has_summary': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga klara objekt ännu.
+      </p>
+      <p>
+        Objekt hamnar här efter att de indexerats i RAG och
+        sammanfattats av Claude.
+      </p>
+    </field>
+  </record>
+
+  <!-- Alla objekt -->
+  <record id="action_clio_vigil_item_all" model="ir.actions.act_window">
+    <field name="name">Alla objekt</field>
+    <field name="res_model">clio.vigil.item</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga bevakningsobjekt ännu.
+      </p>
+      <p>
+        Kör <code>python main.py --run</code> för att samla in och filtrera objekt.
+      </p>
+    </field>
+  </record>
+
+</odoo>

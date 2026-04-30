@@ -12,6 +12,7 @@
         'clio_mail_admin',
         'clio_obit',
         'clio_theme',
+        'clio_vigil',
         'l10n_se_ssn',
     ],
     'post_init_hook': 'post_init_hook',

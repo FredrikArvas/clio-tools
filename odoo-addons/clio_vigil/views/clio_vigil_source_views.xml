@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_source_list" model="ir.ui.view">
+    <field name="name">clio.vigil.source.list</field>
+    <field name="model">clio.vigil.source</field>
+    <field name="arch" type="xml">
+      <list string="Bevakningskällor"
+            decoration-muted="active == False">
+        <field name="name" string="Namn"/>
+        <field name="domain" string="Domän" widget="badge"
+               decoration-info="domain == 'ai'"
+               decoration-warning="domain == 'ufo'"/>
+        <field name="source_type" string="Typ" widget="badge"/>
+        <field name="maturity" string="Mognad" widget="badge"
+               decoration-success="maturity == 'akademisk'"
+               decoration-info="maturity == 'etablerad'"
+               decoration-warning="maturity == 'tidig'"/>
+        <field name="weight" string="Vikt" optional="show"/>
+        <field name="active" string="Aktiv" widget="boolean_toggle"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_source_form" model="ir.ui.view">
+    <field name="name">clio.vigil.source.form</field>
+    <field name="model">clio.vigil.source</field>
+    <field name="arch" type="xml">
+      <form string="Bevakningskälla">
+        <sheet>
+          <group>
+            <group string="Källa">
+              <field name="name" string="Namn"/>
+              <field name="url"  string="URL" widget="url"/>
+              <field name="active" string="Aktiv"/>
+            </group>
+            <group string="Klassificering">
+              <field name="domain"      string="Domän"/>
+              <field name="source_type" string="Typ"/>
+              <field name="maturity"    string="Mognad"/>
+              <field name="weight"      string="Prioritetsvikt"/>
+            </group>
+          </group>
+          <group string="Anteckningar">
+            <field name="notes" string="" nolabel="1" widget="text"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_vigil_source_search" model="ir.ui.view">
+    <field name="name">clio.vigil.source.search</field>
+    <field name="model">clio.vigil.source</field>
+    <field name="arch" type="xml">
+      <search string="Sök källor">
+        <field name="name" string="Namn"/>
+        <field name="url"  string="URL"/>
+
+        <filter name="active"   string="Aktiva"   domain="[('active','=',True)]"/>
+        <filter name="inactive" string="Pausade"  domain="[('active','=',False)]"/>
+        <separator/>
+        <filter name="ufo" string="UFO/UAP" domain="[('domain','=','ufo')]"/>
+        <filter name="ai"  string="AI"      domain="[('domain','=','ai')]"/>
+        <separator/>
+        <filter name="rss"     string="RSS"     domain="[('source_type','=','rss')]"/>
+        <filter name="youtube" string="YouTube" domain="[('source_type','=','youtube')]"/>
+        <separator/>
+        <filter name="etablerad" string="Etablerad+"
+                domain="[('maturity','in',['etablerad','akademisk'])]"/>
+
+        <group expand="0" string="Gruppera">
+          <filter name="group_domain"  string="Domän"  context="{'group_by': 'domain'}"/>
+          <filter name="group_type"    string="Typ"    context="{'group_by': 'source_type'}"/>
+          <filter name="group_maturity" string="Mognad" context="{'group_by': 'maturity'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_vigil_source" model="ir.actions.act_window">
+    <field name="name">Källor</field>
+    <field name="res_model">clio.vigil.source</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_active': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga bevakningskällor konfigurerade ännu.
+      </p>
+      <p>
+        Kör <code>python main.py --seed-sources</code> för att importera
+        YAML-konfigurationen, eller lägg till källor manuellt.
+      </p>
+    </field>
+  </record>
+
+</odoo>
