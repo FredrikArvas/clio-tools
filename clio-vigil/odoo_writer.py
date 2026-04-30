@@ -76,7 +76,7 @@ def _item_to_vals(row) -> dict:
         "url":              row["url"],
         "title":            (row["title"] or "")[:500],
         "domain":           row["domain"] or "",
-        "source_type":      row["source_type"] or "",
+        "source_type":      ("web" if row["source_type"] == "pdf" else row["source_type"]) or "web",
         "source_name":      (row["source_name"] or "")[:200],
         "source_maturity":  row["source_maturity"] or "tidig",
         "published_at":     _dt(row["published_at"]),
