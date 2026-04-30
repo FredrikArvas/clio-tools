@@ -128,7 +128,7 @@
                 <filter string="Säsong 2025/26" name="current_season"
                         domain="[('season_id.ssfta_id', '=', 18)]"/>
                 <filter string="Säsong 2024/25" name="prev_season"
-                        domain="[('season_id.ssfta_id', '=', 19)]"/>
+                        domain="[('season_id.ssfta_id', '=', 17)]"/>
                 <separator/>
                 <filter string="Anmälan öppen" name="entry_open"
                         domain="[('entry_open', '=', True)]"/>

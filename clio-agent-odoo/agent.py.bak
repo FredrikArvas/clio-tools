@@ -42,10 +42,9 @@ ANTHROPIC_KEY  = os.environ.get('ANTHROPIC_API_KEY', '')
 MODEL          = os.environ.get('CLIO_MODEL', 'claude-sonnet-4-6')
 
 # Kanal-id -> Qdrant-collection (RAG-projektminne)
-CHANNEL_RAG_MAP: dict[int, tuple] = {
-    3: ("cap_ssf_pmo", "mem_ssf", "cap_ssf_behorighet"),  # #Clio i ssf (prod)
-    4: ("cap_ssf_pmo", "mem_ssf", "cap_ssf_behorighet"),  # #SSF-PMO i ssf_t2
-    5: ("cap_ssf_pmo", "mem_ssf"),  # #SSF-PMO i aiab
+CHANNEL_RAG_MAP: dict[int, str] = {
+    4: "cap_ssf_pmo",   # #SSF-PMO i ssf_t2
+    5: "cap_ssf_pmo",   # #SSF-PMO i aiab
 }
 
 SYSTEM_PROMPT_BASE = (
@@ -64,31 +63,13 @@ SYSTEM_PROMPT_RAG = (
     'Håll svaren koncisa. Svara alltid på samma språk som frågan.'
 )
 
-# SSF-produktion: fokuserad på SSF-organisation och fakta, inte Capgemini-projekt
-SYSTEM_PROMPT_SSF = (
-    'Du ar Clio, AI-assistent for Svenska Skidförbundet (SSF). '
-    'Du svarar i SSF-systemets Discuss-kanal. '
-    'Du hjalper SSF-personal med fragor om SSF:s organisation, distrikt, '
-    'tavlingsadministration och SSF TA-projektet. '
-    'Du far relevanta textpassager som kontext - basera svaret pa dem. '
-    'Ange kalla i hakparentes nar du citerar. '
-    'Om svaret inte finns i passagerna, sag det och ge allman kunskap om SSF. '
-    'Hall svaren koncisa. Svara alltid pa samma sprak som fragan.'
-)
-
-CHANNEL_PROMPT_MAP: dict[int, str] = {
-    3: SYSTEM_PROMPT_SSF,   # #Clio i ssf (prod) - SSF-fokuserad
-}
-
 
 # ---------------------------------------------------------------------------
 # RAG-sökning
 # ---------------------------------------------------------------------------
 
-def _rag_search(question: str, collection, top_k: int = 5) -> str:
+def _rag_search(question: str, collection: str, top_k: int = 5) -> str:
     """Söker RAG-collection och returnerar formaterad kontext-sträng."""
-    if isinstance(collection, str):
-        collection = (collection,)
     try:
         from openai import OpenAI
         from qdrant_client import QdrantClient
@@ -96,22 +77,12 @@ def _rag_search(question: str, collection, top_k: int = 5) -> str:
         oai    = OpenAI()
         vec    = oai.embeddings.create(input=[question], model="text-embedding-3-small").data[0].embedding
         qdrant = QdrantClient(host="localhost", port=6333)
-        existing_cols = {c.name for c in qdrant.get_collections().collections}
-        hits = []
-        for col in collection:
-            if col not in existing_cols:
-                logger.debug("RAG: collection '%s' saknas", col)
-                continue
-            try:
-                col_hits = qdrant.query_points(
-                    collection_name=col,
-                    query=vec,
-                    limit=top_k,
-                    with_payload=True,
-                ).points
-                hits.extend(col_hits)
-            except Exception as col_exc:
-                logger.warning("RAG fel i '%s': %s", col, col_exc)
+        hits   = qdrant.query_points(
+            collection_name=collection,
+            query=vec,
+            limit=top_k,
+            with_payload=True,
+        ).points
 
         if not hits:
             return ""
@@ -120,7 +91,7 @@ def _rag_search(question: str, collection, top_k: int = 5) -> str:
         for i, hit in enumerate(hits, 1):
             p     = hit.payload
             title = p.get("title", "Okänt dokument")
-            text  = p.get("summary", p.get("text", ""))
+            text  = p.get("summary", "")
             parts.append(f"[Passage {i} — {title}]\n{text}")
         return "\n\n".join(parts)
 
@@ -173,10 +144,10 @@ def _check_access(sender_email: str) -> str:
 # Claude-anrop
 # ---------------------------------------------------------------------------
 
-def _build_reply(message: str, sender_name: str, rag_context: str = "", channel_id: int = 0) -> str:
+def _build_reply(message: str, sender_name: str, rag_context: str = "") -> str:
     client  = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
     if rag_context:
-        system       = CHANNEL_PROMPT_MAP.get(channel_id, SYSTEM_PROMPT_RAG)
+        system       = SYSTEM_PROMPT_RAG
         user_content = (
             f"Projektdokument (kontext):\n\n{rag_context}\n\n"
             f"Fråga från {sender_name}: {message}"
@@ -216,11 +187,11 @@ def _process(
     else:
         try:
             rag_context = ""
-            collections = CHANNEL_RAG_MAP.get(channel_id)
-            if collections:
-                logger.info('RAG-sokning i collections: %s', collections)
-                rag_context = _rag_search(message, collections)
-            reply = _build_reply(message, sender_name, rag_context, channel_id)
+            collection  = CHANNEL_RAG_MAP.get(channel_id)
+            if collection:
+                logger.info('RAG-sökning i collection: %s', collection)
+                rag_context = _rag_search(message, collection)
+            reply = _build_reply(message, sender_name, rag_context)
         except Exception as exc:
             logger.error('Claude API-fel: %s', exc)
             reply = 'Tekniskt fel — kunde inte generera svar. Försök igen.'

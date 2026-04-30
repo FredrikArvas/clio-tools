@@ -1,0 +1,854 @@
+[
+  {
+    "klubb": {
+      "klubbid": "1108",
+      "klubbnamn": "Arvika Idrottssällskap",
+      "klubb_epost": "info@arvikais.se",
+      "klubb_url": "https://www.arvikais.se",
+      "klubb_domain": "www.arvikais.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Box 52",
+        "postnr": "67122",
+        "ort": "ARVIKA",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "3BF43CDA-B5BF-46F0-B460-442C332A2867"
+    },
+    "kontakter": [
+      {
+        "namn": "Arvika Kommun",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://www.arvikais.se/"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "24476",
+      "klubbnamn": "Branäs Alpinaklubb",
+      "klubb_epost": "dag@vestbygard.se",
+      "klubb_url": "http://www.branasak.se",
+      "klubb_domain": "www.branasak.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Myrvägen 2",
+        "postnr": "68060",
+        "ort": "SYSSLEBÄCK",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "C67EDB56-20F0-4D71-A3D1-42D4D605473E"
+    },
+    "kontakter": [
+      {
+        "namn": "Riksidrottsförbundet Idrott",
+        "roll": "Kassör",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.branasak.se/styrelse"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "14253",
+      "klubbnamn": "Deje Alpina Klubb",
+      "klubb_epost": "info@domlebacken.se",
+      "klubb_url": "https://www.domlebacken.se/",
+      "klubb_domain": "www.domlebacken.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Box 8",
+        "postnr": "66721",
+        "ort": "FORSHAGA",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "671A7B27-9E7B-46F1-AE46-C11E2CE61464"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "1412",
+      "klubbnamn": "Deje Skidförening",
+      "klubb_epost": "info@dejesf.se",
+      "klubb_url": "https://www.dejesf.se",
+      "klubb_domain": "www.dejesf.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Skidstugan,Skivtjärn",
+        "postnr": "66991",
+        "ort": "DEJE",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "BF06F5FA-30EF-457C-9F9B-D4B6EBF6BEA4"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "14255",
+      "klubbnamn": "Ekshärads Slalomklubb",
+      "klubb_epost": "info@eksharadsslk.se",
+      "klubb_url": "https://eksharadsslk.se/",
+      "klubb_domain": "eksharadsslk.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Rådavägen 17",
+        "postnr": "68393",
+        "ort": "RÅDA",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "D796D202-16FF-4C4A-91FC-66E744B96375"
+    },
+    "kontakter": [
+      {
+        "namn": "Sara Ziegler",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      },
+      {
+        "namn": "Robert Persson",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      },
+      {
+        "namn": "Joakim Björkner",
+        "roll": "Kassör",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      },
+      {
+        "namn": "Per Olsson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      },
+      {
+        "namn": "Madelene Nordström",
+        "roll": "Sekreterare",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      },
+      {
+        "namn": "Ellen Westlund",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://eksharadsslk.se/kontakt"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "1806",
+      "klubbnamn": "Grums Slalomklubb",
+      "klubb_epost": "info@grumsslk.se",
+      "klubb_url": "http://www.grumsslk.se",
+      "klubb_domain": "www.grumsslk.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Konvaljstigen 8",
+        "postnr": "66432",
+        "ort": "GRUMS",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "DBB43C2D-A30A-46E6-AA9D-1B0A4F215519"
+    },
+    "kontakter": [
+      {
+        "namn": "Henrik Svärd",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Vice Ordförande",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Jesper Österberg",
+        "roll": "Kassör",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Niklas Johansson",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Fredrik Lind",
+        "roll": "Revisor",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Patrik Klum",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      },
+      {
+        "namn": "Ruben Vernang",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.grumsslk.se/styrelse"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "2054",
+      "klubbnamn": "Holmedals Allmänna IS",
+      "klubb_epost": "info@holmedalais.se",
+      "klubb_url": "https://www.svenskalag.se/holmedalsais",
+      "klubb_domain": "www.svenskalag.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Rössbyn 201",
+        "postnr": "67294",
+        "ort": "ÅRJÄNG",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "4D985B99-278B-4A12-9197-0007A2A8C2B9"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "1678",
+      "klubbnamn": "Idrottsklubben Fryken",
+      "klubb_epost": "info@ikfryken.se",
+      "klubb_url": "https://ikfryken.se",
+      "klubb_domain": "ikfryken.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Ransby 119",
+        "postnr": "68697",
+        "ort": "LYSVIK",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "0498D37C-AFBE-4745-A4CC-6F92DAC64E44"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "2278",
+      "klubbnamn": "IFK Likenäs",
+      "klubb_epost": "info@ifklikenas.se",
+      "klubb_url": "http://www.ifklikenas.se",
+      "klubb_domain": "www.ifklikenas.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Mörevägen 4",
+        "postnr": "68063",
+        "ort": "LIKENÄS",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "B6AA8810-8E4D-47DB-8D18-8AF1A7204670"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "14266",
+      "klubbnamn": "Karlstads Slalomklubb",
+      "klubb_epost": "info@kslk.se",
+      "klubb_url": "http://www.kslk.se",
+      "klubb_domain": "www.kslk.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Falkgatan 2",
+        "postnr": "65465",
+        "ort": "KARLSTAD",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "EFCB365D-81CD-4C85-BF58-18BBCE72F299"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "14270",
+      "klubbnamn": "Kils Slalomklubb",
+      "klubb_epost": "info@kilsslk.com",
+      "klubb_url": "http://www.kilsslk.com",
+      "klubb_domain": "www.kilsslk.com",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Galoppstigen 43",
+        "postnr": "65348",
+        "ort": "KARLSTAD",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "1CE883B7-16D8-4B33-8D7B-86199339A270"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "50972",
+      "klubbnamn": "KONG Arrangörs- och Idrottsförening",
+      "klubb_epost": "glenn@kongbacken.com",
+      "klubb_url": "https://kongbacken.com",
+      "klubb_domain": "kongbacken.com",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Kivra: 556645-9094",
+        "postnr": "10631",
+        "ort": "STOCKHOLM",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "5D218433-1F31-4E65-9AAD-FEE8189E8EA8"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "14274",
+      "klubbnamn": "Lennartsfors Idrottsförening",
+      "klubb_epost": "birgitta.olsson@arian.se",
+      "klubb_url": "https://arian.se",
+      "klubb_domain": "arian.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Åsen",
+        "postnr": "67292",
+        "ort": "ÅRJÄNG",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "C9D6EE4B-29AB-4CA4-BB07-3FD9563C579A"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "2986",
+      "klubbnamn": "Mattila Idrottsklubb",
+      "klubb_epost": "ski@mattilamarathon.se",
+      "klubb_url": "https://www.mattilamarathon.se",
+      "klubb_domain": "www.mattilamarathon.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Mattila",
+        "postnr": "68597",
+        "ort": "ÖSTMARK",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "C52C9B44-7DB8-4A42-B0FF-EFAE24615515"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "4203",
+      "klubbnamn": "Orienteringsklubben Tyr",
+      "klubb_epost": "info@oktyr.se",
+      "klubb_url": "https://www.oktyr.se",
+      "klubb_domain": "www.oktyr.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Tyrstugevägen 5",
+        "postnr": "65465",
+        "ort": "KARLSTAD",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "3DA7B829-A7DB-48B0-839D-08342951E319"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "12851",
+      "klubbnamn": "Orienteringsklubben Älgen",
+      "klubb_epost": "info@okalgen.se",
+      "klubb_url": "https://www.okalgen.se",
+      "klubb_domain": "www.okalgen.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Box 77",
+        "postnr": "66422",
+        "ort": "GRUMS",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "EF593DD9-7BD0-4F17-9DC5-5C88EEA2E6F0"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "1254",
+      "klubbnamn": "Skidklubben Bore Torsby",
+      "klubb_epost": "kansliet@skbore.se",
+      "klubb_url": "http://www.skbore.se",
+      "klubb_domain": "www.skbore.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Vasserudsvägen 17",
+        "postnr": "68534",
+        "ort": "TORSBY",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "8306E814-6B7A-44FC-A2DF-C4B99A6383F7"
+    },
+    "kontakter": [
+      {
+        "namn": "Idre Classic",
+        "roll": "Längd",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.skbore.se/"
+      },
+      {
+        "namn": "See More",
+        "roll": "Längd",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.skbore.se/"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "3772",
+      "klubbnamn": "Stavnäs Idrottsklubb",
+      "klubb_epost": "andreas@klassbols.se",
+      "klubb_url": "https://klassbols.se",
+      "klubb_domain": "klassbols.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Damastvägen 5",
+        "postnr": "67195",
+        "ort": "KLÄSSBOL",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "DA45587E-1AD8-47FB-BC72-E99BC4574D4C"
+    },
+    "kontakter": [
+      {
+        "namn": "Klässbols Linneväveri",
+        "roll": "Vd",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://klassbols.se/"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "14283",
+      "klubbnamn": "Sunne Alpina Klubb",
+      "klubb_epost": "info@sunnealpina.se",
+      "klubb_url": "https://www.sunneak.se",
+      "klubb_domain": "www.sunneak.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Box 39",
+        "postnr": "68621",
+        "ort": "SUNNE",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "5F548C49-7ED8-48ED-88C8-A146D55C9DC0"
+    },
+    "kontakter": [
+      {
+        "namn": "Sunne Alpina Klubb",
+        "roll": "Alpin",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://www.sunneak.se/"
+      },
+      {
+        "namn": "Stötta Sunne Alpina",
+        "roll": "Alpin",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://www.sunneak.se/"
+      },
+      {
+        "namn": "Sunne Ski",
+        "roll": "Alpin",
+        "epost": "info@sunnealpina.se",
+        "telefon": null,
+        "kalla_url": "https://www.sunneak.se/"
+      },
+      {
+        "namn": "Helmut Grassl",
+        "roll": "Tränare",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "https://www.sunneak.se/"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "14286",
+      "klubbnamn": "Säffle Idrottsklubb",
+      "klubb_epost": "styrelsen@saffleik.se",
+      "klubb_url": "https://www.saffleik.se",
+      "klubb_domain": "www.saffleik.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Kvistvägen 19",
+        "postnr": "66143",
+        "ort": "SÄFFLE",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "D8C98FFE-F55C-4AD8-847F-050CD29DFD41"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "52616",
+      "klubbnamn": "Team Skoglöfs Bil Idrottsförening",
+      "klubb_epost": "daniel.wassberg@bilskoglofs.se",
+      "klubb_url": "https://bilskoglofs.se",
+      "klubb_domain": "bilskoglofs.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "BOX 233",
+        "postnr": "68125",
+        "ort": "KRISTINEHAMN",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "8947F6E4-C09A-4A53-A13B-FEDF567EFE21"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "34348",
+      "klubbnamn": "Torsby Slalomklubb",
+      "klubb_epost": "david@skilberg.se",
+      "klubb_url": "http://www.valbergsbacken.se",
+      "klubb_domain": "www.valbergsbacken.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Solbergsvägen 64",
+        "postnr": "68591",
+        "ort": "TORSBY",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "7867AD61-6BBB-43DA-B027-220E87EA1F88"
+    },
+    "kontakter": [
+      {
+        "namn": "Ordförande David Skilberg",
+        "roll": "Ordförande",
+        "epost": "david@skilberg.se",
+        "telefon": null,
+        "kalla_url": "http://www.valbergsbacken.se/styrelse"
+      },
+      {
+        "namn": "Ledamot Victor Maschel",
+        "roll": "Ledamot",
+        "epost": "victor.maschel@torsby.se",
+        "telefon": null,
+        "kalla_url": "http://www.valbergsbacken.se/styrelse"
+      },
+      {
+        "namn": "Ledamot Emma Helgesson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valbergsbacken.se/styrelse"
+      },
+      {
+        "namn": "Ledamot Jenny Skilberg",
+        "roll": "Ledamot",
+        "epost": "skilberg.jenny@gmail.com",
+        "telefon": null,
+        "kalla_url": "http://www.valbergsbacken.se/styrelse"
+      },
+      {
+        "namn": "Ledamot Anders Rattfelt",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valbergsbacken.se/styrelse"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "4250",
+      "klubbnamn": "Ulvsby Idrottsförening",
+      "klubb_epost": "info@ulvsbyif.se",
+      "klubb_url": "http://www.ulvsbyif.se",
+      "klubb_domain": "www.ulvsbyif.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Hantverkaregatan 11",
+        "postnr": "65460",
+        "ort": "KARLSTAD",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "A4F72233-17D7-4E92-A523-D8275AB54F24"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "14289",
+      "klubbnamn": "Valfjällets Slalomklubb",
+      "klubb_epost": "info@valfjalletsslk.se",
+      "klubb_url": "http://www.valfjalletsslk.se",
+      "klubb_domain": "www.valfjalletsslk.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Gryttved Valfjället",
+        "postnr": "67396",
+        "ort": "ÅMOTFORS",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "89A58B9C-8894-42F8-9C10-5C87D6B450AB"
+    },
+    "kontakter": [
+      {
+        "namn": "Valfjällets Slalomklubbs",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Thomas Peterson",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Patrik Bäckman",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Madelene Kutt",
+        "roll": "Sekreterare",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Thomas Börjesson",
+        "roll": "Kassör",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Martin Eriksson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Kristina Wargh",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Torbjörn Danielsson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Stefan Elovsson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Andreas Flognfelt",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      },
+      {
+        "namn": "Roger Högenes",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.valfjalletsslk.se/styrelse"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "4592",
+      "klubbnamn": "Åmotfors Idrottsförening",
+      "klubb_epost": "info@amotforsif.se",
+      "klubb_url": "https://www.amotforsif.se",
+      "klubb_domain": "www.amotforsif.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Järnvägsgatan 22",
+        "postnr": "67040",
+        "ort": "ÅMOTFORS",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "E3F26B33-C725-4288-888A-F2D6B64851E4"
+    },
+    "kontakter": []
+  },
+  {
+    "klubb": {
+      "klubbid": "4631",
+      "klubbnamn": "Älgå Sportklubb",
+      "klubb_epost": "info@algask.se",
+      "klubb_url": "http://www.algask.se",
+      "klubb_domain": "www.algask.se",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Fröbol Nytomta 1",
+        "postnr": "67193",
+        "ort": "ARVIKA",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "16B61B0A-E834-49D1-958E-CC396E8DAED7"
+    },
+    "kontakter": [
+      {
+        "namn": "Stig Nyr",
+        "roll": "Ordförande",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Katarina Ledin",
+        "roll": "Kassör",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Stefan Ledin",
+        "roll": "Sekreterare",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Sara Frid",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Lisbeth Augustsson",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Oskar Boström",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Jeanette Edvardsen",
+        "roll": "Ledamot",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Lars Nilsson",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      },
+      {
+        "namn": "Marie Karlsson",
+        "roll": "Suppleant",
+        "epost": null,
+        "telefon": null,
+        "kalla_url": "http://www.algask.se/styrelse"
+      }
+    ]
+  },
+  {
+    "klubb": {
+      "klubbid": "14295",
+      "klubbnamn": "Östmarks Idrottsförening",
+      "klubb_epost": "ostmarksif@ostmark.se",
+      "klubb_url": "https://www.facebook.com/OstmarksIf/",
+      "klubb_domain": "www.facebook.com",
+      "has_own_domain": true,
+      "klubbaddress": {
+        "gata": "Röjdåforsvägen 5",
+        "postnr": "68597",
+        "ort": "ÖSTMARK",
+        "land": "Sverige"
+      },
+      "distrikt": "Värmland",
+      "_id": "8712C52A-AFD0-45A0-A19E-BB4C18E034E4"
+    },
+    "kontakter": []
+  }
+]
