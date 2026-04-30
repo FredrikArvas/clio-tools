@@ -39,6 +39,20 @@
                     <group string="Beskrivning">
                         <field name="description" nolabel="1" readonly="1"/>
                     </group>
+                    <notebook>
+                        <page string="Evenemang" name="events">
+                            <field name="event_ids" readonly="1">
+                                <list create="false" edit="false" delete="false"
+                                      default_order="start_date">
+                                    <field name="name" string="Namn"/>
+                                    <field name="start_date" string="Datum"/>
+                                    <field name="city" string="Ort"/>
+                                    <field name="event_status" string="Status"/>
+                                    <field name="competition_count" string="Tävlingar"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

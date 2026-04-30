@@ -15,3 +15,4 @@ class SsfCup(models.Model):
     organizer_id       = fields.Many2one('res.partner', string='Arrangör', readonly=True, ondelete='set null')
     email              = fields.Char(string='E-post', readonly=True)
     description        = fields.Text(string='Beskrivning', readonly=True)
+    event_ids          = fields.One2many('ssf.event', 'cup_id', string='Evenemang')

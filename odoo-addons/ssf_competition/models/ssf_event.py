@@ -44,6 +44,7 @@ class SsfEvent(models.Model):
     note = fields.Text(string="Note", readonly=True)
     email = fields.Char(string="Email", readonly=True)
     website = fields.Char(string="Website", readonly=True)
+    cup_id = fields.Many2one("ssf.cup", string="Serie", readonly=True, index=True, ondelete="set null")
     competition_ids = fields.One2many("ssf.competition", "event_id", string="Competitions")
 
     # store=True → sorterbara i listvy

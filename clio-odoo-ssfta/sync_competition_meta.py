@@ -292,6 +292,14 @@ def sync_events(
     sector_map = {r["ssfta_id"]: r["id"] for r in env["ssf.sector"].search_read([], ["ssfta_id", "id"])}
     season_map = {r["ssfta_id"]: r["id"] for r in env["ssf.season"].search_read([], ["ssfta_id", "id"])}
 
+    # Cup-karta: (sector_id, season_id) → ssf.cup.id  (matchas implicit via sector+season)
+    cup_map: dict[tuple[int, int], int] = {}
+    for c in env["ssf.cup"].search_read([], ["id", "sector_id", "season_id"]):
+        sid = c["sector_id"][0] if c["sector_id"] else None
+        ssid = c["season_id"][0] if c["season_id"] else None
+        if sid and ssid:
+            cup_map[(sid, ssid)] = c["id"]
+
     # Slå upp organizer -> res.partner via rfid (batcad)
     org_ssfta_ids = list({r["Organizer"] for r in rows_raw if r["Organizer"]})
     org_odoo_map = {}
@@ -311,11 +319,15 @@ def sync_events(
     for r in rows_raw:
         start = r["StartDate"].date() if r["StartDate"] else False
         end = r["EndDate"].date() if r["EndDate"] else False
+        sector_id = sector_map.get(r["Sector"]) or False
+        season_id = season_map.get(r["Season"]) or False
+        cup_id = cup_map.get((sector_id, season_id)) if sector_id and season_id else False
         rows.append({
             "ssfta_id": r["ID"],
             "name": r["Name"] or f"Evenemang {r['ID']}",
-            "sector_id": sector_map.get(r["Sector"]) or False,
-            "season_id": season_map.get(r["Season"]) or False,
+            "sector_id": sector_id,
+            "season_id": season_id,
+            "cup_id": cup_id or False,
             "start_date": str(start) if start else False,
             "end_date": str(end) if end else False,
             "place": r["Place"] or "",

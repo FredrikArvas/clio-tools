@@ -7,6 +7,7 @@
             <list string="Evenemang" create="false" edit="false" delete="false"
                   default_order="start_date desc">
                 <field name="name" string="Namn"/>
+                <field name="cup_id" string="Serie" optional="show"/>
                 <field name="sector_id" string="Gren"/>
                 <field name="season_id" string="Säsong"/>
                 <field name="start_date" string="Datum"/>
@@ -75,6 +76,7 @@
                     </div>
                     <group>
                         <group>
+                            <field name="cup_id" readonly="1" string="Serie"/>
                             <field name="sector_id" readonly="1"/>
                             <field name="season_id" readonly="1"/>
                             <field name="start_date" readonly="1"/>
@@ -157,6 +159,7 @@
         <field name="arch" type="xml">
             <search string="Sök evenemang">
                 <field name="name" string="Namn"/>
+                <field name="cup_id" string="Serie"/>
                 <field name="city" string="Ort"/>
                 <field name="organizer_id" string="Arrangör"/>
                 <filter string="Säsong 2025/26" name="current_season"
@@ -187,6 +190,7 @@
                 <filter string="Freestyle" name="sector_fs"
                         domain="[('sector_id.sector_code', '=', 'FS')]"/>
                 <group expand="0" string="Gruppera efter">
+                    <filter string="Serie" name="group_cup" context="{'group_by': 'cup_id'}"/>
                     <filter string="Gren" name="group_sector" context="{'group_by': 'sector_id'}"/>
                     <filter string="Säsong" name="group_season" context="{'group_by': 'season_id'}"/>
                     <filter string="Ort" name="group_city" context="{'group_by': 'city'}"/>
