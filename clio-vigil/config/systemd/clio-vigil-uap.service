@@ -1,0 +1,14 @@
+[Unit]
+Description=Clio Vigil — UAP domain daily collection
+After=network.target
+
+[Service]
+Type=oneshot
+User=clioadmin
+WorkingDirectory=/home/clioadmin/git/clio-tools/clio-vigil
+ExecStart=/home/clioadmin/git/clio-tools/.venv/bin/python main.py --run --domain ufo
+StandardOutput=append:/home/clioadmin/logs/clio-vigil-uap.log
+StandardError=append:/home/clioadmin/logs/clio-vigil-uap.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+python-dotenv>=1.0
+anthropic>=0.25
+openai>=1.0
+qdrant-client>=1.9
+neo4j>=5.0
+feedparser>=6.0
+# Installera separat:
+# pip install -e ../clio-core
+# pip install pyodoo-connect

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_uap_encounter_tree" model="ir.ui.view">
+    <field name="name">uap.encounter.list</field>
+    <field name="model">uap.encounter</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="encounter_id"/>
+        <field name="title_en"/>
+        <field name="date_observed"/>
+        <field name="country_id"/>
+        <field name="encounter_class"/>
+        <field name="discourse_level"/>
+        <field name="official_response"/>
+        <field name="status"/>
+        <field name="source_count" string="Sources"/>
+        <field name="witness_count" string="Witnesses"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_uap_encounter_form" model="ir.ui.view">
+    <field name="name">uap.encounter.form</field>
+    <field name="model">uap.encounter</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="%(action_uap_source)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-book">
+              <field name="source_count" widget="statinfo" string="Sources"/>
+            </button>
+            <button name="%(action_uap_witness)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-user">
+              <field name="witness_count" widget="statinfo" string="Witnesses"/>
+            </button>
+            <button name="%(action_uap_verification)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-check-circle">
+              <field name="verification_count" widget="statinfo" string="Log Entries"/>
+            </button>
+          </div>
+
+          <group string="Identification">
+            <field name="encounter_id" placeholder="SWE_PPXL_0001"/>
+            <field name="encounter_guid"/>
+            <field name="status"/>
+          </group>
+
+          <group string="Location &amp; Time">
+            <field name="date_observed"/>
+            <field name="country_id"/>
+            <field name="location"/>
+          </group>
+
+          <group string="Classification">
+            <field name="encounter_class"/>
+            <field name="discourse_level"/>
+            <field name="official_response"/>
+          </group>
+
+          <notebook>
+            <page string="Titles &amp; Descriptions">
+              <group string="Titles">
+                <field name="title_en" placeholder="English title"/>
+                <field name="title_original" placeholder="Original language title"/>
+                <field name="language_original"/>
+              </group>
+              <group string="Description (EN)" col="1">
+                <field name="description_en" nolabel="1" placeholder="English description"/>
+              </group>
+              <group string="Description (SV)" col="1">
+                <field name="description_sv" nolabel="1" placeholder="Swedish description"/>
+              </group>
+              <group string="Description (Original)" col="1">
+                <field name="description_original" nolabel="1" placeholder="Original language description"/>
+              </group>
+            </page>
+
+            <page string="Sources">
+              <field name="source_ids" nolabel="1">
+                <list>
+                  <field name="source_id"/>
+                  <field name="name"/>
+                  <field name="source_type"/>
+                  <field name="tier"/>
+                  <field name="url" widget="url"/>
+                </list>
+              </field>
+            </page>
+
+            <page string="Witnesses">
+              <field name="witness_ids" nolabel="1">
+                <list>
+                  <field name="name"/>
+                  <field name="witness_type"/>
+                  <field name="credibility"/>
+                </list>
+              </field>
+            </page>
+
+            <page string="Research Notes">
+              <group col="1">
+                <field name="research_notes" nolabel="1"
+                       placeholder="Tagged notes: [BAK] background, [UTB] education, [SEN] sensitive, [OFF] official, [INT] intelligence, [KRI] critical, [SRC] source"/>
+              </group>
+            </page>
+
+            <page string="Verification Log">
+              <field name="verification_ids" nolabel="1">
+                <list create="false">
+                  <field name="change_date"/>
+                  <field name="changed_by"/>
+                  <field name="field_name"/>
+                  <field name="original_value"/>
+                  <field name="updated_value"/>
+                  <field name="verification_status"/>
+                </list>
+              </field>
+            </page>
+
+            <page string="Technical">
+              <group>
+                <field name="neo4j_node_id"/>
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sökvy -->
+  <record id="view_uap_encounter_search" model="ir.ui.view">
+    <field name="name">uap.encounter.search</field>
+    <field name="model">uap.encounter</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="encounter_id"/>
+        <field name="title_en"/>
+        <field name="country_id"/>
+        <separator/>
+        <filter string="Pending" name="pending" domain="[('status','=','pending')]"/>
+        <filter string="Verified" name="verified" domain="[('status','=','verified')]"/>
+        <filter string="Archived" name="archived" domain="[('status','=','archived')]"/>
+        <separator/>
+        <filter string="Class 3+" name="class3" domain="[('encounter_class','in',['3','4'])]"/>
+        <filter string="Discourse 4+" name="disc4" domain="[('discourse_level','in',['4','5'])]"/>
+        <group expand="0" string="Group By">
+          <filter string="Country" name="by_country" context="{'group_by': 'country_id'}"/>
+          <filter string="Encounter Class" name="by_class" context="{'group_by': 'encounter_class'}"/>
+          <filter string="Discourse Level" name="by_disc" context="{'group_by': 'discourse_level'}"/>
+          <filter string="Status" name="by_status" context="{'group_by': 'status'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_uap_encounter" model="ir.actions.act_window">
+    <field name="name">Encounters</field>
+    <field name="res_model">uap.encounter</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_uap_encounter_search"/>
+  </record>
+
+</odoo>
