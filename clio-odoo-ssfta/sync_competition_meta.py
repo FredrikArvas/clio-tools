@@ -241,9 +241,13 @@ def sync_events(
     conn = _get_conn()
     cur = conn.cursor(as_dict=True)
     cur.execute(f"""
-        SELECT ID, Name, Sector, Season, StartDate, EndDate,
-               Place, City, Organizer, EventStatus, Note, Email, Website
-        FROM Events {event_where}
+        SELECT e.ID, e.Name, e.Sector, e.Season, e.StartDate, e.EndDate,
+               e.Place, e.City, e.Organizer, e.EventStatus, e.Note, e.Email, e.Website,
+               e.GeographicalScope,
+               et.LocalName AS EventTypeName
+        FROM Events e
+        LEFT JOIN EventTypes et ON e.EventType = et.ID
+        {event_where}
     """)
     rows_raw = cur.fetchall()
     conn.close()
@@ -284,6 +288,8 @@ def sync_events(
             "note": r["Note"] or "",
             "email": r["Email"] or "",
             "website": r["Website"] or "",
+            "geographical_scope": str(r["GeographicalScope"]) if r["GeographicalScope"] else False,
+            "event_type_label":   r["EventTypeName"] or "",
         })
 
     c, u = _upsert(env["ssf.event"], rows, dry_run=dry_run)

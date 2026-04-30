@@ -31,6 +31,9 @@
                 <field name="sport_color"/>
                 <field name="sport_color2"/>
                 <field name="hidden"/>
+                <field name="gold_count"/>
+                <field name="silver_count"/>
+                <field name="bronze_count"/>
                 <templates>
                     <t t-name="card">
                         <!-- ── Hero-header med gradient + emoji + namn ── -->
@@ -133,6 +136,33 @@
                             </div>
                         </div>
 
+                        <!-- ── Medaljer ── -->
+                        <t t-if="record.gold_count.value > 0">
+                            <div style="
+                                display: flex; gap: 6px; padding: 0 0 10px 0;
+                                justify-content: center;
+                            ">
+                                <span style="
+                                    font-size: 0.82rem; font-weight: 700;
+                                    background: #FFFDE7; border-radius: 6px;
+                                    padding: 4px 10px; color: #5D4037;
+                                    border: 1px solid #F9A825;
+                                ">🥇 <t t-esc="record.gold_count.value"/></span>
+                                <span style="
+                                    font-size: 0.82rem; font-weight: 700;
+                                    background: #F5F5F5; border-radius: 6px;
+                                    padding: 4px 10px; color: #424242;
+                                    border: 1px solid #BDBDBD;
+                                ">🥈 <t t-esc="record.silver_count.value"/></span>
+                                <span style="
+                                    font-size: 0.82rem; font-weight: 700;
+                                    background: #FFF3E0; border-radius: 6px;
+                                    padding: 4px 10px; color: #4E342E;
+                                    border: 1px solid #FF8F00;
+                                ">🥉 <t t-esc="record.bronze_count.value"/></span>
+                            </div>
+                        </t>
+
                         <!-- ── Footer: FIS-kod + knappar ── -->
                         <div style="
                             border-top: 1px solid #ECF0F1;
@@ -220,8 +250,11 @@
                             <field name="fis_sector_code" readonly="1" string="FIS-kod"/>
                         </group>
                         <group>
-                            <field name="ssfta_id" readonly="1" string="SSFTA ID"/>
-                            <field name="hidden" readonly="1" string="Dold"/>
+                            <field name="ssfta_id"    readonly="1" string="SSFTA ID"/>
+                            <field name="hidden"      readonly="1" string="Dold"/>
+                            <field name="gold_count"  readonly="1" string="Guldmedaljer"/>
+                            <field name="silver_count" readonly="1" string="Silvermedaljer"/>
+                            <field name="bronze_count" readonly="1" string="Bronsmedaljer"/>
                         </group>
                     </group>
                 </sheet>

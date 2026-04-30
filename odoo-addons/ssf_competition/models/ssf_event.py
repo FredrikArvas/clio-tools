@@ -11,6 +11,17 @@ EVENT_STATUS = [
     ('8', 'Inställt'),
 ]
 
+GEO_SCOPE = [
+    ('1',  'Klubb'),
+    ('3',  'Distrikt'),
+    ('5',  'Region'),
+    ('6',  'Landsdel'),
+    ('7',  'Nationell'),
+    ('8',  'Internationell (FIS)'),
+    ('9',  'Klubb (Lokalt)'),
+    ('10', 'Nordisk'),
+]
+
 
 class SsfEvent(models.Model):
     _name = "ssf.event"
@@ -28,6 +39,8 @@ class SsfEvent(models.Model):
     organizer_id = fields.Many2one("res.partner", string="Organizer", readonly=True, ondelete="set null")
     event_type = fields.Char(string="Type", readonly=True)
     event_status = fields.Selection(EVENT_STATUS, string="Status", readonly=True)
+    geographical_scope = fields.Selection(GEO_SCOPE, string="Räckvidd", readonly=True, index=True)
+    event_type_label   = fields.Char(string="Tävlingstyp", readonly=True)
     note = fields.Text(string="Note", readonly=True)
     email = fields.Char(string="Email", readonly=True)
     website = fields.Char(string="Website", readonly=True)

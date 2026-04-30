@@ -52,6 +52,10 @@ class SsfSector(models.Model):
             rec.sport_color  = v['c1']
             rec.sport_color2 = v['c2']
 
+    gold_count   = fields.Integer(string="Guld",   compute="_compute_medals", store=True)
+    silver_count = fields.Integer(string="Silver", compute="_compute_medals", store=True)
+    bronze_count = fields.Integer(string="Brons",  compute="_compute_medals", store=True)
+
     @api.depends()
     def _compute_counts(self):
         for rec in self:
@@ -61,6 +65,30 @@ class SsfSector(models.Model):
             rec.competition_count = self.env["ssf.competition"].search_count(
                 [("sector_id", "=", rec.id)]
             )
+
+    @api.depends()
+    def _compute_medals(self):
+        if not self.ids:
+            return
+        self.env.cr.execute("""
+            SELECT e.sector_id,
+                SUM(CASE WHEN r.rank = 1 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN r.rank = 2 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN r.rank = 3 THEN 1 ELSE 0 END)
+            FROM ssf_result r
+            JOIN ssf_result_list rl ON r.result_list_id = rl.id
+            JOIN ssf_comp_ccd ccd ON rl.ccd_id = ccd.id
+            JOIN ssf_competition comp ON ccd.competition_id = comp.id
+            JOIN ssf_event e ON comp.event_id = e.id
+            WHERE e.sector_id IN %s
+            GROUP BY e.sector_id
+        """, [tuple(self.ids)])
+        medal_data = {row[0]: (row[1], row[2], row[3]) for row in self.env.cr.fetchall()}
+        for rec in self:
+            g, s, b = medal_data.get(rec.id, (0, 0, 0))
+            rec.gold_count   = int(g or 0)
+            rec.silver_count = int(s or 0)
+            rec.bronze_count = int(b or 0)
 
     def action_view_events(self):
         self.ensure_one()

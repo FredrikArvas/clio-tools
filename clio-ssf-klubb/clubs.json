@@ -1,0 +1,1074 @@
+[
+  {
+    "klubbid": "1108",
+    "klubbnamn": "Arvika Idrottssällskap",
+    "klubb_epost": "info@arvikais.se",
+    "klubb_url": "https://www.arvikais.se",
+    "klubb_domain": "www.arvikais.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Box 52",
+      "postnr": "67122",
+      "ort": "ARVIKA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "3BF43CDA-B5BF-46F0-B460-442C332A2867"
+  },
+  {
+    "klubbid": "14249",
+    "klubbnamn": "Arvika Slalomklubb",
+    "klubb_epost": "arvikaslalomklubb@gmail.com",
+    "klubb_url": "https://www.arvikaslk.se",
+    "klubb_domain": "www.arvikaslk.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Rackstad",
+      "postnr": "67192",
+      "ort": "ARVIKA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "D50252D2-9BBE-43AE-8D8B-8AECF6B570A0"
+  },
+  {
+    "klubbid": "1266",
+    "klubbnamn": "Bortans Idrottsklubb",
+    "klubb_epost": "olssonronny@hotmail.com",
+    "klubb_url": "https://facebook.com/bortansikolympia",
+    "klubb_domain": "facebook.com",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Norra Backa",
+      "postnr": "67198",
+      "ort": "GUNNARSKOG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "26274817-BD9D-4AC4-9615-4450D83C48A7"
+  },
+  {
+    "klubbid": "14251",
+    "klubbnamn": "Brandsbols Skidklubb",
+    "klubb_epost": "t.stenmark.dalhem@gmail.com",
+    "klubb_url": "http://www8.idrottonline.se/BrandsbolsSK-Skidor/",
+    "klubb_domain": "www8.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Hedås 112",
+      "postnr": "68698",
+      "ort": "GRÄSMARK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "4D5AEE32-0BA7-45C7-AE09-AF97E601D97A"
+  },
+  {
+    "klubbid": "24476",
+    "klubbnamn": "Branäs Alpinaklubb",
+    "klubb_epost": "dag@vestbygard.se",
+    "klubb_url": "http://www.branasak.se",
+    "klubb_domain": "www.branasak.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Myrvägen 2",
+      "postnr": "68060",
+      "ort": "SYSSLEBÄCK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "C67EDB56-20F0-4D71-A3D1-42D4D605473E"
+  },
+  {
+    "klubbid": "14253",
+    "klubbnamn": "Deje Alpina Klubb",
+    "klubb_epost": "info@domlebacken.se",
+    "klubb_url": "https://www.domlebacken.se/",
+    "klubb_domain": "www.domlebacken.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Box 8",
+      "postnr": "66721",
+      "ort": "FORSHAGA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "671A7B27-9E7B-46F1-AE46-C11E2CE61464"
+  },
+  {
+    "klubbid": "1412",
+    "klubbnamn": "Deje Skidförening",
+    "klubb_epost": "info@dejesf.se",
+    "klubb_url": "https://www.dejesf.se",
+    "klubb_domain": "www.dejesf.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Skidstugan,Skivtjärn",
+      "postnr": "66991",
+      "ort": "DEJE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "BF06F5FA-30EF-457C-9F9B-D4B6EBF6BEA4"
+  },
+  {
+    "klubbid": "14254",
+    "klubbnamn": "Ekshärads Skidförening",
+    "klubb_epost": "eksharadssf@gmail.com",
+    "klubb_url": "https://www.eksharadssf.se",
+    "klubb_domain": "www.eksharadssf.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Ekesbergsvägen 9",
+      "postnr": "68360",
+      "ort": "EKSHÄRAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "FF243C65-B85A-4679-B2B7-B07A8CC546FC"
+  },
+  {
+    "klubbid": "14255",
+    "klubbnamn": "Ekshärads Slalomklubb",
+    "klubb_epost": "info@eksharadsslk.se",
+    "klubb_url": "https://eksharadsslk.se/",
+    "klubb_domain": "eksharadsslk.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Rådavägen 17",
+      "postnr": "68393",
+      "ort": "RÅDA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "D796D202-16FF-4C4A-91FC-66E744B96375"
+  },
+  {
+    "klubbid": "1588",
+    "klubbnamn": "Filipstads Skidförening",
+    "klubb_epost": "filipstadsskidforening@gmail.com",
+    "klubb_url": "https://www.svenskalag.se/filipstadssf",
+    "klubb_domain": "www.svenskalag.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Kalhyttevägen 40",
+      "postnr": "68291",
+      "ort": "FILIPSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "A9674921-D281-44E7-9FD1-CE857311B99D"
+  },
+  {
+    "klubbid": "14257",
+    "klubbnamn": "Finnskoga Idrottsförening",
+    "klubb_epost": "",
+    "klubb_url": "http://www.finnskogaif.se",
+    "klubb_domain": "www.finnskogaif.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Gunneby 14",
+      "postnr": "68060",
+      "ort": "SYSSLEBÄCK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "7372C80D-4AFC-44F2-B545-A7F68C577BDE"
+  },
+  {
+    "klubbid": "14258",
+    "klubbnamn": "Finnskogarnas SK",
+    "klubb_epost": "gittalen@hotmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Smolmark Hagen 3",
+      "postnr": "67293",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "45022B14-F719-4C09-8A56-EE5FEC3E2800"
+  },
+  {
+    "klubbid": "27420",
+    "klubbnamn": "Föreningen Storfors Skidor",
+    "klubb_epost": "i.bergare@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Jägarstigen 14",
+      "postnr": "68831",
+      "ort": "STORFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "13F05BFC-7BA3-467F-A5A0-56A6DF02C36A"
+  },
+  {
+    "klubbid": "1747",
+    "klubbnamn": "Gillberga Skidklubb",
+    "klubb_epost": "gillbergask@gmail.com",
+    "klubb_url": "http://www.gillbergask.com",
+    "klubb_domain": "www.gillbergask.com",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Gillberga Prästgård Askelund",
+      "postnr": "66195",
+      "ort": "VÄRMLANDS NYSÄTER",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "588A351A-973F-4344-865F-0645BC174D0B"
+  },
+  {
+    "klubbid": "1782",
+    "klubbnamn": "Granbergsdals Idrottsförening",
+    "klubb_epost": "karinvarg60@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Granbergsdal Solhem 509",
+      "postnr": "69192",
+      "ort": "GRANBERGSDAL",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "75C9D2BD-7BA5-4EB6-9B1D-27A5A3CC88AD"
+  },
+  {
+    "klubbid": "1788",
+    "klubbnamn": "Grava Skidklubb",
+    "klubb_epost": "gravask@gmail.com",
+    "klubb_url": "https://www.gravask.se",
+    "klubb_domain": "www.gravask.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Fältspatvägen 16",
+      "postnr": "65350",
+      "ort": "KARLSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "D27F4603-B26B-477A-9A68-01C481D6546A"
+  },
+  {
+    "klubbid": "1806",
+    "klubbnamn": "Grums Slalomklubb",
+    "klubb_epost": "info@grumsslk.se",
+    "klubb_url": "http://www.grumsslk.se",
+    "klubb_domain": "www.grumsslk.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Konvaljstigen 8",
+      "postnr": "66432",
+      "ort": "GRUMS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "DBB43C2D-A30A-46E6-AA9D-1B0A4F215519"
+  },
+  {
+    "klubbid": "1846",
+    "klubbnamn": "Gunnarskog Idrottsklubb",
+    "klubb_epost": "kristian.km.magnusson@gmail.com",
+    "klubb_url": "http://www1.idrottonline.se/default.aspx?id=418362",
+    "klubb_domain": "www1.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "",
+      "postnr": "67035",
+      "ort": "GUNNARSKOG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "9FD50750-1904-41B3-903A-322D968ED67B"
+  },
+  {
+    "klubbid": "14263",
+    "klubbnamn": "Hagfors Skidförening",
+    "klubb_epost": "hagforssf@gmail.com",
+    "klubb_url": "https://www.hagforssf.se",
+    "klubb_domain": "www.hagforssf.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Videvägen 5",
+      "postnr": "68333",
+      "ort": "HAGFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "366DE38B-4884-48C4-BFB0-3E8ED304A9CE"
+  },
+  {
+    "klubbid": "2054",
+    "klubbnamn": "Holmedals Allmänna IS",
+    "klubb_epost": "info@holmedalais.se",
+    "klubb_url": "https://www.svenskalag.se/holmedalsais",
+    "klubb_domain": "www.svenskalag.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Rössbyn 201",
+      "postnr": "67294",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "4D985B99-278B-4A12-9197-0007A2A8C2B9"
+  },
+  {
+    "klubbid": "40561",
+    "klubbnamn": "Idrottsföreningen Alpinaskand Sarajevo 84",
+    "klubb_epost": "sefer76@live.se",
+    "klubb_url": "https://www.alpinascandsarajevo84,se",
+    "klubb_domain": "www.alpinascandsarajevo84,se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Skrivarensväg 36",
+      "postnr": "66535",
+      "ort": "KIL",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "B94686EB-BE8C-4F38-A2F4-1CA783CC2A36"
+  },
+  {
+    "klubbid": "1678",
+    "klubbnamn": "Idrottsklubben Fryken",
+    "klubb_epost": "info@ikfryken.se",
+    "klubb_url": "https://ikfryken.se",
+    "klubb_domain": "ikfryken.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Ransby 119",
+      "postnr": "68697",
+      "ort": "LYSVIK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "0498D37C-AFBE-4745-A4CC-6F92DAC64E44"
+  },
+  {
+    "klubbid": "2278",
+    "klubbnamn": "IFK Likenäs",
+    "klubb_epost": "info@ifklikenas.se",
+    "klubb_url": "http://www.ifklikenas.se",
+    "klubb_domain": "www.ifklikenas.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Mörevägen 4",
+      "postnr": "68063",
+      "ort": "LIKENÄS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "B6AA8810-8E4D-47DB-8D18-8AF1A7204670"
+  },
+  {
+    "klubbid": "2451",
+    "klubbnamn": "Jössefors Idrottsklubb",
+    "klubb_epost": "skerijossefors@hotmail.com",
+    "klubb_url": "https://www.jösseforsik.se",
+    "klubb_domain": "www.jösseforsik.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Spelmansvägen 1",
+      "postnr": "67150",
+      "ort": "ARVIKA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "5DBADF41-0220-4801-9F77-E650922F5DAB"
+  },
+  {
+    "klubbid": "14266",
+    "klubbnamn": "Karlstads Slalomklubb",
+    "klubb_epost": "info@kslk.se",
+    "klubb_url": "http://www.kslk.se",
+    "klubb_domain": "www.kslk.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Falkgatan 2",
+      "postnr": "65465",
+      "ort": "KARLSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "EFCB365D-81CD-4C85-BF58-18BBCE72F299"
+  },
+  {
+    "klubbid": "12847",
+    "klubbnamn": "Kils Orienteringsklubb",
+    "klubb_epost": "klubben.kilsok@gmail.com",
+    "klubb_url": "http://www.kilsok.com/",
+    "klubb_domain": "www.kilsok.com",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Äng Sjökullen 1",
+      "postnr": "66591",
+      "ort": "KIL",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "D35B6CDF-F79A-44C8-8592-EFCE0C62C71F"
+  },
+  {
+    "klubbid": "14270",
+    "klubbnamn": "Kils Slalomklubb",
+    "klubb_epost": "info@kilsslk.com",
+    "klubb_url": "http://www.kilsslk.com",
+    "klubb_domain": "www.kilsslk.com",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Galoppstigen 43",
+      "postnr": "65348",
+      "ort": "KARLSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "1CE883B7-16D8-4B33-8D7B-86199339A270"
+  },
+  {
+    "klubbid": "50972",
+    "klubbnamn": "KONG Arrangörs- och Idrottsförening",
+    "klubb_epost": "glenn@kongbacken.com",
+    "klubb_url": "https://kongbacken.com",
+    "klubb_domain": "kongbacken.com",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Kivra: 556645-9094",
+      "postnr": "10631",
+      "ort": "STOCKHOLM",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "5D218433-1F31-4E65-9AAD-FEE8189E8EA8"
+  },
+  {
+    "klubbid": "2617",
+    "klubbnamn": "Kristinehamns OK",
+    "klubb_epost": "kristinehamnsok@outlook.com",
+    "klubb_url": "http://www.idrottonline.se/kristinehamn/kristinehamnsok-orientering",
+    "klubb_domain": "www.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Hultets friluftsgård",
+      "postnr": "68191",
+      "ort": "KRISTINEHAMN",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "A2A31C34-C8BD-43E3-9BDA-B22F65111BCE"
+  },
+  {
+    "klubbid": "2626",
+    "klubbnamn": "Kroppa Idrottsförening",
+    "klubb_epost": "",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Sneddvägen 6",
+      "postnr": "68290",
+      "ort": "NYKROPPA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "392D53CC-63A9-4863-917B-AB6743EFC647"
+  },
+  {
+    "klubbid": "2704",
+    "klubbnamn": "Köla Allmänna Idrottsklubb",
+    "klubb_epost": "satsumas_1972@hotmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Hammarsvallen",
+      "postnr": "67040",
+      "ort": "ÅMOTFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "C5F4919F-D76A-4700-BB79-363FF01FC9C0"
+  },
+  {
+    "klubbid": "14273",
+    "klubbnamn": "Lekvattnets Skidklubb",
+    "klubb_epost": "anders.athisnas@hotmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Poptorp 17",
+      "postnr": "68591",
+      "ort": "TORSBY",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "514DC862-9BF2-4BB7-B7AF-8D43938D1977"
+  },
+  {
+    "klubbid": "14274",
+    "klubbnamn": "Lennartsfors Idrottsförening",
+    "klubb_epost": "birgitta.olsson@arian.se",
+    "klubb_url": "https://arian.se",
+    "klubb_domain": "arian.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Åsen",
+      "postnr": "67292",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "C9D6EE4B-29AB-4CA4-BB07-3FD9563C579A"
+  },
+  {
+    "klubbid": "2758",
+    "klubbnamn": "Lesjöfors Skidklubb",
+    "klubb_epost": "jonsimma@outlook.com",
+    "klubb_url": "http://user.tninet.se/~gaw922k",
+    "klubb_domain": "user.tninet.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Ing-Marie Jonsson",
+      "postnr": "68096",
+      "ort": "LESJÖFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "F3CF3276-3E9F-442D-9F0F-A675F16F1E06"
+  },
+  {
+    "klubbid": "2986",
+    "klubbnamn": "Mattila Idrottsklubb",
+    "klubb_epost": "ski@mattilamarathon.se",
+    "klubb_url": "https://www.mattilamarathon.se",
+    "klubb_domain": "www.mattilamarathon.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Mattila",
+      "postnr": "68597",
+      "ort": "ÖSTMARK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "C52C9B44-7DB8-4A42-B0FF-EFAE24615515"
+  },
+  {
+    "klubbid": "3018",
+    "klubbnamn": "Molkoms SK",
+    "klubb_epost": "molkomssk@outlook.com",
+    "klubb_url": "http://www3.idrottonline.se/MolkomsSK-Skidor/",
+    "klubb_domain": "www3.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Mejerivägen 16",
+      "postnr": "65560",
+      "ort": "Molkom",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "455B0131-C582-4144-8A26-631767F35B52"
+  },
+  {
+    "klubbid": "40099",
+    "klubbnamn": "Mölnbacka Allmänna Idrottssällskap",
+    "klubb_epost": "gote.falk@spray.se",
+    "klubb_url": "http://www5.idrottonline.se/default.aspx?id=159653",
+    "klubb_domain": "www5.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Göte Falk",
+      "postnr": "66992",
+      "ort": "DEJE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "F07BBF8E-CF65-4589-AC0A-5DC638F3F0EA"
+  },
+  {
+    "klubbid": "4203",
+    "klubbnamn": "Orienteringsklubben Tyr",
+    "klubb_epost": "info@oktyr.se",
+    "klubb_url": "https://www.oktyr.se",
+    "klubb_domain": "www.oktyr.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Tyrstugevägen 5",
+      "postnr": "65465",
+      "ort": "KARLSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "3DA7B829-A7DB-48B0-839D-08342951E319"
+  },
+  {
+    "klubbid": "12851",
+    "klubbnamn": "Orienteringsklubben Älgen",
+    "klubb_epost": "info@okalgen.se",
+    "klubb_url": "https://www.okalgen.se",
+    "klubb_domain": "www.okalgen.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Box 77",
+      "postnr": "66422",
+      "ort": "GRUMS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "EF593DD9-7BD0-4F17-9DC5-5C88EEA2E6F0"
+  },
+  {
+    "klubbid": "25132",
+    "klubbnamn": "Persbergs Skidförening",
+    "klubb_epost": "therese.jacobsson72@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Högbergsvägen 25D",
+      "postnr": "68240",
+      "ort": "FILIPSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "4B2236AC-4513-4B1C-BB7A-D400278CA03D"
+  },
+  {
+    "klubbid": "3438",
+    "klubbnamn": "Råda Idrottsklubb",
+    "klubb_epost": "radaikexp@gmail.com",
+    "klubb_url": "http://www.radaik.com",
+    "klubb_domain": "www.radaik.com",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Skogstavägen 11",
+      "postnr": "68393",
+      "ort": "RÅDA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "1527B354-809D-46D2-B80D-4C844DB2A00F"
+  },
+  {
+    "klubbid": "3562",
+    "klubbnamn": "Silleruds Idrottsförening",
+    "klubb_epost": "e-bj@telia.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Älgåna Åsen",
+      "postnr": "67295",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "AE291244-66E9-405C-9996-69CF18B0ED24"
+  },
+  {
+    "klubbid": "3571",
+    "klubbnamn": "Sisu Forshaga Sportklubb",
+    "klubb_epost": "birgitta.dahlstrom@telia.com",
+    "klubb_url": "https://www.svenskalag.se/sisuforshagask",
+    "klubb_domain": "www.svenskalag.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Slottsvägen 12 12",
+      "postnr": "66732",
+      "ort": "FORSHAGA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "236DB32F-67CE-42A7-A095-EB9FD0C3F230"
+  },
+  {
+    "klubbid": "50862",
+    "klubbnamn": "Skattkärrs Skid- och Orienteringsklubb",
+    "klubb_epost": "skattkarrssok@gmail.com",
+    "klubb_url": "https://www.laget.se/SkattkarrsSOK",
+    "klubb_domain": "www.laget.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Kungsbacka 506",
+      "postnr": "65596",
+      "ort": "Väse",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "85D5E1D2-7CBD-4E05-ACAE-7D9F25EC6362"
+  },
+  {
+    "klubbid": "1254",
+    "klubbnamn": "Skidklubben Bore Torsby",
+    "klubb_epost": "kansliet@skbore.se",
+    "klubb_url": "http://www.skbore.se",
+    "klubb_domain": "www.skbore.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Vasserudsvägen 17",
+      "postnr": "68534",
+      "ort": "TORSBY",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "8306E814-6B7A-44FC-A2DF-C4B99A6383F7"
+  },
+  {
+    "klubbid": "3116",
+    "klubbnamn": "Skidklubben Nor",
+    "klubb_epost": "sknor.skidklubb@gmail.com",
+    "klubb_url": "http://www3.idrottonline.se/templates/OrgInfo.aspx?id=357441",
+    "klubb_domain": "www3.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Kvarnåsvägen 9",
+      "postnr": "66450",
+      "ort": "VÅLBERG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "A38C7C4D-6B24-490E-A6C9-E02B762CA018"
+  },
+  {
+    "klubbid": "14281",
+    "klubbnamn": "Skidklubben Skogarna",
+    "klubb_epost": "ulla_persson@hotmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Grytterud, Mossbacken",
+      "postnr": "67196",
+      "ort": "MANGSKOG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "7074AD03-3849-4FE1-95B1-7FB4E725BFC6"
+  },
+  {
+    "klubbid": "67190",
+    "klubbnamn": "Skillingmarks Idrottsförening",
+    "klubb_epost": "anna.laggren@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Bön Bostället",
+      "postnr": "67399",
+      "ort": "SKILLINGSFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "FCD453AE-3624-42D5-946C-E3FA5FD86BF9"
+  },
+  {
+    "klubbid": "3772",
+    "klubbnamn": "Stavnäs Idrottsklubb",
+    "klubb_epost": "andreas@klassbols.se",
+    "klubb_url": "https://klassbols.se",
+    "klubb_domain": "klassbols.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Damastvägen 5",
+      "postnr": "67195",
+      "ort": "KLÄSSBOL",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "DA45587E-1AD8-47FB-BC72-E99BC4574D4C"
+  },
+  {
+    "klubbid": "20668",
+    "klubbnamn": "Stömne Alpinaklubb",
+    "klubb_epost": "tina.hermansson@telia.com",
+    "klubb_url": "https://www.laget.se/stomne_alpina_klubb",
+    "klubb_domain": "www.laget.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Stömne Södra Lycke",
+      "postnr": "67195",
+      "ort": "KLÄSSBOL",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "DB9C7222-91BE-471A-B9C1-44E51D4D2376"
+  },
+  {
+    "klubbid": "14283",
+    "klubbnamn": "Sunne Alpina Klubb",
+    "klubb_epost": "info@sunnealpina.se",
+    "klubb_url": "https://www.sunneak.se",
+    "klubb_domain": "www.sunneak.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Box 39",
+      "postnr": "68621",
+      "ort": "SUNNE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "5F548C49-7ED8-48ED-88C8-A146D55C9DC0"
+  },
+  {
+    "klubbid": "14284",
+    "klubbnamn": "Sunne Skidlöparförening",
+    "klubb_epost": "slfsunne@gmail.com",
+    "klubb_url": "http://www.sunneslf.com",
+    "klubb_domain": "www.sunneslf.com",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Klövervägen 25",
+      "postnr": "68631",
+      "ort": "SUNNE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "4EE2BF40-4E75-4289-8929-E15B08275E9F"
+  },
+  {
+    "klubbid": "3914",
+    "klubbnamn": "Sunnemo Idrottsförening",
+    "klubb_epost": "sunnemoif@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Björkil, Täppevi",
+      "postnr": "68395",
+      "ort": "SUNNEMO",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "8923823D-7AB3-4C7B-8649-563F8769C525"
+  },
+  {
+    "klubbid": "3933",
+    "klubbnamn": "Svartå Idrottsförening",
+    "klubb_epost": "svartaif@outlook.com",
+    "klubb_url": "https://www.svarta.nu/föreningar-org./svartå-if-3663350",
+    "klubb_domain": "www.svarta.nu",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Hyttvallen",
+      "postnr": "69373",
+      "ort": "SVARTÅ",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "E704A07B-CBCD-4761-A77A-BD6145BE3E10"
+  },
+  {
+    "klubbid": "14286",
+    "klubbnamn": "Säffle Idrottsklubb",
+    "klubb_epost": "styrelsen@saffleik.se",
+    "klubb_url": "https://www.saffleik.se",
+    "klubb_domain": "www.saffleik.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Kvistvägen 19",
+      "postnr": "66143",
+      "ort": "SÄFFLE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "D8C98FFE-F55C-4AD8-847F-050CD29DFD41"
+  },
+  {
+    "klubbid": "52616",
+    "klubbnamn": "Team Skoglöfs Bil Idrottsförening",
+    "klubb_epost": "daniel.wassberg@bilskoglofs.se",
+    "klubb_url": "https://bilskoglofs.se",
+    "klubb_domain": "bilskoglofs.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "BOX 233",
+      "postnr": "68125",
+      "ort": "KRISTINEHAMN",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "8947F6E4-C09A-4A53-A13B-FEDF567EFE21"
+  },
+  {
+    "klubbid": "34348",
+    "klubbnamn": "Torsby Slalomklubb",
+    "klubb_epost": "david@skilberg.se",
+    "klubb_url": "http://www.valbergsbacken.se",
+    "klubb_domain": "www.valbergsbacken.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Solbergsvägen 64",
+      "postnr": "68591",
+      "ort": "TORSBY",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "7867AD61-6BBB-43DA-B027-220E87EA1F88"
+  },
+  {
+    "klubbid": "4221",
+    "klubbnamn": "Töcksfors Idrottsförening",
+    "klubb_epost": "tocksforsif@gmail.com",
+    "klubb_url": "https://www.tocksforsif.se",
+    "klubb_domain": "www.tocksforsif.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Hagavallen",
+      "postnr": "67010",
+      "ort": "TÖCKSFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "47FA2692-FFEB-49D9-908B-30A0E8FF4C42"
+  },
+  {
+    "klubbid": "4250",
+    "klubbnamn": "Ulvsby Idrottsförening",
+    "klubb_epost": "info@ulvsbyif.se",
+    "klubb_url": "http://www.ulvsbyif.se",
+    "klubb_domain": "www.ulvsbyif.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Hantverkaregatan 11",
+      "postnr": "65460",
+      "ort": "KARLSTAD",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "A4F72233-17D7-4E92-A523-D8275AB54F24"
+  },
+  {
+    "klubbid": "14289",
+    "klubbnamn": "Valfjällets Slalomklubb",
+    "klubb_epost": "info@valfjalletsslk.se",
+    "klubb_url": "http://www.valfjalletsslk.se",
+    "klubb_domain": "www.valfjalletsslk.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Gryttved Valfjället",
+      "postnr": "67396",
+      "ort": "ÅMOTFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "89A58B9C-8894-42F8-9C10-5C87D6B450AB"
+  },
+  {
+    "klubbid": "14292",
+    "klubbnamn": "Väse Skidklubb",
+    "klubb_epost": "elisabeth.eklo@gmail.com",
+    "klubb_url": "https://www.idrottonline.se/karlstad/vasesk-skidor",
+    "klubb_domain": "www.idrottonline.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Ringgatan 5",
+      "postnr": "66057",
+      "ort": "VÄSE",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "FBB3344B-637F-441F-8149-2963FB656212"
+  },
+  {
+    "klubbid": "4530",
+    "klubbnamn": "Västra Ämterviks Idrottsförening",
+    "klubb_epost": "",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Svensbyåsarna 66",
+      "postnr": "68695",
+      "ort": "VÄSTRA ÄMTERVIK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "1A319D7C-4FAB-42DE-993D-83DBDD0D4647"
+  },
+  {
+    "klubbid": "4592",
+    "klubbnamn": "Åmotfors Idrottsförening",
+    "klubb_epost": "info@amotforsif.se",
+    "klubb_url": "https://www.amotforsif.se",
+    "klubb_domain": "www.amotforsif.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Järnvägsgatan 22",
+      "postnr": "67040",
+      "ort": "ÅMOTFORS",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "E3F26B33-C725-4288-888A-F2D6B64851E4"
+  },
+  {
+    "klubbid": "4601",
+    "klubbnamn": "Årjängs Idrottsförening",
+    "klubb_epost": "arjangs.if@telia.com",
+    "klubb_url": "https://www.svenskalag.se/arjangsif",
+    "klubb_domain": "www.svenskalag.se",
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Högerudsvägen 29",
+      "postnr": "67230",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "18CC74D9-E694-4CDF-845C-11769A1CA8C4"
+  },
+  {
+    "klubbid": "14293",
+    "klubbnamn": "Årjängs Slalomklubb",
+    "klubb_epost": "arjangs.slk@gmail.com",
+    "klubb_url": "",
+    "klubb_domain": null,
+    "has_own_domain": false,
+    "klubbaddress": {
+      "gata": "Box 45",
+      "postnr": "67221",
+      "ort": "ÅRJÄNG",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "875A7E8B-F0C7-4E7F-AA62-2CF01AEB8CD9"
+  },
+  {
+    "klubbid": "4631",
+    "klubbnamn": "Älgå Sportklubb",
+    "klubb_epost": "info@algask.se",
+    "klubb_url": "http://www.algask.se",
+    "klubb_domain": "www.algask.se",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Fröbol Nytomta 1",
+      "postnr": "67193",
+      "ort": "ARVIKA",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "16B61B0A-E834-49D1-958E-CC396E8DAED7"
+  },
+  {
+    "klubbid": "14295",
+    "klubbnamn": "Östmarks Idrottsförening",
+    "klubb_epost": "ostmarksif@ostmark.se",
+    "klubb_url": "https://www.facebook.com/OstmarksIf/",
+    "klubb_domain": "www.facebook.com",
+    "has_own_domain": true,
+    "klubbaddress": {
+      "gata": "Röjdåforsvägen 5",
+      "postnr": "68597",
+      "ort": "ÖSTMARK",
+      "land": "Sverige"
+    },
+    "distrikt": "Värmland",
+    "_id": "8712C52A-AFD0-45A0-A19E-BB4C18E034E4"
+  }
+]

@@ -16,6 +16,8 @@
                 <field name="competition_count" string="Tävlingar"/>
                 <field name="entry_count" string="Anmälningar" optional="show"/>
                 <field name="result_count" string="Resultat" optional="show"/>
+                <field name="geographical_scope" string="Räckvidd" optional="show"/>
+                <field name="event_type_label"   string="Typ"      optional="show"/>
             </list>
         </field>
     </record>
@@ -78,6 +80,8 @@
                             <field name="start_date" readonly="1"/>
                             <field name="end_date" readonly="1"/>
                             <field name="event_status" readonly="1"/>
+                            <field name="geographical_scope" readonly="1" string="Räckvidd"/>
+                            <field name="event_type_label"   readonly="1" string="Tävlingstyp"/>
                         </group>
                         <group>
                             <field name="city" readonly="1"/>
@@ -158,7 +162,7 @@
                 <filter string="Säsong 2025/26" name="current_season"
                         domain="[('season_id.ssfta_id', '=', 18)]"/>
                 <filter string="Säsong 2024/25" name="prev_season"
-                        domain="[('season_id.ssfta_id', '=', 19)]"/>
+                        domain="[('season_id.ssfta_id', '=', 17)]"/>
                 <separator/>
                 <filter string="Godkända" name="status_approved"
                         domain="[('event_status', '=', '3')]"/>
@@ -166,6 +170,13 @@
                         domain="[('event_status', '=', '6')]"/>
                 <filter string="Inställda" name="status_cancelled"
                         domain="[('event_status', '=', '8')]"/>
+                <separator/>
+                <filter string="Internationell (FIS)" name="scope_fis"
+                        domain="[('geographical_scope', '=', '8')]"/>
+                <filter string="Nationell" name="scope_national"
+                        domain="[('geographical_scope', '=', '7')]"/>
+                <filter string="Nordisk" name="scope_nordic"
+                        domain="[('geographical_scope', '=', '10')]"/>
                 <separator/>
                 <filter string="Alpine" name="sector_alpine"
                         domain="[('sector_id.sector_code', '=', 'AL')]"/>
@@ -180,6 +191,8 @@
                     <filter string="Säsong" name="group_season" context="{'group_by': 'season_id'}"/>
                     <filter string="Ort" name="group_city" context="{'group_by': 'city'}"/>
                     <filter string="Arrangör" name="group_organizer" context="{'group_by': 'organizer_id'}"/>
+                    <filter string="Räckvidd" name="group_scope" context="{'group_by': 'geographical_scope'}"/>
+                    <filter string="Tävlingstyp" name="group_event_type" context="{'group_by': 'event_type_label'}"/>
                 </group>
             </search>
         </field>
