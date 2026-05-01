@@ -185,5 +185,5 @@ def print_report(result: AnalysisResult) -> None:
         for uo in unknowns:
             conf = uo.get("confidence", 0.0)
             uo_notes = uo.get("notes", "")[:56]
-            print(f"  {'':7}   → OKÄNT: {uo.get('label', '?')} (conf={conf:.2f}) {uo_notes}")
+            print(f"  {'':7}   >> OKANT: {uo.get('label', '?')} (conf={conf:.2f}) {uo_notes}")
     print()
