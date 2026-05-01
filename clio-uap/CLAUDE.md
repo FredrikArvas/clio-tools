@@ -14,6 +14,10 @@ UAP Tracking — migration och CLI för Notion → Odoo 18 + Neo4j + Qdrant, sam
 | `qdrant_index.py` | Indexerar encounters i Qdrant |
 | `frame_extractor.py` | Extraherar frames ur video med ffmpeg/ffprobe |
 | `video_analyzer.py` | Frame-by-frame UAP-analys med Claude Vision |
+| `pipeline/__init__.py` | Markörfil — gör pipeline till Python-paket |
+| `pipeline/motion_delta.py` | Pixeldifferens-analys för att hitta anomali-frames |
+| `pipeline/ollama_screen.py` | LLaVA-förfiltrering via Ollama (lokal, kostnadsfri) |
+| `pipeline/main.py` | CE5-pipeline CLI: motion-delta → LLaVA → Claude |
 
 ## Beroenden
 
@@ -44,11 +48,18 @@ python main.py sync-neo4j
 # Qdrant-indexering
 python main.py sync-qdrant
 
-# Analysera iPhone slow-motion-video (standard 2 frames/s, frågar om Odoo-utkast)
+# Enkel videoanalys — alla frames direkt till Claude Vision
 python main.py analyze --video C:/path/to/slowmo.mov
-
-# Analysera utan Odoo, 1 frame/s, behåll frames
 python main.py analyze --video slowmo.mov --fps 1 --no-odoo --keep-frames
+python main.py analyze --video slowmo.mov --start 1:30 --end 2:00
+
+# CE5-pipeline — motion-delta + LLaVA + Claude (kör på servern)
+# Kör från clio-uap/-katalogen:
+python -m pipeline.main analyze --video /mnt/dropbox-disk/uap/inbox/ce5.mov
+python -m pipeline.main analyze --folder /mnt/dropbox-disk/uap/inbox/
+python -m pipeline.main analyze --video ce5.mov --no-ollama --fps 8
+python -m pipeline.main analyze --video ce5.mov --no-claude --keep-frames
+python -m pipeline.main analyze --video ce5.mov --delta-threshold 8 --gap-frames 6
 ```
 
 ## Videoanalys — flöde
@@ -64,6 +75,30 @@ Inställningar kan styras via env-variabler:
 - `UAP_FRAMES_PER_SEC` — frames per speluppspelningssekund (standard: 2)
 - `UAP_VISION_MODEL` — Claude-modell (standard: claude-sonnet-4-6)
 - `UAP_CONFIDENCE_THRESHOLD` — oanvänd i klassificeringen, reserverad (standard: 0.7)
+
+## CE5-pipeline — flöde
+
+Används för analys av kända UAP-videor (t.ex. CE5-kursmaterial). Körs på EliteDesk-servern där Ollama+GPU finns.
+
+```
+[1] ffmpeg frame-extraction
+      ↓
+[2] Motion-delta (PIL + numpy, cellbaserat 8×8-nät)
+      → Identifierar frames med ovanlig pixeldifferens
+      → Klustrar konsekutiva anomali-frames till "events"
+      ↓
+[3] LLaVA pre-screen (Ollama localhost:11434, gratis)
+      → Skickar peak-framen per event till llava:latest
+      → Filtrerar bort fåglar, flygplan, artefakter
+      ↓
+[4] Claude deep-analyze (claude-sonnet-4-6, kostar tokens)
+      → Analyserar bara events som klarade LLaVA-filtret
+      → JSON: objekt, kategorier, unknown_detected
+      ↓
+[5] Rapport + valfritt Odoo-utkast
+```
+
+Notera: `--no-ollama` skickar alla events direkt till Claude. `--no-claude` stannar efter LLaVA.
 
 ## Odoo-addon
 

@@ -27,13 +27,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Se till att clio-uap ligger i path
+# clio-uap måste ligga FÖRST i sys.path för att skugga clio-tools/config/-paketet
 _HERE = Path(__file__).parent
 _UAP_DIR = _HERE.parent
 _ROOT_DIR = _UAP_DIR.parent
 for _p in [str(_ROOT_DIR), str(_UAP_DIR)]:
-    if _p not in sys.path:
-        sys.path.insert(0, _p)
+    if _p in sys.path:
+        sys.path.remove(_p)
+sys.path.insert(0, str(_ROOT_DIR))
+sys.path.insert(0, str(_UAP_DIR))
 
 import config
 from frame_extractor import extract_frames, get_video_metadata
@@ -70,9 +72,9 @@ def analyze_single(
         print(f"[FEL] Filen finns inte: {video_path}")
         return None
 
-    print(f"\n{'─'*64}")
+    print(f"\n{'-'*64}")
     print(f"  Fil: {p.name}")
-    print(f"{'─'*64}")
+    print(f"{'-'*64}")
 
     # Metadata
     meta = get_video_metadata(video_path)
