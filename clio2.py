@@ -49,7 +49,7 @@ if _env_file.exists():
                 _k, _v = _line.split("=", 1)
                 os.environ[_k.strip()] = _v.strip()
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 ROOT       = Path(__file__).parent
 CONFIG_DIR = ROOT / "config"
