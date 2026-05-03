@@ -50,7 +50,7 @@ def _free_domain(email: str) -> bool:
 
 
 def _fetch_all_pages(s, district_id):
-    Hämtar alla sidor och returnerar råa organisations-listor.
+    """Hämtar alla sidor och returnerar råa organisations-listor."""
     r = s.get(f'{API}/search', params={
         'query': '', 'districtId': district_id,
         'municipality': '', 'subSport': '', 'page': '0'
