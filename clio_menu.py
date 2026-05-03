@@ -259,38 +259,111 @@ def _tool_lines(tool: dict | None, state: dict, last_run: str | None,
     return _rpad(l1, col_w), _rpad(l2, col_w), _rpad(l3, col_w)
 
 
-def show_menu(state: dict, tools: list, version: str,
+def all_tools(contexts: list) -> list:
+    """Flattar alla verktyg från alla kontexter."""
+    return [tool for ctx in contexts for tool in ctx["tools"]]
+
+
+def _ctx_tool_line(tool: dict | None, state: dict, last_run: str | None,
+                   col_w: int) -> tuple[str, str]:
+    """Bygger två rader (namn+markering, beskrivning) för ett verktyg i kontextlayout."""
+    if tool is None:
+        return " " * col_w, " " * col_w
+
+    color  = GRN if tool.get("status") == "active" else GRY
+    marker = f" {YEL}◀{NRM}" if tool["name"] == last_run else ""
+    odoo   = tool.get("odoo_release")
+    odoo_s = f" {GRY}[→{odoo}]{NRM}" if odoo else ""
+    nr_s   = f"{tool['nr']}."
+
+    l1 = f"  {color}{nr_s:>3}{NRM} {BLD}{_trunc(tool['name'], 16)}{NRM}{odoo_s}{marker}"
+    l2 = f"     {GRY}{_trunc(tool['desc'], 22)}{NRM}"
+    return _rpad(l1, col_w), _rpad(l2, col_w)
+
+
+def show_menu(state: dict, tools_or_contexts: list, version: str,
               print_banner=None) -> None:
     clear()
     if print_banner:
         print_banner("Clio Tools", version, subtitle="")
     else:
-        print(f"\n{BLD}{'─' * 56}{NRM}")
+        print(f"\n{BLD}{'─' * 78}{NRM}")
         print(f"{BLD}  Clio Tools  v{version}{NRM}")
-        print(f"{BLD}{'─' * 56}{NRM}")
+        print(f"{BLD}{'─' * 78}{NRM}")
     print()
 
+    # Bakåtkompatibilitet: flat TOOLS-lista → 2-kolumns fallback
+    if tools_or_contexts and "tools" not in tools_or_contexts[0]:
+        last_run = state.get("last_run", None)
+        COL, SEP = 38, "  "
+        lefts  = tools_or_contexts[0::2]
+        rights = tools_or_contexts[1::2]
+        pairs  = list(zip(lefts, rights))
+        if len(tools_or_contexts) % 2:
+            pairs.append((tools_or_contexts[-1], None))
+        for L, R in pairs:
+            l1, l2, l3 = _tool_lines(L, state, last_run, COL)
+            r1, r2, r3 = _tool_lines(R, state, last_run, COL)
+            print(l1 + SEP + r1)
+            print(l2 + SEP + r2)
+            print(l3 + SEP + r3)
+            print()
+        print(f"  {YEL}c.{NRM} Kontrollera miljön   "
+              f"  {YEL}e.{NRM} Exportera källkod   "
+              f"  {YEL}q.{NRM} Avsluta\n")
+        print(f"{'─' * 78}")
+        return
+
+    # Kontext-orienterad 3-kolumns-layout
     last_run = state.get("last_run", None)
-    COL, SEP = 38, "  "
+    COL, SEP = 28, "  "
 
-    # Para ihop verktyg: udda index → vänster, jämna → höger
-    lefts  = tools[0::2]
-    rights = tools[1::2]
-    pairs  = list(zip(lefts, rights))
-    if len(tools) % 2:
-        pairs.append((tools[-1], None))
+    top_ctxs  = tools_or_contexts[:3]   # MEDIA-TOOLS, KNOWLEDGE, AGENTS
+    bot_ctxs  = tools_or_contexts[3:]   # ANALYSIS & DATA
 
-    for L, R in pairs:
-        l1, l2, l3 = _tool_lines(L, state, last_run, COL)
-        r1, r2, r3 = _tool_lines(R, state, last_run, COL)
-        print(l1 + SEP + r1)
-        print(l2 + SEP + r2)
-        print(l3 + SEP + r3)
+    # Rubrikrad
+    header = ""
+    for ctx in top_ctxs:
+        h = f"  {BLD}{ctx['name']}{NRM}"
+        header += _rpad(h, COL) + SEP
+    print(header.rstrip())
+    print(f"  {'─' * (COL * 3 + len(SEP) * 2 - 2)}")
+
+    # Verktygsrader — iterera rad för rad tills alla kolumner är tomma
+    max_rows = max(len(ctx["tools"]) for ctx in top_ctxs)
+    for i in range(max_rows):
+        row1 = row2 = ""
+        for ctx in top_ctxs:
+            tool = ctx["tools"][i] if i < len(ctx["tools"]) else None
+            l1, l2 = _ctx_tool_line(tool, state, last_run, COL)
+            row1 += l1 + SEP
+            row2 += l2 + SEP
+        print(row1.rstrip())
+        print(row2.rstrip())
+    print()
+
+    # Horisontell rad för resterande kontexter (ANALYSIS & DATA)
+    for ctx in bot_ctxs:
+        print(f"  {BLD}{ctx['name']}{NRM}")
+        print(f"  {'─' * (COL * 3 + len(SEP) * 2 - 2)}")
+        tools = ctx["tools"]
+        row1 = row2 = ""
+        for j, tool in enumerate(tools):
+            l1, l2 = _ctx_tool_line(tool, state, last_run, COL)
+            row1 += l1 + SEP
+            row2 += l2 + SEP
+            if (j + 1) % 3 == 0:
+                print(row1.rstrip())
+                print(row2.rstrip())
+                row1 = row2 = ""
+        if row1.strip():
+            print(row1.rstrip())
+            print(row2.rstrip())
         print()
 
-    print(f"  {YEL}c.{NRM} Kontrollera miljön   "
-          f"  {YEL}e.{NRM} Exportera källkod   "
-          f"  {YEL}q.{NRM} Avsluta\n")
+    print(f"  {YEL}c.{NRM} Check env   "
+          f"  {YEL}e.{NRM} Export src   "
+          f"  {YEL}q.{NRM} Quit\n")
     print(f"{'─' * 78}")
 
 
