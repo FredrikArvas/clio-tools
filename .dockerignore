@@ -1,0 +1,42 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Large model/data directories
+clio-vigil/models/
+clio-vigil/data/
+clio-rag/data/
+clio-rag/qdrant_storage/
+clio-rag/storage/
+
+# Cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Config secrets and tokens
+config/clio_state.json
+google_token.json
+config/client_secret_*.json
+.env
+*.env
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+nohup.out
