@@ -48,7 +48,8 @@ def _extract_description(entry) -> str:
         # Strippa HTML-taggar enkelt
         import re
         clean = re.sub(r"<[^>]+>", " ", entry.summary)
-        parts.append(clean[:500])
+        # A3: Fulltext — upp till 2500 tecken för bättre filtersignal
+        parts.append(clean[:2500])
     return " ".join(parts)
 
 

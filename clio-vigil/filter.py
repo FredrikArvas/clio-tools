@@ -63,40 +63,102 @@ def keyword_score(text: str, keywords: dict) -> float:
 # Filterkörning mot databasen
 # ---------------------------------------------------------------------------
 
+def _build_source_thresholds(domain_config: dict) -> dict:
+    """
+    A2: Bygg dict source_name → transcription_threshold från YAML-konfiguration.
+    Används för att ge enskilda källor en lägre/högre tröskel än domänstandarden.
+    """
+    thresholds = {}
+    sources = domain_config.get("sources", {})
+    for src in sources.get("rss", []):
+        name = src.get("name")
+        if name and "transcription_threshold" in src:
+            thresholds[name] = float(src["transcription_threshold"])
+    for src in sources.get("youtube_channels", []):
+        name = src.get("name") or src.get("channel_id")
+        if name and "transcription_threshold" in src:
+            thresholds[name] = float(src["transcription_threshold"])
+    return thresholds
+
+
 def run_filter(conn, domain_config: dict) -> dict:
     """
     Kör relevansfilter på alla discovered-objekt i en domän.
     Uppdaterar state till filtered_in eller filtered_out.
+
+    Filterordning:
+      1. A1 Längdfilter  — hoppa över objekt utanför min/max_duration_sec
+      2. A2 Nyckelordsfilter — relevansscore mot käll-/domäntröskel
     Returnerar räknare.
     """
     from orchestrator import transition, update_priority
 
-    domain_id = domain_config["domain_id"]
-    threshold = domain_config.get("relevance_threshold", 0.55)
-    keywords = domain_config.get("keywords", {})
-    counts = {"filtered_in": 0, "filtered_out": 0}
+    domain_id  = domain_config["domain_id"]
+    threshold  = domain_config.get("relevance_threshold", 0.55)
+    keywords   = domain_config.get("keywords", {})
+
+    # A1: Längdgränser (sekunder). None = ingen gräns.
+    min_dur = domain_config.get("min_duration_sec", None)
+    max_dur = domain_config.get("max_duration_sec", None)
+
+    # A2: Per-källtröskel
+    source_thresholds = _build_source_thresholds(domain_config)
+
+    counts = {"filtered_in": 0, "filtered_out": 0, "length_filtered": 0}
 
     rows = conn.execute(
-        "SELECT id, title, description FROM vigil_items WHERE state = 'discovered' AND domain = ?",
+        """SELECT id, title, description, duration_seconds, source_name
+           FROM vigil_items WHERE state = 'discovered' AND domain = ?""",
         (domain_id,)
     ).fetchall()
 
     scored = []
     for row in rows:
-        text = f"{row['title'] or ''} {row['description'] or ''}"
+        text  = f"{row['title'] or ''} {row['description'] or ''}"
         score = keyword_score(text, keywords)
-        scored.append((row["id"], row["title"], score))
+        scored.append((
+            row["id"],
+            row["title"],
+            row["duration_seconds"],
+            row["source_name"] or "",
+            score,
+        ))
 
-    # Batch-uppdatera scores i en transaktion
+    # Batch-uppdatera relevance_score
     conn.executemany(
         "UPDATE vigil_items SET relevance_score = ? WHERE id = ?",
-        [(score, item_id) for item_id, _, score in scored]
+        [(score, item_id) for item_id, _, _, _, score in scored]
     )
     conn.commit()
 
-    # Tillståndsövergångar och kö (en transaktion per item men utan extra commits)
-    for item_id, title, score in scored:
-        if score >= threshold:
+    # Tillståndsövergångar
+    for item_id, title, duration, source_name, score in scored:
+
+        # A1: Längdfilter — filtrera ut om duration är känd och utanför gränser
+        if duration is not None:
+            if min_dur is not None and duration < min_dur:
+                transition(conn, item_id, "filtered_out")
+                counts["filtered_out"] += 1
+                counts["length_filtered"] += 1
+                logger.debug(
+                    f"Längdfilter (för kort {duration}s < {min_dur}s): "
+                    f"{(title or '')[:50]}"
+                )
+                continue
+            if max_dur is not None and duration > max_dur:
+                transition(conn, item_id, "filtered_out")
+                counts["filtered_out"] += 1
+                counts["length_filtered"] += 1
+                logger.debug(
+                    f"Längdfilter (för lång {duration}s > {max_dur}s): "
+                    f"{(title or '')[:50]}"
+                )
+                continue
+
+        # A2: Välj tröskel — käll-override eller domänstandard
+        effective_threshold = source_thresholds.get(source_name, threshold)
+
+        if score >= effective_threshold:
             new_state = "filtered_in"
             counts["filtered_in"] += 1
         else:
@@ -113,13 +175,16 @@ def run_filter(conn, domain_config: dict) -> dict:
                    VALUES (?, ?, datetime('now'))""",
                 (item_id, prio)
             )
-            logger.debug(f"Item {item_id} köad med prio {prio:.3f}: {(title or '')[:50]}")
+            logger.debug(
+                f"Item {item_id} köad (prio {prio:.3f}, tröskel {effective_threshold}): "
+                f"{(title or '')[:50]}"
+            )
 
     conn.commit()
 
     logger.info(
         f"Filter klar [{domain_id}]: "
         f"{counts['filtered_in']} in, {counts['filtered_out']} ut "
-        f"(tröskel={threshold})"
+        f"({counts['length_filtered']} längdfiltrerade, tröskel={threshold})"
     )
     return counts

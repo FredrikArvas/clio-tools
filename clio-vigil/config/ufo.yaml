@@ -14,6 +14,11 @@ chroma_collection: vigil_ufo
 transcription_profile: ufo_content
 relevance_threshold: 0.40
 
+# A1: Längdfilter — objekt utanför dessa gränser filtreras ut direkt
+# (None = ingen gräns; sätt i sekunder)
+min_duration_sec: 120       # < 2 min = troligen trailer/klipp utan substans
+max_duration_sec: 18000     # > 5 h = troligen livestream, ej bevakningsvärt
+
 # Seedord för MVP-filter.
 # Mognar via onboarding-dialog i Release 1.5 (RLHF-logik).
 keywords:
@@ -83,6 +88,7 @@ sources:
       name: The Debrief
       maturity: etablerad
       weight: 1.2
+      transcription_threshold: 0.25   # A2: etablerad källa — lägre tröskel
 
     - url: https://www.politico.com/rss/politicopicks.xml
       name: Politico (UAP-filter)
@@ -141,6 +147,7 @@ sources:
       name: Citizen Hearing on UFO Disclosure
       maturity: etablerad
       weight: 1.2
+      transcription_threshold: 0.20   # A2: mycket pålitlig källa
 
     - channel_id: "@BasharChanneledbyDarrylAnka"
       name: Bashar (Darryl Anka)

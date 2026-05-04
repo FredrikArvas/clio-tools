@@ -9,6 +9,10 @@ chroma_collection: vigil_ai
 transcription_profile: swedish_news
 relevance_threshold: 0.35
 
+# A1: Längdfilter
+min_duration_sec: 120     # < 2 min filtreras ut
+max_duration_sec: 10800   # > 3 h filtreras ut
+
 keywords:
   primary:
     - ai
@@ -48,11 +52,13 @@ sources:
       name: Veckans AI
       maturity: etablerad
       weight: 1.2
+      transcription_threshold: 0.20   # A2: etablerad AI-podd, lägre tröskel
 
     - url: https://anchor.fm/s/d7cf21a0/podcast/rss
       name: Generativet
       maturity: etablerad
       weight: 1.1
+      transcription_threshold: 0.20   # A2: etablerad AI-podd
 
   youtube_channels: []
 
