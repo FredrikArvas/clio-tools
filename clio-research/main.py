@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).parent
 ROOT_DIR = BASE_DIR.parent
 
-load_dotenv(ROOT_DIR / ".env")
+load_dotenv(ROOT_DIR / ".env", override=True)
 load_dotenv(BASE_DIR / ".env", override=True)
 
 sys.path.insert(0, str(BASE_DIR))
@@ -150,7 +150,8 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
             if len(new) == 0:
                 msg = f"Fas {phase_num} ({label}): Noll resultat"
                 logger.warning(msg)
-                status_mailer.send_anomaly(run_id, phase_num, msg)
+                question = protocol["question"].get("natural_language", "")
+                status_mailer.send_anomaly(run_id, phase_num, msg, question=question)
 
         elif phase_num == 5:
             logger.info("=== Fas 5: Citation chase ===")
@@ -171,9 +172,10 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
         elif phase_num == 8:
             logger.info("=== Fas 8: Delivery ===")
             rp = Path(state.get("report_path", ""))
+            question = protocol["question"].get("natural_language", "")
             if rp.exists():
                 qdrant_indexer.index_report(protocol, sources, rp, run_id)
-                status_mailer.send_final_report(run_id, rp)
+                status_mailer.send_final_report(run_id, rp, question=question)
             else:
                 logger.warning("Rapport saknas för delivery-fas")
 
@@ -182,10 +184,12 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
         _save_state(state, sources)
 
         if protocol["output"].get("status_updates") and phase_num <= 4:
+            question = protocol["question"].get("natural_language", "")
             status_mailer.send_phase_complete(
                 run_id, phase_num, label,
                 source_count=len(sources),
                 relevant_count=len([s for s in sources if s.get("phase_found") == phase_num]),
+                question=question,
             )
 
     _move_to_done(run_id)

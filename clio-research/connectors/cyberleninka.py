@@ -1,45 +1,29 @@
-"""connectors/cyberleninka.py — CyberLeninka (rysk open access). BeautifulSoup scraping."""
+"""
+connectors/cyberleninka.py — CyberLeninka (rysk open access).
+
+R1.0 STATUS: CyberLeninka renderar sökresultat via JavaScript (SPA). Statisk BeautifulSoup-
+scraping fungerar inte. Connectorn returnerar tomma resultat och loggar en tydlig varning.
+R1.5: Implementera via Playwright/Selenium eller undersök inofficiell JSON-API-endpoint.
+"""
 
 from __future__ import annotations
 
-import time
 import logging
-import requests
-from bs4 import BeautifulSoup
-
-BASE_URL = "https://cyberleninka.ru/search"
-SLEEP = 2.0
 
 logger = logging.getLogger(__name__)
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; clio-research/1.0; mailto:fredrik@arvas.se)",
-    "Accept-Language": "ru,en;q=0.9",
-}
-
 
 def search(query: str, max_results: int = 30) -> list[dict]:
-    """Sök CyberLeninka. Returnerar normaliserade källobjekt."""
-    results = []
-    page = 1
-
-    while len(results) < max_results:
-        params = {"q": query, "page": page}
-        try:
-            html = _get(BASE_URL, params)
-            items = _parse(html)
-            if not items:
-                break
-            for item in items:
-                results.append(item)
-                if len(results) >= max_results:
-                    break
-            page += 1
-        except Exception as e:
-            logger.warning("CyberLeninka sökning misslyckades (sida %d): %s", page, e)
-            break
-
-    return results
+    """
+    Sök CyberLeninka.
+    R1.0: Ej implementerat — CyberLeninka kräver JavaScript-rendering (SPA).
+    Returnerar tom lista med varning.
+    """
+    logger.warning(
+        "CyberLeninka: JS-rendering krävs — ej tillgänglig i R1.0. "
+        "Implementeras med Playwright i R1.5."
+    )
+    return []
 
 
 def _get(url: str, params: dict) -> str:

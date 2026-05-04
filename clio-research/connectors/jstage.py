@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def search(query: str, max_results: int = 30, lang: str = "ja") -> list[dict]:
     """Sök J-STAGE via Opensearch API. Returnerar normaliserade källobjekt."""
     params = {
-        "global_id": "JST.JSTAGE",
+        "service": "1",  # 1=artiklar, 2=tidskrifter
         "text": query,
         "count": min(max_results, 100),
         "lang": lang,

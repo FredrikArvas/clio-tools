@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 _MAIL_DIR = Path(__file__).parent.parent / "clio-agent-mail"
 _ROOT_DIR = Path(__file__).parent.parent
-_CONFIG_PATH = _ROOT_DIR / "clio.config"
+_CONFIG_PATH = _MAIL_DIR / "clio.config"
 _ENV_PATH = _ROOT_DIR / ".env"
 
 SENDER = "clio"
@@ -51,31 +51,37 @@ def _get_config() -> configparser.ConfigParser | None:
 
 
 def send_phase_complete(run_id: str, phase: int, label: str,
-                        source_count: int, relevant_count: int) -> None:
+                        source_count: int, relevant_count: int,
+                        question: str = "") -> None:
     """Statusmail vid fasavslut."""
-    subject = f"[clio-research] Fas {phase} klar — {run_id}"
+    q_line = f"\nFråga: {question}" if question else ""
+    subject = f"[clio-research] Fas {phase} ({label}) klar{' — ' + question[:50] if question else ''}"
     body = (
-        f"Fas {phase} ({label}) avslutad.\n\n"
+        f"Fas {phase}: {label}{q_line}\n\n"
+        f"Källor insamlade totalt: {source_count}\n"
+        f"Nya i fas {phase}: {relevant_count}\n\n"
         f"Körning: {run_id}\n"
-        f"Hittade: {source_count} källor totalt\n"
-        f"Relevanta (fas {phase}): {relevant_count}\n"
     )
     _send(subject, body)
 
 
-def send_anomaly(run_id: str, phase: int, message: str) -> None:
+def send_anomaly(run_id: str, phase: int, message: str, question: str = "") -> None:
     """Anomalimail vid oväntat fynd."""
-    subject = f"[clio-research] Anomali i fas {phase} — {run_id}"
-    body = f"Anomali detekterad i körning {run_id}, fas {phase}:\n\n{message}\n"
+    q_line = f" | {question[:50]}" if question else ""
+    subject = f"[clio-research] Anomali fas {phase}{q_line}"
+    body = f"Fas {phase}{' (' + question + ')' if question else ''}:\n\n{message}\n\nKörning: {run_id}\n"
     _send(subject, body)
 
 
-def send_final_report(run_id: str, report_path: Path) -> None:
+def send_final_report(run_id: str, report_path: Path, question: str = "") -> None:
     """Slutleverans med rapport som bilaga."""
-    subject = f"[clio-research] Rapport klar — {run_id}"
+    q_line = question[:60] if question else run_id
+    subject = f"[clio-research] Rapport klar — {q_line}"
     body = (
-        f"Evidensrapport för körning {run_id} är klar.\n\n"
+        f"Evidensrapport klar.\n\n"
+        f"Fråga: {question or '(okänd)'}\n"
         f"Rapport: {report_path}\n"
+        f"Körning: {run_id}\n"
     )
     attachments = [str(report_path)] if report_path and report_path.exists() else []
     _send(subject, body, attachments=attachments)
