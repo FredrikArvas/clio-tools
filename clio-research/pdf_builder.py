@@ -86,7 +86,7 @@ def _render_line(pdf, line: str) -> None:
 
     elif stripped.startswith("- ") or stripped.startswith("* "):
         pdf.set_font(FONT_FAMILY, size=10)
-        pdf.multi_cell(w, LINE_HEIGHT, "  • " + _clean(stripped[2:]))
+        pdf.multi_cell(w, LINE_HEIGHT, "  - " + _clean(stripped[2:]))
 
     else:
         pdf.set_font(FONT_FAMILY, size=10)
