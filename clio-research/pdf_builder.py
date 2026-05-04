@@ -49,20 +49,23 @@ def _create_pdf():
 
 def _render_line(pdf, line: str) -> None:
     stripped = line.strip()
+    # Återställ alltid x till vänstermarginalen innan varje rad
+    pdf.set_x(MARGIN)
+    w = pdf.w - 2 * MARGIN
 
     if stripped.startswith("# ") and not stripped.startswith("## "):
         pdf.set_font(FONT_FAMILY, "B", 16)
-        pdf.multi_cell(0, 9, _clean(stripped[2:]))
+        pdf.multi_cell(w, 9, _clean(stripped[2:]))
         pdf.ln(3)
 
     elif stripped.startswith("## "):
         pdf.set_font(FONT_FAMILY, "B", 13)
-        pdf.multi_cell(0, 8, _clean(stripped[3:]))
+        pdf.multi_cell(w, 8, _clean(stripped[3:]))
         pdf.ln(2)
 
     elif stripped.startswith("### "):
         pdf.set_font(FONT_FAMILY, "B", 11)
-        pdf.multi_cell(0, 7, _clean(stripped[4:]))
+        pdf.multi_cell(w, 7, _clean(stripped[4:]))
         pdf.ln(1)
 
     elif stripped == "---":
@@ -75,23 +78,22 @@ def _render_line(pdf, line: str) -> None:
         pdf.ln(LINE_HEIGHT / 2)
 
     elif stripped.startswith("|"):
-        _render_table_row(pdf, stripped)
-        pdf.set_x(MARGIN)
+        _render_table_row(pdf, stripped, w)
 
     elif re.match(r"^\d+\.", stripped):
         pdf.set_font(FONT_FAMILY, size=9)
-        pdf.multi_cell(0, LINE_HEIGHT, _clean(stripped))
+        pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped))
 
     elif stripped.startswith("- ") or stripped.startswith("* "):
         pdf.set_font(FONT_FAMILY, size=10)
-        pdf.multi_cell(0, LINE_HEIGHT, "  • " + _clean(stripped[2:]))
+        pdf.multi_cell(w, LINE_HEIGHT, "  • " + _clean(stripped[2:]))
 
     else:
         pdf.set_font(FONT_FAMILY, size=10)
-        pdf.multi_cell(0, LINE_HEIGHT, _clean(stripped))
+        pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped))
 
 
-def _render_table_row(pdf, line: str) -> None:
+def _render_table_row(pdf, line: str, w: float) -> None:
     if re.match(r"^\|[-| :]+\|$", line):
         return
     cells = [c.strip() for c in line.strip("|").split("|")]
@@ -100,9 +102,8 @@ def _render_table_row(pdf, line: str) -> None:
 
     pdf.set_font(FONT_FAMILY, size=8)
     row_text = " | ".join(_clean(c)[:35] for c in cells if c)
-    usable_w = pdf.w - 2 * MARGIN
-    if usable_w > 0:
-        pdf.multi_cell(usable_w, LINE_HEIGHT, row_text)
+    if w > 0:
+        pdf.multi_cell(w, LINE_HEIGHT, row_text)
 
 
 def _clean(text: str) -> str:
