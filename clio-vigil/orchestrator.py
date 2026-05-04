@@ -40,6 +40,7 @@ STATES = [
     "queued",
     "transcribing",
     "transcribed",
+    "captioned",      # Sprint B: YouTube auto-captions (hoppar över Whisper)
     "indexed",
     "notified",
 ]
