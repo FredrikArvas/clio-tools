@@ -44,6 +44,12 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
     out_path.write_text(report_md, encoding="utf-8")
     logger.info("[report_builder] Rapport sparad: %s", out_path)
 
+    try:
+        import pdf_builder
+        pdf_builder.build_pdf(out_path)
+    except Exception as e:
+        logger.warning("[report_builder] PDF-generering misslyckades: %s", e)
+
     return out_path
 
 

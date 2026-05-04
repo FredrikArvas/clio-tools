@@ -83,7 +83,10 @@ def send_final_report(run_id: str, report_path: Path, question: str = "") -> Non
         f"Rapport: {report_path}\n"
         f"Körning: {run_id}\n"
     )
-    attachments = [str(report_path)] if report_path and report_path.exists() else []
+    attachments = []
+    if report_path and report_path.exists():
+        pdf_path = report_path.with_suffix(".pdf")
+        attachments.append(str(pdf_path if pdf_path.exists() else report_path))
     _send(subject, body, attachments=attachments)
 
 
