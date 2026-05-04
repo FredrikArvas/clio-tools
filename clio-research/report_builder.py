@@ -213,23 +213,13 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
         verdict_section += "_Verdict-klassificering ej tillgänglig._\n"
     verdict_section += "\n---\n\n"
 
-    # Källförteckning — tabellformat
+    # Källförteckning — APA 7
     sources_section = "## 9. Källförteckning\n\n"
-    sources_section += "| # | Titel | Författare | År | Region | DB | Trovärd | Relevans |\n"
-    sources_section += "|---|-------|------------|----|---------|----|---------|----------|\n"
+    sources_section += "_Format: APA 7. Trovärd = trovärdighetspoäng (0–18), Rel = relevansscore (0–1). "
+    sources_section += "Se [metodbeskrivning](https://fredrik.arvas.se/clio-research/metod/) "
+    sources_section += "för poängsättningens kriterier. (c) = hämtad från Qdrant-cache._\n\n"
     for i, src in enumerate(sources, 1):
-        title = (src.get("title") or "Okänd titel")[:55]
-        if src.get("from_cache"):
-            title += " *(c)*"
-        authors = (", ".join(src.get("authors", [])[:2]) or "Okänd")[:30]
-        year = src.get("year", "?")
-        region = (src.get("region") or "?")[:12]
-        db = (src.get("database") or "?")[:12]
-        cred = src.get("credibility_score", "?")
-        rel = src.get("relevance_score", "?")
-        sources_section += (
-            f"| {i} | {title} | {authors} | {year} | {region} | {db} | {cred}/18 | {rel} |\n"
-        )
+        sources_section += _format_apa7(i, src) + "\n"
 
     copyright_section = (
         f"\n\n---\n\n"
@@ -241,6 +231,36 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
     )
 
     return header + body + verdict_section + sources_section + copyright_section
+
+
+def _format_apa7(index: int, src: dict) -> str:
+    """Formaterar en källa enligt APA 7."""
+    authors_raw = src.get("authors") or []
+    if authors_raw:
+        authors_str = ", ".join(authors_raw[:6])
+        if len(authors_raw) > 6:
+            authors_str += ", . . ."
+    else:
+        authors_str = "Okänd upphovsman"
+
+    year = src.get("year") or "u.å."
+    title = src.get("title") or "Okänd titel"
+    db = src.get("database") or ""
+    doi = src.get("doi") or ""
+    url = src.get("fulltext_url") or ""
+    cred = src.get("credibility_score", "?")
+    rel = src.get("relevance_score", "?")
+    cached = " *(c)*" if src.get("from_cache") else ""
+
+    ref = f"{index}. {authors_str} ({year}). *{title}*.{cached}"
+    if db:
+        ref += f" {db.capitalize()}."
+    if doi:
+        ref += f" https://doi.org/{doi}"
+    elif url:
+        ref += f" {url}"
+    ref += f" [Trovärd: {cred}/18 | Rel: {rel}]"
+    return ref
 
 
 def _load_prompts() -> dict:
