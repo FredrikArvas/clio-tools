@@ -1,0 +1,34 @@
+databases:
+  openalex:
+    base_url: "https://api.openalex.org"
+    rate_limit_sleep: 0.1
+    requires_key: false
+    polite_email_env: OPENALEX_EMAIL
+
+  semantic_scholar:
+    base_url: "https://api.semanticscholar.org/graph/v1"
+    rate_limit_sleep: 1.0
+    requires_key: true
+    key_env: SEMANTIC_SCHOLAR_API_KEY
+
+  core_api:
+    base_url: "https://api.core.ac.uk/v3"
+    rate_limit_sleep: 0.5
+    requires_key: true
+    key_env: CORE_API_KEY
+
+  crossref:
+    base_url: "https://api.crossref.org/works"
+    rate_limit_sleep: 0.3
+    requires_key: false
+
+  cyberleninka:
+    base_url: "https://cyberleninka.ru/search"
+    rate_limit_sleep: 2.0
+    requires_key: false
+    scraping: true
+
+  jstage:
+    base_url: "https://api.jstage.jst.go.jp/searchapi/do"
+    rate_limit_sleep: 1.0
+    requires_key: false

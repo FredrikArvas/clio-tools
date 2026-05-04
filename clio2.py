@@ -129,12 +129,20 @@ CONTEXTS = [
             "status":       "active",
             "needs_folder": False,
         },
+        {
+            "nr":           6,
+            "name":         "clio-fetch-iphone-audio",
+            "desc":         "iPhone AudioShare → lokal mapp (inkrementell sync)",
+            "script":       ROOT / "clio-fetch-iphone-audio" / "main.py",
+            "status":       "active",
+            "needs_folder": False,
+        },
     ]},
 
     # ── KNOWLEDGE ─────────────────────────────────────────────────────────────
     {"name": "KNOWLEDGE", "tools": [
         {
-            "nr":           6,
+            "nr":           7,
             "name":         "clio-library",
             "desc":         "Family library — import, enrich, recommend",
             "status":       "active",
@@ -206,7 +214,7 @@ CONTEXTS = [
             ],
         },
         {
-            "nr":           7,
+            "nr":           8,
             "name":         "clio-rag",
             "desc":         "Local RAG — index docs, search with Claude",
             "status":       "active",
@@ -244,7 +252,7 @@ CONTEXTS = [
             ],
         },
         {
-            "nr":           8,
+            "nr":           9,
             "name":         "clio-vigil",
             "desc":         "Media monitor — RSS/YouTube → RAG",
             "status":       "active",
@@ -346,7 +354,7 @@ CONTEXTS = [
     # ── AGENTS ────────────────────────────────────────────────────────────────
     {"name": "AGENTS", "tools": [
         {
-            "nr":           9,
+            "nr":           10,
             "name":         "web-fetch",
             "desc":         "Web fetch → JSON (url/dir/file)",
             "script":       ROOT / "clio-fetch" / "clio_fetch.py",
@@ -354,7 +362,7 @@ CONTEXTS = [
             "needs_folder": False,
         },
         {
-            "nr":           10,
+            "nr":           11,
             "name":         "clio-agent-mail",
             "desc":         "AI mail — IMAP, rules, auto-reply",
             "script":       ROOT / "clio-agent-mail" / "main.py",
@@ -363,7 +371,7 @@ CONTEXTS = [
             "custom_runner": True,
         },
         {
-            "nr":           11,
+            "nr":           12,
             "name":         "clio-agent-gmail",
             "desc":         "Gmail fetch — PDF attachments by sender",
             "script":       ROOT / "clio-agent-gmail" / "main.py",
@@ -372,7 +380,7 @@ CONTEXTS = [
             "custom_runner": True,
         },
         {
-            "nr":           12,
+            "nr":           13,
             "name":         "emailfetch",
             "desc":         "IMAP backup → Dropbox",
             "script":       ROOT / "clio-emailfetch" / "imap_backup.py",
@@ -380,7 +388,7 @@ CONTEXTS = [
             "needs_folder": False,
         },
         {
-            "nr":           13,
+            "nr":           14,
             "name":         "clio-agent-job",
             "desc":         "Job search — career signals",
             "script":       ROOT / "clio-agent-job" / "run.py",
@@ -390,7 +398,7 @@ CONTEXTS = [
             "odoo_release": "R1",
         },
         {
-            "nr":           14,
+            "nr":           15,
             "name":         "clio-agent-obit",
             "desc":         "Obituary monitor — daily watch list",
             "script":       ROOT / "clio-agent-obit" / "run.py",
@@ -400,7 +408,7 @@ CONTEXTS = [
             "odoo_release": "R2",
         },
         {
-            "nr":           15,
+            "nr":           16,
             "name":         "clio-agent-odoo",
             "desc":         "Clio in Odoo Discuss — AI channel",
             "script":       ROOT / "clio-agent-odoo" / "run.py",
@@ -413,16 +421,16 @@ CONTEXTS = [
     # ── ANALYSIS & DATA ───────────────────────────────────────────────────────
     {"name": "ANALYSIS & DATA", "tools": [
         {
-            "nr":           16,
+            "nr":           17,
             "name":         "family-tree",
             "desc":         "Genealogy — GEDCOM → Wikidata → Notion",
-            "script":       ROOT / "clio-research" / "research.py",
+            "script":       ROOT / "clio-genealogy" / "research.py",
             "status":       "active",
             "needs_folder": False,
             "custom_runner": True,
         },
         {
-            "nr":           17,
+            "nr":           18,
             "name":         "bankaccounts",
             "desc":         "Personal finance — statements, reports",
             "script":       ROOT / "clio-privfin" / "rapport.py",
@@ -431,7 +439,7 @@ CONTEXTS = [
             "custom_runner": True,
         },
         {
-            "nr":           18,
+            "nr":           19,
             "name":         "clio-graph",
             "desc":         "Network graph — Odoo → Neo4j sync",
             "script":       ROOT / "clio-graph" / "run.py",

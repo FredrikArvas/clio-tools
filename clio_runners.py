@@ -62,7 +62,7 @@ def run_tool(tool: dict, state: dict) -> None:
     needs_folder = tool.get("needs_folder", True)
 
     if tool.get("custom_runner"):
-        if name == "clio-research":
+        if name == "family-tree":
             run_research(tool, state)
             return
         if name == "clio-agent-mail":
