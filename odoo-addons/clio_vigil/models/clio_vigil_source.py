@@ -62,6 +62,13 @@ class ClioVigilSource(models.Model):
     )
     notes = fields.Text(string="Anteckningar")
 
+    # ── Sprint C: Arkivering ─────────────────────────────────────────────────
+    archive_enabled = fields.Boolean(
+        string  = "Arkivera lokalt",
+        default = False,
+        help    = "Om aktiverad laddar --archive-sources ned hela källarkivet.",
+    )
+
     _sql_constraints = [
         ("url_uniq", "UNIQUE(url)", "Käll-URL måste vara unik."),
     ]

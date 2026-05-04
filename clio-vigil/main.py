@@ -596,8 +596,10 @@ def main():
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
-    parser.add_argument("--classify-uap", action="store_true", help="Klassificera queued UFO-items och skapa pending Odoo-encounters")
-    parser.add_argument("--seed-sources", action="store_true", help="Importera YAML-källkonfiguration till Odoo (engångsimport)")
+    parser.add_argument("--classify-uap",    action="store_true", help="Klassificera queued UFO-items och skapa pending Odoo-encounters")
+    parser.add_argument("--seed-sources",    action="store_true", help="Importera YAML-källkonfiguration till Odoo (engångsimport)")
+    parser.add_argument("--archive-sources", action="store_true", help="Arkivera källor med archive:true i YAML (Sprint C)")
+    parser.add_argument("--archive-source",  type=str,            help="Arkivera specifik källa (namnmatchning)")
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
@@ -610,6 +612,7 @@ def main():
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
+        args.archive_sources, bool(args.archive_source),
     ])
     if not any_action:
         _interactive_menu()
@@ -670,6 +673,18 @@ def main():
                     })
             n = write_sources(_odoo_env, all_sources)
             print(f"✓ {n} källor importerade till Odoo.")
+
+    if args.archive_sources or args.archive_source:
+        from archiver import run_archive, list_archives
+        filter_name = args.archive_source or None
+        totals = run_archive(conn, filter_name=filter_name, dry_run=args.dry_run)
+        print(
+            f"\n✓ Arkivering klar: {totals['sources']} källor, "
+            f"{totals['downloaded']} nya, {totals['skipped']} redan klara, "
+            f"{totals['failed']} fel"
+        )
+        if _odoo_env:
+            _odoo_sync("efter arkivering")
 
     if args.stats:
         print_stats(conn, args.domain)
