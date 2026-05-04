@@ -170,7 +170,8 @@ def _render_line(pdf, line: str) -> None:
         pdf.ln(LINE_HEIGHT / 2)
 
     elif stripped.startswith("|"):
-        _render_table_row(pdf, stripped, w)
+        _render_table_row(pdf, stripped, w, getattr(pdf, "_last_was_separator", False))
+        pdf._last_was_separator = bool(re.match(r"^\|[-| :]+\|$", stripped))
 
     elif re.match(r"^\d+\.", stripped):
         pdf.set_font("Helvetica", size=8)
@@ -197,15 +198,17 @@ def _render_line(pdf, line: str) -> None:
         pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped), align="L")
 
 
-def _render_table_row(pdf, line: str, w: float) -> None:
+def _render_table_row(pdf, line: str, w: float, prev_was_separator: bool = False) -> None:
     if re.match(r"^\|[-| :]+\|$", line):
         return
     cells = [c.strip() for c in line.strip("|").split("|")]
     if not any(cells):
         return
 
-    # Rubrikrad (fetstil om alla celler är korta / saknar siffror → troligen header)
-    is_header = all(len(c) < 30 and not re.search(r"\d{4}", c) for c in cells if c)
+    # Rubrikrad = raden direkt före separator-raden (|---|)
+    is_header = not prev_was_separator and any(
+        c in ("#", "Titel", "Källa", "Författare", "Ställningstagande") for c in cells
+    )
     pdf.set_font("Helvetica", "B" if is_header else "", 8)
     pdf.set_text_color(*NAVY if is_header else BROWN)
     if is_header:
