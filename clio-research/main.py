@@ -111,12 +111,14 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
     import search_runner
     import citation_chaser
     import credibility_scorer
+    import relevance_filter
     import report_builder
     import status_mailer
     import qdrant_indexer
 
     protocol = protocol_loader.load(protocol_id, INBOX_DIR)
     run_id = resume_run_id or protocol["run_id"]
+    question = protocol["question"]["natural_language"]
 
     if resume_run_id:
         state = _load_state(resume_run_id)
@@ -125,8 +127,12 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
         start_phase = state.get("last_completed_phase", 0) + 1
         logger.info("Återupptar körning %s från fas %d", run_id, start_phase)
     else:
-        sources = []
-        seen_ids = set()
+        # Ladda cachade källor från tidigare körningar
+        cached = qdrant_indexer.load_cached_sources(question)
+        sources = cached
+        seen_ids = set(s["source_id"] for s in cached if s.get("source_id"))
+        if cached:
+            logger.info("Laddade %d cachade källor från Qdrant", len(cached))
         start_phase = 1
         logger.info("Startar ny körning: %s", run_id)
 
@@ -162,19 +168,27 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
         elif phase_num == 6:
             logger.info("=== Fas 6: Credibility scoring ===")
             credibility_scorer.score_all(sources)
+            logger.info("=== Fas 6.5: Relevansfiltrering ===")
+            relevant_sources = relevance_filter.filter_by_relevance(sources, question)
+            state["relevant_sources_count"] = len(relevant_sources)
+            if not relevant_sources:
+                status_mailer.send_anomaly(
+                    run_id, 6,
+                    f"Relevansfilter returnerade 0 av {len(sources)} källor. "
+                    f"Kontrollera söktermer i protokollet.",
+                    question=question,
+                )
 
         elif phase_num == 7:
             logger.info("=== Fas 7: Rapport building ===")
-            credibility_scorer.score_all(sources)
-            report_path = report_builder.build(protocol, sources, run_id, DONE_DIR)
+            report_path = report_builder.build(protocol, relevant_sources, run_id, DONE_DIR)
             state["report_path"] = str(report_path)
 
         elif phase_num == 8:
             logger.info("=== Fas 8: Delivery ===")
             rp = Path(state.get("report_path", ""))
-            question = protocol["question"].get("natural_language", "")
             if rp.exists():
-                qdrant_indexer.index_report(protocol, sources, rp, run_id)
+                qdrant_indexer.index_report(protocol, relevant_sources, rp, run_id)
                 status_mailer.send_final_report(run_id, rp, question=question)
             else:
                 logger.warning("Rapport saknas för delivery-fas")
