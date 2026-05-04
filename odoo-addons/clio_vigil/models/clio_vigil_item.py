@@ -103,6 +103,18 @@ class ClioVigilItem(models.Model):
         help   = "Första 500 tecken av transkriptionen.",
     )
 
+    # ── Sprint C: Arkivering ─────────────────────────────────────────────────
+
+    archive_downloaded = fields.Boolean(
+        string  = "Arkiverad",
+        default = False,
+        help    = "Episoden finns nedladdad lokalt på servern.",
+    )
+    archive_path = fields.Char(
+        string = "Lokal sökväg",
+        help   = "Absolut sökväg till den nedladdade filen på servern.",
+    )
+
     # ── Tidsstämplar ─────────────────────────────────────────────────────────
 
     created_at  = fields.Datetime(string="Skapad",       copy=False)

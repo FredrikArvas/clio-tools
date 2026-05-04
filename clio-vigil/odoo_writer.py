@@ -83,10 +83,13 @@ def _item_to_vals(row) -> dict:
         "duration_seconds": row["duration_seconds"] or False,
         "relevance_score":  float(row["relevance_score"] or 0.0),
         "priority_score":   float(row["priority_score"] or 0.0),
-        "state":            row["state"] or "discovered",
-        "summary":          row["summary"] or False,
-        "created_at":       _dt(row["created_at"]),
-        "notified_at":      _dt(row["notified_at"]),
+        "state":               row["state"] or "discovered",
+        "summary":             row["summary"] or False,
+        "created_at":          _dt(row["created_at"]),
+        "notified_at":         _dt(row["notified_at"]),
+        # Sprint C
+        "archive_downloaded":  bool(row["archive_downloaded"]) if "archive_downloaded" in row.keys() else False,
+        "archive_path":        row["archive_path"] if "archive_path" in row.keys() else False,
     }
 
 

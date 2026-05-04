@@ -100,6 +100,7 @@ sources:
       name: Från UFO till UAP (En verklighet i förändring)
       maturity: etablerad
       weight: 1.2
+      # archive: true   # Avkommentera för att arkivera hela podden lokalt
 
     - url: https://audioboom.com/channels/5024014.rss
       name: That UFO Podcast
@@ -132,6 +133,7 @@ sources:
       name: The Black Vault
       maturity: tidig
       weight: 0.9
+      # archive: true   # Avkommentera för att arkivera hela kanalen lokalt
 
     - channel_id: "@JeremyCorbell"
       name: Weaponized (Jeremy Corbell)

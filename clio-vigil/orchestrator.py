@@ -125,11 +125,32 @@ CREATE TABLE IF NOT EXISTS transcription_queue (
     completed_at    TEXT,
     pause_reason    TEXT                     -- t.ex. "preempted_by_item_42"
 );
+
+-- Sprint C: Källarkiv — spårar nedladdade episoder/klipp
+CREATE TABLE IF NOT EXISTS source_archives (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id         INTEGER REFERENCES vigil_items(id) ON DELETE SET NULL,
+    source_name     TEXT NOT NULL,
+    url             TEXT NOT NULL UNIQUE,    -- original URL (same as vigil_items.url)
+    local_path      TEXT,                    -- absolut sökväg till nedladdad fil
+    archived_at     TEXT DEFAULT (datetime('now')),
+    file_size_mb    REAL,                    -- filstorlek i MB
+    archive_status  TEXT DEFAULT 'ok'        -- ok | error | skipped
+);
+CREATE INDEX IF NOT EXISTS idx_archive_source ON source_archives(source_name);
+CREATE INDEX IF NOT EXISTS idx_archive_url    ON source_archives(url);
 """
 
 # ---------------------------------------------------------------------------
 # Databasinitiering
 # ---------------------------------------------------------------------------
+
+_MIGRATIONS = [
+    # Sprint C: lägg till arkiveringsfält om de saknas
+    "ALTER TABLE vigil_items ADD COLUMN archive_downloaded INTEGER DEFAULT 0",
+    "ALTER TABLE vigil_items ADD COLUMN archive_path TEXT",
+]
+
 
 def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """Initierar databasen och returnerar en anslutning."""
@@ -137,6 +158,12 @@ def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path, timeout=30)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    # Idempotenta migreringar — ignorera fel om kolumnen redan finns
+    for sql in _MIGRATIONS:
+        try:
+            conn.execute(sql)
+        except Exception:
+            pass
     conn.commit()
     logger.info(f"vigil.db initierad: {db_path}")
     return conn
