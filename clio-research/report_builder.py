@@ -231,7 +231,16 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
             f"Trovärd: {cred}/18 | Relevans: {rel}{doi_str}\n\n"
         )
 
-    return header + body + verdict_section + sources_section
+    copyright_section = (
+        f"\n\n---\n\n"
+        f"*© {date[:4]} Arvas International AB. "
+        f"Rapporten är framtagen med AI-stöd (clio-research) och är avsedd för internt bruk. "
+        f"Källorna tillhör respektive upphovsman och citeras i enlighet med akademisk praxis "
+        f"(korta utdrag ur abstract för analytiskt ändamål). "
+        f"Rapporten får ej vidaredistribueras utan skriftligt tillstånd.*\n"
+    )
+
+    return header + body + verdict_section + sources_section + copyright_section
 
 
 def _load_prompts() -> dict:
