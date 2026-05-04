@@ -1,0 +1,6 @@
+running/
+done/
+inbox/
+__pycache__/
+*.pyc
+.env

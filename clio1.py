@@ -405,7 +405,7 @@ CONTEXTS = [
             "nr":           16,
             "name":         "family-tree",
             "desc":         "Genealogy — GEDCOM → Wikidata → Notion",
-            "script":       ROOT / "clio-research" / "research.py",
+            "script":       ROOT / "clio-genealogy" / "research.py",
             "status":       "active",
             "needs_folder": False,
             "custom_runner": True,
