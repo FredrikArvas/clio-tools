@@ -119,15 +119,16 @@ def load_cached_sources(question: str, top_k: int = 30) -> list[dict]:
 
     try:
         from qdrant_client.models import Filter, FieldCondition, MatchValue
-        hits = client.search(
+        result = client.query_points(
             collection_name=COLLECTION_NAME,
-            query_vector=q_vector,
+            query=q_vector,
             limit=top_k,
             score_threshold=CACHE_SIMILARITY_THRESHOLD,
             query_filter=Filter(
                 must=[FieldCondition(key="type", match=MatchValue(value="source"))]
             ),
         )
+        hits = result.points
     except Exception as e:
         logger.warning("[qdrant_indexer] Cache-sökning misslyckades: %s", e)
         return []
@@ -169,13 +170,14 @@ def _connect():
 
     host = os.getenv("QDRANT_HOST", "localhost")
     port = int(os.getenv("QDRANT_PORT", "6333"))
+    url = f"http://{host}:{port}"
 
     try:
-        client = QdrantClient(host=host, port=port, check_compatibility=False)
+        client = QdrantClient(url=url, check_compatibility=False)
         _ensure_collection(client, VectorParams, Distance)
         return client, PointStruct
     except Exception as e:
-        logger.warning("Qdrant ej tillgänglig (%s:%s): %s — indexering hoppas över", host, port, e)
+        logger.warning("Qdrant ej tillgänglig (%s): %s — indexering hoppas över", url, e)
         return None, None
 
 
