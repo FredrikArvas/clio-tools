@@ -65,7 +65,7 @@ class _ClioReport:
         self._pdf.output(path)
 
     def _add_footers(self):
-        total = self._pdf.pages
+        total = len(self._pdf.pages)
         today = datetime.now().strftime("%Y-%m-%d")
         for page_num in range(1, total + 1):
             self._pdf.page = page_num
