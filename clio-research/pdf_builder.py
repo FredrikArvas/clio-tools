@@ -76,6 +76,7 @@ def _render_line(pdf, line: str) -> None:
 
     elif stripped.startswith("|"):
         _render_table_row(pdf, stripped)
+        pdf.set_x(MARGIN)
 
     elif re.match(r"^\d+\.", stripped):
         pdf.set_font(FONT_FAMILY, size=9)
@@ -98,10 +99,10 @@ def _render_table_row(pdf, line: str) -> None:
         return
 
     pdf.set_font(FONT_FAMILY, size=8)
-    col_w = (pdf.w - 2 * MARGIN) / max(len(cells), 1)
-    for cell in cells:
-        pdf.cell(col_w, LINE_HEIGHT, _clean(cell)[:40], border=0)
-    pdf.ln()
+    row_text = " | ".join(_clean(c)[:35] for c in cells if c)
+    usable_w = pdf.w - 2 * MARGIN
+    if usable_w > 0:
+        pdf.multi_cell(usable_w, LINE_HEIGHT, row_text)
 
 
 def _clean(text: str) -> str:
