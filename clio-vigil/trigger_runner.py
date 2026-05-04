@@ -19,14 +19,15 @@ TRIGGER_FILE = _HERE / "data" / ".vigil_trigger"
 STATUS_FILE  = _HERE / "data" / ".vigil_status"
 
 STEP_ARGS = {
-    "run":        ["--run", "--all-domains"],
-    "transcribe": ["--transcribe"],
-    "summarize":  ["--summarize"],
-    "index":      ["--index"],
-    "digest":     ["--digest"],
-    "full":       ["--full", "--all-domains"],
-    "seed":       ["--seed-sources"],
-    "recompute":  ["--recompute-priorities"],
+    "run":           ["--run", "--all-domains"],
+    "caption_check": ["--caption-check", "--all-domains"],
+    "transcribe":    ["--transcribe"],
+    "summarize":     ["--summarize"],
+    "index":         ["--index"],
+    "digest":        ["--digest"],
+    "full":          ["--full", "--all-domains"],
+    "seed":          ["--seed-sources"],
+    "recompute":     ["--recompute-priorities"],
 }
 
 

@@ -582,12 +582,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="clio-vigil — mediebevakning och intelligence-pipeline"
     )
-    parser.add_argument("--run",         action="store_true", help="Kör collect+filter pipeline")
-    parser.add_argument("--transcribe",  action="store_true", help="Kör transkriptionskö")
-    parser.add_argument("--summarize",   action="store_true", help="Kör summering (Claude)")
-    parser.add_argument("--index",       action="store_true", help="Kör RAG-indexering (Qdrant)")
-    parser.add_argument("--digest",      action="store_true", help="Skicka daglig digest-mail")
-    parser.add_argument("--full",        action="store_true", help="Kör hela pipeline: run+transcribe+summarize+index+digest")
+    parser.add_argument("--run",            action="store_true", help="Kör collect+filter pipeline")
+    parser.add_argument("--caption-check", action="store_true", help="Hämta YouTube auto-captions (Sprint B)")
+    parser.add_argument("--transcribe",    action="store_true", help="Kör transkriptionskö (Whisper, hoppar captioned)")
+    parser.add_argument("--summarize",     action="store_true", help="Kör summering (Claude)")
+    parser.add_argument("--index",         action="store_true", help="Kör RAG-indexering (Qdrant)")
+    parser.add_argument("--digest",        action="store_true", help="Skicka daglig digest-mail")
+    parser.add_argument("--full",          action="store_true", help="Kör hela pipeline: run+caption-check+transcribe+summarize+index+digest")
     parser.add_argument("--stats",       action="store_true", help="Visa tillståndsstatistik")
     parser.add_argument("--list-queued",  action="store_true", help="Lista transkriptionskön")
     parser.add_argument("--pick",         action="store_true", help="Välj objekt att prioritera i kön")
@@ -605,7 +606,7 @@ def main():
     args = parser.parse_args()
 
     any_action = any([
-        args.run, args.transcribe, args.summarize, args.index,
+        args.run, args.caption_check, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
@@ -704,6 +705,16 @@ def main():
             except Exception as e:
                 logger.error(f"Pipeline-fel [{domain_id}]: {e}", exc_info=True)
         _odoo_sync("efter filter")
+
+    if args.caption_check or args.full:
+        from caption_fetcher import run_caption_check
+        counts = run_caption_check(conn, domain=args.domain,
+                                   max_items=args.max * 5)  # caption-check är snabb
+        logger.info(
+            f"Caption-check: {counts['captioned']} captioned (slipper Whisper), "
+            f"{counts['skipped']} till Whisper, {counts['failed']} fel"
+        )
+        _odoo_sync("efter caption-check")
 
     if args.transcribe or args.full:
         _odoo_pull("före transkription")

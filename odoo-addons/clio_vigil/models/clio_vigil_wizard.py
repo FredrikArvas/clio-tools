@@ -28,6 +28,7 @@ class ClioVigilSetStateWizard(models.TransientModel):
             ("filtered_out", "Filtrerades bort"),
             ("queued",       "I kö"),
             ("transcribed",  "Transkriberad"),
+            ("captioned",    "Auto-textad (YouTube)"),
             ("indexed",      "Indexerad"),
             ("notified",     "Skickad i digest"),
         ],

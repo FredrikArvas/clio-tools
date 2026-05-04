@@ -124,6 +124,11 @@ class ClioVigilPipeline(models.TransientModel):
         self._write_trigger("run")
         return self._notify("run")
 
+    def action_caption_check(self):
+        """Sprint B: hämtar YouTube auto-captions för köade klipp."""
+        self._write_trigger("caption_check")
+        return self._notify("caption_check")
+
     def action_transcribe(self):
         self._write_trigger("transcribe")
         return self._notify("transcribe")

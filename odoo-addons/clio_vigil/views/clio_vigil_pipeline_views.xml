@@ -49,10 +49,16 @@
                       confirm="Starta insamling (collect + filter) för alla domäner?"/>
             </div>
             <div class="col-6 col-md-4">
+              <button name="action_caption_check" type="object"
+                      class="btn btn-secondary w-100"
+                      string="&#128250; Kontrollera captions"
+                      confirm="Hämta YouTube auto-captions för köade klipp?"/>
+            </div>
+            <div class="col-6 col-md-4">
               <button name="action_transcribe" type="object"
                       class="btn btn-secondary w-100"
-                      string="&#127897; Transkribera"
-                      confirm="Starta transkription av objekt i kö?"/>
+                      string="&#127897; Transkribera (Whisper)"
+                      confirm="Starta Whisper-transkription av objekt i kö?"/>
             </div>
             <div class="col-6 col-md-4">
               <button name="action_summarize" type="object"

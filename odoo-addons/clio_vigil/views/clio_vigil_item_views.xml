@@ -7,7 +7,7 @@
     <field name="model">clio.vigil.item</field>
     <field name="arch" type="xml">
       <list string="Bevakningsobjekt"
-            decoration-success="state in ('indexed', 'notified')"
+            decoration-success="state in ('indexed', 'notified', 'captioned')"
             decoration-warning="state in ('queued', 'transcribing')"
             decoration-info="state == 'transcribed'"
             decoration-muted="state == 'filtered_out'"
@@ -25,7 +25,7 @@
                optional="show"/>
         <field name="title"          string="Titel"/>
         <field name="state"          string="Tillstånd" widget="badge"
-               decoration-success="state in ('indexed','notified')"
+               decoration-success="state in ('indexed','notified','captioned')"
                decoration-warning="state in ('queued','transcribing')"
                decoration-info="state == 'transcribed'"
                decoration-muted="state == 'filtered_out'"/>

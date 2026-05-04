@@ -169,7 +169,7 @@ def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20) -> d
     """
     query = """
         SELECT id FROM vigil_items
-        WHERE state IN ('transcribed', 'indexed', 'notified')
+        WHERE state IN ('transcribed', 'captioned', 'indexed', 'notified')
           AND (summary IS NULL OR summary = '')
           {}
         ORDER BY priority_score DESC

@@ -296,7 +296,7 @@ def run_indexer(conn, domain: Optional[str] = None, max_items: int = 20) -> dict
     """Indexerar alla transcribed-objekt. Returnerar räknare."""
     query = """
         SELECT id FROM vigil_items
-        WHERE state = 'transcribed'
+        WHERE state IN ('transcribed', 'captioned')
           {}
         ORDER BY priority_score DESC
         LIMIT ?
