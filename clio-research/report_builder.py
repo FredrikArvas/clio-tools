@@ -213,22 +213,22 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
         verdict_section += "_Verdict-klassificering ej tillgänglig._\n"
     verdict_section += "\n---\n\n"
 
-    # Källförteckning
+    # Källförteckning — tabellformat
     sources_section = "## 9. Källförteckning\n\n"
+    sources_section += "| # | Titel | Författare | År | Region | DB | Trovärd | Relevans |\n"
+    sources_section += "|---|-------|------------|----|---------|----|---------|----------|\n"
     for i, src in enumerate(sources, 1):
-        authors = ", ".join(src.get("authors", [])[:3]) or "Okänd"
+        title = (src.get("title") or "Okänd titel")[:55]
+        if src.get("from_cache"):
+            title += " *(c)*"
+        authors = (", ".join(src.get("authors", [])[:2]) or "Okänd")[:30]
         year = src.get("year", "?")
-        region = src.get("region", "?")
-        db = src.get("database", "?")
+        region = (src.get("region") or "?")[:12]
+        db = (src.get("database") or "?")[:12]
         cred = src.get("credibility_score", "?")
         rel = src.get("relevance_score", "?")
-        doi = src.get("doi", "")
-        doi_str = f" DOI: {doi}" if doi else ""
-        cached = " *(cache)*" if src.get("from_cache") else ""
         sources_section += (
-            f"{i}. **{src.get('title', 'Okänd titel')}**{cached}  \n"
-            f"   {authors} ({year}) | {region} | {db} | "
-            f"Trovärd: {cred}/18 | Relevans: {rel}{doi_str}\n\n"
+            f"| {i} | {title} | {authors} | {year} | {region} | {db} | {cred}/18 | {rel} |\n"
         )
 
     copyright_section = (
