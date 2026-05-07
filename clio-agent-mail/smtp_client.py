@@ -14,6 +14,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders as _encoders
+from email.header import Header
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ def send_email(
         _alt = msg
     msg["From"] = user
     msg["To"] = to_addr
-    msg["Subject"] = subject
+    msg["Subject"] = Header(subject, "utf-8")
 
     if message_id:
         msg["Message-ID"] = message_id

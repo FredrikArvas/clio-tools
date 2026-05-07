@@ -222,7 +222,7 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
     subject_clean = re.sub(
         r"^(Re|Fwd|Fw|Sv|VS):\s*", "", mail_item.subject or "", flags=re.IGNORECASE
     ).strip()
-    body_raw   = _get_plain_body(mail_item) or ""
+    body_raw   = mail_item.body or ""
     body_lines = [l for l in body_raw.splitlines() if l.strip() and not l.startswith(">")]
     first_para = " ".join(body_lines[:5]).strip()
 

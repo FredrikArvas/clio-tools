@@ -41,6 +41,16 @@ _IGNORE_PATTERNS = (
 )
 
 
+def _get_own_addresses(config) -> set:
+    """Returnerar alla egna imap_user_*-adresser från config — används för loopskydd."""
+    own = set()
+    for key in [a.strip() for a in config.get("mail", "accounts", fallback="clio").split(",") if a.strip()]:
+        user = config.get("mail", f"imap_user_{key}", fallback="").lower().strip()
+        if user:
+            own.add(user)
+    return own
+
+
 @dataclass
 class Classification:
     action: str
@@ -118,6 +128,14 @@ def classify(mail_item, whitelist: set, config) -> Classification:
         return Classification(
             action=ACTION_IGNORE,
             reason="Bounce/system-mail — ignoreras",
+            account_key=account_key,
+        )
+
+    # ── Egna konton — ignoreras för att förhindra svarsloopar ───────────────
+    if sender_lower in _get_own_addresses(config):
+        return Classification(
+            action=ACTION_IGNORE,
+            reason="Eget konto — ignoreras för att förhindra svarsloop",
             account_key=account_key,
         )
 
