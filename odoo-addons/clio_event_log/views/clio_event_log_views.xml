@@ -98,15 +98,11 @@
         </field>
     </record>
 
-    <!-- ── Meny ─────────────────────────────────────────────────────────── -->
-    <menuitem id="menu_clio_root"
-              name="Clio"
-              sequence="90"/>
-
+    <!-- ── Meny — placeras under Clio Agent Mail ───────────────────────── -->
     <menuitem id="menu_clio_event_log"
               name="Händelselogg"
-              parent="menu_clio_root"
+              parent="clio_mail_admin.menu_clio_root"
               action="action_clio_event_log"
-              sequence="10"/>
+              sequence="50"/>
 
 </odoo>

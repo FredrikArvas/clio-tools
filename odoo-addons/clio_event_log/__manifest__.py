@@ -4,7 +4,7 @@
     'summary': 'Logg över inkommande mail-händelser från clio-agent-mail (intent-klassificering, PII, blockeringar)',
     'author': 'Arvas International AB',
     'category': 'Clio',
-    'depends': ['base'],
+    'depends': ['base', 'clio_mail_admin'],
     'data': [
         'security/ir.model.access.csv',
         'views/clio_event_log_views.xml',
