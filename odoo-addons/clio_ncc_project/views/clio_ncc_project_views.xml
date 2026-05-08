@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ────────────────────────────────────────────────────── -->
+    <record id="view_clio_ncc_project_list" model="ir.ui.view">
+        <field name="name">clio.ncc.project.list</field>
+        <field name="model">clio.ncc.project</field>
+        <field name="arch" type="xml">
+            <list string="Projektlista"
+                  default_order="nr"
+                  decoration-success="ncc_ok == True"
+                  decoration-danger="ncc_ok == False">
+                <field name="nr"         string="Nr"          optional="show"/>
+                <field name="sfar"       string="Sfär"        optional="show"/>
+                <field name="kodord"     string="Kodord"/>
+                <field name="name"       string="Projektnamn"/>
+                <field name="ncc_ok"     string="NCC"         widget="boolean"/>
+                <field name="status_raw" string="Status"      optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ────────────────────────────────────────────────────── -->
+    <record id="view_clio_ncc_project_form" model="ir.ui.view">
+        <field name="name">clio.ncc.project.form</field>
+        <field name="model">clio.ncc.project</field>
+        <field name="arch" type="xml">
+            <form string="Projekt">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="nr"     string="Nr"/>
+                            <field name="sfar"   string="Sfär"/>
+                            <field name="kodord" string="Kodord"/>
+                        </group>
+                        <group>
+                            <field name="name"       string="Projektnamn"/>
+                            <field name="ncc_ok"     string="NCC"/>
+                            <field name="status_raw" string="Status"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search view ──────────────────────────────────────────────────── -->
+    <record id="view_clio_ncc_project_search" model="ir.ui.view">
+        <field name="name">clio.ncc.project.search</field>
+        <field name="model">clio.ncc.project</field>
+        <field name="arch" type="xml">
+            <search string="Sök projekt">
+                <field name="name"   string="Projektnamn"/>
+                <field name="kodord" string="Kodord"/>
+                <field name="sfar"   string="Sfär"/>
+                <separator/>
+                <filter name="ncc_ok"  string="Har NCC"    domain="[('ncc_ok','=',True)]"/>
+                <filter name="ncc_missing" string="Saknar NCC" domain="[('ncc_ok','=',False)]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter name="group_sfar" string="Sfär" context="{'group_by': 'sfar'}"/>
+                    <filter name="group_ncc"  string="NCC"  context="{'group_by': 'ncc_ok'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ───────────────────────────────────────────────────────── -->
+    <record id="action_clio_ncc_project" model="ir.actions.act_window">
+        <field name="name">Projektlista</field>
+        <field name="res_model">clio.ncc.project</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Inga projekt inlästa ännu.
+            </p>
+            <p>Klicka <b>Ladda om från Notion</b> för att hämta projektlistan.</p>
+        </field>
+    </record>
+
+    <!-- ── Server action: Ladda om ──────────────────────────────────────── -->
+    <record id="action_reload_ncc_projects" model="ir.actions.server">
+        <field name="name">Ladda om från Notion</field>
+        <field name="model_id" ref="model_clio_ncc_project"/>
+        <field name="binding_model_id" ref="model_clio_ncc_project"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">model.action_reload_from_service()</field>
+    </record>
+
+    <!-- ── Meny ─────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_clio_projekt_root"
+              name="Clio Projekt"
+              sequence="85"/>
+
+    <menuitem id="menu_clio_ncc_project"
+              name="Projektlista"
+              parent="menu_clio_projekt_root"
+              action="action_clio_ncc_project"
+              sequence="10"/>
+
+</odoo>

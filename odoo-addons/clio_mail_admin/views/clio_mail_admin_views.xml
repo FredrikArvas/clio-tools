@@ -24,25 +24,6 @@
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
 
-          <!-- NCC list -->
-          <group string="Project List / NCC">
-            <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_ncc" type="object" string="Load NCC List" class="btn-primary"/>
-            </div>
-            <field name="ncc_ids" nolabel="1" invisible="not ncc_ids">
-              <list decoration-success="ncc_ok == True"
-                    decoration-danger="ncc_ok == False"
-                                       default_order="id">
-                <field name="nr"         optional="show"  string="No."/>
-                <field name="sfar"       optional="show"  string="Sphere"/>
-                <field name="kodord"                      string="Keyword"/>
-                <field name="name"                        string="Project Name"/>
-                <field name="ncc_ok"     widget="boolean" string="NCC" readonly="1"/>
-                <field name="status_raw" optional="hide"  string="Status"/>
-              </list>
-            </field>
-          </group>
-
           <!-- Waiting mail -->
           <group string="Waiting Mail">
             <div class="o_row" style="margin-bottom: 8px;">
