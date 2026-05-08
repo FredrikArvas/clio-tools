@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ────────────────────────────────────────────────────── -->
+    <record id="view_clio_event_log_list" model="ir.ui.view">
+        <field name="name">clio.event.log.list</field>
+        <field name="model">clio.event.log</field>
+        <field name="arch" type="xml">
+            <list string="Händelselogg" default_order="event_timestamp desc"
+                  decoration-danger="utfall == 'blocked'"
+                  decoration-warning="utfall == 'error'"
+                  decoration-success="utfall == 'allowed'">
+                <field name="event_timestamp" string="Tidpunkt" widget="datetime"/>
+                <field name="sender" string="Avsändare"/>
+                <field name="subject" string="Ämne"/>
+                <field name="klassificering" string="Intention"/>
+                <field name="utfall" string="Utfall"/>
+                <field name="pii_risk" string="PII"/>
+                <field name="block_reason" string="Blockeringsorsak" optional="hide"/>
+                <field name="sqlite_id" string="ID" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ────────────────────────────────────────────────────── -->
+    <record id="view_clio_event_log_form" model="ir.ui.view">
+        <field name="name">clio.event.log.form</field>
+        <field name="model">clio.event.log</field>
+        <field name="arch" type="xml">
+            <form string="Händelse" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group string="Händelse">
+                            <field name="event_timestamp" string="Tidpunkt"/>
+                            <field name="utfall" string="Utfall"/>
+                            <field name="klassificering" string="Intention"/>
+                            <field name="pii_risk" string="PII-risk"/>
+                        </group>
+                        <group string="Avsändare">
+                            <field name="sender" string="Avsändare"/>
+                            <field name="subject" string="Ämne"/>
+                        </group>
+                    </group>
+                    <group string="Detaljer" attrs="{'invisible': [('block_reason', '=', False)]}">
+                        <field name="block_reason" string="Blockeringsorsak" nolabel="1"/>
+                    </group>
+                    <group string="Teknisk info" groups="base.group_system">
+                        <field name="sqlite_id" string="SQLite ID"/>
+                        <field name="synced_from_sqlite" string="Synkad från SQLite"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search view ──────────────────────────────────────────────────── -->
+    <record id="view_clio_event_log_search" model="ir.ui.view">
+        <field name="name">clio.event.log.search</field>
+        <field name="model">clio.event.log</field>
+        <field name="arch" type="xml">
+            <search string="Sök händelser">
+                <field name="sender" string="Avsändare"/>
+                <field name="subject" string="Ämne"/>
+                <separator/>
+                <filter name="allowed"  string="Tillåtna"   domain="[('utfall','=','allowed')]"/>
+                <filter name="blocked"  string="Blockerade"  domain="[('utfall','=','blocked')]"/>
+                <filter name="error"    string="Fel"         domain="[('utfall','=','error')]"/>
+                <separator/>
+                <filter name="pii_high"   string="Hög PII"    domain="[('pii_risk','=','high')]"/>
+                <filter name="pii_medium" string="Medel PII"  domain="[('pii_risk','=','medium')]"/>
+                <separator/>
+                <filter name="today" string="Idag"
+                    domain="[('event_timestamp','&gt;=', (context_today()).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter name="group_utfall"   string="Utfall"     context="{'group_by': 'utfall'}"/>
+                    <filter name="group_sender"   string="Avsändare"  context="{'group_by': 'sender'}"/>
+                    <filter name="group_pii"      string="PII-risk"   context="{'group_by': 'pii_risk'}"/>
+                    <filter name="group_date"     string="Datum"      context="{'group_by': 'event_timestamp:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ───────────────────────────────────────────────────────── -->
+    <record id="action_clio_event_log" model="ir.actions.act_window">
+        <field name="name">Händelselogg</field>
+        <field name="res_model">clio.event.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Inga händelser loggade ännu.
+            </p>
+            <p>
+                Händelser synkas hit från clio-agent-mail när SSF-mail
+                klassificeras via intent-pipelinen.
+            </p>
+        </field>
+    </record>
+
+    <!-- ── Meny ─────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_clio_root"
+              name="Clio"
+              sequence="90"/>
+
+    <menuitem id="menu_clio_event_log"
+              name="Händelselogg"
+              parent="menu_clio_root"
+              action="action_clio_event_log"
+              sequence="10"/>
+
+</odoo>

@@ -40,6 +40,21 @@ logger = logging.getLogger("clio-mail")
 
 _INTERNAL_TAGS = {"[CLIO-FLAGGAD]", "[CLIO-KOPIA]", "[CLIO-INFO]"}
 
+# ── SSF-behörighetsmatris ──────────────────────────────────────────────────────
+# Speglar reference_capgemini_contacts.md + CLAUDE.md roller.
+# ROLE_ADMIN  → alla intentioner och konton
+# ROLE_PO_PMO → läs + skriv + utföra, mem_ssf tillåtet
+# ROLE_KODORD → enbart läs, ingen mem_ssf, ingen hög PII
+
+_SSF_PERMISSION_MATRIX: dict = {
+    "fredrik@arvas.se":            {"role": "admin",   "accounts": ["*"],     "mem_ssf": True},
+    "fredrik.arvas@capgemini.com": {"role": "admin",   "accounts": ["*"],     "mem_ssf": True},
+    "maria.nyberg@capgemini.com":  {"role": "po-pmo",  "accounts": ["ssf"],   "mem_ssf": True},
+    "carl.lindell@capgemini.com":  {"role": "po-pmo",  "accounts": ["ssf"],   "mem_ssf": True},
+    "emil.alic@capgemini.com":     {"role": "kodord",  "accounts": ["ssf"],   "mem_ssf": False},
+    "elin.tann@capgemini.com":     {"role": "kodord",  "accounts": ["ssf"],   "mem_ssf": False},
+}
+
 
 # ── Mailhantering ─────────────────────────────────────────────────────────────
 
@@ -193,6 +208,128 @@ def _handle_obit_import(mail_item, clf, config, dry_run: bool):
 
 
 
+def _send_intent_block_notification(mail_item, result, config) -> None:
+    """
+    Skickar blockeringsnotis till Fredrik när en SSF-fråga nekas av intent-gate.
+    Liknande format som _send_flagged_notification men utan JA/NEJ-alternativ.
+    """
+    notify_addr = config.get("mail", "notify_address")
+    sep = "━" * 40
+    smtp_client.send_email(
+        config=config,
+        from_account_key="clio",
+        to_addr=notify_addr,
+        subject=f"[CLIO-BLOCKERING] {_short(mail_item.subject, 50)}",
+        body=(
+            f"Clio blockerade ett SSF-mail via behörighetskontroll.\n\n"
+            f"{sep}\n"
+            f"Från:  {mail_item.sender}\n"
+            f"Ämne:  {mail_item.subject}\n"
+            f"Orsak: {result.block_reason}\n"
+            f"{sep}\n\n"
+            f"Mail-text (utdrag):\n"
+            f"{(mail_item.body or '')[:600]}"
+            f"{'...' if len(mail_item.body or '') > 600 else ''}\n\n"
+            f"{sep}\n"
+            f"Ingen åtgärd krävs — mailet är sparat med status FLAGGAD.\n"
+        ),
+    )
+
+
+def _run_ssf_intent_gate(
+    mail_item,
+    clf,
+    config,
+    dry_run: bool,
+) -> bool:
+    """
+    Kör intent-klassificerarpipelinen för SSF-mail.
+
+    Returnerar True om åtkomst är tillåten, False om blockerad.
+    Vid blockering: skickar notis till Fredrik (om notify_admin) och
+    uppdaterar mail-status till FLAGGAD.
+
+    Avsiktligt fail-closed: vid oväntat fel blockeras mailet och loggas.
+    """
+    from intent_classifier import (
+        build_pipeline,
+        OllamaInjectionClient,
+        ClaudeIntentClient,
+    )
+
+    sender_email = _extract_email(mail_item.sender)
+
+    # Klientkonfiguration (faller tillbaka till defaults om sektionen saknas)
+    def _cfg(section, key, fallback=""):
+        try:
+            return config.get(section, key, fallback=fallback)
+        except Exception:
+            return fallback
+
+    ollama = OllamaInjectionClient(
+        host=_cfg("intent", "ollama_host", "http://localhost:11434"),
+        model=_cfg("intent", "ollama_model", "phi3:mini"),
+        timeout=int(_cfg("intent", "ollama_timeout", "10")),
+    )
+    claude = ClaudeIntentClient(
+        api_key=_cfg("claude", "api_key", ""),
+        model=_cfg("intent", "claude_model", "claude-haiku-4-5"),
+    )
+
+    log_db = Path(__file__).parent / "events.db"
+
+    # Odoo-synk: bygg sync-funktion om Odoo är konfigurerat
+    odoo_sync_fn = None
+    try:
+        from odoo_sync import make_odoo_sync_fn
+        odoo_sync_fn = make_odoo_sync_fn(config)
+    except Exception as exc:
+        logger.debug("[intent_gate] Odoo-synk ej tillgänglig: %s", exc)
+
+    try:
+        result = build_pipeline(
+            sender=sender_email,
+            subject=mail_item.subject or "",
+            body=mail_item.body or "",
+            matrix=_SSF_PERMISSION_MATRIX,
+            ollama=ollama,
+            claude=claude,
+            log_db=log_db,
+            odoo_available=odoo_sync_fn is not None,
+            odoo_sync_fn=odoo_sync_fn,
+        )
+    except Exception as exc:
+        # Oväntat fel i gate → fail-closed
+        logger.error("[intent_gate] Oväntat fel: %s", exc, exc_info=True)
+        if not dry_run:
+            state.update_status(mail_item.message_id, state.STATUS_FLAGGED)
+        return False
+
+    if not result.allowed:
+        logger.warning(
+            "[intent_gate] Blockerad: %s — %s",
+            sender_email,
+            result.block_reason,
+        )
+        if result.notify_admin and not dry_run:
+            try:
+                _send_intent_block_notification(mail_item, result, config)
+            except Exception as exc:
+                logger.error("[intent_gate] Kunde inte skicka blockeringsnotis: %s", exc)
+        if not dry_run:
+            state.update_status(mail_item.message_id, state.STATUS_FLAGGED)
+        return False
+
+    if result.pii_warning:
+        logger.info(
+            "[intent_gate] PII-varning (tillåten): %s → %s",
+            sender_email,
+            mail_item.subject,
+        )
+
+    return True
+
+
 def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
     """ssf@/aiab@/gsf@ → multi-collection RAG + bilage-sparning i *minnet-mapp."""
     import subprocess
@@ -205,6 +342,13 @@ def _handle_rag_query(mail_item, clf, thread_id: str, config, dry_run: bool):
 
     to_addr    = _extract_email(mail_item.sender)
     account    = clf.account_key   # "ssf" | "aiab" | "gsf"
+
+    # ── Intent-behörighetsgap (SSF-mail) ─────────────────────────────────────
+    # Körs för ssf-konto: verifiera avsändare, injektionscheck, klassificera
+    # intention och validera mot roll × PII-matris. Fail-closed vid fel.
+    if account == "ssf":
+        if not _run_ssf_intent_gate(mail_item, clf, config, dry_run):
+            return
 
     # ── Läs config ───────────────────────────────────────────────────────────
     def _cfg(key, fallback=""):
