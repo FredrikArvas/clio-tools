@@ -77,19 +77,6 @@ class ClioPermLine(models.TransientModel):
         return parent.action_load_permissions()
 
 
-class ClioNccLine(models.TransientModel):
-    _name = "clio.ncc.line"
-    _description = "Clio NCC Row"
-    _order = "id"
-
-    admin_id   = fields.Many2one("clio.mail.admin", ondelete="cascade")
-    nr         = fields.Char(string="No.")
-    sfar       = fields.Char(string="Sphere")
-    kodord     = fields.Char(string="Keyword")
-    name       = fields.Char(string="Project Name")
-    ncc_ok     = fields.Boolean(string="NCC")
-    status_raw = fields.Char(string="Status")
-
 
 class ClioWaitingLine(models.TransientModel):
     _name = "clio.waiting.line"
@@ -136,7 +123,6 @@ class ClioMailAdmin(models.TransientModel):
     _description = "Clio Mail Admin"
 
     result_text = fields.Text(string="Result", readonly=True)
-    ncc_ids     = fields.One2many("clio.ncc.line",    "admin_id", string="Projects")
     waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Waiting")
     perm_ids    = fields.One2many("clio.perm.line",   "admin_id", string="Permissions")
 
@@ -163,27 +149,6 @@ class ClioMailAdmin(models.TransientModel):
 
     def action_whitelist(self):
         self.result_text = _call(self.env, "/mail/whitelist")
-        return self._reopen()
-
-    def action_ncc_lista(self):
-        self.result_text = _call(self.env, "/mail/ncc/lista")
-        return self._reopen()
-
-    def action_load_ncc(self):
-        result = _call_raw(self.env, "/mail/ncc/lista/json")
-        self.ncc_ids.unlink()
-        vals = []
-        for p in result.get("projects", []):
-            vals.append({
-                "admin_id":   self.id,
-                "nr":         p.get("nr") or "",
-                "sfar":       p.get("sfar") or "",
-                "kodord":     p.get("kodord") or "",
-                "name":       p.get("name") or "",
-                "ncc_ok":     bool(p.get("ncc_url")),
-                "status_raw": p.get("status") or "",
-            })
-        self.env["clio.ncc.line"].create(vals)
         return self._reopen()
 
     def action_load_waiting(self):
