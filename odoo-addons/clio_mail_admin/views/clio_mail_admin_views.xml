@@ -58,27 +58,6 @@
             </div>
           </group>
 
-          <!-- Permission matrix -->
-          <group string="Permission Matrix">
-            <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_permissions" type="object" string="Load Permissions" class="btn-primary"/>
-            </div>
-            <field name="perm_ids" nolabel="1" invisible="not perm_ids">
-              <list editable="top"
-                    decoration-danger="level == 'denied'"
-                    decoration-success="level in ('admin', 'write')"
-                    decoration-info="level == 'coded'">
-                <field name="email"           string="Email"/>
-                <field name="level"           string="Level" widget="selection"/>
-                <field name="accounts_raw"    string="Accounts"              optional="show"/>
-                <field name="kodord_read_raw" string="Read (keyword)"        optional="show"/>
-                <field name="kodord_rw_raw"   string="Read+Write (keyword)"  optional="show"/>
-                <button name="action_save" type="object" string="Save"
-                        icon="fa-save" class="btn-sm btn-success"/>
-              </list>
-            </field>
-          </group>
-
         </sheet>
       </form>
     </field>
