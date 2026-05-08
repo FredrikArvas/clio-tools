@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- List view (primary, inline edit) -->
+  <record id="view_clio_mail_permission_list" model="ir.ui.view">
+    <field name="name">clio.mail.permission.list</field>
+    <field name="model">clio.mail.permission</field>
+    <field name="arch" type="xml">
+      <list string="Behörigheter" editable="top"
+            decoration-danger="level == 'denied'"
+            decoration-success="level in ('admin', 'write')"
+            decoration-info="level == 'coded'"
+            decoration-warning="sync_error != False">
+        <field name="email"/>
+        <field name="level" widget="selection"/>
+        <field name="accounts_raw"    optional="show" string="Konton"/>
+        <field name="kodord_read_raw" optional="show" string="Kodord (läs)"/>
+        <field name="kodord_rw_raw"   optional="show" string="Kodord (läs+skriv)"/>
+        <field name="synced_at"       optional="show" readonly="1" string="Synkad"/>
+        <field name="sync_error"      optional="hide" readonly="1" string="Synkfel"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Form view -->
+  <record id="view_clio_mail_permission_form" model="ir.ui.view">
+    <field name="name">clio.mail.permission.form</field>
+    <field name="model">clio.mail.permission</field>
+    <field name="arch" type="xml">
+      <form string="Behörighet">
+        <sheet>
+          <group>
+            <group>
+              <field name="email"/>
+              <field name="level"/>
+            </group>
+            <group>
+              <field name="accounts_raw"    string="Konton"/>
+              <field name="kodord_read_raw" string="Kodord (läs)"/>
+              <field name="kodord_rw_raw"   string="Kodord (läs+skriv)"/>
+            </group>
+          </group>
+          <group string="Synkstatus" invisible="not synced_at and not sync_error">
+            <field name="synced_at" readonly="1"/>
+            <field name="sync_error" readonly="1" invisible="not sync_error"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Search view -->
+  <record id="view_clio_mail_permission_search" model="ir.ui.view">
+    <field name="name">clio.mail.permission.search</field>
+    <field name="model">clio.mail.permission</field>
+    <field name="arch" type="xml">
+      <search string="Sök behörighet">
+        <field name="email"/>
+        <separator/>
+        <filter name="admin"       string="Admin"       domain="[('level','=','admin')]"/>
+        <filter name="write"       string="Write"       domain="[('level','=','write')]"/>
+        <filter name="coded"       string="Keyword"     domain="[('level','=','coded')]"/>
+        <filter name="whitelisted" string="Whitelisted" domain="[('level','=','whitelisted')]"/>
+        <filter name="denied"      string="Denied"      domain="[('level','=','denied')]"/>
+        <separator/>
+        <filter name="sync_error" string="Synkfel" domain="[('sync_error','!=',False)]"/>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_clio_mail_permission" model="ir.actions.act_window">
+    <field name="name">Behörigheter</field>
+    <field name="res_model">clio.mail.permission</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Inga behörigheter inlästa ännu.</p>
+      <p>Klicka <b>Synka från service</b> för att hämta från clio-agent-mail.</p>
+    </field>
+  </record>
+
+  <!-- Server action: Synka från service -->
+  <record id="action_sync_permissions_from_service" model="ir.actions.server">
+    <field name="name">Synka från service</field>
+    <field name="model_id" ref="model_clio_mail_permission"/>
+    <field name="binding_model_id" ref="model_clio_mail_permission"/>
+    <field name="binding_view_types">list</field>
+    <field name="state">code</field>
+    <field name="code">model.action_sync_from_service()</field>
+  </record>
+
+  <!-- Menu under Clio Agent Mail root -->
+  <menuitem id="menu_clio_mail_permission"
+            name="Behörigheter"
+            parent="clio_mail_admin.menu_clio_root"
+            action="action_clio_mail_permission"
+            sequence="20"/>
+
+</odoo>

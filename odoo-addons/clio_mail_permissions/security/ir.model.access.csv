@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_mail_perm_user,clio.mail.permission läs,model_clio_mail_permission,base.group_user,1,0,0,0
+access_clio_mail_perm_admin,clio.mail.permission admin,model_clio_mail_permission,base.group_system,1,1,1,1
