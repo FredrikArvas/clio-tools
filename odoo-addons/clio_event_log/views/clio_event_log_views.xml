@@ -41,7 +41,7 @@
                             <field name="subject" string="Ämne"/>
                         </group>
                     </group>
-                    <group string="Detaljer" attrs="{'invisible': [('block_reason', '=', False)]}">
+                    <group string="Detaljer" invisible="not block_reason">
                         <field name="block_reason" string="Blockeringsorsak" nolabel="1"/>
                     </group>
                     <group string="Teknisk info" groups="base.group_system">
