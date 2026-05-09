@@ -369,14 +369,22 @@ CHAT_SYSTEM = (
 )
 
 def cors_headers(request: Request) -> dict:
-    """Reflekterar origin inkl. 'null' (file://) för lokala klienter."""
+    """Reflekterar origin inkl. 'null' (file://) för lokala klienter.
+
+    Inkluderar Access-Control-Allow-Private-Network för att hantera
+    Chrome:s Private Network Access-policy (file:// → privat Tailscale-IP).
+    """
     origin = request.headers.get("origin", "*")
-    return {
+    headers = {
         "Access-Control-Allow-Origin":  origin,
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Vary": "Origin",
     }
+    # Chrome PNA: file:// (publik origin) → privat IP kräver explicit tillstånd
+    if request.headers.get("access-control-request-private-network") == "true":
+        headers["Access-Control-Allow-Private-Network"] = "true"
+    return headers
 
 
 @mcp.custom_route("/chat", methods=["POST", "OPTIONS"])
