@@ -260,6 +260,62 @@ def _visible_collections() -> dict[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# REST /sources — alla unika titlar i en samling (för innehållsförteckning)
+# ---------------------------------------------------------------------------
+
+@mcp.custom_route("/sources", methods=["GET", "OPTIONS"])
+async def rest_sources(request: Request):
+    """
+    GET /sources?collection=vigil_ufo
+    Returnerar alla unika titlar + källnamn i samlingen.
+    """
+    ch = cors_headers(request)
+    if request.method == "OPTIONS":
+        return JSONResponse({}, headers=ch)
+
+    auth  = request.headers.get("Authorization", "")
+    token = auth.removeprefix("Bearer ").strip()
+    if VALID_TOKENS and token not in VALID_TOKENS:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401, headers=ch)
+
+    collection = request.query_params.get("collection", "vigil_ufo")
+    allowed    = TOKEN_COLLECTIONS.get(token)
+    if allowed is not None and collection not in allowed:
+        return JSONResponse({"error": f"Ingen åtkomst till '{collection}'"}, status_code=403, headers=ch)
+
+    try:
+        from qdrant_client import QdrantClient
+        client = QdrantClient(host="localhost", port=6333)
+
+        seen    = {}   # title → source_name
+        offset  = None
+        while True:
+            batch, offset = client.scroll(
+                collection_name = collection,
+                limit           = 250,
+                offset          = offset,
+                with_payload    = True,
+                with_vectors    = False,
+            )
+            for pt in batch:
+                title  = pt.payload.get("title", "")
+                source = pt.payload.get("source_name", "")
+                if title and title not in seen:
+                    seen[title] = source
+            if offset is None:
+                break
+
+        items = sorted(
+            [{"title": t, "source": s} for t, s in seen.items()],
+            key=lambda x: x["source"] + x["title"]
+        )
+        return JSONResponse({"collection": collection, "count": len(items), "items": items}, headers=ch)
+
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500, headers=ch)
+
+
+# ---------------------------------------------------------------------------
 # REST /search — enkel endpoint för browser-klienter (med CORS)
 # ---------------------------------------------------------------------------
 
