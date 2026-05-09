@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+from starlette.middleware import Middleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -234,5 +235,5 @@ if __name__ == "__main__":
         transport  = "streamable-http",
         host       = HOST,
         port       = PORT,
-        middleware = [BearerAuthMiddleware],
+        middleware = [Middleware(BearerAuthMiddleware)],
     )
