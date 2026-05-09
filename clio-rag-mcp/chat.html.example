@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>clio-rag chat</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 14px 20px;
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { font-size: 1rem; font-weight: 600; color: #e0e0e0; }
+  header .badge {
+    font-size: 0.7rem;
+    background: #0f3460;
+    color: #7ec8e3;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .collection-select {
+    margin-left: auto;
+    background: #0f3460;
+    color: #e0e0e0;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .msg {
+    max-width: 780px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    line-height: 1.6;
+    font-size: 0.9rem;
+  }
+  .msg.user {
+    background: #0f3460;
+    align-self: flex-end;
+    color: #e0e0e0;
+  }
+  .msg.assistant {
+    background: #16213e;
+    align-self: flex-start;
+    border: 1px solid #0f3460;
+    white-space: pre-wrap;
+  }
+  .msg.sources {
+    background: transparent;
+    align-self: flex-start;
+    font-size: 0.78rem;
+    color: #7ec8e3;
+    padding: 4px 16px;
+  }
+  .msg.error {
+    background: #3d0f0f;
+    align-self: flex-start;
+    border: 1px solid #7d2020;
+    color: #ff9898;
+  }
+  .msg.thinking {
+    background: transparent;
+    align-self: flex-start;
+    color: #888;
+    font-style: italic;
+    font-size: 0.82rem;
+  }
+
+  footer {
+    padding: 14px 20px;
+    background: #16213e;
+    border-top: 1px solid #0f3460;
+    display: flex;
+    gap: 10px;
+  }
+  #input {
+    flex: 1;
+    background: #0f3460;
+    border: 1px solid #1a4a7a;
+    color: #e0e0e0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    resize: none;
+    height: 44px;
+    max-height: 140px;
+    overflow-y: auto;
+    font-family: inherit;
+  }
+  #input:focus { border-color: #7ec8e3; }
+  #send {
+    background: #0f3460;
+    color: #7ec8e3;
+    border: 1px solid #1a4a7a;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+  }
+  #send:hover { background: #1a4a7a; }
+  #send:disabled { opacity: 0.4; cursor: default; }
+
+  /* Enkel markdown: fetstil, kursiv, kodblock */
+  .msg b, .msg strong { color: #7ec8e3; }
+  .msg code {
+    background: #0a0a1a;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ðŸ”­ clio-rag</h1>
+  <span class="badge">UAP + AI</span>
+  <select class="collection-select" id="collection">
+    <option value="vigil_ufo">vigil_ufo â€” UFO/UAP</option>
+    <option value="vigil_uap">vigil_uap â€” UAP</option>
+    <option value="vigil_ai" selected>vigil_ai â€” AI</option>
+    <option value="vigil_research">vigil_research â€” Forskning</option>
+  </select>
+</header>
+
+<div id="messages">
+  <div class="msg assistant">Hej! StÃ¤ll en frÃ¥ga om UAP, UFO eller AI sÃ¥ sÃ¶ker jag i clio:s indexerade kunskapsbas och svarar med kÃ¤llhÃ¤nvisning.</div>
+</div>
+
+<footer>
+  <textarea id="input" placeholder="Skriv din frÃ¥gaâ€¦" rows="1"></textarea>
+  <button id="send">Skicka</button>
+</footer>
+
+<script>
+// â”€â”€ Konfiguration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const RAG_URL    = "http://100.107.127.104:4010/search";
+const RAG_TOKEN  = "CLIO_RAG_TOKEN_HÄR";
+const CLAUDE_KEY = "ANTHROPIC_API_KEY_HÄR";
+const MODEL      = "claude-3-5-haiku-20241022";  // snabb + billig fÃ¶r RAG-chat
+const TOP_K      = 6;
+
+const SYSTEM = `Du Ã¤r en hjÃ¤lpsam assistent med tillgÃ¥ng till clio:s indexerade kunskapsbas.
+Du fÃ¥r relevanta textpassager frÃ¥n databasen och ska svara pÃ¥ frÃ¥gan baserat pÃ¥ dem.
+Ange alltid kÃ¤llhÃ¤nvisning i formatet [KÃ¤lltitel] direkt efter pÃ¥stÃ¥enden som bygger pÃ¥ passagerna.
+Om informationen inte finns i passagerna, sÃ¤g det tydligt.
+Svara pÃ¥ svenska om frÃ¥gan Ã¤r pÃ¥ svenska, annars pÃ¥ frÃ¥gans sprÃ¥k.
+Var koncis â€” 3â€“6 meningar om inget annat efterfrÃ¥gas.`;
+
+// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const history = [];  // [{role, content}]
+
+// â”€â”€ DOM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const messages   = document.getElementById("messages");
+const input      = document.getElementById("input");
+const sendBtn    = document.getElementById("send");
+const colSelect  = document.getElementById("collection");
+
+function addMsg(text, cls) {
+  const d = document.createElement("div");
+  d.className = "msg " + cls;
+  d.textContent = text;
+  messages.appendChild(d);
+  messages.scrollTop = messages.scrollHeight;
+  return d;
+}
+
+function renderSources(passages) {
+  const seen = new Set();
+  const parts = passages
+    .filter(p => { const k = p.title || p.source; if (seen.has(k)) return false; seen.add(k); return true; })
+    .map(p => `[${p.score.toFixed(2)}] ${p.title || p.source}`)
+    .join("  Â·  ");
+  if (parts) addMsg("ðŸ“š " + parts, "sources");
+}
+
+// â”€â”€ SÃ¶k i RAG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function searchRag(query, collection) {
+  const res = await fetch(RAG_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type":  "application/json",
+      "Authorization": "Bearer " + RAG_TOKEN,
+    },
+    body: JSON.stringify({ query, collection, top_k: TOP_K }),
+  });
+  if (!res.ok) throw new Error("RAG-fel: " + res.status);
+  return await res.json();
+}
+
+// â”€â”€ FrÃ¥ga Claude â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function askClaude(question, context) {
+  const userContent = `Passager frÃ¥n kunskapsbasen:\n\n${context}\n\n---\n\nFrÃ¥ga: ${question}`;
+
+  const msgs = [
+    ...history.slice(-8),
+    { role: "user", content: userContent },
+  ];
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type":            "application/json",
+      "x-api-key":               CLAUDE_KEY,
+      "anthropic-version":       "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model:      MODEL,
+      max_tokens: 1024,
+      system:     SYSTEM,
+      messages:   msgs,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error("Claude-fel: " + (err.error?.message || res.status));
+  }
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+// â”€â”€ HuvudflÃ¶de â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function send() {
+  const q = input.value.trim();
+  if (!q) return;
+
+  input.value = "";
+  sendBtn.disabled = true;
+  addMsg(q, "user");
+
+  const thinking = addMsg("SÃ¶ker i databasenâ€¦", "thinking");
+
+  try {
+    const collection = colSelect.value;
+    const rag = await searchRag(q, collection);
+
+    if (rag.error) throw new Error(rag.error);
+
+    const passages = rag.passages || [];
+    if (!passages.length) {
+      thinking.remove();
+      addMsg("Inga trÃ¤ffar i " + collection + " fÃ¶r den frÃ¥gan.", "assistant");
+      return;
+    }
+
+    // Bygg kontext-strÃ¤ng
+    const context = passages.map((p, i) =>
+      `[Passage ${i+1} â€” ${p.title || p.source}]\n${p.text}`
+    ).join("\n\n");
+
+    thinking.textContent = "Formulerar svarâ€¦";
+    const answer = await askClaude(q, context);
+    thinking.remove();
+
+    addMsg(answer, "assistant");
+    renderSources(passages);
+
+    // Spara i historik (utan RAG-kontext fÃ¶r att hÃ¥lla nere tokens)
+    history.push({ role: "user",      content: q });
+    history.push({ role: "assistant", content: answer });
+
+  } catch (err) {
+    thinking.remove();
+    addMsg("Fel: " + err.message, "error");
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+// â”€â”€ Event listeners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+sendBtn.addEventListener("click", send);
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+});
+input.addEventListener("input", () => {
+  input.style.height = "44px";
+  input.style.height = Math.min(input.scrollHeight, 140) + "px";
+});
+</script>
+</body>
+</html>

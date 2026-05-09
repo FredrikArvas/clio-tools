@@ -95,3 +95,4 @@ attachments/
 # clio-vigil runtime data (DB, audio, transcripts)
 clio-vigil/data/
 clio-vigil/.env
+clio-rag-mcp/chat.html
