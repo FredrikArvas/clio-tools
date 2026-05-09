@@ -54,8 +54,7 @@ HOST = os.getenv("MCP_HOST", "0.0.0.0")
 
 # Publik delmängd av samlingar (ej interna SSF-dokument)
 PUBLIC_COLLECTIONS: dict[str, str] = {
-    "vigil_ufo":      "UFO/UAP — svenska och engelska poddar och artiklar från clio-vigil",
-    "vigil_uap":      "UAP — ytterligare bevakningsinnehåll (Weaponized, Pentagon m.fl.)",
+    "vigil_ufo":      "UFO/UAP — poddar, artiklar och fallrapporter (inkl. Vallentuna-vågen)",
     "vigil_ai":       "AI-modeller och teknik — nyheter och poddar",
     "vigil_research": "Allmän forskning och långläsningar indexerade av clio-vigil",
 }
