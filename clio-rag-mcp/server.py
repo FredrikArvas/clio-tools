@@ -21,9 +21,9 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 # Lägg till clio-rag i sökvägen så att config.py och query.py kan importeras
 _RAG_DIR = Path(__file__).parent.parent / "clio-rag"
@@ -80,25 +80,38 @@ def _load_tokens() -> dict[str, str]:
 VALID_TOKENS: dict[str, str] = _load_tokens()
 
 
-class BearerAuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        # Tillåt health-check utan token
-        if request.url.path in ("/health", "/"):
-            return await call_next(request)
+class BearerAuthMiddleware:
+    """Ren ASGI-middleware för Bearer-token-autentisering."""
 
-        auth = request.headers.get("Authorization", "")
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        # Tillåt health-check utan token
+        path = scope.get("path", "")
+        if path in ("/health", "/"):
+            await self.app(scope, receive, send)
+            return
+
+        # Extrahera token från Authorization-header
+        headers = dict(scope.get("headers", []))
+        auth = headers.get(b"authorization", b"").decode()
         token = auth.removeprefix("Bearer ").strip()
 
-        if not VALID_TOKENS:
-            # Ingen konfigurerad — tillåt allt (dev-läge)
-            return await call_next(request)
+        if VALID_TOKENS and token not in VALID_TOKENS:
+            _logger.warning("Obehörig förfrågan (path=%s)", path)
+            response = JSONResponse({"error": "Unauthorized"}, status_code=401)
+            await response(scope, receive, send)
+            return
 
-        if token not in VALID_TOKENS:
-            _logger.warning("Obehörig förfrågan från %s", request.client)
-            return JSONResponse({"error": "Unauthorized"}, status_code=401)
+        if token in VALID_TOKENS:
+            _logger.info("Förfrågan från: %s", VALID_TOKENS[token])
 
-        _logger.info("Förfrågan från: %s", VALID_TOKENS[token])
-        return await call_next(request)
+        await self.app(scope, receive, send)
 
 
 # ---------------------------------------------------------------------------
@@ -113,8 +126,6 @@ mcp = FastMCP(
         "sedan search för att ställa frågor mot en specifik samling."
     ),
 )
-
-mcp.add_middleware(BearerAuthMiddleware)
 
 
 @mcp.tool(
@@ -220,7 +231,8 @@ if __name__ == "__main__":
     _logger.info("Aktiva tokens: %d st", len(VALID_TOKENS))
 
     mcp.run(
-        transport = "streamable-http",
-        host      = HOST,
-        port      = PORT,
+        transport  = "streamable-http",
+        host       = HOST,
+        port       = PORT,
+        middleware = [BearerAuthMiddleware],
     )
