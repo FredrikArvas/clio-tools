@@ -25,6 +25,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -256,6 +257,54 @@ def _visible_collections() -> dict[str, str]:
     if allowed is None:
         return PUBLIC_COLLECTIONS
     return {k: v for k, v in PUBLIC_COLLECTIONS.items() if k in allowed}
+
+
+# ---------------------------------------------------------------------------
+# REST /search — enkel endpoint för browser-klienter (med CORS)
+# ---------------------------------------------------------------------------
+
+@mcp.custom_route("/search", methods=["POST", "OPTIONS"])
+async def rest_search(request: Request):
+    """
+    POST /search  { "query": "...", "collection": "vigil_ufo", "top_k": 5 }
+    Authorization: Bearer <token>
+    Returnerar samma format som MCP-verktyget search().
+    """
+    if request.method == "OPTIONS":
+        return JSONResponse({}, headers={
+            "Access-Control-Allow-Origin":  "*",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+        })
+
+    # Auth
+    auth  = request.headers.get("Authorization", "")
+    token = auth.removeprefix("Bearer ").strip()
+    if VALID_TOKENS and token not in VALID_TOKENS:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401,
+                            headers={"Access-Control-Allow-Origin": "*"})
+
+    # Sätt tillåtna samlingar
+    allowed = TOKEN_COLLECTIONS.get(token)
+    token_var = _allowed.set(allowed)
+
+    try:
+        body       = await request.json()
+        query      = body.get("query", "").strip()
+        collection = body.get("collection", "vigil_ufo")
+        top_k      = int(body.get("top_k", 5))
+
+        if not query:
+            return JSONResponse({"error": "query saknas"}, status_code=400,
+                                headers={"Access-Control-Allow-Origin": "*"})
+
+        result = search(query=query, collection=collection, top_k=top_k)
+        return JSONResponse(result, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as exc:
+        return JSONResponse({"error": str(exc)}, status_code=500,
+                            headers={"Access-Control-Allow-Origin": "*"})
+    finally:
+        _allowed.reset(token_var)
 
 
 # ---------------------------------------------------------------------------
