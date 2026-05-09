@@ -1,0 +1,19 @@
+[Unit]
+Description=clio-rag MCP server
+After=network.target qdrant.service
+
+[Service]
+Type=simple
+User=clioadmin
+WorkingDirectory=/home/clioadmin/clio-tools/clio-rag-mcp
+ExecStart=/usr/bin/python3 server.py
+Restart=on-failure
+RestartSec=10
+EnvironmentFile=/home/clioadmin/clio-tools/.env
+EnvironmentFile=/home/clioadmin/clio-tools/clio-rag-mcp/.env
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clio-rag-mcp
+
+[Install]
+WantedBy=multi-user.target
