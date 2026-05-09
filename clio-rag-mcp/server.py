@@ -6,6 +6,8 @@ MCP-server som exponerar clio-rag:s Qdrant-samlingar via Streamable HTTP.
 Åtkomst: Tailscale (100.107.127.104:4010)
 Auth:    Bearer-token i Authorization-header
          Tokens definieras i .env: MCP_TOKENS=token1:namn1,token2:namn2
+         Per-token samlingsbegränsning: MCP_COLLECTIONS=token1:vigil_ufo+vigil_uap,token2:*
+         (* = alla publika samlingar)
 
 Starta:
     python3 server.py
@@ -15,6 +17,7 @@ Systemd-service: clio-rag-mcp.service
 
 from __future__ import annotations
 
+import contextvars
 import logging
 import os
 import sys
@@ -34,7 +37,7 @@ load_dotenv(Path(__file__).parent / ".env")
 load_dotenv(Path(__file__).parent.parent / ".env", override=False)
 
 import config as rag_config
-from query import embed_query, search_qdrant, format_context
+from query import embed_query, search_qdrant
 
 from fastmcp import FastMCP
 
@@ -45,8 +48,8 @@ _logger = logging.getLogger(__name__)
 # Konfiguration
 # ---------------------------------------------------------------------------
 
-PORT      = int(os.getenv("MCP_PORT", "4010"))
-HOST      = os.getenv("MCP_HOST", "0.0.0.0")
+PORT = int(os.getenv("MCP_PORT", "4010"))
+HOST = os.getenv("MCP_HOST", "0.0.0.0")
 
 # Publik delmängd av samlingar (ej interna SSF-dokument)
 PUBLIC_COLLECTIONS: dict[str, str] = {
@@ -56,15 +59,17 @@ PUBLIC_COLLECTIONS: dict[str, str] = {
     "vigil_research": "Allmän forskning och långläsningar indexerade av clio-vigil",
 }
 
+# ContextVar: samlingar tillåtna för innevarande request (None = alla publika)
+_allowed: contextvars.ContextVar[set[str] | None] = contextvars.ContextVar(
+    "allowed_collections", default=None
+)
+
 # ---------------------------------------------------------------------------
 # Token-hantering
 # ---------------------------------------------------------------------------
 
 def _load_tokens() -> dict[str, str]:
-    """
-    Läser MCP_TOKENS=token1:namn1,token2:namn2 från env.
-    Returnerar {token: namn}.
-    """
+    """MCP_TOKENS=token1:namn1,token2:namn2 → {token: namn}"""
     raw = os.getenv("MCP_TOKENS", "")
     tokens: dict[str, str] = {}
     for part in raw.split(","):
@@ -78,11 +83,38 @@ def _load_tokens() -> dict[str, str]:
         _logger.warning("Inga MCP_TOKENS konfigurerade — servern är öppen!")
     return tokens
 
-VALID_TOKENS: dict[str, str] = _load_tokens()
 
+def _load_token_collections() -> dict[str, set[str]]:
+    """
+    MCP_COLLECTIONS=token1:vigil_ufo+vigil_uap,token2:*
+    → {token: {"vigil_ufo","vigil_uap"}}
+    Token som saknas i MCP_COLLECTIONS får tillgång till alla publika samlingar.
+    """
+    raw = os.getenv("MCP_COLLECTIONS", "")
+    mapping: dict[str, set[str]] = {}
+    for part in raw.split(","):
+        part = part.strip()
+        if ":" not in part:
+            continue
+        tok, cols_str = part.split(":", 1)
+        tok = tok.strip()
+        if cols_str.strip() == "*":
+            mapping[tok] = set(PUBLIC_COLLECTIONS.keys())
+        else:
+            mapping[tok] = {c.strip() for c in cols_str.split("+")}
+    return mapping
+
+
+VALID_TOKENS: dict[str, str]          = _load_tokens()
+TOKEN_COLLECTIONS: dict[str, set[str]] = _load_token_collections()
+
+
+# ---------------------------------------------------------------------------
+# ASGI-middleware: autentisering + samlingsbegränsning
+# ---------------------------------------------------------------------------
 
 class BearerAuthMiddleware:
-    """Ren ASGI-middleware för Bearer-token-autentisering."""
+    """Kontrollerar Bearer-token och sätter tillåtna samlingar i ContextVar."""
 
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
@@ -92,16 +124,14 @@ class BearerAuthMiddleware:
             await self.app(scope, receive, send)
             return
 
-        # Tillåt health-check utan token
         path = scope.get("path", "")
         if path in ("/health", "/"):
             await self.app(scope, receive, send)
             return
 
-        # Extrahera token från Authorization-header
         headers = dict(scope.get("headers", []))
-        auth = headers.get(b"authorization", b"").decode()
-        token = auth.removeprefix("Bearer ").strip()
+        auth    = headers.get(b"authorization", b"").decode()
+        token   = auth.removeprefix("Bearer ").strip()
 
         if VALID_TOKENS and token not in VALID_TOKENS:
             _logger.warning("Obehörig förfrågan (path=%s)", path)
@@ -109,10 +139,16 @@ class BearerAuthMiddleware:
             await response(scope, receive, send)
             return
 
-        if token in VALID_TOKENS:
-            _logger.info("Förfrågan från: %s", VALID_TOKENS[token])
+        name = VALID_TOKENS.get(token, "anonym")
+        _logger.info("Förfrågan från: %s", name)
 
-        await self.app(scope, receive, send)
+        # Sätt tillåtna samlingar för detta request
+        allowed = TOKEN_COLLECTIONS.get(token)   # None → inga restriktioner
+        token_var = _allowed.set(allowed)
+        try:
+            await self.app(scope, receive, send)
+        finally:
+            _allowed.reset(token_var)
 
 
 # ---------------------------------------------------------------------------
@@ -120,7 +156,7 @@ class BearerAuthMiddleware:
 # ---------------------------------------------------------------------------
 
 mcp = FastMCP(
-    name        = "clio-rag",
+    name         = "clio-rag",
     instructions = (
         "Sök i clio:s indexerade kunskapsbas om UFO/UAP och AI. "
         "Använd list_collections för att se vad som finns, "
@@ -151,10 +187,19 @@ def search(
     """
     top_k = max(1, min(top_k, 20))
 
+    # Kontrollera mot publika samlingar
     if collection not in PUBLIC_COLLECTIONS:
         return {
             "error": f"Samling '{collection}' är inte tillgänglig. "
-                     f"Tillgängliga: {list(PUBLIC_COLLECTIONS.keys())}"
+                     f"Tillgängliga: {list(_visible_collections().keys())}"
+        }
+
+    # Kontrollera per-token begränsning
+    allowed = _allowed.get()
+    if allowed is not None and collection not in allowed:
+        return {
+            "error": f"Ditt token har inte tillgång till '{collection}'. "
+                     f"Tillgängliga: {sorted(allowed)}"
         }
 
     try:
@@ -171,27 +216,23 @@ def search(
     for hit in hits:
         p = hit.payload
         passages.append({
-            "score":    round(hit.score, 4),
-            "title":    p.get("title", ""),
-            "source":   p.get("source_name", p.get("title", "")),
-            "text":     p.get("summary", p.get("text", ""))[:1500],
+            "score":      round(hit.score, 4),
+            "title":      p.get("title", ""),
+            "source":     p.get("source_name", p.get("title", "")),
+            "text":       p.get("summary", p.get("text", ""))[:1500],
             "page_start": p.get("ext_page_start"),
             "page_end":   p.get("ext_page_end"),
-            "url":      p.get("url", p.get("ext_notion_url", "")),
+            "url":        p.get("url", p.get("ext_notion_url", "")),
         })
 
-    return {
-        "collection": collection,
-        "query":      query,
-        "passages":   passages,
-    }
+    return {"collection": collection, "query": query, "passages": passages}
 
 
 @mcp.tool(
     description="Listar tillgängliga RAG-samlingar med beskrivningar och antal indexerade chunks."
 )
 def list_collections() -> dict:
-    """Returnerar alla publikt tillgängliga samlingar."""
+    """Returnerar samlingar tillgängliga för detta token."""
     try:
         from qdrant_client import QdrantClient
         client = QdrantClient(host="localhost", port=6333)
@@ -200,26 +241,30 @@ def list_collections() -> dict:
     except Exception:
         sizes = {}
 
+    visible = _visible_collections()
     return {
         "collections": [
-            {
-                "name":        name,
-                "description": desc,
-                "chunks":      sizes.get(name, "?"),
-            }
-            for name, desc in PUBLIC_COLLECTIONS.items()
+            {"name": name, "description": desc, "chunks": sizes.get(name, "?")}
+            for name, desc in visible.items()
         ]
     }
 
 
+def _visible_collections() -> dict[str, str]:
+    """Filtrerar PUBLIC_COLLECTIONS efter per-token begränsning."""
+    allowed = _allowed.get()
+    if allowed is None:
+        return PUBLIC_COLLECTIONS
+    return {k: v for k, v in PUBLIC_COLLECTIONS.items() if k in allowed}
+
+
 # ---------------------------------------------------------------------------
-# Hälsokontroll (HTTP GET /health)
+# Hälsokontroll
 # ---------------------------------------------------------------------------
 
 @mcp.custom_route("/health", methods=["GET"])
 async def health(request: Request):
-    from starlette.responses import JSONResponse as JR
-    return JR({"status": "ok", "server": "clio-rag-mcp"})
+    return JSONResponse({"status": "ok", "server": "clio-rag-mcp"})
 
 
 # ---------------------------------------------------------------------------
@@ -230,6 +275,7 @@ if __name__ == "__main__":
     _logger.info("Startar clio-rag-mcp på %s:%d", HOST, PORT)
     _logger.info("Publiga samlingar: %s", list(PUBLIC_COLLECTIONS.keys()))
     _logger.info("Aktiva tokens: %d st", len(VALID_TOKENS))
+    _logger.info("Token-begränsningar: %d konfigurerade", len(TOKEN_COLLECTIONS))
 
     mcp.run(
         transport  = "streamable-http",
