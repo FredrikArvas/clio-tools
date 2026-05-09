@@ -270,22 +270,16 @@ async def rest_search(request: Request):
     Authorization: Bearer <token>
     Returnerar samma format som MCP-verktyget search().
     """
+    ch = cors_headers(request)
     if request.method == "OPTIONS":
-        return JSONResponse({}, headers={
-            "Access-Control-Allow-Origin":  "*",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-        })
+        return JSONResponse({}, headers=ch)
 
-    # Auth
     auth  = request.headers.get("Authorization", "")
     token = auth.removeprefix("Bearer ").strip()
     if VALID_TOKENS and token not in VALID_TOKENS:
-        return JSONResponse({"error": "Unauthorized"}, status_code=401,
-                            headers={"Access-Control-Allow-Origin": "*"})
+        return JSONResponse({"error": "Unauthorized"}, status_code=401, headers=ch)
 
-    # Sätt tillåtna samlingar
-    allowed = TOKEN_COLLECTIONS.get(token)
+    allowed   = TOKEN_COLLECTIONS.get(token)
     token_var = _allowed.set(allowed)
 
     try:
@@ -295,14 +289,12 @@ async def rest_search(request: Request):
         top_k      = int(body.get("top_k", 5))
 
         if not query:
-            return JSONResponse({"error": "query saknas"}, status_code=400,
-                                headers={"Access-Control-Allow-Origin": "*"})
+            return JSONResponse({"error": "query saknas"}, status_code=400, headers=ch)
 
         result = search(query=query, collection=collection, top_k=top_k)
-        return JSONResponse(result, headers={"Access-Control-Allow-Origin": "*"})
+        return JSONResponse(result, headers=ch)
     except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=500,
-                            headers={"Access-Control-Allow-Origin": "*"})
+        return JSONResponse({"error": str(exc)}, status_code=500, headers=ch)
     finally:
         _allowed.reset(token_var)
 
@@ -320,11 +312,15 @@ CHAT_SYSTEM = (
     "Var koncis — 3–6 meningar om inget annat efterfrågas."
 )
 
-CORS_HEADERS = {
-    "Access-Control-Allow-Origin":  "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-}
+def cors_headers(request: Request) -> dict:
+    """Reflekterar origin inkl. 'null' (file://) för lokala klienter."""
+    origin = request.headers.get("origin", "*")
+    return {
+        "Access-Control-Allow-Origin":  origin,
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Vary": "Origin",
+    }
 
 
 @mcp.custom_route("/chat", methods=["POST", "OPTIONS"])
@@ -334,13 +330,13 @@ async def rest_chat(request: Request):
     Söker i RAG, anropar Claude på servern, returnerar { answer, sources }.
     """
     if request.method == "OPTIONS":
-        return JSONResponse({}, headers=CORS_HEADERS)
+        return JSONResponse({}, headers=cors_headers(request))
 
     auth  = request.headers.get("Authorization", "")
     token = auth.removeprefix("Bearer ").strip()
     if VALID_TOKENS and token not in VALID_TOKENS:
         return JSONResponse({"error": "Unauthorized"}, status_code=401,
-                            headers=CORS_HEADERS)
+                            headers=cors_headers(request))
 
     allowed   = TOKEN_COLLECTIONS.get(token)
     token_var = _allowed.set(allowed)
@@ -355,13 +351,13 @@ async def rest_chat(request: Request):
 
         if not query:
             return JSONResponse({"error": "query saknas"}, status_code=400,
-                                headers=CORS_HEADERS)
+                                headers=cors_headers(request))
 
         # Kontrollera samlingsbegränsning
         if allowed is not None and collection not in allowed:
             return JSONResponse(
                 {"error": f"Ingen åtkomst till '{collection}'. Tillgängliga: {sorted(allowed)}"},
-                status_code=403, headers=CORS_HEADERS,
+                status_code=403, headers=cors_headers(request),
             )
 
         # RAG-sökning
@@ -370,7 +366,7 @@ async def rest_chat(request: Request):
         if not hits:
             return JSONResponse(
                 {"answer": f"Inga träffar i '{collection}' för den frågan.", "sources": []},
-                headers=CORS_HEADERS,
+                headers=cors_headers(request),
             )
 
         context = "\n\n".join(
@@ -398,11 +394,11 @@ async def rest_chat(request: Request):
              "url": h.payload.get("url", h.payload.get("ext_notion_url",""))}
             for h in hits
         ]
-        return JSONResponse({"answer": answer, "sources": sources}, headers=CORS_HEADERS)
+        return JSONResponse({"answer": answer, "sources": sources}, headers=cors_headers(request))
 
     except Exception as exc:
         _logger.error("/chat fel: %s", exc)
-        return JSONResponse({"error": str(exc)}, status_code=500, headers=CORS_HEADERS)
+        return JSONResponse({"error": str(exc)}, status_code=500, headers=cors_headers(request))
     finally:
         _allowed.reset(token_var)
 
