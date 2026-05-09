@@ -125,8 +125,9 @@ class BearerAuthMiddleware:
             await self.app(scope, receive, send)
             return
 
-        path = scope.get("path", "")
-        if path in ("/health", "/"):
+        path   = scope.get("path", "")
+        method = scope.get("method", "")
+        if path in ("/health", "/") or method == "OPTIONS":
             await self.app(scope, receive, send)
             return
 
