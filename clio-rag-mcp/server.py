@@ -309,6 +309,106 @@ async def rest_search(request: Request):
 
 
 # ---------------------------------------------------------------------------
+# REST /chat — RAG + Claude på servern (webbläsaren behöver ingen API-nyckel)
+# ---------------------------------------------------------------------------
+
+CHAT_SYSTEM = (
+    "Du är en hjälpsam assistent med tillgång till clio:s indexerade kunskapsbas. "
+    "Du får relevanta textpassager och ska svara på frågan baserat på dem. "
+    "Ange källhänvisning i formatet [Källtitel] efter påståenden från passagerna. "
+    "Om informationen saknas, säg det tydligt. "
+    "Svara på svenska om frågan är på svenska, annars på frågans språk. "
+    "Var koncis — 3–6 meningar om inget annat efterfrågas."
+)
+
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin":  "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+}
+
+
+@mcp.custom_route("/chat", methods=["POST", "OPTIONS"])
+async def rest_chat(request: Request):
+    """
+    POST /chat  { "query": "...", "collection": "vigil_ufo", "top_k": 6, "history": [...] }
+    Söker i RAG, anropar Claude på servern, returnerar { answer, sources }.
+    """
+    if request.method == "OPTIONS":
+        return JSONResponse({}, headers=CORS_HEADERS)
+
+    auth  = request.headers.get("Authorization", "")
+    token = auth.removeprefix("Bearer ").strip()
+    if VALID_TOKENS and token not in VALID_TOKENS:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401,
+                            headers=CORS_HEADERS)
+
+    allowed   = TOKEN_COLLECTIONS.get(token)
+    token_var = _allowed.set(allowed)
+
+    try:
+        import anthropic as _anthropic
+        body       = await request.json()
+        query      = body.get("query", "").strip()
+        collection = body.get("collection", "vigil_ufo")
+        top_k      = int(body.get("top_k", 6))
+        history    = body.get("history", [])
+
+        if not query:
+            return JSONResponse({"error": "query saknas"}, status_code=400,
+                                headers=CORS_HEADERS)
+
+        # Kontrollera samlingsbegränsning
+        if allowed is not None and collection not in allowed:
+            return JSONResponse(
+                {"error": f"Ingen åtkomst till '{collection}'. Tillgängliga: {sorted(allowed)}"},
+                status_code=403, headers=CORS_HEADERS,
+            )
+
+        # RAG-sökning
+        vector = embed_query(query)
+        hits   = search_qdrant(vector, top_k=top_k, collection=collection)
+        if not hits:
+            return JSONResponse(
+                {"answer": f"Inga träffar i '{collection}' för den frågan.", "sources": []},
+                headers=CORS_HEADERS,
+            )
+
+        context = "\n\n".join(
+            f"[Passage {i+1} — {h.payload.get('title','')}]\n"
+            f"{h.payload.get('summary', h.payload.get('text',''))[:1500]}"
+            for i, h in enumerate(hits)
+        )
+
+        user_content = f"Passager från kunskapsbasen:\n\n{context}\n\n---\n\nFråga: {query}"
+
+        msgs = [m for m in history[-8:] if m.get("role") in ("user","assistant")]
+        msgs.append({"role": "user", "content": user_content})
+
+        client = _anthropic.Anthropic()
+        resp   = client.messages.create(
+            model      = "claude-3-5-sonnet-20241022",
+            max_tokens = 1024,
+            system     = CHAT_SYSTEM,
+            messages   = msgs,
+        )
+        answer = resp.content[0].text
+
+        sources = [
+            {"score": round(h.score, 3), "title": h.payload.get("title",""),
+             "url": h.payload.get("url", h.payload.get("ext_notion_url",""))}
+            for h in hits
+        ]
+        return JSONResponse({"answer": answer, "sources": sources}, headers=CORS_HEADERS)
+
+    except Exception as exc:
+        _logger.error("/chat fel: %s", exc)
+        return JSONResponse({"error": str(exc)}, status_code=500, headers=CORS_HEADERS)
+    finally:
+        _allowed.reset(token_var)
+
+
+# ---------------------------------------------------------------------------
 # Hälsokontroll
 # ---------------------------------------------------------------------------
 
