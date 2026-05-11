@@ -1,7 +1,7 @@
-{
+﻿{
     'name': 'Clio Theme',
-    'version': '18.0.1.0.0',
-    'summary': 'Färgkodad navbar per databas — aiab, ssf, test, staging',
+    'version': '19.0.1.0.0',
+    'summary': 'FÃ¤rgkodad navbar per databas â€” aiab, ssf, test, staging',
     'author': 'Arvas International AB',
     'depends': ['web'],
     'data': [
