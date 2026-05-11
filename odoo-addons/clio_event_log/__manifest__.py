@@ -1,7 +1,7 @@
-{
+﻿{
     'name': 'Clio Event Log',
-    'version': '18.0.1.0.0',
-    'summary': 'Logg över inkommande mail-händelser från clio-agent-mail (intent-klassificering, PII, blockeringar)',
+    'version': '19.0.1.0.0',
+    'summary': 'Logg Ã¶ver inkommande mail-hÃ¤ndelser frÃ¥n clio-agent-mail (intent-klassificering, PII, blockeringar)',
     'author': 'Arvas International AB',
     'category': 'Clio',
     'depends': ['base', 'clio_mail_admin'],

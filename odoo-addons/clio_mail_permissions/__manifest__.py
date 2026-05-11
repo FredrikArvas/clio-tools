@@ -1,7 +1,7 @@
-{
-    "name":     "Clio — E-postbehörigheter",
-    "version":  "18.0.1.0.0",
-    "summary":  "Behörighetshantering för clio-agent-mail med tvåvägssynk",
+﻿{
+    "name":     "Clio â€” E-postbehÃ¶righeter",
+    "version":  "19.0.1.0.0",
+    "summary":  "BehÃ¶righetshantering fÃ¶r clio-agent-mail med tvÃ¥vÃ¤gssynk",
     "depends":  ["base", "clio_mail_admin"],
     "application": False,
     "data": [

@@ -26,9 +26,15 @@ def _service_url(env) -> str:
     ).rstrip("/")
 
 
-def _call_raw(env, path: str) -> dict:
+def _call_raw(env, path: str, data: dict | None = None) -> dict:
     url = f"{_service_url(env)}{path}"
-    req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+    body = json.dumps(data or {}).encode("utf-8") if data is not None else None
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST" if body is not None else "GET",
+    )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read())
@@ -60,7 +66,7 @@ class ClioNccProject(models.Model):
         Hämtar projektlistan från clio-service och uppdaterar databasen.
         Befintliga rader raderas och återskapas (full refresh).
         """
-        result = _call_raw(self.env, "/mail/ncc/lista/json")
+        result = _call_raw(self.env, "/mail/ncc/lista/json", {"refresh": True})
         projects = result.get("projects", [])
 
         self.search([]).unlink()

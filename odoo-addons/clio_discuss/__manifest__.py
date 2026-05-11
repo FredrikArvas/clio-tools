@@ -1,7 +1,7 @@
-{
+﻿{
     'name': 'Clio Discuss',
-    'version': '18.0.0.1.0',
-    'summary': 'Clio AI-assistent i Odoo Discuss — global #clio-kanal',
+    'version': '19.0.0.1.0',
+    'summary': 'Clio AI-assistent i Odoo Discuss â€” global #clio-kanal',
     'author': 'Arvas International AB',
     'depends': ['mail'],
     'data': [

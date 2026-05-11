@@ -1,6 +1,6 @@
-{
-    "name":        "Clio Graph — Nätverksrelationer",
-    "version":     "18.0.1.0.0",
+﻿{
+    "name":        "Clio Graph â€” NÃ¤tverksrelationer",
+    "version":     "19.0.1.0.0",
     "category":    "Extra Tools",
     "summary":     "Extends partner_multi_relation with Neo4j sync flags and seeds GSF relation types.",
     "author":      "Fredrik Arvas / Arvas International AB",
