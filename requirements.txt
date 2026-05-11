@@ -2,7 +2,7 @@
 # Installera med: pip install -r requirements.txt
 
 # ── Gemensamma ────────────────────────────────────────────────────────────────
-anthropic>=0.25.0       # Claude API (vision, research, narrate-rekommendation)
+anthropic>=0.101.0       # Claude API (vision, research, narrate-rekommendation)
 python-dotenv>=1.0.0    # Läser .env
 questionary>=2.0.0      # Piltangentmenyer (TUI-standard för alla runners)
 
