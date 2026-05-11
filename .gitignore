@@ -68,8 +68,8 @@ clio-library/runeberg/*.html
 # Test fixtures (generated)
 tests/fixtures/sample.*
 
-# Local Claude settings (projektspecifika inställningar stannar lokalt)
-CLAUDE.md
+# Rot-CLAUDE.md stannar lokalt (innehåller infrastrukturdetaljer)
+/CLAUDE.md
 .claude/*
 !.claude/commands/
 .claude/commands/*
