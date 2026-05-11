@@ -1,5 +1,5 @@
 # clio-agent-job — pip-beroenden
-feedparser>=6.0
+feedparser>=6.0.12
 anthropic>=0.25
 pyyaml>=6.0
 python-dotenv>=1.0

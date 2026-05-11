@@ -1,7 +1,7 @@
 # clio-vigil — beroenden
 # MVP-beroenden (pip install -r requirements.txt)
 
-feedparser>=6.0.0       # RSS-insamling
+feedparser>=6.0.12       # RSS-insamling
 yt-dlp>=2024.1.0        # YouTube metadata och audio
 pyyaml>=6.0             # Domänkonfiguration
 
