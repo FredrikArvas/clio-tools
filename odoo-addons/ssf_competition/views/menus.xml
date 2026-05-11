@@ -33,4 +33,17 @@
               parent="menu_ssf_competition_root"
               sequence="90"
               action="action_ssf_sector_list"/>
+
+    <menuitem id="menu_ssf_iol_roles"
+              name="IOL-roller"
+              parent="menu_ssf_competition_root"
+              action="ssf_iol_role_action"
+              sequence="40"/>
+
+    <menuitem id="menu_ssf_non_members"
+              name="Motionärer"
+              parent="menu_ssf_competition_root"
+              sequence="45"
+              action="action_ssf_non_member_list"/>
+
 </odoo>

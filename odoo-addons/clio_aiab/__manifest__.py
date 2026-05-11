@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio AIAB â€” Installationsprofil',
     'version': '19.0.3.0.0',
     'summary': 'Meta-modul: installerar alla Clio-moduler fÃ¶r AIAB-databasen',

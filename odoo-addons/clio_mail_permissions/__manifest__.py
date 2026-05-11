@@ -1,4 +1,4 @@
-﻿{
+{
     "name":     "Clio â€” E-postbehÃ¶righeter",
     "version":  "19.0.1.0.0",
     "summary":  "BehÃ¶righetshantering fÃ¶r clio-agent-mail med tvÃ¥vÃ¤gssynk",

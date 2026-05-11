@@ -215,7 +215,7 @@
         <separator/>
         <filter string="Class 3+" name="class3" domain="[('encounter_class','in',['3','4'])]"/>
         <filter string="Discourse 4+" name="disc4" domain="[('discourse_level','in',['4','5'])]"/>
-        <group expand="0" string="Group By">
+        <group>
           <filter string="Country" name="by_country" context="{'group_by': 'country_id'}"/>
           <filter string="Encounter Class" name="by_class" context="{'group_by': 'encounter_class'}"/>
           <filter string="Discourse Level" name="by_disc" context="{'group_by': 'discourse_level'}"/>

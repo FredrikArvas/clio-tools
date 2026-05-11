@@ -57,7 +57,7 @@
                 <separator/>
                 <filter string="Accepterade" name="accepted"
                         domain="[('status', '=', 'ACCEPTED')]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Förening" name="group_org"
                             context="{'group_by': 'organization_id'}"/>
                     <filter string="Evenemang" name="group_event"

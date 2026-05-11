@@ -121,7 +121,7 @@
         <field name="field_name"/>
         <filter string="Verified" name="verified" domain="[('verification_status','=','verified')]"/>
         <filter string="Pending" name="pending" domain="[('verification_status','=','pending')]"/>
-        <group expand="0" string="Group By">
+        <group>
           <filter string="Encounter" name="by_encounter" context="{'group_by': 'encounter_id'}"/>
           <filter string="Status" name="by_status" context="{'group_by': 'verification_status'}"/>
           <filter string="Changed By" name="by_changed_by" context="{'group_by': 'changed_by'}"/>

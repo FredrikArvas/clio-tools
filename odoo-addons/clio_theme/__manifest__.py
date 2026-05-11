@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio Theme',
     'version': '19.0.1.0.0',
     'summary': 'FÃ¤rgkodad navbar per databas â€” aiab, ssf, test, staging',

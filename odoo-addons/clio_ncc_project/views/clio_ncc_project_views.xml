@@ -56,7 +56,7 @@
                 <separator/>
                 <filter name="ncc_ok"  string="Har NCC"    domain="[('ncc_ok','=',True)]"/>
                 <filter name="ncc_missing" string="Saknar NCC" domain="[('ncc_ok','=',False)]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter name="group_sfar" string="Sfär" context="{'group_by': 'sfar'}"/>
                     <filter name="group_ncc"  string="NCC"  context="{'group_by': 'ncc_ok'}"/>
                 </group>

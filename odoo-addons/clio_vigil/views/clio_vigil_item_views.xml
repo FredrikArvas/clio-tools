@@ -135,10 +135,11 @@
         <filter name="has_summary" string="Har sammanfattning"
                 domain="[('summary','!=',False),('summary','!=','')]"/>
 
-        <group expand="0" string="Gruppera">
+        <group>
           <filter name="group_state"    string="Tillstånd"  context="{'group_by': 'state'}"/>
-          <filter name="group_domain"   string="Domän"      context="{'group_by': 'domain'}"/>
-          <filter name="group_source"   string="Källa"      context="{'group_by': 'source_name'}"/>
+          <filter name="group_domain"      string="Domän"      context="{'group_by': 'domain'}"/>
+          <filter name="group_source_type" string="Typ"        context="{'group_by': 'source_type'}"/>
+          <filter name="group_source"      string="Källa"      context="{'group_by': 'source_name'}"/>
           <filter name="group_published" string="Publicerat" context="{'group_by': 'published_at:day'}"/>
         </group>
       </search>

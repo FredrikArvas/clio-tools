@@ -72,7 +72,7 @@
         <filter name="etablerad" string="Etablerad+"
                 domain="[('maturity','in',['etablerad','akademisk'])]"/>
 
-        <group expand="0" string="Gruppera">
+        <group>
           <filter name="group_domain"  string="Domän"  context="{'group_by': 'domain'}"/>
           <filter name="group_type"    string="Typ"    context="{'group_by': 'source_type'}"/>
           <filter name="group_maturity" string="Mognad" context="{'group_by': 'maturity'}"/>

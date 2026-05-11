@@ -84,13 +84,17 @@
         <filter name="has_snippet" string="Has Snippet"
                 domain="[('body_snippet','!=',False),('body_snippet','!=','')]"/>
 
-        <group expand="0" string="Group By">
+        <group>
           <filter name="group_source" string="Source"
                   context="{'group_by': 'source'}"/>
           <filter name="group_date" string="Fetched"
                   context="{'group_by': 'first_seen:day'}"/>
           <filter name="group_published" string="Published"
                   context="{'group_by': 'published:day'}"/>
+          <filter name="group_matched" string="Matched"
+                  context="{'group_by': 'is_matched'}"/>
+          <filter name="group_fetched_month" string="Fetched (Month)"
+                  context="{'group_by': 'first_seen:month'}"/>
         </group>
       </search>
     </field>

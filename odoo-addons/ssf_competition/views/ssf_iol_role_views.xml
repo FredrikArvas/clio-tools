@@ -33,7 +33,7 @@
                 <filter string="Admin" name="admin"
                         domain="[('role_name', 'ilike', 'admin')]"/>
                 <separator/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Roll"         name="group_role"
                             context="{'group_by': 'role_name'}"/>
                     <filter string="Organisation" name="group_org"
@@ -51,10 +51,4 @@
         <field name="context">{}</field>
     </record>
 
-    <!-- Menypost -->
-    <menuitem id="menu_ssf_iol_roles"
-              name="IOL-roller"
-              parent="menu_ssf_competition_root"
-              action="ssf_iol_role_action"
-              sequence="40"/>
 </odoo>

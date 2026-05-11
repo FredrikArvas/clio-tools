@@ -309,7 +309,7 @@
                 <separator/>
                 <filter string="Säsong 2025/26" name="current_season"
                         domain="[('cs_event_count', '>', 0)]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Dold" name="group_hidden"
                             context="{'group_by': 'hidden'}"/>
                 </group>

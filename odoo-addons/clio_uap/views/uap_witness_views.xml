@@ -104,7 +104,7 @@
         <field name="name"/>
         <filter string="Military" name="military" domain="[('witness_type','=','military')]"/>
         <filter string="Tier 1" name="tier1" domain="[('credibility','=','tier_1')]"/>
-        <group expand="0" string="Group By">
+        <group>
           <filter string="Type" name="by_type" context="{'group_by': 'witness_type'}"/>
           <filter string="Credibility" name="by_cred" context="{'group_by': 'credibility'}"/>
         </group>

@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "SSF - LOK-stÃ¶d",
     "version": "19.0.1.0.0",
     "summary": "LOK-stÃ¶dsrapporter (FeeReports) synkade frÃ¥n SSFTA.",

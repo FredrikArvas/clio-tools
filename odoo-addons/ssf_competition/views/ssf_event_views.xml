@@ -189,13 +189,14 @@
                         domain="[('sector_id.sector_code', '=', 'SB')]"/>
                 <filter string="Freestyle" name="sector_fs"
                         domain="[('sector_id.sector_code', '=', 'FS')]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Serie" name="group_cup" context="{'group_by': 'cup_id'}"/>
                     <filter string="Gren" name="group_sector" context="{'group_by': 'sector_id'}"/>
                     <filter string="Säsong" name="group_season" context="{'group_by': 'season_id'}"/>
                     <filter string="Ort" name="group_city" context="{'group_by': 'city'}"/>
                     <filter string="Arrangör" name="group_organizer" context="{'group_by': 'organizer_id'}"/>
                     <filter string="Räckvidd" name="group_scope" context="{'group_by': 'geographical_scope'}"/>
+                    <filter string="Status" name="group_event_status" context="{'group_by': 'event_status'}"/>
                     <filter string="Tävlingstyp" name="group_event_type" context="{'group_by': 'event_type_label'}"/>
                 </group>
             </search>

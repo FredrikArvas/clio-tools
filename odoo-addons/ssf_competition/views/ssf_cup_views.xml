@@ -67,7 +67,7 @@
                 <field name="sector_id" string="Gren"/>
                 <field name="season_id" string="Säsong"/>
                 <field name="organizer_id" string="Arrangör"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Gren" name="group_sector"
                             context="{'group_by': 'sector_id'}"/>
                     <filter string="Säsong" name="group_season"

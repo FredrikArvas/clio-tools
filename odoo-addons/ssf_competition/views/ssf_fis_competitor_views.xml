@@ -56,7 +56,7 @@
                 <filter string="Bara SWE" name="filter_swe" domain="[('nation','=','SWE')]"/>
                 <filter string="Från FIS API" name="filter_api" domain="[('source','=','fis_api')]"/>
                 <filter string="Härledd från SSFTA" name="filter_ssfta" domain="[('source','=','ssfta_derived')]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Disciplin" name="group_discipline"
                             context="{'group_by': 'discipline_id'}"/>
                     <filter string="Nation" name="group_nation"

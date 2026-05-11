@@ -12,7 +12,6 @@
         <!-- SF-admin: ser hela databasen, ingen record rule begränsar -->
         <record id="group_ssf_sf_admin" model="res.groups">
             <field name="name">SF-admin</field>
-            <field name="category_id" ref="module_category_ssf"/>
             <field name="comment">
                 Specialförbundsnivå. Tilldelad via LoginPrivileges persons/settings på OrgType=2.
                 Ser alla partners utan begränsning.
@@ -22,7 +21,6 @@
         <!-- SDF-admin: ser sin SDF + föreningar + utövare -->
         <record id="group_ssf_sdf_admin" model="res.groups">
             <field name="name">SDF-admin</field>
-            <field name="category_id" ref="module_category_ssf"/>
             <field name="comment">
                 Distriktsförbundsnivå. Tilldelad via LoginPrivileges events/datatransfer på OrgType=4.
                 Begränsad av record rule: ser partners med ssfta_sdf_id = managed_partner.
@@ -32,7 +30,6 @@
         <!-- Klubbadmin: ser sin förening + dess utövare -->
         <record id="group_ssf_club_admin" model="res.groups">
             <field name="name">Klubbadmin</field>
-            <field name="category_id" ref="module_category_ssf"/>
             <field name="comment">
                 Föreningsnivå. Tilldelad via PersonIOLRoles Klubbadministratör på OrgType=5.
                 Begränsad av record rule: ser partners med ssfta_club_id = managed_partner.

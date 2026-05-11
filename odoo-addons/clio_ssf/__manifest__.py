@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio SSF â€” Installationsprofil',
     'version': '19.0.4.0.0',
     'summary': 'Meta-modul: installerar alla Clio-moduler fÃ¶r SSF-databasen',

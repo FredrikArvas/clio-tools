@@ -53,7 +53,7 @@
                         domain="[('nationality', '!=', 'SWE')]"/>
                 <filter string="Svensk" name="swedish"
                         domain="[('nationality', '=', 'SWE')]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter string="Nationalitet" name="group_nationality"
                             context="{'group_by': 'nationality'}"/>
                     <filter string="Kön" name="group_gender"
@@ -71,9 +71,4 @@
         <field name="context">{"create": false}</field>
     </record>
 
-    <menuitem id="menu_ssf_non_members"
-              name="Motionärer"
-              parent="menu_ssf_competition_root"
-              sequence="45"
-              action="action_ssf_non_member_list"/>
-</odoo>
+    </odoo>

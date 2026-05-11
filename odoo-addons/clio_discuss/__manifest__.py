@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio Discuss',
     'version': '19.0.0.1.0',
     'summary': 'Clio AI-assistent i Odoo Discuss â€” global #clio-kanal',
