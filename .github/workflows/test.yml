@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-mock
+          pip install -e ./clio-core
+
+      - name: Unit tests
+        run: pytest tests/unit/test_docs.py tests/unit/test_utils.py tests/unit/test_qc.py -v
+
+      - name: Agent-mail tests
+        working-directory: clio-agent-mail
+        run: pytest tests/ -v
