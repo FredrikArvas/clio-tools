@@ -108,7 +108,7 @@
         <field name="source_id"/>
         <filter string="Tier 1" name="tier1" domain="[('tier','=','tier_1')]"/>
         <filter string="Tier 2" name="tier2" domain="[('tier','=','tier_2')]"/>
-        <group expand="0" string="Group By">
+        <group>
           <filter string="Type" name="by_type" context="{'group_by': 'source_type'}"/>
           <filter string="Tier" name="by_tier" context="{'group_by': 'tier'}"/>
         </group>

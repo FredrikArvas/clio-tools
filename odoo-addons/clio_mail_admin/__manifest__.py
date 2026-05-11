@@ -1,4 +1,4 @@
-﻿{
+{
     "name":        "Clio Mail Admin",
     "version":     "19.0.2.0.0",
     "category":    "Extra Tools",

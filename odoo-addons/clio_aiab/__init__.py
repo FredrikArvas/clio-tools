@@ -41,6 +41,6 @@ def _create_aiab_users(env):
             'login': u['login'],
             'email': u['email'],
             'lang': 'sv_SE',
-            'groups_id': [(6, 0, [group.id])],
+            'group_ids': [(6, 0, [group.id])],
         })
         _logger.info('clio_aiab: skapade anvandare %s', u['login'])

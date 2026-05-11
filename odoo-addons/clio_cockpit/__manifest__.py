@@ -1,4 +1,4 @@
-﻿{
+{
     "name":        "Clio Cockpit",
     "version":     "19.0.4.0.0",
     "category":    "Extra Tools",

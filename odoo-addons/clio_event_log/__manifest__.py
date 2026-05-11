@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio Event Log',
     'version': '19.0.1.0.0',
     'summary': 'Logg Ã¶ver inkommande mail-hÃ¤ndelser frÃ¥n clio-agent-mail (intent-klassificering, PII, blockeringar)',

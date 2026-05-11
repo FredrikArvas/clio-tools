@@ -1,4 +1,4 @@
-﻿{
+{
     'name': 'Clio Vigil â€” Mediebevakning',
     'version': '19.0.1.0.0',
     'summary': 'Odoo-vy fÃ¶r clio-vigil: kÃ¤llor, pipeline-kÃ¶ och fÃ¤rdiga bevakningsobjekt',

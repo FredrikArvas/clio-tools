@@ -19,7 +19,7 @@ def post_init_hook(env):
         'login': 'clio-bot',
         'email': 'clio-bot@arvas.se',
         'partner_id': partner.id,
-        'groups_id': [(4, env.ref('base.group_user').id)],
+        'group_ids': [(4, env.ref('base.group_user').id)],
     })
     user.password = password
 

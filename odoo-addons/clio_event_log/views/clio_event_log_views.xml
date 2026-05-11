@@ -71,7 +71,7 @@
                 <separator/>
                 <filter name="today" string="Idag"
                     domain="[('event_timestamp','&gt;=', (context_today()).strftime('%Y-%m-%d 00:00:00'))]"/>
-                <group expand="0" string="Gruppera efter">
+                <group>
                     <filter name="group_utfall"   string="Utfall"     context="{'group_by': 'utfall'}"/>
                     <filter name="group_sender"   string="Avsändare"  context="{'group_by': 'sender'}"/>
                     <filter name="group_pii"      string="PII-risk"   context="{'group_by': 'pii_risk'}"/>
