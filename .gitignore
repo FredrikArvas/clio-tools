@@ -68,8 +68,12 @@ clio-library/runeberg/*.html
 # Test fixtures (generated)
 tests/fixtures/sample.*
 
-# Local Claude settings
-.claude/
+# Local Claude settings (projektspecifika inställningar stannar lokalt)
+CLAUDE.md
+.claude/*
+!.claude/commands/
+.claude/commands/*
+!.claude/commands/*.md
 
 # Exiftool binaries (installeras lokalt)
 clio-vision/exiftool*/
@@ -84,6 +88,10 @@ _clio_tmp_*
 
 # Email-bilagor (genereras av clio-emailfetch, ska inte in i Git)
 attachments/
+
+# Google OAuth credentials och tokens
+google_token.json
+config/client_secret_*.json
 
 # Zip-arkiv
 *.zip
