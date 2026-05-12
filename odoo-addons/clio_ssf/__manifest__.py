@@ -1,7 +1,7 @@
 {
-    'name': 'Clio SSF â€” Installationsprofil',
+    'name': 'Clio SSF — Installationsprofil',
     'version': '19.0.4.0.0',
-    'summary': 'Meta-modul: installerar alla Clio-moduler fÃ¶r SSF-databasen',
+    'summary': 'Meta-modul: installerar alla Clio-moduler för SSF-databasen',
     'author': 'Arvas International AB',
     'depends': [
         'clio_cockpit',

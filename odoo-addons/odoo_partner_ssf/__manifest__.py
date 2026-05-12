@@ -1,7 +1,7 @@
 {
-    'name': 'SSF â€” KontakttillÃ¤gg',
+    'name': 'SSF — Kontakttillägg',
     'version': '19.0.1.0.0',
-    'summary': 'LÃ¤gger till Bolag och Roller synligt i listvy och formulÃ¤r fÃ¶r SSF-kontakter.',
+    'summary': 'Lägger till Bolag och Roller synligt i listvy och formulär för SSF-kontakter.',
     'author': 'Arvas International AB',
     'depends': ['contacts'],
     'data': [

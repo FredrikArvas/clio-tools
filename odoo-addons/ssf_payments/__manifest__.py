@@ -1,7 +1,7 @@
 {
     "name": "SSF - Betalningar",
     "version": "19.0.1.0.0",
-    "summary": "Startavgiftsbetalningar (Payments) synkade frÃ¥n SSFTA.",
+    "summary": "Startavgiftsbetalningar (Payments) synkade från SSFTA.",
     "author": "Arvas International AB",
     "depends": ["ssf_competition"],
     "data": [

@@ -1,7 +1,7 @@
 {
-    'name': 'SSF CRM â€” BehÃ¶righetsmodell',
+    'name': 'SSF CRM — Behörighetsmodell',
     'version': '19.0.1.0.0',
-    'summary': 'Grupper, custom fÃ¤lt och record rules fÃ¶r SSF-administratÃ¶rer.',
+    'summary': 'Grupper, custom fält och record rules för SSF-administratörer.',
     'author': 'Arvas International AB',
     'depends': ['contacts', 'base_setup'],
     'data': [
