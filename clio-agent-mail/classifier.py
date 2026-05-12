@@ -95,6 +95,19 @@ def _get_permission(sender_email: str, account_key: str, config) -> str:
     return am.get_level({"email": sender_email}, scope=account_key)
 
 
+def _get_active_interview_by_thread(mail_item) -> dict | None:
+    """
+    Returnerar aktiv intervjusession om mailets tråd matchar — annars None.
+    Kollar både thread_id och in_reply_to mot interview_sessions.thread_id.
+    """
+    thread_id   = getattr(mail_item, "thread_id", None)
+    in_reply_to = getattr(mail_item, "in_reply_to", None)
+    return (
+        _state.get_interview_by_thread(thread_id) or
+        _state.get_interview_by_thread(in_reply_to)
+    )
+
+
 def classify(mail_item, whitelist: set, config) -> Classification:
     """
     Regelmotor — returnerar Classification med action, reason och account_key.
@@ -108,6 +121,10 @@ def classify(mail_item, whitelist: set, config) -> Classification:
       write   → SELF_QUERY på tillåtna konton
       coded   → AUTO_SEND med kontextmedveten flagg
       övriga  → vitlista-first som tidigare
+
+    Intervju-routing (Sprint 3):
+      Baseras uteslutande på tråd-ID — inte på avsändarens e-post.
+      Det förhindrar att nya uppgifter från admins fastnar i intervjuflödet.
     """
     info_account = config.get("mail", "imap_user_info", fallback="").lower()
     account = mail_item.account.lower()
@@ -153,17 +170,20 @@ def classify(mail_item, whitelist: set, config) -> Classification:
                 account_key=account_key,
             )
 
+    # ── Aktiv intervjusession via tråd-ID (gäller alla avsändare) ───────────
+    # Matchar på thread_id/in_reply_to — INTE på e-postadress.
+    # Garanterar att uppgiftsmail från admins inte fastnar i intervjuflödet.
+    if _get_active_interview_by_thread(mail_item):
+        return Classification(
+            action=ACTION_INTERVIEW,
+            reason="Active interview session (thread match)",
+            account_key=account_key,
+        )
+
     # ── Behörighetscheck ─────────────────────────────────────────────────────
     perm = _get_permission(sender_email, account_key, config)
 
     if perm in ("admin", "write"):
-        # Admin/write kan delta i intervju om aktiv session finns
-        if _state.get_active_interview(sender_email):
-            return Classification(
-                action=ACTION_INTERVIEW,
-                reason="Active interview session (admin participant)",
-                account_key=account_key,
-            )
         return Classification(
             action=ACTION_SELF_QUERY,
             reason=f"Permission: {perm}",
@@ -176,14 +196,6 @@ def classify(mail_item, whitelist: set, config) -> Classification:
         return Classification(
             action=ACTION_AUTO_SEND,
             reason="Permission: coded",
-            account_key=account_key,
-        )
-
-    # ── Aktiv intervjusession — prioriteras före vitlista ────────────────────
-    if _state.get_active_interview(sender_email):
-        return Classification(
-            action=ACTION_INTERVIEW,
-            reason="Active interview session",
             account_key=account_key,
         )
 
