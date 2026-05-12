@@ -1,5 +1,5 @@
 {
-    "name":        "Clio Job â€” JobbsÃ¶kar-profiler",
+    "name":        "Clio Job — Jobbsökar-profiler",
     "version":     "19.0.3.2.0",
     "category":    "Extra Tools",
     "summary":     "Extends res.partner with job-signal profile and match history for Clio automation.",

@@ -2,7 +2,7 @@
     "name":        "Clio Interview",
     "version":     "19.0.1.0.0",
     "category":    "Extra Tools",
-    "summary":     "Cockpit for Claude-driven interviews via email â€” templates, sessions and summaries.",
+    "summary":     "Cockpit for Claude-driven interviews via email — templates, sessions and summaries.",
     "author":      "Fredrik Arvas / Arvas International AB",
     "license":     "LGPL-3",
     "depends":     ["base"],
