@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy: sparade filer ──────────────────────────────────────────── -->
+  <record id="view_clio_obit_gedcom_list" model="ir.ui.view">
+    <field name="name">clio.obit.gedcom.list</field>
+    <field name="model">clio.obit.gedcom</field>
+    <field name="arch" type="xml">
+      <list string="GEDCOM-filer" default_order="uploaded_at desc">
+        <field name="name"             string="Namn"/>
+        <field name="filename"         string="Filnamn"        optional="show"/>
+        <field name="individual_count" string="Individer"      optional="show"/>
+        <field name="file_size"        string="Storlek (B)"    optional="hide"/>
+        <field name="uploaded_at"      string="Uppladdad"      widget="datetime" optional="show"/>
+        <field name="last_import_at"   string="Senaste import" widget="datetime" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy: fil + importlogg ───────────────────────────────────── -->
+  <record id="view_clio_obit_gedcom_form" model="ir.ui.view">
+    <field name="name">clio.obit.gedcom.form</field>
+    <field name="model">clio.obit.gedcom</field>
+    <field name="arch" type="xml">
+      <form string="GEDCOM-fil">
+        <header>
+          <button name="action_open_import_wizard"
+                  string="Importera till Odoo"
+                  type="object"
+                  class="btn-primary"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Namn på trädet, t.ex. Arvas-trädet 2026"/></h1>
+          </div>
+          <group>
+            <group string="Fil">
+              <field name="file_data"  string="GEDCOM-fil" widget="binary"
+                     filename="filename"/>
+              <field name="filename"   string="Filnamn" readonly="1"/>
+              <field name="file_size"  string="Storlek (bytes)" readonly="1"/>
+              <field name="uploaded_at" string="Uppladdad" readonly="1"/>
+            </group>
+            <group string="Innehåll">
+              <field name="individual_count"
+                     string="Levande individer"
+                     readonly="1"
+                     help="Räknas automatiskt vid uppladdning."/>
+              <field name="last_import_at"
+                     string="Senaste import"
+                     readonly="1"/>
+            </group>
+          </group>
+
+          <!-- Importlogg — en rad per körning -->
+          <field name="log_ids" string="Importlogg" readonly="1">
+            <list create="false" delete="false" default_order="imported_at desc">
+              <field name="imported_at"  string="Tidpunkt"      widget="datetime"/>
+              <field name="user_id"      string="Bevakare"/>
+              <field name="created"      string="Nya"/>
+              <field name="updated"      string="Uppdaterade"/>
+              <field name="skipped"      string="Överhoppade"/>
+              <field name="dry_run"      string="Torrkörning"   widget="boolean_toggle"/>
+              <field name="log_text"     string="Detaljlogg"    optional="show"/>
+            </list>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Action: GEDCOM-filer ────────────────────────────────────────────── -->
+  <record id="action_clio_obit_gedcom" model="ir.actions.act_window">
+    <field name="name">GEDCOM-filer</field>
+    <field name="res_model">clio.obit.gedcom</field>
+    <field name="view_mode">list,form</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Ladda upp ditt första GEDCOM-träd.
+      </p>
+      <p>
+        Exportera en .ged-fil från t.ex. Gramps, MyHeritage eller Ancestry
+        och ladda upp den här. Sedan importeras valda personer som bevakade
+        kontakter i Odoo.
+      </p>
+    </field>
+  </record>
+
+  <!-- ── Wizard-formulär ─────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_gedcom_wizard_form" model="ir.ui.view">
+    <field name="name">clio.obit.gedcom.wizard.form</field>
+    <field name="model">clio.obit.gedcom.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Importera GEDCOM">
+        <group invisible="state == 'done'">
+          <group string="Fil">
+            <field name="gedcom_id"  string="GEDCOM-fil"/>
+          </group>
+          <group string="Inställningar">
+            <field name="user_id"      string="Bevakare"/>
+            <field name="ego_name"     string="Startperson (ego)"
+                   placeholder="Lämna tomt = helträd"/>
+            <field name="depth"        string="Djup" invisible="full_import"/>
+            <field name="full_import"  string="Importera hela trädet"/>
+            <field name="dry_run"      string="Torrkörning (simulera)"/>
+          </group>
+        </group>
+
+        <!-- Resultat visas efter körning -->
+        <group string="Resultat" invisible="state == 'draft'">
+          <field name="result_text" string="" nolabel="1"
+                 widget="text" readonly="1"/>
+        </group>
+
+        <footer>
+          <button name="action_run_import"
+                  string="Kör import"
+                  type="object"
+                  class="btn-primary"
+                  invisible="state == 'done'"/>
+          <button string="Stäng" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_add_watch_form" model="ir.ui.view">
+    <field name="name">clio.obit.add.watch.form</field>
+    <field name="model">clio.obit.add.watch</field>
+    <field name="arch" type="xml">
+      <form string="Lägg till bevakning">
+        <sheet>
+          <group invisible="state == 'done'">
+            <group string="Person att bevaka">
+              <field name="fornamn"/>
+              <field name="efternamn"/>
+              <field name="fodelsedatum" placeholder="T.ex. 1952, ca 1952, 1952-03-15"/>
+            </group>
+            <group string="Bevakning">
+              <field name="user_id"/>
+              <field name="priority" widget="radio"/>
+            </group>
+          </group>
+
+          <group invisible="state != 'done'" string="Resultat">
+            <field name="result_text" readonly="1" nolabel="1"/>
+          </group>
+        </sheet>
+
+        <footer>
+          <button name="action_add"
+                  string="Lägg till bevakning"
+                  type="object"
+                  class="btn-primary"
+                  invisible="state == 'done'"/>
+          <button name="action_open_partner"
+                  string="Öppna kontakt"
+                  type="object"
+                  class="btn-secondary"
+                  invisible="state != 'done' or not found_partner_id"/>
+          <button string="Stäng"
+                  class="btn-secondary"
+                  special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_obit_add_watch" model="ir.actions.act_window">
+    <field name="name">Lägg till bevakning</field>
+    <field name="res_model">clio.obit.add.watch</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+</odoo>

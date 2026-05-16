@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_match_list" model="ir.ui.view">
+    <field name="name">clio.obit.match.list</field>
+    <field name="model">clio.obit.match</field>
+    <field name="arch" type="xml">
+      <list string="Matchningshistorik"
+            decoration-success="priority == 'viktig'"
+            decoration-warning="priority == 'normal'"
+            decoration-muted="suppressed == True"
+            default_order="notified_at desc">
+        <field name="partner_id"   string="Bevakad person"/>
+        <field name="ann_name"     string="Namn i annonsen"/>
+        <field name="score"        string="Poäng" optional="show"/>
+        <field name="priority"     string="Prioritet" optional="show"/>
+        <field name="ann_source"   string="Källa" optional="show"/>
+        <field name="ann_date"     string="Publicerad" widget="date" optional="show"/>
+        <field name="suppressed"   string="Supprimerad" widget="boolean_toggle" optional="show"/>
+        <field name="notified_at"  string="Notifierad" widget="datetime" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_match_form" model="ir.ui.view">
+    <field name="name">clio.obit.match.form</field>
+    <field name="model">clio.obit.match</field>
+    <field name="arch" type="xml">
+      <form string="Matchning">
+        <sheet>
+          <group>
+            <group string="Matchning">
+              <field name="partner_id" string="Bevakad person"/>
+              <field name="score" string="Konfidenspoäng"/>
+              <field name="priority" string="Prioritet"/>
+              <field name="notified_at" string="Notifierad"/>
+              <field name="suppressed" string="Supprimerad"/>
+            </group>
+            <group string="Dödsannons">
+              <field name="ann_name" string="Namn i annonsen" readonly="1"/>
+              <field name="ann_source" string="Källa" readonly="1"/>
+              <field name="ann_date" string="Publicerad" readonly="1"/>
+              <field name="ann_url" string="URL" widget="url" readonly="1"/>
+            </group>
+          </group>
+          <group string="Dödsannonsen i sin helhet">
+            <field name="announcement_id" string="" nolabel="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_obit_match_search" model="ir.ui.view">
+    <field name="name">clio.obit.match.search</field>
+    <field name="model">clio.obit.match</field>
+    <field name="arch" type="xml">
+      <search string="Sök matchningar">
+        <field name="partner_id"  string="Bevakad person"/>
+        <field name="ann_name"    string="Namn i annonsen"/>
+        <field name="ann_source"  string="Källa"/>
+
+        <filter name="viktig"     string="Viktig"
+                domain="[('priority','=','viktig')]"/>
+        <filter name="normal"     string="Normal"
+                domain="[('priority','=','normal')]"/>
+        <separator/>
+        <filter name="notified"   string="Notifierad"
+                domain="[('notified_at','!=',False)]"/>
+        <filter name="suppressed" string="Supprimerade"
+                domain="[('suppressed','=',True)]"/>
+        <separator/>
+        <filter name="this_month" string="Denna månad"
+                domain="[('notified_at','&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+
+        <group expand="0" string="Gruppera efter">
+          <filter name="group_partner"   string="Bevakad person"
+                  context="{'group_by': 'partner_id'}"/>
+          <filter name="group_priority"  string="Prioritet"
+                  context="{'group_by': 'priority'}"/>
+          <filter name="group_source"    string="Källa"
+                  context="{'group_by': 'ann_source'}"/>
+          <filter name="group_date"      string="Notifierad"
+                  context="{'group_by': 'notified_at:month'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_obit_match" model="ir.actions.act_window">
+    <field name="name">Matchningshistorik</field>
+    <field name="res_model">clio.obit.match</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Inga matchningar registrerade ännu.
+      </p>
+      <p>
+        Matchningar skapas automatiskt när clio-agent-obit hittar en bevakad person.
+      </p>
+    </field>
+  </record>
+
+</odoo>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="family_tree_page" name="Clio Obit — Familjeträd">
+    <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Familjeträd — <t t-esc="partner.name"/></title>
+        <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"/>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: -apple-system, sans-serif; background: #f4f4f8; }
+
+          #topbar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px;
+            background: #2A3F6F; color: white;
+          }
+          #topbar a { color: #C8A84B; text-decoration: none; font-size: 13px; }
+          #topbar h1 { font-size: 16px; font-weight: 600; flex: 1; }
+
+          #controls {
+            display: flex; gap: 8px; align-items: center;
+            padding: 8px 16px; background: white;
+            border-bottom: 1px solid #ddd; flex-wrap: wrap;
+          }
+          #controls label { font-size: 13px; color: #555; }
+          #controls select, #controls button {
+            font-size: 13px; padding: 4px 10px; border-radius: 4px;
+            border: 1px solid #ccc; cursor: pointer;
+          }
+          #controls button { background: #2A3F6F; color: white; border-color: #2A3F6F; }
+
+          #legend {
+            display: flex; gap: 16px; align-items: center;
+            padding: 6px 16px; background: white;
+            border-bottom: 1px solid #eee; font-size: 12px; color: #555;
+          }
+          .legend-item { display: flex; align-items: center; gap: 4px; }
+          .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+          #network { width: 100%; height: calc(100vh - 110px); }
+        </style>
+      </head>
+      <body>
+        <div id="topbar">
+          <a t-attf-href="/odoo/contacts/#{partner.id}">← Tillbaka</a>
+          <h1>Familjeträd — <t t-esc="partner.name"/></h1>
+        </div>
+
+        <div id="controls">
+          <label>Djup:</label>
+          <select id="depthSelect">
+            <option value="1">1 — make/maka, barn, föräldrar</option>
+            <option value="2" selected="1">2 — + syskon, far/morföräldrar</option>
+            <option value="3">3 — + syskonbarn, fastrar/morbröder</option>
+          </select>
+          <button onclick="loadGraph()">Uppdatera</button>
+          <button onclick="network.fit()">Centrera</button>
+        </div>
+
+        <div id="legend">
+          <span>Relationer:</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#e74c3c"/> make/maka</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#2ecc71"/> barn</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#3498db"/> förälder</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#9b59b6"/> syskon</span>
+          <span style="margin-left:auto">
+            Noder: <b id="nodeCount">–</b> &amp;nbsp; Kanter: <b id="edgeCount">–</b>
+          </span>
+        </div>
+
+        <div id="network"/>
+
+        <script>
+          const PARTNER_ID = <t t-esc="partner_id"/>;
+          let network;
+
+          const OPTIONS = {
+            nodes: {
+              shape: "box",
+              borderWidth: 2,
+              font: { size: 13 },
+              margin: 8,
+            },
+            groups: {
+              root:     { color: { background: "#C8A84B", border: "#2A3F6F" }, font: { bold: true } },
+              living:   { color: { background: "#d5e8d4", border: "#2ecc71" } },
+              deceased: { color: { background: "#dae8fc", border: "#6c8ebf" }, font: { color: "#555" } },
+            },
+            edges: {
+              font: { size: 11, align: "middle" },
+              smooth: { type: "curvedCW", roundness: 0.1 },
+            },
+            physics: {
+              solver: "forceAtlas2Based",
+              forceAtlas2Based: { gravitationalConstant: -60, springLength: 120 },
+              stabilization: { iterations: 200 },
+            },
+            interaction: { hover: true, tooltipDelay: 200 },
+          };
+
+          async function loadGraph() {
+            const depth = document.getElementById("depthSelect").value;
+            const resp = await fetch(`/clio/api/family-tree/${PARTNER_ID}?depth=${depth}`);
+            const data = await resp.json();
+
+            document.getElementById("nodeCount").textContent = data.nodes.length;
+            document.getElementById("edgeCount").textContent = data.edges.length;
+
+            const container = document.getElementById("network");
+            if (network) {
+              network.setData({ nodes: data.nodes, edges: data.edges });
+            } else {
+              network = new vis.Network(container,
+                { nodes: data.nodes, edges: data.edges }, OPTIONS);
+              network.on("doubleClick", (params) => {
+                if (params.nodes.length) {
+                  window.location.href = `/clio/family-tree/${params.nodes[0]}`;
+                }
+              });
+            }
+          }
+
+          loadGraph();
+        </script>
+      </body>
+    </html>
+  </template>
+</odoo>
