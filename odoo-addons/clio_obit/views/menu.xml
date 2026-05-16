@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Toppnivå -->
+  <menuitem id="menu_clio_obit_root"
+            name="Clio Obit"
+            sequence="101"
+            groups="clio_obit.group_clio_bevakare,base.group_system"/>
+
+  <!-- Bevakade (mina) -->
+  <menuitem id="menu_clio_obit_bevakade"
+            name="Bevakade"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_watch_mine"
+            sequence="10"/>
+
+  <!-- Matchade annonser (kanban first) -->
+  <menuitem id="menu_clio_obit_matchade"
+            name="Matchade annonser"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_announcement_matched"
+            sequence="20"/>
+
+  <!-- Alla annonser -->
+  <menuitem id="menu_clio_obit_annonser"
+            name="Alla annonser"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_announcement"
+            sequence="30"
+            groups="clio_obit.group_clio_bevakare,base.group_system"/>
+
+  <!-- Matchningshistorik -->
+  <menuitem id="menu_clio_obit_matchningar"
+            name="Matchningshistorik"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_match"
+            sequence="40"/>
+
+  <!-- Alla bevakningar (admin) -->
+  <menuitem id="menu_clio_obit_watch_all"
+            name="Alla bevakningar"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_watch_all"
+            sequence="45"
+            groups="base.group_system"/>
+
+  <!-- Lägg till bevakning (manuell) -->
+  <menuitem id="menu_clio_obit_add_watch"
+            name="Lägg till bevakning"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_add_watch"
+            sequence="12"/>
+
+  <!-- GEDCOM-filer -->
+  <menuitem id="menu_clio_obit_gedcom"
+            name="GEDCOM-filer"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_gedcom"
+            sequence="50"
+            groups="clio_obit.group_clio_bevakare,base.group_system"/>
+
+  <!-- Neo4j Browser -->
+  <record id="action_clio_obit_neo4j" model="ir.actions.act_url">
+    <field name="name">Neo4j Browser</field>
+    <field name="url">http://100.107.127.104:7474</field>
+    <field name="target">new</field>
+  </record>
+  <menuitem id="menu_clio_obit_neo4j"
+            name="Familjegrafen (Neo4j)"
+            parent="menu_clio_obit_root"
+            action="action_clio_obit_neo4j"
+            sequence="60"
+            groups="base.group_system"/>
+
+</odoo>
