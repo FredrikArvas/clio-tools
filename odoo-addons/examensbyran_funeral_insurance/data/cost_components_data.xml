@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cost_coffin_simple" model="examensbyran.funeral.cost.component">
+            <field name="name">Enkel kista</field>
+            <field name="category">coffin</field>
+            <field name="cost_min">3000</field>
+            <field name="cost_typical">5000</field>
+            <field name="cost_max">8000</field>
+            <field name="is_optional" eval="False"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="cost_cremation" model="examensbyran.funeral.cost.component">
+            <field name="name">Kremering</field>
+            <field name="category">burial</field>
+            <field name="cost_min">1500</field>
+            <field name="cost_typical">2500</field>
+            <field name="cost_max">4000</field>
+            <field name="is_optional" eval="False"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="cost_ceremony_venue" model="examensbyran.funeral.cost.component">
+            <field name="name">Lokal för ceremoni</field>
+            <field name="category">ceremony</field>
+            <field name="cost_min">2000</field>
+            <field name="cost_typical">4000</field>
+            <field name="cost_max">8000</field>
+            <field name="is_optional" eval="False"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="cost_flowers" model="examensbyran.funeral.cost.component">
+            <field name="name">Blommor</field>
+            <field name="category">flowers</field>
+            <field name="cost_min">500</field>
+            <field name="cost_typical">1500</field>
+            <field name="cost_max">5000</field>
+            <field name="is_optional" eval="True"/>
+            <field name="sequence">40</field>
+        </record>
+
+        <record id="cost_gravestone" model="examensbyran.funeral.cost.component">
+            <field name="name">Gravsten (enkel)</field>
+            <field name="category">gravestone</field>
+            <field name="cost_min">5000</field>
+            <field name="cost_typical">12000</field>
+            <field name="cost_max">30000</field>
+            <field name="is_optional" eval="True"/>
+            <field name="sequence">50</field>
+        </record>
+
+        <record id="cost_reception" model="examensbyran.funeral.cost.component">
+            <field name="name">Minnesstund med fika</field>
+            <field name="category">reception</field>
+            <field name="cost_min">2000</field>
+            <field name="cost_typical">5000</field>
+            <field name="cost_max">15000</field>
+            <field name="is_optional" eval="True"/>
+            <field name="sequence">60</field>
+        </record>
+    </data>
+</odoo>
