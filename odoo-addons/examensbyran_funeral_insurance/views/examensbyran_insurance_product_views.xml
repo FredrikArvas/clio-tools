@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_examensbyran_insurance_product_list" model="ir.ui.view">
+            <field name="name">examensbyran.insurance.product.list</field>
+            <field name="model">examensbyran.insurance.product</field>
+            <field name="arch" type="xml">
+                <list string="Försäkringsprodukter">
+                    <field name="provider_id"/>
+                    <field name="name"/>
+                    <field name="product_type"/>
+                    <field name="coverage_amount" widget="monetary"/>
+                    <field name="premium_amount" widget="monetary"/>
+                    <field name="requires_membership"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_examensbyran_insurance_product_form" model="ir.ui.view">
+            <field name="name">examensbyran.insurance.product.form</field>
+            <field name="model">examensbyran.insurance.product</field>
+            <field name="arch" type="xml">
+                <form string="Försäkringsprodukt">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Produktnamn"/></h1>
+                        </div>
+                        <group>
+                            <group string="Grunddata">
+                                <field name="provider_id"/>
+                                <field name="product_type"/>
+                                <field name="active"/>
+                            </group>
+                            <group string="Täckning och premie">
+                                <field name="coverage_amount" widget="monetary"/>
+                                <field name="premium_amount" widget="monetary"/>
+                                <field name="premium_frequency"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Villkor">
+                                <field name="age_min"/>
+                                <field name="age_max"/>
+                                <field name="requires_membership"/>
+                                <field name="membership_info"
+                                       invisible="not requires_membership"/>
+                            </group>
+                            <group string="Länk">
+                                <field name="url" widget="url"/>
+                                <field name="last_updated"/>
+                                <field name="recommendation_score"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Beskrivning">
+                                <field name="description" widget="html"/>
+                            </page>
+                            <page string="Vad ingår / inte ingår">
+                                <group>
+                                    <field name="includes"/>
+                                    <field name="excludes"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_examensbyran_insurance_product_search" model="ir.ui.view">
+            <field name="name">examensbyran.insurance.product.search</field>
+            <field name="model">examensbyran.insurance.product</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="provider_id"/>
+                    <field name="product_type"/>
+                    <group expand="0" string="Gruppera efter">
+                        <filter string="Aktör" name="group_provider"
+                                context="{'group_by': 'provider_id'}"/>
+                        <filter string="Typ" name="group_type"
+                                context="{'group_by': 'product_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_examensbyran_insurance_product_list" model="ir.actions.act_window">
+            <field name="name">Försäkringsprodukter</field>
+            <field name="res_model">examensbyran.insurance.product</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_examensbyran_insurance_product_search"/>
+        </record>
+    </data>
+</odoo>

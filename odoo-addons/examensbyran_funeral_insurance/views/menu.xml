@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_examensbyran_funeral_insurance_root"
+                  name="Begravningsförsäkring"
+                  sequence="50"/>
+
+        <menuitem id="menu_examensbyran_funeral_assessments"
+                  name="Skattningar"
+                  parent="menu_examensbyran_funeral_insurance_root"
+                  action="action_examensbyran_funeral_assessment_list"
+                  sequence="10"/>
+
+        <menuitem id="menu_examensbyran_funeral_providers"
+                  name="Försäkringsaktörer"
+                  parent="menu_examensbyran_funeral_insurance_root"
+                  action="action_examensbyran_insurance_provider_list"
+                  sequence="20"/>
+
+        <menuitem id="menu_examensbyran_funeral_products"
+                  name="Produkter"
+                  parent="menu_examensbyran_funeral_insurance_root"
+                  action="action_examensbyran_insurance_product_list"
+                  sequence="30"/>
+
+        <menuitem id="menu_examensbyran_funeral_costs"
+                  name="Kostnadskomponenter"
+                  parent="menu_examensbyran_funeral_insurance_root"
+                  action="action_examensbyran_funeral_cost_component_list"
+                  sequence="40"/>
+    </data>
+</odoo>

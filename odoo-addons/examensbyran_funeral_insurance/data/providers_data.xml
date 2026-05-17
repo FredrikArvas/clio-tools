@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="provider_folksam" model="examensbyran.insurance.provider">
+            <field name="name">Folksam</field>
+            <field name="provider_type">insurance_company</field>
+            <field name="website">https://www.folksam.se</field>
+        </record>
+
+        <record id="provider_lansforsakringar" model="examensbyran.insurance.provider">
+            <field name="name">Länsförsäkringar</field>
+            <field name="provider_type">insurance_company</field>
+            <field name="website">https://www.lansforsakringar.se</field>
+        </record>
+
+        <record id="provider_if" model="examensbyran.insurance.provider">
+            <field name="name">IF Skadeförsäkring</field>
+            <field name="provider_type">insurance_company</field>
+            <field name="website">https://www.if.se</field>
+        </record>
+
+        <record id="provider_trygghansa" model="examensbyran.insurance.provider">
+            <field name="name">Trygg-Hansa</field>
+            <field name="provider_type">insurance_company</field>
+            <field name="website">https://www.trygghansa.se</field>
+        </record>
+
+        <record id="provider_dina" model="examensbyran.insurance.provider">
+            <field name="name">Dina Försäkringar</field>
+            <field name="provider_type">insurance_company</field>
+            <field name="website">https://www.dinaforsakringar.se</field>
+        </record>
+
+        <record id="provider_fenix" model="examensbyran.insurance.provider">
+            <field name="name">Fenix Begravning</field>
+            <field name="provider_type">other</field>
+            <field name="website">https://www.fenixbegravning.se</field>
+        </record>
+
+        <record id="provider_fonus" model="examensbyran.insurance.provider">
+            <field name="name">Fonus</field>
+            <field name="provider_type">other</field>
+            <field name="website">https://www.fonus.se</field>
+        </record>
+
+        <record id="provider_unionen" model="examensbyran.insurance.provider">
+            <field name="name">Unionen</field>
+            <field name="provider_type">union</field>
+            <field name="website">https://www.unionen.se</field>
+        </record>
+
+        <record id="provider_kommunal" model="examensbyran.insurance.provider">
+            <field name="name">Kommunal</field>
+            <field name="provider_type">union</field>
+            <field name="website">https://www.kommunal.se</field>
+        </record>
+
+        <record id="provider_saco" model="examensbyran.insurance.provider">
+            <field name="name">Akademikerförbunden (Saco)</field>
+            <field name="provider_type">union</field>
+            <field name="website">https://www.saco.se</field>
+        </record>
+    </data>
+</odoo>
