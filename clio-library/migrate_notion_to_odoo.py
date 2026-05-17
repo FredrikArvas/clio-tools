@@ -43,6 +43,7 @@ from pathlib import Path
 def _load_dotenv():
     for candidate in [
         Path(__file__).parent.parent / ".env",
+        Path("/home/clioadmin/clio-tools/.env"),
         Path(__file__).parent / ".env",
         Path.home() / ".env",
     ]:
@@ -76,6 +77,7 @@ PERSON_MAP = {
     "Fredrik": "admin",
     "Ulrika":  "ulrika",
     "Alice":   "alice",
+    "Johan":   "johan",
 }
 
 HERE     = Path(__file__).parent
