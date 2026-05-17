@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_library_book_list" model="ir.ui.view">
+        <field name="name">library.book.list</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <list string="Böcker">
+                <field name="bok_id" optional="show"/>
+                <field name="name"/>
+                <field name="author"/>
+                <field name="year" optional="show"/>
+                <field name="shelf" optional="show"/>
+                <field name="language" optional="show"/>
+                <field name="format" optional="show"/>
+                <field name="avg_rating" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_library_book_form" model="ir.ui.view">
+        <field name="name">library.book.form</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <form string="Bok">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Titel"/></h1>
+                        <h2><field name="author" placeholder="Författare"/></h2>
+                    </div>
+                    <group>
+                        <group string="Metadata">
+                            <field name="bok_id" readonly="1"/>
+                            <field name="author_last"/>
+                            <field name="author_first"/>
+                            <field name="isbn"/>
+                            <field name="year"/>
+                            <field name="publisher"/>
+                        </group>
+                        <group string="Klassificering">
+                            <field name="language"/>
+                            <field name="format"/>
+                            <field name="shelf"/>
+                            <field name="house"/>
+                            <field name="avg_rating" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Betyg">
+                            <field name="rating_ids">
+                                <list editable="bottom">
+                                    <field name="user_id"/>
+                                    <field name="rating"/>
+                                    <field name="date_read"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_library_book_search" model="ir.ui.view">
+        <field name="name">library.book.search</field>
+        <field name="model">library.book</field>
+        <field name="arch" type="xml">
+            <search string="Sök böcker">
+                <field name="name"/>
+                <field name="author"/>
+                <field name="isbn"/>
+                <field name="bok_id"/>
+                <filter string="Fysisk" name="physical" domain="[('format','=','physical')]"/>
+                <filter string="E-bok" name="ebook" domain="[('format','=','ebook')]"/>
+                <filter string="Ljudbok" name="audio" domain="[('format','=','audio')]"/>
+                <separator/>
+                <filter string="Svenska" name="sv" domain="[('language','=','sv')]"/>
+                <filter string="Engelska" name="en" domain="[('language','=','en')]"/>
+                <group>
+                    <filter name="by_house" string="Hus" context="{'group_by': 'house'}"/>
+                    <filter name="by_language" string="Språk" context="{'group_by': 'language'}"/>
+                    <filter name="by_format" string="Format" context="{'group_by': 'format'}"/>
+                    <filter name="by_shelf" string="Hylla" context="{'group_by': 'shelf'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_library_book" model="ir.actions.act_window">
+        <field name="name">Böcker</field>
+        <field name="res_model">library.book</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_library_book_search"/>
+    </record>
+</odoo>

@@ -1,0 +1,20 @@
+{
+    'name': 'Clio Bibliotek',
+    'version': '19.0.1.0.0',
+    'summary': 'Arvas Familjebibliotek — bokregister, betyg och AI-smakrådgivare',
+    'author': 'Arvas International AB',
+    'category': 'Extra Tools',
+    'depends': ['base'],
+    'data': [
+        'security/library_security.xml',
+        'security/ir.model.access.csv',
+        'data/library_sequence.xml',
+        'views/library_book_views.xml',
+        'views/library_rating_views.xml',
+        'views/library_recommend_wizard_views.xml',
+        'views/library_menus.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
+    'license': 'LGPL-3',
+}
