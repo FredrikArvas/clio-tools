@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_library_root" name="Bibliotek" sequence="50"/>
+    <menuitem id="menu_library_books" name="Böcker"
+              parent="menu_library_root"
+              action="action_library_book" sequence="10"/>
+    <menuitem id="menu_library_ratings" name="Betyg"
+              parent="menu_library_root"
+              action="action_library_rating" sequence="20"/>
+    <menuitem id="menu_library_recommend" name="Rekommendera..."
+              parent="menu_library_root"
+              action="action_library_recommend_wizard" sequence="30"/>
+</odoo>

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_library_book_user,library.book user,model_library_book,,1,0,0,0
+access_library_book_manager,library.book manager,model_library_book,clio_library.library_group_manager,1,1,1,1
+access_library_rating_user,library.rating user,model_library_rating,,1,1,1,1
+access_library_recommend_wizard,library.recommend.wizard,model_library_recommend_wizard,,1,1,1,0
