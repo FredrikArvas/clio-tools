@@ -1,4 +1,4 @@
-ocrmypdf>=16.0.0
+ocrmypdf>=17.4.2
 pypdf>=4.0.0
 pymupdf>=1.23.0
 pytesseract>=0.3.10
