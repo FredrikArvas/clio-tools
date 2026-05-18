@@ -15,7 +15,7 @@
                 <field name="kodord"     string="Kodord"/>
                 <field name="name"       string="Projektnamn"/>
                 <field name="ncc_ok"     string="NCC"         widget="boolean"/>
-                <field name="notion_url" string="Notion"      widget="url" optional="show"/>
+                <field name="notion_url" string="Notion" widget="url"/>
                 <field name="status_raw" string="Status"      optional="hide"/>
             </list>
         </field>
