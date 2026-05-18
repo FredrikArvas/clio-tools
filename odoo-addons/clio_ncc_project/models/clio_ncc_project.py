@@ -52,6 +52,7 @@ class ClioNccProject(models.Model):
     kodord     = fields.Char(string="Kodord", index=True)
     name       = fields.Char(string="Projektnamn", required=True)
     ncc_ok     = fields.Boolean(string="NCC", default=False)
+    notion_url = fields.Char(string="Notion")
     status_raw = fields.Char(string="Status")
 
     @api.model
@@ -72,6 +73,7 @@ class ClioNccProject(models.Model):
                 "kodord":     p.get("kodord") or "",
                 "name":       p.get("name") or "(inget namn)",
                 "ncc_ok":     bool(p.get("ncc_url")),
+                "notion_url": p.get("ncc_url") or "",
                 "status_raw": p.get("status") or "",
             }
             for p in projects
