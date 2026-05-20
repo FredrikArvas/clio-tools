@@ -259,7 +259,7 @@ def find_ego(parser: Parser, owner_email: str,
         parts = ego_name.strip().lower().split()
         candidates = [
             ind for ind in individuals
-            if (n := _get_name(ind)) and all(p in f"{n[0]} {n[1]}".lower() for p in parts)
+            if (n := _get_name(ind)) and all(any(p == w for w in f"{n[0]} {n[1]}".lower().split()) for p in parts)
         ]
         if len(candidates) == 1:
             n = _get_name(candidates[0])
