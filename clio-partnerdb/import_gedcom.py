@@ -437,6 +437,9 @@ def _collect_ego_network(ego: IndividualElement, parser: Parser, depth: int) -> 
     ego_ptr = ego.get_pointer()
     seen: set[str] = {ego_ptr}
     result: list[tuple] = []
+    # Always include ego as the primary watch target
+    if _is_likely_alive(ego):
+        result.append((ego, "important"))
 
     def add(ind: Optional[IndividualElement], priority: str):
         if ind is None:
