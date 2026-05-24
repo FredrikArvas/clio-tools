@@ -83,7 +83,7 @@
     <field name="code">records.action_svartlista()</field>
   </record>
 
-  <!-- ── Kommandon — formulärvy (vitlista, svartlista, intervju, status) ── -->
+  <!-- ── Kommandon — formulärvy (vitlista, svartlista, status) ── -->
 
   <record id="view_clio_mail_admin_form" model="ir.ui.view">
     <field name="name">clio.mail.admin.form</field>
@@ -109,17 +109,6 @@
               <button name="action_blacklist"     type="object" string="Svartlista" class="btn-danger"/>
             </div>
           </group>
-
-          <group string="Intervju">
-            <field name="interview_to"      placeholder="mottagare@exempel.se"/>
-            <field name="interview_subject"/>
-            <field name="interview_context" placeholder="Kontext att skicka med (valfritt)"/>
-            <div class="o_row">
-              <button name="action_interview_start" type="object" string="Starta intervju" class="btn-primary"/>
-              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-secondary"/>
-            </div>
-          </group>
-
         </sheet>
       </form>
     </field>
