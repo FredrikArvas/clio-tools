@@ -6,12 +6,11 @@
             name="Clio Agent Mail"
             sequence="90"/>
 
-  <!-- Mail Admin (befintlig) -->
+  <!-- Väntande mail (ersätter wizard-dialogen) -->
   <menuitem id="menu_clio_mail_admin"
-            name="Mail Admin"
+            name="Väntande mail"
             parent="menu_clio_root"
-            action="action_clio_mail_admin"
+            action="action_clio_waiting_mail"
             sequence="10"/>
-
 
 </odoo>

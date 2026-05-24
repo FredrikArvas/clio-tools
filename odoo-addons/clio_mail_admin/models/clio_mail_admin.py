@@ -43,9 +43,52 @@ def _call(env, path: str, data: dict | None = None) -> str:
     return _call_raw(env, path, data).get("text", "")
 
 
+# ── Väntande mail (persistent listvy) ────────────────────────────────────────
+
+class ClioWaitingMail(models.Model):
+    _name        = "clio.waiting.mail"
+    _description = "Väntande mail"
+    _order       = "date_received"
+    _rec_name    = "sender"
+
+    sender        = fields.Char(string="Avsändare", readonly=True)
+    subject       = fields.Char(string="Ämne",      readonly=True)
+    date_received = fields.Char(string="Datum",     readonly=True)
+    account       = fields.Char(string="Konto",     readonly=True)
+
+    @api.model
+    def action_sync_from_service(self):
+        result = _call_raw(self.env, "/mail/waiting/json")
+        self.search([]).unlink()
+        vals = [
+            {
+                "sender":        r.get("sender", ""),
+                "subject":       r.get("subject", ""),
+                "date_received": (r.get("date_received") or "")[:10],
+                "account":       r.get("account", ""),
+            }
+            for r in result.get("waiting", [])
+        ]
+        if vals:
+            self.create(vals)
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def _decide(self, action: str):
+        for rec in self:
+            _call(self.env, "/mail/waiting/decide", {"sender": rec.sender, "action": action})
+        self.unlink()
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def action_vitlista(self):   return self._decide("VITLISTA")
+    def action_svartlista(self): return self._decide("SVARTLISTA")
+    def action_behall(self):     return self._decide("BEHÅLL")
+
+
+# ── Gamla TransientModels — behålls men exponeras ej i UI ────────────────────
+
 class ClioWaitingLine(models.TransientModel):
     _name = "clio.waiting.line"
-    _description = "Waiting Mail"
+    _description = "Waiting Mail (legacy)"
     _order = "id"
 
     admin_id      = fields.Many2one("clio.mail.admin", ondelete="cascade")
@@ -73,39 +116,22 @@ class ClioWaitingLine(models.TransientModel):
         self.env["clio.waiting.line"].create(vals)
         return parent._reopen()
 
-    def action_vitlista(self):
-        return self._decide("VITLISTA")
-
-    def action_svartlista(self):
-        return self._decide("SVARTLISTA")
-
-    def action_behall(self):
-        return self._decide("BEHÅLL")
+    def action_vitlista(self):   return self._decide("VITLISTA")
+    def action_svartlista(self): return self._decide("SVARTLISTA")
+    def action_behall(self):     return self._decide("BEHÅLL")
 
 
 class ClioMailAdmin(models.TransientModel):
     _name = "clio.mail.admin"
-    _description = "Clio Mail Admin"
+    _description = "Clio Mail Admin (legacy)"
 
-    result_text = fields.Text(string="Result", readonly=True)
-    waiting_ids = fields.One2many("clio.waiting.line", "admin_id", string="Waiting")
-
-    # Fields for actions with arguments
+    result_text       = fields.Text(string="Result",  readonly=True)
+    waiting_ids       = fields.One2many("clio.waiting.line", "admin_id", string="Waiting")
     email_input       = fields.Char(string="Email")
     decide_sender     = fields.Char(string="Sender")
     interview_to      = fields.Char(string="To")
     interview_subject = fields.Char(string="Subject", default="Intervju")
     interview_context = fields.Text(string="Context")
-
-    # ── Enkla kommandon ───────────────────────────────────────────────────────
-
-    def action_list(self):
-        self.result_text = _call(self.env, "/mail/list")
-        return self._reopen()
-
-    def action_waiting(self):
-        self.result_text = _call(self.env, "/mail/waiting")
-        return self._reopen()
 
     def action_status(self):
         self.result_text = _call(self.env, "/mail/status")
@@ -152,16 +178,9 @@ class ClioMailAdmin(models.TransientModel):
         self.env["clio.waiting.line"].create(vals)
         return self._reopen()
 
-    def action_bulk_vitlista(self):
-        return self._bulk_decide("VITLISTA")
-
-    def action_bulk_svartlista(self):
-        return self._bulk_decide("SVARTLISTA")
-
-    def action_bulk_behall(self):
-        return self._bulk_decide("BEHÅLL")
-
-    # ── Kommandon med argument ────────────────────────────────────────────────
+    def action_bulk_vitlista(self):   return self._bulk_decide("VITLISTA")
+    def action_bulk_svartlista(self): return self._bulk_decide("SVARTLISTA")
+    def action_bulk_behall(self):     return self._bulk_decide("BEHÅLL")
 
     def action_whitelist_add(self):
         if not self.email_input:
@@ -175,36 +194,6 @@ class ClioMailAdmin(models.TransientModel):
             raise UserError("Ange en e-postadress att svartlista.")
         self.result_text = _call(self.env, "/mail/blacklist", {"email": self.email_input})
         self.email_input = False
-        return self._reopen()
-
-    def action_decide_vitlista(self):
-        if not self.decide_sender:
-            raise UserError("Ange avsändarens e-postadress.")
-        self.result_text = _call(self.env, "/mail/waiting/decide", {
-            "sender": self.decide_sender,
-            "action": "VITLISTA",
-        })
-        self.decide_sender = False
-        return self._reopen()
-
-    def action_decide_svartlista(self):
-        if not self.decide_sender:
-            raise UserError("Ange avsändarens e-postadress.")
-        self.result_text = _call(self.env, "/mail/waiting/decide", {
-            "sender": self.decide_sender,
-            "action": "SVARTLISTA",
-        })
-        self.decide_sender = False
-        return self._reopen()
-
-    def action_decide_behall(self):
-        if not self.decide_sender:
-            raise UserError("Ange avsändarens e-postadress.")
-        self.result_text = _call(self.env, "/mail/waiting/decide", {
-            "sender": self.decide_sender,
-            "action": "BEHÅLL",
-        })
-        self.decide_sender = False
         return self._reopen()
 
     def action_interview_start(self):
@@ -225,8 +214,6 @@ class ClioMailAdmin(models.TransientModel):
         })
         self.interview_to = False
         return self._reopen()
-
-    # ── Hjälpmetod ────────────────────────────────────────────────────────────
 
     def _reopen(self):
         return {

@@ -3,3 +3,5 @@ access_clio_mail_admin,clio.mail.admin,model_clio_mail_admin,base.group_system,1
 access_clio_ncc_line,clio.ncc.line,model_clio_ncc_line,base.group_system,1,1,1,1
 access_clio_waiting_line,clio.waiting.line,model_clio_waiting_line,base.group_system,1,1,1,1
 access_clio_perm_line,clio.perm.line,model_clio_perm_line,base.group_system,1,1,1,1
+access_clio_waiting_mail_user,clio.waiting.mail läs,model_clio_waiting_mail,base.group_user,1,0,0,0
+access_clio_waiting_mail_admin,clio.waiting.mail admin,model_clio_waiting_mail,base.group_system,1,1,1,1
