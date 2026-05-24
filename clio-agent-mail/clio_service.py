@@ -147,7 +147,7 @@ def _route_mail_waiting_json(_data: dict) -> dict:
     import state as st
     with st.get_connection() as conn:
         rows = conn.execute(
-            "SELECT id, sender, subject, date_received, account FROM mail "
+            "SELECT id, sender, subject, date_received, account, body FROM mail "
             "WHERE status = ? ORDER BY created_at",
             (st.STATUS_WAITING,),
         ).fetchall()
@@ -315,24 +315,21 @@ def _route_mail_interview_close_and_summarize(data: dict) -> dict:
 
 
 def _route_mail_permissions_json(_data: dict) -> dict:
-    config = _get_config()
-    notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
-    page_id = config.get("mail", "permissions_notion_page_id", fallback="")
-    if not page_id:
-        return {"ok": False, "error": "permissions_notion_page_id saknas i clio.config"}
+    import state as st
     try:
-        from clio_access.notion_source import fetch_matrix
-        matrix = fetch_matrix(page_id, notion_token)
+        rows = st.list_permissions()
         users = [
             {
-                "email":        email,
-                "level":        entry["level"],
-                "accounts":     entry["accounts"],
-                "telegram_id":  entry.get("telegram_id"),
-                "kodord_scope": entry.get("kodord_scope", []),
-                "kodord_write": entry.get("kodord_write", []),
+                "email":        r["email"],
+                "level":        r["level"],
+                "accounts":     [a.strip() for a in (r["accounts"] or "*").split(",")
+                                 if a.strip() and a.strip() != "*"],
+                "telegram_id":  None,
+                "kodord_scope": ([k.strip() for k in (r["kodord_read"] or "").split(",") if k.strip()] +
+                                 [k.strip() for k in (r["kodord_rw"]   or "").split(",") if k.strip()]),
+                "kodord_write": [k.strip() for k in (r["kodord_rw"] or "").split(",") if k.strip()],
             }
-            for email, entry in matrix["emails"].items()
+            for r in rows
         ]
         return {"ok": True, "users": users}
     except Exception as e:
@@ -344,21 +341,19 @@ def _route_mail_permissions_update(data: dict) -> dict:
     email = data.get("email", "").strip().lower()
     if not email:
         return {"ok": False, "error": "saknat fält: email"}
-    config = _get_config()
-    notion_token = os.getenv("NOTION_API_KEY") or os.getenv("NOTION_TOKEN", "")
-    page_id = config.get("mail", "permissions_notion_page_id", fallback="")
-    if not page_id:
-        return {"ok": False, "error": "permissions_notion_page_id saknas i clio.config"}
+    import state as st
+    accounts_list = data.get("accounts") or []
+    accounts_str  = ",".join(accounts_list) if accounts_list else "*"
+    scope     = data.get("kodord_scope") or []
+    write_set = set(data.get("kodord_write") or [])
+    read_only = [k for k in scope if k not in write_set]
     try:
-        from clio_access.notion_source import update_user_permission
-        update_user_permission(
-            page_id=page_id,
-            token=notion_token,
+        st.upsert_permission(
             email=email,
-            level=data.get("level") or None,
-            accounts=data.get("accounts") or None,
-            kodord_scope=data.get("kodord_scope") or None,
-            kodord_write=data.get("kodord_write") or None,
+            level=data.get("level") or "whitelisted",
+            accounts=accounts_str,
+            kodord_read=",".join(read_only),
+            kodord_rw=",".join(data.get("kodord_write") or []),
         )
         return {"ok": True, "text": f"Behörighet uppdaterad för {email}"}
     except Exception as e:
