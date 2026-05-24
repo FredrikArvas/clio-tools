@@ -42,10 +42,40 @@
     </field>
   </record>
 
+  <record id="view_clio_waiting_mail_form" model="ir.ui.view">
+    <field name="name">clio.waiting.mail.form</field>
+    <field name="model">clio.waiting.mail</field>
+    <field name="arch" type="xml">
+      <form string="Väntande mail">
+        <sheet>
+          <group>
+            <group>
+              <field name="sender"        readonly="1"/>
+              <field name="subject"       readonly="1" string="Ämne"/>
+            </group>
+            <group>
+              <field name="date_received" readonly="1" string="Datum"/>
+              <field name="account"       readonly="1" string="Konto"/>
+            </group>
+          </group>
+          <separator string="Meddelande"/>
+          <field name="body" readonly="1" nolabel="1"
+                 style="font-family: monospace; white-space: pre-wrap; min-height: 200px;"/>
+        </sheet>
+        <footer>
+          <button name="action_vitlista"   type="object" string="Vitlista"   class="btn-primary"/>
+          <button name="action_svartlista" type="object" string="Svartlista" class="btn-danger"/>
+          <button name="action_behall"     type="object" string="Behåll"     class="btn-secondary"/>
+          <button special="cancel" string="Stäng"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
   <record id="action_clio_waiting_mail" model="ir.actions.act_window">
     <field name="name">Väntande mail</field>
     <field name="res_model">clio.waiting.mail</field>
-    <field name="view_mode">list</field>
+    <field name="view_mode">list,form</field>
     <field name="path">clio-agent-mail</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Inga väntande mail.</p>
