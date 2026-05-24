@@ -129,9 +129,6 @@ class ClioMailAdmin(models.TransientModel):
     waiting_ids       = fields.One2many("clio.waiting.line", "admin_id", string="Waiting")
     email_input       = fields.Char(string="Email")
     decide_sender     = fields.Char(string="Sender")
-    interview_to      = fields.Char(string="To")
-    interview_subject = fields.Char(string="Subject", default="Intervju")
-    interview_context = fields.Text(string="Context")
 
     def action_status(self):
         self.result_text = _call(self.env, "/mail/status")
@@ -194,25 +191,6 @@ class ClioMailAdmin(models.TransientModel):
             raise UserError("Ange en e-postadress att svartlista.")
         self.result_text = _call(self.env, "/mail/blacklist", {"email": self.email_input})
         self.email_input = False
-        return self._reopen()
-
-    def action_interview_start(self):
-        if not self.interview_to:
-            raise UserError("Ange mottagarens e-postadress.")
-        self.result_text = _call(self.env, "/mail/interview/start", {
-            "to":      self.interview_to,
-            "subject": self.interview_subject or "Intervju",
-            "context": self.interview_context or "",
-        })
-        return self._reopen()
-
-    def action_interview_stop(self):
-        if not self.interview_to:
-            raise UserError("Ange deltagarens e-postadress.")
-        self.result_text = _call(self.env, "/mail/interview/stop", {
-            "participant": self.interview_to,
-        })
-        self.interview_to = False
         return self._reopen()
 
     def _reopen(self):
