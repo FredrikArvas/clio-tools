@@ -16,7 +16,7 @@
                 icon="fa-check"   class="btn-sm btn-success"/>
         <button name="action_svartlista" type="object" string="Svartlista"
                 icon="fa-ban"     class="btn-sm btn-danger"/>
-        <button name="action_behall"     type="object" string="Behåll"
+        <button name="action_kasta"     type="object" string="Kasta"
                 icon="fa-clock-o" class="btn-sm btn-secondary"/>
       </list>
     </field>
@@ -65,7 +65,7 @@
         <footer>
           <button name="action_vitlista"   type="object" string="Vitlista"   class="btn-primary"/>
           <button name="action_svartlista" type="object" string="Svartlista" class="btn-danger"/>
-          <button name="action_behall"     type="object" string="Behåll"     class="btn-secondary"/>
+          <button name="action_kasta"     type="object" string="Kasta"     class="btn-secondary"/>
           <button special="cancel" string="Stäng"/>
         </footer>
       </form>

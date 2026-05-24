@@ -83,7 +83,7 @@ class ClioWaitingMail(models.Model):
 
     def action_vitlista(self):   return self._decide("VITLISTA")
     def action_svartlista(self): return self._decide("SVARTLISTA")
-    def action_behall(self):     return self._decide("BEHÅLL")
+    def action_kasta(self):     return self._decide("KASTA")
 
 
 # ── Gamla TransientModels — behålls men exponeras ej i UI ────────────────────
@@ -120,7 +120,7 @@ class ClioWaitingLine(models.TransientModel):
 
     def action_vitlista(self):   return self._decide("VITLISTA")
     def action_svartlista(self): return self._decide("SVARTLISTA")
-    def action_behall(self):     return self._decide("BEHÅLL")
+    def action_kasta(self):     return self._decide("KASTA")
 
 
 class ClioMailAdmin(models.TransientModel):
@@ -179,7 +179,7 @@ class ClioMailAdmin(models.TransientModel):
 
     def action_bulk_vitlista(self):   return self._bulk_decide("VITLISTA")
     def action_bulk_svartlista(self): return self._bulk_decide("SVARTLISTA")
-    def action_bulk_behall(self):     return self._bulk_decide("BEHÅLL")
+    def action_bulk_kasta(self):     return self._bulk_decide("KASTA")
 
     def action_whitelist_add(self):
         if not self.email_input:

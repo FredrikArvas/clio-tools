@@ -110,7 +110,7 @@ def _route_mail_waiting_decide(data: dict) -> dict:
     if not sender:
         return {"ok": False, "error": "saknar fält: sender"}
     if not action:
-        return {"ok": False, "error": "saknar fält: action (VITLISTA/SVARTLISTA/BEHÅLL)"}
+        return {"ok": False, "error": "saknar fält: action (VITLISTA/SVARTLISTA/KASTA)"}
     return _dispatch("waiting_decide", body_text=sender, subject=action)
 
 # ── Route-handlers ────────────────────────────────────────────────────────────
