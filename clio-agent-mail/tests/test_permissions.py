@@ -1,12 +1,11 @@
 """
-test_permissions.py — enhetstester för permissions + intervju-sammanfattning
+test_permissions.py — enhetstester för permissions-update + intervju-sammanfattning
 
-Täcker de tre nya clio_service-routrarna:
-  - _route_mail_permissions_json
-  - _route_mail_permissions_update
+Täcker:
+  - /mail/permissions/update (valideringsfel)
   - _route_mail_interview_summarize
 
-Inga nätverksanrop — Notion och Claude mockade.
+Behörighets-CRUD och service-synk täcks av test_permissions_scenarios.py (S-serien).
 """
 import configparser
 import sys
@@ -28,120 +27,13 @@ def _tmp_db():
     return Path(f.name)
 
 
-_FAKE_MATRIX = {
-    "emails": {
-        "carl@capgemini.com": {
-            "level": "coded",
-            "accounts": ["clio", "ssf"],
-            "telegram_id": None,
-            "kodord_scope": ["iaf", "capssf"],
-            "kodord_write": ["capssf"],
-        },
-        "ulrika@arvas.se": {
-            "level": "write",
-            "accounts": [],
-            "telegram_id": None,
-            "kodord_scope": [],
-            "kodord_write": [],
-        },
-    },
-    "telegram_ids": {},
-    "blocks": [],
-}
-
-
-# ── Hjälp: ladda routes från clio_service utan att starta servern ────────────
-
-def _load_routes():
-    """Importerar route-funktionerna utan att köra HTTP-servern."""
-    import importlib
-    # Mocka config + dotenv innan import
-    with patch("clio_service._get_config") as mock_cfg:
-        cfg = configparser.ConfigParser()
-        cfg.add_section("mail")
-        cfg.set("mail", "permissions_notion_page_id", "fake-page-id")
-        cfg.set("mail", "notify_address", "test@arvas.international")
-        mock_cfg.return_value = cfg
-        import clio_service
-        importlib.reload(clio_service)
-    return clio_service
-
-
-# ── 1. /mail/permissions/json ─────────────────────────────────────────────────
-
-class TestPermissionsJson(unittest.TestCase):
-
-    def setUp(self):
-        self.cfg = configparser.ConfigParser()
-        self.cfg.add_section("mail")
-        self.cfg.set("mail", "permissions_notion_page_id", "fake-page-id")
-
-    @patch("clio_service._get_config")
-    @patch("clio_service.os.getenv", return_value="fake-token")
-    @patch("clio_access.notion_source.fetch_matrix", return_value=_FAKE_MATRIX)
-    def test_returns_ok_and_users_list(self, mock_fetch, mock_env, mock_cfg):
-        mock_cfg.return_value = self.cfg
-        import clio_service
-        result = clio_service._route_mail_permissions_json({})
-        self.assertTrue(result.get("ok"), f"Svar: {result}")
-        self.assertIn("users", result)
-        self.assertIsInstance(result["users"], list)
-
-    @patch("clio_service._get_config")
-    @patch("clio_service.os.getenv", return_value="fake-token")
-    @patch("clio_access.notion_source.fetch_matrix", return_value=_FAKE_MATRIX)
-    def test_user_structure(self, mock_fetch, mock_env, mock_cfg):
-        mock_cfg.return_value = self.cfg
-        import clio_service
-        result = clio_service._route_mail_permissions_json({})
-        users = {u["email"]: u for u in result["users"]}
-
-        self.assertIn("carl@capgemini.com", users)
-        carl = users["carl@capgemini.com"]
-        self.assertEqual(carl["level"], "coded")
-        self.assertEqual(carl["accounts"], ["clio", "ssf"])
-        self.assertEqual(carl["kodord_scope"], ["iaf", "capssf"])
-        self.assertEqual(carl["kodord_write"], ["capssf"])
-
-    @patch("clio_service._get_config")
-    def test_missing_page_id_returns_error(self, mock_cfg):
-        cfg = configparser.ConfigParser()
-        cfg.add_section("mail")
-        mock_cfg.return_value = cfg
-        import clio_service
-        result = clio_service._route_mail_permissions_json({})
-        self.assertFalse(result.get("ok"))
-        self.assertIn("permissions_notion_page_id", result.get("error", ""))
-
-
-# ── 2. /mail/permissions/update ───────────────────────────────────────────────
+# ── /mail/permissions/update — validering ────────────────────────────────────
 
 class TestPermissionsUpdate(unittest.TestCase):
 
     def setUp(self):
         self.cfg = configparser.ConfigParser()
         self.cfg.add_section("mail")
-        self.cfg.set("mail", "permissions_notion_page_id", "fake-page-id")
-
-    @patch("clio_service._get_config")
-    @patch("clio_service.os.getenv", return_value="fake-token")
-    @patch("clio_access.notion_source.update_user_permission", return_value=True)
-    def test_update_calls_notion_and_returns_ok(self, mock_update, mock_env, mock_cfg):
-        mock_cfg.return_value = self.cfg
-        import clio_service
-        result = clio_service._route_mail_permissions_update({
-            "email":        "carl@capgemini.com",
-            "level":        "coded",
-            "accounts":     ["clio"],
-            "kodord_scope": ["iaf", "capssf"],
-            "kodord_write": ["capssf"],
-        })
-        self.assertTrue(result.get("ok"), f"Svar: {result}")
-        self.assertIn("carl@capgemini.com", result.get("text", ""))
-        mock_update.assert_called_once()
-        call_kwargs = mock_update.call_args[1]
-        self.assertEqual(call_kwargs["email"], "carl@capgemini.com")
-        self.assertEqual(call_kwargs["level"], "coded")
 
     @patch("clio_service._get_config")
     def test_missing_email_returns_error(self, mock_cfg):
@@ -151,21 +43,8 @@ class TestPermissionsUpdate(unittest.TestCase):
         self.assertFalse(result.get("ok"))
         self.assertIn("email", result.get("error", ""))
 
-    @patch("clio_service._get_config")
-    @patch("clio_service.os.getenv", return_value="fake-token")
-    @patch("clio_access.notion_source.update_user_permission", side_effect=Exception("Notion timeout"))
-    def test_notion_error_returns_error(self, mock_update, mock_env, mock_cfg):
-        mock_cfg.return_value = self.cfg
-        import clio_service
-        result = clio_service._route_mail_permissions_update({
-            "email": "carl@capgemini.com",
-            "level": "coded",
-        })
-        self.assertFalse(result.get("ok"))
-        self.assertIn("Notion timeout", result.get("error", ""))
 
-
-# ── 3. /mail/interview/summarize ──────────────────────────────────────────────
+# ── /mail/interview/summarize ─────────────────────────────────────────────────
 
 class TestInterviewSummarize(unittest.TestCase):
 
@@ -249,7 +128,6 @@ class TestInterviewSummarize(unittest.TestCase):
         import clio_service
         result = clio_service._route_mail_interview_summarize({"thread_id": self.thread_id})
         self.assertTrue(result.get("ok"), f"Svar: {result}")
-        # Verifiera att standardprompt skickades till Claude
         call_args = mock_anthropic_cls.return_value.messages.create.call_args
         content = call_args[1]["messages"][0]["content"]
         self.assertIn("Sammanfatta", content)
