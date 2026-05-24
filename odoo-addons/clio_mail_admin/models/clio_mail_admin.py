@@ -55,6 +55,7 @@ class ClioWaitingMail(models.Model):
     subject       = fields.Char(string="Ämne",      readonly=True)
     date_received = fields.Char(string="Datum",     readonly=True)
     account       = fields.Char(string="Konto",     readonly=True)
+    body          = fields.Text(string="Meddelande", readonly=True)
 
     @api.model
     def action_sync_from_service(self):
@@ -66,6 +67,7 @@ class ClioWaitingMail(models.Model):
                 "subject":       r.get("subject", ""),
                 "date_received": (r.get("date_received") or "")[:10],
                 "account":       r.get("account", ""),
+                "body":          r.get("body", ""),
             }
             for r in result.get("waiting", [])
         ]
@@ -76,7 +78,7 @@ class ClioWaitingMail(models.Model):
     def _decide(self, action: str):
         for rec in self:
             _call(self.env, "/mail/waiting/decide", {"sender": rec.sender, "action": action})
-        self.unlink()
+            rec.unlink()
         return {"type": "ir.actions.client", "tag": "reload"}
 
     def action_vitlista(self):   return self._decide("VITLISTA")
