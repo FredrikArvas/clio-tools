@@ -7,10 +7,9 @@
     <field name="name">clio.waiting.mail.list</field>
     <field name="model">clio.waiting.mail</field>
     <field name="arch" type="xml">
-      <list string="Väntande mail"
-            decoration-danger="False">
-        <field name="date_received" string="Datum"      optional="show"/>
-        <field name="account"       string="Konto"      optional="show"/>
+      <list string="Väntande mail">
+        <field name="date_received" string="Datum"     optional="show"/>
+        <field name="account"       string="Konto"     optional="show"/>
         <field name="sender"        string="Avsändare"/>
         <field name="subject"       string="Ämne"/>
         <button name="action_vitlista"   type="object" string="Vitlista"
@@ -47,6 +46,7 @@
     <field name="name">Väntande mail</field>
     <field name="res_model">clio.waiting.mail</field>
     <field name="view_mode">list</field>
+    <field name="path">clio-agent-mail</field>
     <field name="help" type="html">
       <p class="o_view_nocontent_smiling_face">Inga väntande mail.</p>
       <p>Klicka <b>Synka från service</b> i kugghjulsmenyn för att hämta aktuell lista.</p>
@@ -83,65 +83,52 @@
     <field name="code">records.action_svartlista()</field>
   </record>
 
-  <!-- ── Legacy: wizard-formuläret — behålls men används ej från menyn ─── -->
+  <!-- ── Kommandon — formulärvy (vitlista, svartlista, intervju, status) ── -->
 
   <record id="view_clio_mail_admin_form" model="ir.ui.view">
     <field name="name">clio.mail.admin.form</field>
     <field name="model">clio.mail.admin</field>
     <field name="arch" type="xml">
-      <form string="Clio Mail Admin">
+      <form string="Kommandon">
         <sheet>
-          <group string="Commands">
+
+          <group string="Status">
             <div class="o_row">
               <button name="action_status"    type="object" string="Status"    class="btn-secondary"/>
-              <button name="action_whitelist" type="object" string="Whitelist" class="btn-secondary"/>
+              <button name="action_whitelist" type="object" string="Visa vitlista" class="btn-secondary"/>
             </div>
-          </group>
-          <group string="Result">
             <field name="result_text" widget="text" nolabel="1"
                    invisible="not result_text"
                    style="font-family: monospace; white-space: pre-wrap;"/>
           </group>
-          <group string="Waiting Mail">
-            <div class="o_row" style="margin-bottom: 8px;">
-              <button name="action_load_waiting"    type="object" string="Load Waiting"       class="btn-primary"/>
-              <button name="action_bulk_vitlista"   type="object" string="Whitelist Selected" class="btn-success"/>
-              <button name="action_bulk_svartlista" type="object" string="Blacklist Selected" class="btn-danger"/>
-              <button name="action_bulk_behall"     type="object" string="Keep Selected"      class="btn-secondary"/>
-            </div>
-            <field name="waiting_ids" nolabel="1" invisible="not waiting_ids">
-              <list editable="top">
-                <field name="selected"      string=""        widget="boolean_toggle"/>
-                <field name="date_received" string="Date"    readonly="1" optional="show"/>
-                <field name="account"       string="Account" readonly="1" optional="show"/>
-                <field name="sender"        string="Sender"  readonly="1"/>
-                <field name="subject"       string="Subject" readonly="1"/>
-                <button name="action_vitlista"   type="object" string="Whitelist"
-                        icon="fa-check"   class="btn-sm btn-success"/>
-                <button name="action_svartlista" type="object" string="Blacklist"
-                        icon="fa-ban"     class="btn-sm btn-danger"/>
-                <button name="action_behall"     type="object" string="Keep"
-                        icon="fa-clock-o" class="btn-sm btn-secondary"/>
-              </list>
-            </field>
-          </group>
-          <group string="Whitelist / Blacklist">
-            <field name="email_input" placeholder="name@example.com"/>
+
+          <group string="Vitlista / Svartlista">
+            <field name="email_input" placeholder="namn@exempel.se"/>
             <div class="o_row">
-              <button name="action_whitelist_add" type="object" string="Add to Whitelist" class="btn-success"/>
-              <button name="action_blacklist"     type="object" string="Blacklist"        class="btn-danger"/>
+              <button name="action_whitelist_add" type="object" string="Vitlista" class="btn-success"/>
+              <button name="action_blacklist"     type="object" string="Svartlista" class="btn-danger"/>
             </div>
           </group>
+
+          <group string="Intervju">
+            <field name="interview_to"      placeholder="mottagare@exempel.se"/>
+            <field name="interview_subject"/>
+            <field name="interview_context" placeholder="Kontext att skicka med (valfritt)"/>
+            <div class="o_row">
+              <button name="action_interview_start" type="object" string="Starta intervju" class="btn-primary"/>
+              <button name="action_interview_stop"  type="object" string="Avsluta intervju" class="btn-secondary"/>
+            </div>
+          </group>
+
         </sheet>
       </form>
     </field>
   </record>
 
   <record id="action_clio_mail_admin" model="ir.actions.act_window">
-    <field name="name">Clio Mail Admin</field>
+    <field name="name">Kommandon</field>
     <field name="res_model">clio.mail.admin</field>
     <field name="view_mode">form</field>
-    <field name="target">new</field>
     <field name="context">{'default_result_text': False}</field>
   </record>
 
