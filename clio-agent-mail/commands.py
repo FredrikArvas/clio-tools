@@ -1191,7 +1191,7 @@ def dispatch(command: str, mail_item, config) -> CommandResult:
 def _cmd_waiting_decide(mail_item, config) -> CommandResult:
     """Godkänn ett väntande mail direkt från Odoo admin.
 
-    subject = action: VITLISTA | SVARTLISTA | BEHÅLL
+    subject = action: VITLISTA | SVARTLISTA | KASTA
     body    = avsändarens e-postadress
     """
     import re as _re
@@ -1204,10 +1204,10 @@ def _cmd_waiting_decide(mail_item, config) -> CommandResult:
         return CommandResult("Saknar e-postadress i brödtexten.")
     sender = email_match.group(0).lower()
 
-    valid = ("VITLISTA", "SVARTLISTA", "BEHÅLL")
+    valid = ("VITLISTA", "SVARTLISTA", "KASTA")
     if action not in valid:
         return CommandResult(
-            f"Okänd action: {action!r}. Använd VITLISTA, SVARTLISTA eller BEHÅLL."
+            f"Okänd action: {action!r}. Använd VITLISTA, SVARTLISTA eller KASTA."
         )
 
     if action == "VITLISTA":
@@ -1229,10 +1229,13 @@ def _cmd_waiting_decide(mail_item, config) -> CommandResult:
             )
         return CommandResult(f"Svartlistad: {sender}")
 
-    # BEHÅLL
-    import handlers as _handlers
-    _handlers._send_standard_for_waiting(sender, config)
-    return CommandResult(f"Standardsvar skickat för: {sender}")
+    # KASTA — ta bort väntande mail tyst, ingen svartlistning, inget svar
+    with state.get_connection() as conn:
+        conn.execute(
+            "UPDATE mail SET status = ? WHERE sender LIKE ? AND status = ?",
+            (state.STATUS_REJECTED, f"%{sender}%", state.STATUS_WAITING),
+        )
+    return CommandResult(f"Kastat (utan svar): {sender}")
 
 # Late-bind: waiting_decide added after function definition
 _HANDLERS["waiting_decide"] = _cmd_waiting_decide
