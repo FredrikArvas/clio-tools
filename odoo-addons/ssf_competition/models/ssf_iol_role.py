@@ -17,7 +17,7 @@ class SsfIolRole(models.Model):
     )
     role_name = fields.Char(string='Roll', required=True, index=True)
 
-    _sql_constraints = [
-        ('unique_iol', 'UNIQUE(person_id, organization_id, role_name)',
-         'Kombinationen person + organisation + roll finns redan'),
-    ]
+    _unique_iol = models.Constraint(
+        "UNIQUE(person_id, organization_id, role_name)",
+        "Kombinationen person + organisation + roll finns redan",
+    )

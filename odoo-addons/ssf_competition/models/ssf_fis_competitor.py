@@ -21,10 +21,7 @@ class SsfFisCompetitor(models.Model):
         readonly=True,
     )
 
-    _sql_constraints = [
-        (
-            "fis_competitor_unique",
-            "UNIQUE(fis_code, discipline_id)",
-            "FIS-kod + disciplin måste vara unik.",
-        )
-    ]
+    _fis_competitor_unique = models.Constraint(
+        "UNIQUE(fis_code, discipline_id)",
+        "FIS-kod + disciplin måste vara unik.",
+    )
