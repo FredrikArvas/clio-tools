@@ -120,9 +120,10 @@ class ClioVigilItem(models.Model):
     created_at  = fields.Datetime(string="Skapad",       copy=False)
     notified_at = fields.Datetime(string="Notifierad",   copy=False)
 
-    _sql_constraints = [
-        ("url_uniq", "UNIQUE(url)", "Objekt-URL måste vara unik."),
-    ]
+    _url_uniq = models.Constraint(
+        "UNIQUE(url)",
+        "Objekt-URL måste vara unik.",
+    )
 
     # ── Åtgärder ─────────────────────────────────────────────────────────────
 
