@@ -10,6 +10,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 MARGIN = 20
+MARGIN_TOP = 28  # Extra luft till sidhuvudet
 LINE_HEIGHT = 6
 FOOTER_URL = "https://fredrik.arvas.se/clio-research/"
 
@@ -35,10 +36,27 @@ def build_pdf(md_path: Path) -> Path:
         raise
 
     text = md_path.read_text(encoding="utf-8")
-    pdf = _ClioReport()
-    pdf.add_page()
+    lines = text.splitlines()
 
-    for line in text.splitlines():
+    # Samla rubriker för innehållsförteckning (## och ### nivåer)
+    toc_entries = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            toc_entries.append(("##", _clean(stripped[3:])))
+        elif stripped.startswith("### "):
+            toc_entries.append(("###", _clean(stripped[4:])))
+
+    pdf = _ClioReport()
+
+    # Sida 1+: innehållsförteckning
+    if toc_entries:
+        pdf.add_page()
+        _render_toc(pdf, toc_entries)
+
+    # Innehållssidor
+    pdf.add_page()
+    for line in lines:
         _render_line(pdf, line)
 
     out_path = md_path.with_suffix(".pdf")
@@ -47,13 +65,41 @@ def build_pdf(md_path: Path) -> Path:
     return out_path
 
 
+def _render_toc(pdf, entries: list) -> None:
+    """Renderar en innehållsförteckningssida."""
+    w = pdf.w - 2 * MARGIN
+    pdf.set_x(MARGIN)
+
+    # Rubrik
+    pdf.set_fill_color(*NAVY)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Helvetica", "B", 15)
+    pdf.set_x(MARGIN)
+    pdf.multi_cell(w, 10, "Innehållsförteckning", fill=True, align="L")
+    pdf.ln(6)
+
+    for level, title in entries:
+        indent = MARGIN if level == "##" else MARGIN + 6
+        size = 10 if level == "##" else 9
+        style = "B" if level == "##" else ""
+        color = NAVY if level == "##" else BLUE
+        pdf.set_font("Helvetica", style, size)
+        pdf.set_text_color(*color)
+        pdf.set_x(indent)
+        # Trunkera långa titlar
+        display = title[:80] + ("..." if len(title) > 80 else "")
+        pdf.cell(w - (indent - MARGIN), LINE_HEIGHT + 1, display, align="L", ln=True)
+
+    pdf.set_text_color(*BROWN)
+
+
 class _ClioReport:
     """Tunn wrapper runt FPDF med sidnummer och footer."""
 
     def __init__(self):
         from fpdf import FPDF
         self._pdf = FPDF()
-        self._pdf.set_margins(MARGIN, MARGIN, MARGIN)
+        self._pdf.set_margins(MARGIN, MARGIN_TOP, MARGIN)
         self._pdf.set_auto_page_break(auto=True, margin=18)
         self._pdf.set_font("Helvetica", size=10)
 
