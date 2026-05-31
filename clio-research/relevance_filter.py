@@ -49,7 +49,20 @@ def filter_by_relevance(sources: list[dict], question: str, top_n: int = DEFAULT
             len(below), len(sources), MIN_SIMILARITY,
         )
 
-    relevant = [s for s in sources if s.get("relevance_score", 0) >= MIN_SIMILARITY]
+    # Filtrera bort källor utan abstract — de kan inte evidensbedömas
+    no_abstract = [s for s in sources if not s.get("abstract") or len(str(s.get("abstract", ""))) < 50]
+    if no_abstract:
+        logger.info(
+            "[relevance_filter] %d källor utan abstract filtreras bort (ej evidensbara)",
+            len(no_abstract),
+        )
+
+    relevant = [
+        s for s in sources
+        if s.get("relevance_score", 0) >= MIN_SIMILARITY
+        and s.get("abstract")
+        and len(str(s.get("abstract", ""))) >= 50
+    ]
 
     relevant.sort(
         key=lambda s: s.get("relevance_score", 0) * 0.6 + (s.get("credibility_score", 0) / 18) * 0.4,
