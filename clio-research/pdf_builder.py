@@ -14,6 +14,11 @@ MARGIN_TOP = 28  # Extra luft till sidhuvudet
 LINE_HEIGHT = 6
 FOOTER_URL = "https://fredrik.arvas.se/clio-research/"
 
+# DejaVu Sans — Unicode-font med stöd för svenska tecken
+FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+FONT_REGULAR = f"{FONT_DIR}/DejaVuSans.ttf"
+FONT_BOLD    = f"{FONT_DIR}/DejaVuSans-Bold.ttf"
+
 # AIAB-färgpalett
 NAVY   = (42, 63, 111)
 BLUE   = (74, 111, 165)
@@ -38,21 +43,20 @@ def build_pdf(md_path: Path) -> Path:
     text = md_path.read_text(encoding="utf-8")
     lines = text.splitlines()
 
-    # Samla rubriker för innehållsförteckning (## och ### nivåer)
+    # Samla rubriker för innehållsförteckning (enbart ## nivå)
     toc_entries = []
     for line in lines:
         stripped = line.strip()
-        if stripped.startswith("## "):
-            toc_entries.append(("##", _clean(stripped[3:])))
-        elif stripped.startswith("### "):
-            toc_entries.append(("###", _clean(stripped[4:])))
+        if stripped.startswith("## ") and not stripped.startswith("### "):
+            toc_entries.append(_clean(stripped[3:]))
 
     pdf = _ClioReport()
 
-    # Sida 1+: innehållsförteckning
+    # Sida 1: innehållsförteckning
     if toc_entries:
         pdf.add_page()
         _render_toc(pdf, toc_entries)
+        pdf.ln(4)
 
     # Innehållssidor
     pdf.add_page()
@@ -66,29 +70,25 @@ def build_pdf(md_path: Path) -> Path:
 
 
 def _render_toc(pdf, entries: list) -> None:
-    """Renderar en innehållsförteckningssida."""
+    """Renderar en innehållsförteckningssida med enbart ## rubriker."""
     w = pdf.w - 2 * MARGIN
-    pdf.set_x(MARGIN)
 
-    # Rubrik
+    # Rubrik med navy-bakgrund
     pdf.set_fill_color(*NAVY)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_font("Helvetica", "B", 15)
+    pdf.set_font("DejaVu", "B", 15)
     pdf.set_x(MARGIN)
     pdf.multi_cell(w, 10, "Innehållsförteckning", fill=True, align="L")
     pdf.ln(6)
 
-    for level, title in entries:
-        indent = MARGIN if level == "##" else MARGIN + 6
-        size = 10 if level == "##" else 9
-        style = "B" if level == "##" else ""
-        color = NAVY if level == "##" else BLUE
-        pdf.set_font("Helvetica", style, size)
-        pdf.set_text_color(*color)
-        pdf.set_x(indent)
-        # Trunkera långa titlar
-        display = title[:80] + ("..." if len(title) > 80 else "")
-        pdf.cell(w - (indent - MARGIN), LINE_HEIGHT + 1, display, align="L", ln=True)
+    for title in entries:
+        # Trunkera om nödvändigt
+        display = title[:85] + ("..." if len(title) > 85 else "")
+        pdf.set_font("DejaVu", "B", 10)
+        pdf.set_text_color(*NAVY)
+        pdf.set_x(MARGIN)
+        pdf.multi_cell(w, LINE_HEIGHT + 1, display, align="L")
+        pdf.ln(1)
 
     pdf.set_text_color(*BROWN)
 
@@ -101,7 +101,10 @@ class _ClioReport:
         self._pdf = FPDF()
         self._pdf.set_margins(MARGIN, MARGIN_TOP, MARGIN)
         self._pdf.set_auto_page_break(auto=True, margin=18)
-        self._pdf.set_font("Helvetica", size=10)
+        # Registrera DejaVu Sans för Unicode-stöd (ä, ö, å, emojis etc.)
+        self._pdf.add_font("DejaVu", "", FONT_REGULAR, uni=True)
+        self._pdf.add_font("DejaVu", "B", FONT_BOLD, uni=True)
+        self._pdf.set_font("DejaVu", size=10)
 
     def add_page(self):
         self._pdf.add_page()
@@ -116,7 +119,7 @@ class _ClioReport:
         for page_num in range(1, total + 1):
             self._pdf.page = page_num
             self._pdf.set_y(-14)
-            self._pdf.set_font("Helvetica", "I", 7)
+            self._pdf.set_font("DejaVu", "", 7)
             self._pdf.set_text_color(*GREY)
             left = f"clio-research  |  {FOOTER_URL}"
             right = f"{today}  |  Sida {page_num}/{total}"
@@ -177,7 +180,7 @@ def _render_line(pdf, line: str) -> None:
         # Färgad bakgrundsruta för H1
         pdf.set_fill_color(*NAVY)
         pdf.set_text_color(255, 255, 255)
-        pdf.set_font("Helvetica", "B", 15)
+        pdf.set_font("DejaVu", "B", 15)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, 10, _clean(stripped[2:]), fill=True, align="L")
         pdf.set_text_color(*BROWN)
@@ -186,7 +189,7 @@ def _render_line(pdf, line: str) -> None:
     elif stripped.startswith("## "):
         pdf.ln(3)
         pdf.set_text_color(*NAVY)
-        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_font("DejaVu", "B", 12)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, 8, _clean(stripped[3:]), align="L")
         # Understrykning
@@ -200,7 +203,7 @@ def _render_line(pdf, line: str) -> None:
     elif stripped.startswith("### "):
         pdf.ln(2)
         pdf.set_text_color(*BLUE)
-        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_font("DejaVu", "B", 10)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, 7, _clean(stripped[4:]), align="L")
         pdf.set_text_color(*BROWN)
@@ -220,25 +223,25 @@ def _render_line(pdf, line: str) -> None:
         pdf._last_was_separator = bool(re.match(r"^\|[-| :]+\|$", stripped))
 
     elif re.match(r"^\d+\.", stripped):
-        pdf.set_font("Helvetica", size=8)
+        pdf.set_font("DejaVu", size=8)
         pdf.set_text_color(*BROWN)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped), align="L")
 
     elif stripped.startswith("- ") or stripped.startswith("* "):
-        pdf.set_font("Helvetica", size=10)
+        pdf.set_font("DejaVu", size=10)
         pdf.set_text_color(*BROWN)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, LINE_HEIGHT, "  - " + _clean(stripped[2:]), align="L")
 
     elif stripped.startswith("**") and stripped.endswith("**"):
-        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_font("DejaVu", "B", 10)
         pdf.set_text_color(*BROWN)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped), align="L")
 
     else:
-        pdf.set_font("Helvetica", size=10)
+        pdf.set_font("DejaVu", size=10)
         pdf.set_text_color(*BROWN)
         pdf.set_x(MARGIN)
         pdf.multi_cell(w, LINE_HEIGHT, _clean(stripped), align="L")
@@ -255,7 +258,7 @@ def _render_table_row(pdf, line: str, w: float, prev_was_separator: bool = False
     is_header = not prev_was_separator and any(
         c in ("#", "Titel", "Källa", "Författare", "Ställningstagande") for c in cells
     )
-    pdf.set_font("Helvetica", "B" if is_header else "", 8)
+    pdf.set_font("DejaVu", "B" if is_header else "", 8)
     pdf.set_text_color(*NAVY if is_header else BROWN)
     if is_header:
         pdf.set_fill_color(*CREAM)
@@ -273,5 +276,4 @@ def _clean(text: str) -> str:
     text = re.sub(r"\*(.*?)\*", r"\1", text)
     text = re.sub(r"`(.*?)`", r"\1", text)
     text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", text)
-    text = text.encode("latin-1", errors="ignore").decode("latin-1")
     return text.strip()
