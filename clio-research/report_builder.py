@@ -51,6 +51,12 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
         logger.warning("[report_builder] PDF-generering misslyckades: %s", e)
 
     try:
+        import rtf_builder
+        rtf_builder.build_rtf(out_path)
+    except Exception as e:
+        logger.warning("[report_builder] RTF-generering misslyckades: %s", e)
+
+    try:
         import quadrant_builder
         quadrant_builder.build_quadrant(sources, verdicts, run_id, done_dir)
     except Exception as e:
