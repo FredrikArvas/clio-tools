@@ -163,7 +163,7 @@ def _render_line(stripped: str) -> str:
         content = _inline(stripped[2:])
         return (
             r"\pard\li360\fi-180\sb30\sa30"
-            r"{\f1\fs20\cf3 \bullet  " + content + r"}"
+            r"{\f1\b0\fs20\cf3 \bullet  " + content + r"}"
             r"\par "
         )
 
@@ -171,7 +171,7 @@ def _render_line(stripped: str) -> str:
         content = _inline(stripped)
         return (
             r"\pard\li360\fi-180\sb20\sa20"
-            r"{\f1\fs18\cf3 " + content + r"}"
+            r"{\f1\b0\fs20\cf3 " + content + r"}"
             r"\par "
         )
 
@@ -186,7 +186,7 @@ def _render_line(stripped: str) -> str:
     content = _inline(stripped)
     return (
         r"\pard\sb40\sa40"
-        r"{\f1\fs20\cf3 " + content + r"}"
+        r"{\f1\b0\fs20\cf3 " + content + r"}"
         r"\par "
     )
 
@@ -225,7 +225,7 @@ def _render_table(lines: list[str]) -> str:
         parts.append("\n")
         for cell in cells:
             text = _clean(cell)
-            fmt  = r"\b\cf1" if is_header else r"\cf3"
+            fmt  = r"\b\cf1" if is_header else r"\b0\cf3"
             parts.append(
                 r"\pard\intbl\f1\fs18" + fmt + r" " + _esc(text) + r"\cell "
             )
