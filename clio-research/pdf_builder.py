@@ -112,8 +112,7 @@ class _ClioReport:
                 self.set_text_color(*GREY)
                 w = self.w - 2 * MARGIN
                 self.set_xy(MARGIN, 8)
-                self.cell(w / 2, 4, "clio-research  |  Evidensrapport", align="L")
-                self.cell(w / 2, 4, FOOTER_URL, align="R")
+                self.cell(w, 4, "clio-research  |  Evidensrapport", align="L")
                 # Tunn linje under header
                 self.set_draw_color(*GREY)
                 self.line(MARGIN, 13, self.w - MARGIN, 13)
@@ -286,9 +285,11 @@ def _render_table_row(pdf, line: str, w: float, prev_was_separator: bool = False
 
 
 def _clean(text: str) -> str:
-    """Ta bort Markdown-formattering och tecken utanför latin-1."""
-    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
-    text = re.sub(r"\*(.*?)\*", r"\1", text)
-    text = re.sub(r"`(.*?)`", r"\1", text)
-    text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", text)
+    """Ta bort Markdown-formattering."""
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)   # **bold**
+    text = re.sub(r"\*(.*?)\*",     r"\1", text)   # *italic*
+    text = re.sub(r"__(.*?)__",     r"\1", text)   # __bold__
+    text = re.sub(r"_(.*?)_",       r"\1", text)   # _italic_
+    text = re.sub(r"`(.*?)`",       r"\1", text)   # `code`
+    text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", text)  # [text](url)
     return text.strip()
