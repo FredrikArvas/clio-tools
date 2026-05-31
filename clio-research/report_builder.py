@@ -190,28 +190,24 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
     for key, title in section_titles.items():
         body += f"{title}\n\n{sections.get(key, '')}\n\n---\n\n"
 
-    # Verdict-tabell
+    # Verdict-lista (kortformat — ersätter tabell som fungerar dåligt i PDF)
     verdict_section = "## 8. Källernas ställningstaganden\n\n"
     if verdicts:
         verdict_map = {v["index"]: v for v in verdicts}
-        verdict_section += (
-            "| # | Källa | År | Region | Ställningstagande | Motivering |\n"
-            "|---|-------|----|--------|-------------------|------------|\n"
-        )
         for i, src in enumerate(sources[:30], 1):
             v = verdict_map.get(i, {})
             raw_v = v.get("verdict", "?")
-            emoji = {"stöd": "🟢", "neutral": "🟡", "avvisar": "🔴"}.get(raw_v, "⚪")
-            title_short = (src.get("title") or "?")[:55]
-            year = src.get("year", "?")
-            region = src.get("region", "?")
-            reason = (v.get("reason") or "").replace("|", "/")[:80]
+            emoji = {"stod": "Stodjer", "stöd": "Stodjer", "neutral": "Neutral", "avvisar": "Avvisar"}.get(raw_v, raw_v)
+            title_short = (src.get("title") or "?")[:70]
+            year = src.get("year", "u.a.")
+            region = src.get("region") or "?"
+            reason = (v.get("reason") or "").replace("|", "/")
             verdict_section += (
-                f"| {i} | {title_short} | {year} | {region} | "
-                f"{emoji} {raw_v} | {reason} |\n"
+                f"**{i}. {title_short}** ({year}, {region})\n"
+                f"{emoji} — {reason}\n\n"
             )
     else:
-        verdict_section += "_Verdict-klassificering ej tillgänglig._\n"
+        verdict_section += "_Verdict-klassificering ej tillganglig._\n"
     verdict_section += "\n---\n\n"
 
     # Källförteckning — APA 7
