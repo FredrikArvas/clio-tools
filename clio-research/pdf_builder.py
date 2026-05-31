@@ -10,7 +10,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 MARGIN = 20
-MARGIN_TOP = 28  # Extra luft till sidhuvudet
+MARGIN_TOP = 22   # Toppmarginal — header tar ~8mm, resten är luft
 LINE_HEIGHT = 6
 FOOTER_URL = "https://fredrik.arvas.se/clio-research/"
 
@@ -94,39 +94,54 @@ def _render_toc(pdf, entries: list) -> None:
 
 
 class _ClioReport:
-    """Tunn wrapper runt FPDF med sidnummer och footer."""
+    """
+    Wrapper runt en FPDF-subklass med korrekt header() och footer().
+    header()/footer() anropas automatiskt av fpdf2 vid varje add_page() och output().
+    """
 
     def __init__(self):
         from fpdf import FPDF
-        self._pdf = FPDF()
-        self._pdf.set_margins(MARGIN, MARGIN_TOP, MARGIN)
-        self._pdf.set_auto_page_break(auto=True, margin=18)
-        # Registrera DejaVu Sans för Unicode-stöd (ä, ö, å, emojis etc.)
-        self._pdf.add_font("DejaVu", "", FONT_REGULAR, uni=True)
-        self._pdf.add_font("DejaVu", "B", FONT_BOLD, uni=True)
-        self._pdf.set_font("DejaVu", size=10)
+
+        today = datetime.now().strftime("%Y-%m-%d")
+        font_regular = FONT_REGULAR
+        font_bold    = FONT_BOLD
+
+        class _PDF(FPDF):
+            def header(self):
+                self.set_font("DejaVu", "", 7)
+                self.set_text_color(*GREY)
+                w = self.w - 2 * MARGIN
+                self.set_xy(MARGIN, 8)
+                self.cell(w / 2, 4, "clio-research  |  Evidensrapport", align="L")
+                self.cell(w / 2, 4, FOOTER_URL, align="R")
+                # Tunn linje under header
+                self.set_draw_color(*GREY)
+                self.line(MARGIN, 13, self.w - MARGIN, 13)
+                self.set_draw_color(0, 0, 0)
+
+            def footer(self):
+                self.set_y(-12)
+                self.set_font("DejaVu", "", 7)
+                self.set_text_color(*GREY)
+                w = self.w - 2 * MARGIN
+                self.set_x(MARGIN)
+                self.cell(w / 2, 5, today, align="L")
+                self.cell(w / 2, 5, f"Sida {self.page_no()}/{{nb}}", align="R")
+
+        pdf = _PDF()
+        pdf.alias_nb_pages()          # aktiverar {nb}-platshållaren för totalt sidantal
+        pdf.add_font("DejaVu", "", font_regular, uni=True)
+        pdf.add_font("DejaVu", "B", font_bold, uni=True)
+        pdf.set_margins(MARGIN, MARGIN_TOP, MARGIN)
+        pdf.set_auto_page_break(auto=True, margin=16)
+        pdf.set_font("DejaVu", size=10)
+        self._pdf = pdf
 
     def add_page(self):
         self._pdf.add_page()
 
     def output(self, path: str):
-        self._add_footers()
         self._pdf.output(path)
-
-    def _add_footers(self):
-        total = len(self._pdf.pages)
-        today = datetime.now().strftime("%Y-%m-%d")
-        for page_num in range(1, total + 1):
-            self._pdf.page = page_num
-            self._pdf.set_y(-14)
-            self._pdf.set_font("DejaVu", "", 7)
-            self._pdf.set_text_color(*GREY)
-            left = f"clio-research  |  {FOOTER_URL}"
-            right = f"{today}  |  Sida {page_num}/{total}"
-            w = self._pdf.w - 2 * MARGIN
-            self._pdf.set_x(MARGIN)
-            self._pdf.cell(w / 2, 5, left, align="L")
-            self._pdf.cell(w / 2, 5, right, align="R")
 
     # Delegera egenskaper FPDF behöver
     @property
