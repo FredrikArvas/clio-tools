@@ -1,7 +1,7 @@
 """rtf_builder.py — Konverterar .md-rapport till RTF (inga externa beroenden).
 
 RTF öppnas direkt i Word, LibreOffice och macOS Preview utan font-installationer.
-Genererar exakt samma innehåll som pdf_builder men via RTF-formatet.
+Kodning: Windows-1252 (cp1252) — svenska tecken stöds fullt ut.
 """
 
 from __future__ import annotations
@@ -12,14 +12,6 @@ from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
-# AIAB-färger som RTF-färgtabellindex (1-baserat)
-_C_NAVY  = 1   # (42, 63, 111)
-_C_BLUE  = 2   # (74, 111, 165)
-_C_BROWN = 3   # (61, 46, 10)
-_C_GREY  = 4   # (180, 180, 180)
-_C_WHITE = 5   # (255, 255, 255)
-_C_GOLD  = 6   # (200, 168, 75)
 
 _COLOUR_TABLE = (
     r"{\colortbl;"
@@ -53,26 +45,29 @@ def build_rtf(md_path: Path) -> Path:
     text = md_path.read_text(encoding="utf-8")
     lines = text.splitlines()
 
-    parts: list[str] = []
+    # Samla ## rubriker för innehållsförteckning
+    toc_entries: list[str] = []
+    for line in lines:
+        s = line.strip()
+        if s.startswith("## ") and not s.startswith("### "):
+            toc_entries.append(_clean(s[3:]))
+
+    # Rendera innehåll
+    body_parts: list[str] = []
     i = 0
     while i < len(lines):
-        line = lines[i]
-        stripped = line.strip()
-
-        if stripped.startswith("| ") or stripped.startswith("|---"):
-            # Samla ihop alla rader i tabellen
+        stripped = lines[i].strip()
+        if stripped.startswith("|"):
             table_lines: list[str] = []
             while i < len(lines) and lines[i].strip().startswith("|"):
                 table_lines.append(lines[i].strip())
                 i += 1
-            parts.append(_render_table(table_lines))
+            body_parts.append(_render_table(table_lines))
             continue
-
-        parts.append(_render_line(stripped))
+        body_parts.append(_render_line(stripped))
         i += 1
 
     today = datetime.now().strftime("%Y-%m-%d")
-    basename = md_path.stem
 
     header_rtf = (
         r"{\header\pard\qr\f1\fs16\cf4 "
@@ -82,57 +77,76 @@ def build_rtf(md_path: Path) -> Path:
     footer_rtf = (
         r"{\footer\pard\f1\fs16\cf4 "
         + _esc(today)
-        + r"\tab\tab\tab\tab Sida \chpgn\par}"
+        + r"\tab\tab\tab\tab\tab\tab Sida \chpgn\par}"
     )
 
+    toc_rtf = _render_toc(toc_entries)
+
     document = (
-        r"{\rtf1\ansi\ansicpg1252\uc1\deff1"
+        r"{\rtf1\ansi\ansicpg1252\deff1"
         + "\n" + _FONT_TABLE
         + "\n" + _COLOUR_TABLE
         + r"\widowctrl\hyphauto"
         + r"\margl1440\margr1440\margt1440\margb1440"
         + "\n" + header_rtf
         + "\n" + footer_rtf
-        + "\n"
-        + "\n".join(parts)
+        + "\n" + toc_rtf
+        + "\n" + "\n".join(body_parts)
         + "\n}"
     )
 
     out_path = md_path.with_suffix(".rtf")
-    # RTF ska vara latin-1 / windows-1252; icke-kodningsbara tecken ersätts med \uN?
     out_path.write_bytes(_encode_rtf(document))
     logger.info("[rtf_builder] RTF sparad: %s (%d bytes)", out_path, out_path.stat().st_size)
     return out_path
 
 
 # ---------------------------------------------------------------------------
-# Intern rendering
+# Innehållsförteckning
+# ---------------------------------------------------------------------------
+
+def _render_toc(entries: list[str]) -> str:
+    if not entries:
+        return ""
+    parts = [
+        r"\pard\sb240\sa80{\f1\b\fs28\cf5\highlight1 "
+        + _esc("Innehållsförteckning")
+        + r"}\par ",
+        r"\pard\sb40\sa0\par ",
+    ]
+    for entry in entries:
+        parts.append(
+            r"\pard\sb16\sa16\li360{\f1\fs20\cf1 "
+            + _esc(entry)
+            + r"}\par "
+        )
+    parts.append(r"\pard\page ")   # sidbrytning efter TOC
+    return "\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Radrendering
 # ---------------------------------------------------------------------------
 
 def _render_line(stripped: str) -> str:
     if not stripped:
-        return r"\par "
+        return r"\pard\sb0\sa0\par "
 
     if stripped == "---":
-        return (
-            r"\pard\sb120\sa120"
-            r"{\f1\fs18\cf4 "
-            + "_" * 80
-            + r"}\par "
-        )
+        return r"\pard\sb80\sa80\brdrb\brdrs\brdrw5\brdrcf4\par "
 
     if stripped.startswith("# ") and not stripped.startswith("## "):
         title = _clean(stripped[2:])
         return (
-            r"\pard\sb240\sa60"
-            r"{\f1\b\fs30\cf5\highlight1 " + _esc(title) + r"}"
+            r"\pard\sb240\sa80\cbpat1"
+            r"{\f1\b\fs30\cf5 " + _esc(title) + r"}"
             r"\par "
         )
 
     if stripped.startswith("## "):
         title = _clean(stripped[3:])
         return (
-            r"\pard\sb200\sa60\brdrb\brdrs\brdrw10\brdrcf2"
+            r"\pard\sb200\sa40\brdrb\brdrs\brdrw8\brdrcf2"
             r"{\f1\b\fs24\cf1 " + _esc(title) + r"}"
             r"\par "
         )
@@ -140,7 +154,7 @@ def _render_line(stripped: str) -> str:
     if stripped.startswith("### "):
         title = _clean(stripped[4:])
         return (
-            r"\pard\sb160\sa40"
+            r"\pard\sb140\sa30"
             r"{\f1\b\fs21\cf2 " + _esc(title) + r"}"
             r"\par "
         )
@@ -148,7 +162,7 @@ def _render_line(stripped: str) -> str:
     if stripped.startswith("- ") or stripped.startswith("* "):
         content = _inline(stripped[2:])
         return (
-            r"\pard\li360\fi-180\sb40\sa40"
+            r"\pard\li360\fi-180\sb30\sa30"
             r"{\f1\fs20\cf3 \bullet  " + content + r"}"
             r"\par "
         )
@@ -169,7 +183,6 @@ def _render_line(stripped: str) -> str:
             r"\par "
         )
 
-    # Brödtext
     content = _inline(stripped)
     return (
         r"\pard\sb40\sa40"
@@ -178,8 +191,11 @@ def _render_line(stripped: str) -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Tabellrendering
+# ---------------------------------------------------------------------------
+
 def _render_table(lines: list[str]) -> str:
-    """Renderar en MD-tabell som RTF-tabell med enkla kanter."""
     rows = []
     for line in lines:
         if re.match(r"^\|[-| :]+\|$", line):
@@ -193,7 +209,7 @@ def _render_table(lines: list[str]) -> str:
         return ""
 
     n_cols  = max(len(r) for r in rows)
-    col_w   = 8640 // n_cols           # total textbredd ~12 cm i twips
+    col_w   = 8640 // n_cols
     col_pos = [(i + 1) * col_w for i in range(n_cols)]
 
     parts = [r"\pard\sb80\sa80 "]
@@ -204,12 +220,12 @@ def _render_table(lines: list[str]) -> str:
             parts.append(
                 r"\clbrdrt\brdrw5\brdrs\clbrdrl\brdrw5\brdrs"
                 r"\clbrdrb\brdrw5\brdrs\clbrdrr\brdrw5\brdrs"
-                + r"\cellx" + str(cp)
+                r"\cellx" + str(cp)
             )
         parts.append("\n")
         for cell in cells:
             text = _clean(cell)
-            fmt = r"\b\cf1" if is_header else r"\cf3"
+            fmt  = r"\b\cf1" if is_header else r"\cf3"
             parts.append(
                 r"\pard\intbl\f1\fs18" + fmt + r" " + _esc(text) + r"\cell "
             )
@@ -218,29 +234,28 @@ def _render_table(lines: list[str]) -> str:
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# Text-hjälpfunktioner
+# ---------------------------------------------------------------------------
+
 def _inline(text: str) -> str:
     """Konverterar inline MD-formattering till RTF."""
-    # **bold**
     text = re.sub(
         r"\*\*(.+?)\*\*",
         lambda m: r"{\b " + _esc(m.group(1)) + r"}",
         text,
     )
-    # *italic* och _italic_
     text = re.sub(
         r"\*(.+?)\*|_(.+?)_",
         lambda m: r"{\i " + _esc(m.group(1) or m.group(2)) + r"}",
         text,
     )
-    # `code`
     text = re.sub(
         r"`(.+?)`",
         lambda m: r"{\f2\fs18 " + _esc(m.group(1)) + r"}",
         text,
     )
-    # [link](url) — visa bara länktexten
     text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", lambda m: _esc(m.group(1)), text)
-    # Resten som ej redan är RTF
     return text
 
 
@@ -255,7 +270,7 @@ def _clean(text: str) -> str:
 
 
 def _esc(text: str) -> str:
-    """Escapar text för RTF: backslash, klamrar och icke-ASCII via \\uN?."""
+    """Escapar RTF-specialtecken. Svenska tecken passerar rakt igenom för cp1252-kodning."""
     out = []
     for ch in text:
         if ch == "\\":
@@ -264,14 +279,13 @@ def _esc(text: str) -> str:
             out.append("\\{")
         elif ch == "}":
             out.append("\\}")
-        elif ord(ch) <= 127:
-            out.append(ch)
+        elif ch == "\n":
+            out.append(r"\line ")
         else:
-            # Unicode-escape: \uN? — ? är fallback-tecken (visas om font saknar glyfen)
-            out.append(f"\\u{ord(ch)}?")
+            out.append(ch)
     return "".join(out)
 
 
 def _encode_rtf(document: str) -> bytes:
-    """Kodas som ASCII — icke-ASCII är redan escaped via \\uN?."""
-    return document.encode("ascii", errors="replace")
+    """Kodar RTF som Windows-1252. Tecken utanför kodningen (t.ex. emojis) byts mot '?'."""
+    return document.encode("cp1252", errors="replace")
