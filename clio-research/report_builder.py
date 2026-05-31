@@ -56,7 +56,7 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
 def _generate_sections(client, prompts: dict, system: str, question: str,
                        context: str, sources: list[dict]) -> dict:
     section_keys = [
-        "question_summary", "core_claim", "evidence_clusters",
+        "executive_summary", "question_summary", "core_claim", "evidence_clusters",
         "weak_links", "adversarial_landscape", "white_spots",
         "epistemological_assessment",
     ]
@@ -176,6 +176,7 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
     )
 
     section_titles = {
+        "executive_summary":      "## Sammanfattning",
         "question_summary":       "## 1. Frågeställning",
         "core_claim":             "## 2. Kärnanspråket",
         "evidence_clusters":      "## 3. Starkaste evidenskluster",

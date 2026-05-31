@@ -12,7 +12,7 @@ import os
 logger = logging.getLogger(__name__)
 
 EMBEDDING_MODEL = "text-embedding-3-small"
-DEFAULT_TOP_N = 60
+DEFAULT_TOP_N = 100
 MIN_SIMILARITY = 0.20
 
 
