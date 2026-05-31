@@ -8,3 +8,4 @@ python-dotenv>=1.0.0
 pymupdf>=1.23
 trafilatura>=1.6
 PyYAML>=6.0
+matplotlib>=3.8

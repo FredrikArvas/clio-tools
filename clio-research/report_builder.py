@@ -50,6 +50,12 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
     except Exception as e:
         logger.warning("[report_builder] PDF-generering misslyckades: %s", e)
 
+    try:
+        import quadrant_builder
+        quadrant_builder.build_quadrant(sources, verdicts, run_id, done_dir)
+    except Exception as e:
+        logger.warning("[report_builder] Quadrant-diagram misslyckades: %s", e)
+
     return out_path
 
 
@@ -171,7 +177,7 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
         f"**Datum:** {date}  \n"
         f"**Relevanta källor:** {len(sources)}  \n"
         f"**Regioner:** {', '.join(regions) if regions else 'Ej kategoriserade'}  \n"
-        f"**Ställningstaganden:** 🟢 {stod} stödjer · 🟡 {neutral} neutral · 🔴 {avvisar} avvisar\n\n"
+        f"**Ställningstaganden:** [Stödjer] {stod} · [Neutral] {neutral} · [Avvisar] {avvisar}\n\n"
         f"---\n\n"
     )
 
@@ -197,17 +203,17 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
         for i, src in enumerate(sources[:30], 1):
             v = verdict_map.get(i, {})
             raw_v = v.get("verdict", "?")
-            emoji = {"stod": "Stodjer", "stöd": "Stodjer", "neutral": "Neutral", "avvisar": "Avvisar"}.get(raw_v, raw_v)
+            label = {"stöd": "[Stödjer]", "neutral": "[Neutral]", "avvisar": "[Avvisar]"}.get(raw_v, "[?]")
             title_short = (src.get("title") or "?")[:70]
-            year = src.get("year", "u.a.")
+            year = src.get("year", "u.å.")
             region = src.get("region") or "?"
             reason = (v.get("reason") or "").replace("|", "/")
             verdict_section += (
                 f"**{i}. {title_short}** ({year}, {region})\n"
-                f"{emoji} — {reason}\n\n"
+                f"{label} — {reason}\n\n"
             )
     else:
-        verdict_section += "_Verdict-klassificering ej tillganglig._\n"
+        verdict_section += "Verdict-klassificering ej tillgänglig.\n"
     verdict_section += "\n---\n\n"
 
     # Källförteckning — APA 7
