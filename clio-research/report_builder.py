@@ -37,7 +37,7 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
         logger.warning("[report_builder] Inga relevanta källor — rapporten blir tunn")
 
     sections = _generate_sections(client, prompts, system_prompt, question, context, sources)
-    verdicts = _generate_verdicts(client, system_prompt, question, sources[:30])
+    verdicts = _generate_verdicts(client, system_prompt, question, sources[:60])
 
     report_md = _format_report(protocol, sources, sections, verdicts, run_id)
     out_path = done_dir / f"{run_id}.md"
@@ -200,7 +200,7 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
     verdict_section = "## 8. Källernas ställningstaganden\n\n"
     if verdicts:
         verdict_map = {v["index"]: v for v in verdicts}
-        for i, src in enumerate(sources[:30], 1):
+        for i, src in enumerate(sources[:60], 1):
             v = verdict_map.get(i, {})
             raw_v = v.get("verdict", "?")
             label = {"stöd": "[Stödjer]", "neutral": "[Neutral]", "avvisar": "[Avvisar]"}.get(raw_v, "[?]")
