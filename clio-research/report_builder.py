@@ -202,21 +202,24 @@ def _format_report(protocol: dict, sources: list[dict], sections: dict,
     for key, title in section_titles.items():
         body += f"{title}\n\n{sections.get(key, '')}\n\n---\n\n"
 
-    # Verdict-lista (kortformat — ersätter tabell som fungerar dåligt i PDF)
+    # Verdict-tabell
     verdict_section = "## 8. Källernas ställningstaganden\n\n"
     if verdicts:
         verdict_map = {v["index"]: v for v in verdicts}
+        verdict_section += (
+            "| # | Källa | År | Region | Ställningstagande | Motivering |\n"
+            "|---|-------|----|--------|-------------------|------------|\n"
+        )
         for i, src in enumerate(sources[:60], 1):
             v = verdict_map.get(i, {})
             raw_v = v.get("verdict", "?")
             label = {"stöd": "[Stödjer]", "neutral": "[Neutral]", "avvisar": "[Avvisar]"}.get(raw_v, "[?]")
-            title_short = (src.get("title") or "?")[:70]
+            title_short = (src.get("title") or "?")[:50]
             year = src.get("year", "u.å.")
             region = src.get("region") or "?"
-            reason = (v.get("reason") or "").replace("|", "/")
+            reason = (v.get("reason") or "").replace("|", "/")[:70]
             verdict_section += (
-                f"**{i}. {title_short}** ({year}, {region})\n"
-                f"{label} — {reason}\n\n"
+                f"| {i} | {title_short} | {year} | {region} | {label} | {reason} |\n"
             )
     else:
         verdict_section += "Verdict-klassificering ej tillgänglig.\n"
