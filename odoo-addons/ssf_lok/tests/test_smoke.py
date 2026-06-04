@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
 
+@tagged("post_install", "-at_install")
 class TestSmokeSsfLok(TransactionCase):
     """Smoke test — ssf_lok: fee_report och fee_report_value."""
 

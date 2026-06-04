@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
 
+@tagged("post_install", "-at_install")
 class TestSmokeOdooPartnerSsf(TransactionCase):
     """Smoke test — odoo_partner_ssf: verifierar att fälten är tillagda på res.partner."""
 

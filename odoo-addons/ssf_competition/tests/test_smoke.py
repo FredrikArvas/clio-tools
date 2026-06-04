@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
 
+@tagged("post_install", "-at_install")
 class TestSmokeSsfCompetition(TransactionCase):
     """Smoke test — ssf_competition: alla modeller registrerade + basic CRUD."""
 

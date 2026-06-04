@@ -1,31 +1,47 @@
 #!/usr/bin/env bash
-# run_tests.sh — Kör Odoo-enhetstester inuti Odoo 19-containern
+# run_tests.sh — Skapar en fresh testdatabas, installerar modulen, kör tester.
+# Credentials läses från odoo.conf i containern — inga lösenord i skriptet.
+#
 # Användning:
-#   ./scripts/run_tests.sh                      # alla moduler
-#   ./scripts/run_tests.sh clio_cockpit         # en modul
-#   ./scripts/run_tests.sh clio_cockpit,clio_job  # flera moduler
+#   ./scripts/run_tests.sh clio_event_log            # testar en modul
+#   ./scripts/run_tests.sh clio_event_log,clio_job   # testar flera
+#   ./scripts/run_tests.sh clio_aiab                 # testar hela AIAB-stacken
+#
+# Obs: Skapar och droppar databasen clio_smoke_test automatiskt.
 
 set -e
 
 CONTAINER="odoo19-odoo-1"
-DB="aiab19_migrated"
-MODULES="${1:-$(ls /home/clioadmin/19.0/clio-tools/odoo-addons/ | grep -v CLAUDE | tr n ,)}"
+PGCONTAINER="odoo19-db-1"
+TEST_DB="clio_smoke_test"
+MODULES="${1:-clio_aiab}"
 
 echo "═══════════════════════════════════════════════"
-echo "  Odoo Enhetstester"
-echo "  Databas : $DB"
-echo "  Moduler : $MODULES"
+echo "  Odoo 19 Smoketester"
+echo "  Testdatabas : $TEST_DB"
+echo "  Moduler     : $MODULES"
 echo "═══════════════════════════════════════════════"
 
+# 1. Skapa tom databas
+echo ""
+echo "→ Skapar testdatabas $TEST_DB..."
+docker exec "$PGCONTAINER" psql -U odoo -c "DROP DATABASE IF EXISTS $TEST_DB;" postgres
+docker exec "$PGCONTAINER" psql -U odoo -c "CREATE DATABASE $TEST_DB;" postgres
+
+# 2. Initiera Odoo-schema
+echo "→ Installerar Odoo bas + moduler ($MODULES)..."
 docker exec "$CONTAINER" odoo \
-    --db_host=db \
-    --db_user=odoo \
-    --db_password=odoo \
+    --http-port=8950 \
     --test-enable \
+    --test-tags post_install \
     --stop-after-init \
-    -u "$MODULES" \
-    -d "$DB" \
-    2>&1 | grep -E "^(ERROR|WARNING|INFO|CRITICAL|Ran|OK|FAIL|ERROR:)" || true
+    -i "$MODULES" \
+    -d "$TEST_DB" \
+    2>&1 | grep -E "(ERROR|CRITICAL|Starting Test|Ran [0-9]+|FAIL|stats:|post-tests)" || true
 
 echo ""
-echo "Klart. Kontrollera logg ovan för FAIL/ERROR."
+echo "→ Droppar testdatabas..."
+docker exec "$PGCONTAINER" psql -U odoo -c "DROP DATABASE IF EXISTS $TEST_DB;" postgres
+
+echo ""
+echo "Klart."
