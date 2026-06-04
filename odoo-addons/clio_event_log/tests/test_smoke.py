@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
 
+@tagged("post_install", "-at_install")
 class TestSmokeClioEventLog(TransactionCase):
     """Smoke test — clio_event_log: modell, CRUD, compute-fält."""
 

@@ -1,6 +1,8 @@
 from odoo.tests.common import TransactionCase
+from odoo.tests import tagged
 
 
+@tagged("post_install", "-at_install")
 class TestSmokeClioLibrary(TransactionCase):
     """Smoke test — clio_library: library.book och library.rating."""
 
