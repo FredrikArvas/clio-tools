@@ -1,0 +1,36 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = [
+    ".git",
+    "__pycache__",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# E: pycodestyle errors, F: pyflakes, I: isort, W: warnings
+# B: flake8-bugbear, UP: pyupgrade
+select = ["E", "F", "I", "W", "B", "UP"]
+ignore = [
+    "E501",   # line too long — hanteras av ruff-format
+    "B008",   # do not perform function calls in default args (vanligt i Odoo)
+    "B904",   # raise from None — ibland ok i Odoo exception-hantering
+    "UP007",  # Use X | Y for union — inte alltid kompatibelt med Odoo ORM
+    "UP038",  # Use X | Y in isinstance — ditto
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Testfiler: tillåt längre uttryck och fler imports
+"*/tests/*.py" = ["E402", "F401"]
+# Manifest-filer: tillåt icke-standard formattering
+"*/__manifest__.py" = ["I001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["odoo"]
+known-third-party = []
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

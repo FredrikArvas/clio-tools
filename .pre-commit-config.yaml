@@ -1,0 +1,38 @@
+repos:
+  # ── Standardkontroller ────────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-yaml
+      - id: check-json
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ── Python: ruff (linting + formattering) ────────────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.8
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # ── XML / JSON / YAML: prettier ───────────────────────────────────────────
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types_or: [xml, json, yaml]
+        args: [--tab-width=4, --print-width=120]
+        exclude: |
+          (?x)^(
+            .*\.po$|
+            .*\.pot$
+          )$
+
+# Kör pylint-odoo och Odoo-enhetstester via scripts/lint_odoo.sh (kräver Docker)
+# pre-commit run --all-files kör INTE dessa automatiskt — se scripts/
