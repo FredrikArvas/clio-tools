@@ -10,7 +10,6 @@
         'clio_graph',
         'clio_job',
         'clio_mail_admin',
-        'clio_obit',
         'clio_theme',
         'clio_vigil',
         'l10n_se_ssn',
