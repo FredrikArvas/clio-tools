@@ -86,3 +86,14 @@ class ClioRecruiterProfile(models.Model):
     def _compute_match_count(self):
         for rec in self:
             rec.match_count = len(rec.match_ids)
+
+    def action_view_matches(self):
+        self.ensure_one()
+        return {
+            "type":     "ir.actions.act_window",
+            "name":     "Matchhistorik",
+            "res_model": "clio.recruiter.match",
+            "view_mode": "list,form",
+            "domain":   [("profile_id", "=", self.id)],
+            "context":  {"default_profile_id": self.id},
+        }
