@@ -93,8 +93,8 @@ def run(
     from notifier import send_report, send_onboarding
     from onboarding import build_onboarding_mail
     from odoo_writer import (
-        write_matches_to_odoo, write_heartbeat, get_odoo_env,
-        load_known_article_ids, write_articles_to_odoo,
+        write_matches_to_odoo, write_recruiter_match, write_heartbeat,
+        get_odoo_env, load_known_article_ids, write_articles_to_odoo,
     )
 
     odoo_env = get_odoo_env() if odoo_enabled else None
@@ -243,7 +243,10 @@ def run(
                 mail_sent = 1
                 print(f"[clio-job] Rapport skickad till {to_addr}")
                 if odoo_env:
-                    write_matches_to_odoo(profile, matched)
+                    if is_recruiter:
+                        write_recruiter_match(profile, matched)
+                    else:
+                        write_matches_to_odoo(profile, matched)
         except (RuntimeError, ValueError, FileNotFoundError) as e:
             print(f"[FEL] Kunde inte skicka mail: {e}", file=sys.stderr)
     else:
