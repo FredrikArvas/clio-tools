@@ -206,7 +206,7 @@ def run(
                 "match_score":  result.match_score if not result.error else -1,
                 "is_matched":   is_match,
             })
-        else:
+        elif not dry_run:
             # SQLite-läge: skriv direkt per artikel
             mark_seen(
                 article.article_id,
