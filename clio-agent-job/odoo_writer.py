@@ -218,7 +218,7 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
         else:
             target = profile.get("target_candidate") or {}
             signals = profile.get("trigger_signals") or {}
-            profile_id = Profile.create({
+            Profile.create({
                 "name":                    profile_name,
                 "email":                   profile.get("email", ""),
                 "language":                profile.get("language", "sv"),
@@ -232,6 +232,9 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
                 "confidential_client":     bool(profile.get("confidential_client", True)),
                 "client_hint":             profile.get("client_hint", ""),
             })
+            # create() returnerar OdooRecordset — hämta integer-id via search_read
+            created = Profile.search_read([("name", "=", profile_name)], ["id"], limit=1)
+            profile_id = created[0]["id"]
             _logger.info("write_recruiter_match: skapade ny profil '%s' (id=%s)", profile_name, profile_id)
 
         sent_at = _utcnow_str()
