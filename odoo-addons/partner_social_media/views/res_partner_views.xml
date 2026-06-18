@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id='res_partner_view_form_social' model='ir.ui.view'>
+        <field name='name'>res.partner.form.social</field>
+        <field name='model'>res.partner</field>
+        <field name='inherit_id' ref='base.view_partner_form'/>
+        <field name='arch' type='xml'>
+            <xpath expr='//field[@name="website"]' position='after'>
+                <field name='social_linkedin' widget='url' placeholder='https://linkedin.com/in/...'/>
+                <field name='social_twitter' widget='url' placeholder='https://x.com/...'/>
+                <field name='social_facebook' widget='url' placeholder='https://facebook.com/...'/>
+                <field name='social_instagram' widget='url' placeholder='https://instagram.com/...'/>
+                <field name='social_github' widget='url' placeholder='https://github.com/...'/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
