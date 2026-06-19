@@ -248,7 +248,7 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         f"{(item['title'] or '—')[:55]}"
     )
 
-    model = WhisperModel(model_size, device="cpu", compute_type="int8")
+    model = WhisperModel(model_size, device="cuda", compute_type="float32")
     raw_segs, _ = model.transcribe(str(audio_path), beam_size=5, language=language)
 
     new_segments: list[dict] = []
