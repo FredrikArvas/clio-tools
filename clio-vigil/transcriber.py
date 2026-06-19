@@ -146,6 +146,10 @@ def download_audio(item: dict) -> Optional[Path]:
 
     output_path = AUDIO_DIR / _audio_filename(item)
 
+    if output_path.exists():
+        logger.info(f"Audio redan förberedd: {output_path.name}")
+        return output_path
+
     if source_type == "youtube":
         logger.info(f"Laddar ned YouTube-audio: {url[:70]}")
         ok = _download_youtube(url, output_path)
@@ -353,6 +357,44 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
             else:
                 counts["failed"] += 1
 
+    return counts
+
+
+def run_download_queue(conn, domain: Optional[str] = None,
+                       max_items: int = 20) -> dict:
+    """
+    Förladdar audio för köade objekt utan att transkribera.
+    Körs fristående (t.ex. var 30:e min) så att Whisper hittar
+    filen redo i AUDIO_DIR och slipper vänta på nedladdning.
+    """
+    where = "AND domain = ?" if domain else ""
+    params: tuple = (domain, max_items) if domain else (max_items,)
+    rows = conn.execute(
+        f"""SELECT * FROM vigil_items
+            WHERE state = 'queued'
+            AND (archive_downloaded = 0 OR archive_downloaded IS NULL)
+            {where}
+            ORDER BY priority_score DESC
+            LIMIT ?""",
+        params,
+    ).fetchall()
+
+    counts = {"downloaded": 0, "skipped": 0, "failed": 0}
+    for item in rows:
+        output_path = AUDIO_DIR / _audio_filename(dict(item))
+        if output_path.exists():
+            counts["skipped"] += 1
+            continue
+        path = download_audio(dict(item))
+        if path:
+            counts["downloaded"] += 1
+        else:
+            counts["failed"] += 1
+
+    logger.info(
+        f"Förladning klar: {counts['downloaded']} nya, "
+        f"{counts['skipped']} redan klara, {counts['failed']} fel"
+    )
     return counts
 
 
