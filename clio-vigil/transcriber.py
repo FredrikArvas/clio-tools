@@ -22,7 +22,9 @@ Körning (separat från pipeline — GPU-intensiv):
 
 import json
 import logging
+import os
 import re
+import shutil
 import sys
 from pathlib import Path
 from typing import Optional
@@ -36,9 +38,13 @@ from orchestrator import (
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR       = Path(__file__).parent / "data"
-AUDIO_DIR      = DATA_DIR / "audio"
+DATA_DIR        = Path(__file__).parent / "data"
+AUDIO_DIR       = DATA_DIR / "audio"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
+
+# Arkivkatalog — samma som archiver.py, konfigurerbar via miljövariabel
+ARCHIVE_DIR = Path(os.getenv("VIGIL_ARCHIVE_DIR", "/home/clioadmin/clio-archive"))
+SAVE_AUDIO  = os.getenv("VIGIL_SAVE_AUDIO", "true").lower() != "false"
 
 # ---------------------------------------------------------------------------
 # Transkriptionsprofiler
@@ -280,9 +286,8 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
                 preempted = True
                 break
 
-    _cleanup_audio(audio_path)
-
     if preempted:
+        _cleanup_audio(audio_path)
         return False
 
     # Klar — skriv färdigt transkript
@@ -300,6 +305,8 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         (item_id,),
     )
     conn.commit()
+
+    _archive_audio(conn, item_id, dict(item), audio_path)
 
     logger.info(f"Klar: {len(all_segments)} segment → {transcript_json.name}")
     return True
@@ -363,11 +370,41 @@ def _fmt_ts(seconds: float) -> str:
 
 
 def _cleanup_audio(path: Optional[Path]) -> None:
+    """Raderar temporär ljudfil (används vid preempt)."""
     if path and path.exists():
         try:
             path.unlink()
         except Exception as e:
             logger.warning(f"Kunde inte ta bort audio {path}: {e}")
+
+
+def _archive_audio(conn, item_id: int, item: dict, audio_path: Optional[Path]) -> None:
+    """Flyttar transkriberat ljud till arkivkatalog och uppdaterar DB.
+    Om VIGIL_SAVE_AUDIO=false raderas filen istället.
+    """
+    if not audio_path or not audio_path.exists():
+        return
+    if not SAVE_AUDIO:
+        _cleanup_audio(audio_path)
+        return
+
+    source_slug = _make_slug(item.get("source_name") or "okand")
+    dest_dir    = ARCHIVE_DIR / source_slug
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_path   = dest_dir / audio_path.name
+
+    try:
+        shutil.move(str(audio_path), str(dest_path))
+        size_mb = dest_path.stat().st_size / (1024 * 1024)
+        conn.execute(
+            "UPDATE vigil_items SET archive_downloaded=1, archive_path=? WHERE id=?",
+            (str(dest_path), item_id),
+        )
+        conn.commit()
+        logger.info(f"Ljud arkiverat: {dest_path.name} ({size_mb:.1f} MB)")
+    except Exception as e:
+        logger.warning(f"Kunde inte arkivera ljud {audio_path}: {e}")
+        _cleanup_audio(audio_path)
 
 
 # ---------------------------------------------------------------------------
