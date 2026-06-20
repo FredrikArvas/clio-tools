@@ -13,6 +13,7 @@ Om anslutning saknas eller misslyckas loggas en varning och körningen fortsätt
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +26,10 @@ if str(_ROOT) not in sys.path:
 _logger = logging.getLogger(__name__)
 
 TOOL_NAME = "clio-vigil"
+
+# Vigil-specifik Odoo-anslutning — åsidosätter globala ODOO_* om satt
+_VIGIL_ODOO_URL = os.getenv("VIGIL_ODOO_URL")
+_VIGIL_ODOO_DB  = os.getenv("VIGIL_ODOO_DB")
 
 # Tillstånd som är värda att spegla till Odoo (discovered = för många)
 SYNC_STATES = [
@@ -43,10 +48,10 @@ SYNC_STATES = [
 # ---------------------------------------------------------------------------
 
 def get_odoo_env():
-    """Returnerar en ansluten OdooConnector, eller None vid fel."""
+    """Returnerar en ansluten OdooConnector mot vigil-databasen, eller None vid fel."""
     try:
         from clio_odoo import connect
-        return connect()
+        return connect(url=_VIGIL_ODOO_URL, db=_VIGIL_ODOO_DB)
     except Exception as exc:
         _logger.warning("Odoo-anslutning misslyckades: %s", exc)
         return None
