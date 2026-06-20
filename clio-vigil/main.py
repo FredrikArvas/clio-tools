@@ -772,10 +772,8 @@ def main():
         _sys.path.insert(0, str(_Path(__file__).parent.parent))
         from classifiers.uap_pipeline import run_uap_classifier
         try:
-            import sys as _s2
-            _s2.path.insert(0, str(_Path(__file__).parent.parent / "clio_odoo"))
-            from clio_odoo import connect as _odoo_connect
-            _odoo_env = _odoo_connect()
+            from odoo_writer import get_odoo_env as _get_odoo_env
+            _odoo_env = _get_odoo_env()
         except Exception as _e:
             logger.error(f"Odoo-anslutning misslyckades: {_e}")
             _odoo_env = None
