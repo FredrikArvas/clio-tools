@@ -167,20 +167,32 @@ def sync_item(odoo_env, row) -> bool:
 
 def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None) -> int:
     """
-    Läser objekt från SQLite och upsert:ar till clio.vigil.item.
-    Returnerar antal synkade poster.
+    Delta-synkar vigil_items → clio.vigil.item.
+
+    Synkar bara rader där odoo_synced_state saknas eller skiljer sig från
+    aktuellt state. Batch-lookup + batch-create minskar Odoo-anrop från
+    2N → 1 + N_changed + 1 (steady state ~50 anrop istället för ~3900).
 
     states: lista av tillstånd att synka (default: SYNC_STATES).
     """
     if odoo_env is None:
         return 0
 
+    # Migrering: lägg till kolumn om den saknas (idempotent)
+    try:
+        conn.execute("ALTER TABLE vigil_items ADD COLUMN odoo_synced_state TEXT")
+        conn.commit()
+    except Exception:
+        pass  # Kolumnen finns redan
+
     states = states or SYNC_STATES
     placeholders = ",".join("?" * len(states))
 
     try:
         rows = conn.execute(
-            f"SELECT * FROM vigil_items WHERE state IN ({placeholders})",
+            f"""SELECT * FROM vigil_items
+                WHERE state IN ({placeholders})
+                AND (odoo_synced_state IS NULL OR odoo_synced_state != state)""",
             states,
         ).fetchall()
     except Exception as exc:
@@ -188,9 +200,52 @@ def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None) -> int
         return 0
 
     if not rows:
+        _logger.info("sync_items_from_conn: inget att synka (ingen state-ändring)")
         return 0
 
-    synced = sum(1 for row in rows if sync_item(odoo_env, row))
+    Item = odoo_env["clio.vigil.item"]
+
+    # Batch-lookup: ett enda anrop för alla URL:er
+    all_urls = [row["url"] for row in rows]
+    try:
+        existing = Item.search_read([("url", "in", all_urls)], ["id", "url"])
+        url_to_id = {r["url"]: r["id"] for r in existing}
+    except Exception as exc:
+        _logger.warning("sync_items_from_conn: batch-lookup misslyckades: %s", exc)
+        return 0
+
+    to_create: list[dict] = []
+    synced_urls: list[str] = []
+
+    for row in rows:
+        vals = _item_to_vals(row)
+        url  = vals["url"]
+        try:
+            if url in url_to_id:
+                Item.write([url_to_id[url]], vals)
+            else:
+                to_create.append(vals)
+            synced_urls.append(url)
+        except Exception as exc:
+            _logger.warning("sync_items_from_conn: write-fel för %s: %s", url[:60], exc)
+
+    # Batch-create för nya poster
+    if to_create:
+        try:
+            Item.create(to_create)
+        except Exception as exc:
+            _logger.warning("sync_items_from_conn: batch-create misslyckades: %s", exc)
+            synced_urls = [u for u in synced_urls if u not in {v["url"] for v in to_create}]
+
+    # Markera synkade rader i SQLite
+    if synced_urls:
+        conn.executemany(
+            "UPDATE vigil_items SET odoo_synced_state = state WHERE url = ?",
+            [(u,) for u in synced_urls],
+        )
+        conn.commit()
+
+    synced = len(synced_urls)
     _logger.info("sync_items_from_conn: %d/%d objekt synkade", synced, len(rows))
     return synced
 
