@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_match_list" model="ir.ui.view">
+    <field name="name">clio.recruiter.match.list</field>
+    <field name="model">clio.recruiter.match</field>
+    <field name="arch" type="xml">
+      <list string="Matchhistorik"
+            decoration-success="recommended_action == 'kontakta_nu'"
+            decoration-warning="recommended_action == 'bevaka_3_mån'"
+            decoration-muted="recommended_action == 'skip'"
+            default_order="sent_at desc">
+        <field name="sent_at"           string="Skickat"/>
+        <field name="profile_id"        string="Profil"/>
+        <field name="target_company"    string="Bolag"/>
+        <field name="signal_type"       string="Signaltyp"/>
+        <field name="match_score"       string="Score"/>
+        <field name="estimated_timeline" string="Horisont"/>
+        <field name="recommended_action" string="Åtgärd" widget="badge"
+               decoration-success="recommended_action == 'kontakta_nu'"
+               decoration-warning="recommended_action == 'bevaka_3_mån'"/>
+        <field name="candidate_profile" string="Kandidattyp" optional="show"/>
+        <field name="article_title"     string="Artikel" optional="show"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_match_form" model="ir.ui.view">
+    <field name="name">clio.recruiter.match.form</field>
+    <field name="model">clio.recruiter.match</field>
+    <field name="arch" type="xml">
+      <form string="Matchad signal">
+        <sheet>
+          <group>
+            <group string="Signal">
+              <field name="profile_id"        string="Rekryterarprofil"/>
+              <field name="sent_at"           string="Rapport skickad"/>
+              <field name="match_score"       string="Score"/>
+              <field name="signal_type"       string="Signaltyp"/>
+              <field name="recommended_action" string="Rekommenderad åtgärd"/>
+            </group>
+            <group string="Bolag &amp; kandidat">
+              <field name="target_company"    string="Bolag"/>
+              <field name="candidate_profile" string="Kandidattyp"/>
+              <field name="estimated_timeline" string="Tidshorisont"/>
+              <field name="contact_hint"      string="Kontakttips"/>
+            </group>
+          </group>
+          <group string="Artikel">
+            <field name="article_title" string="Rubrik" nolabel="1"/>
+            <field name="article_url"   string="URL" widget="url" nolabel="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_match_search" model="ir.ui.view">
+    <field name="name">clio.recruiter.match.search</field>
+    <field name="model">clio.recruiter.match</field>
+    <field name="arch" type="xml">
+      <search string="Sök matchningar">
+        <field name="target_company"/>
+        <field name="profile_id"/>
+        <field name="signal_type"/>
+        <filter name="kontakta_nu" string="Kontakta nu"
+                domain="[('recommended_action','=','kontakta_nu')]"/>
+        <filter name="bevaka" string="Bevaka"
+                domain="[('recommended_action','=','bevaka_3_mån')]"/>
+        <group>
+          <filter name="group_profile"  string="Profil"    context="{'group_by': 'profile_id'}"/>
+          <filter name="group_company"  string="Bolag"     context="{'group_by': 'target_company'}"/>
+          <filter name="group_signal"   string="Signaltyp" context="{'group_by': 'signal_type'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_recruiter_match" model="ir.actions.act_window">
+    <field name="name">Matchhistorik</field>
+    <field name="res_model">clio.recruiter.match</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+</odoo>
