@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Rotmeny ────────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_recruit_root"
+            name="Clio Recruit"
+            sequence="90"
+            groups="base.group_user"/>
+
+  <!-- ── Rekryterarprofiler ─────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_recruit_profiles"
+            name="Rekryterarprofiler"
+            parent="menu_clio_recruit_root"
+            action="action_clio_recruiter_profile"
+            sequence="10"/>
+
+  <!-- ── Matchhistorik ──────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_recruit_matches"
+            name="Matchhistorik"
+            parent="menu_clio_recruit_root"
+            action="action_clio_recruiter_match"
+            sequence="20"/>
+
+</odoo>
