@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_recruiter_profile_user,clio.recruiter.profile user,model_clio_recruiter_profile,base.group_user,1,0,0,0
+access_clio_recruiter_profile_admin,clio.recruiter.profile admin,model_clio_recruiter_profile,base.group_system,1,1,1,1
+access_clio_recruiter_match_user,clio.recruiter.match user,model_clio_recruiter_match,base.group_user,1,0,0,0
+access_clio_recruiter_match_admin,clio.recruiter.match admin,model_clio_recruiter_match,base.group_system,1,1,1,1

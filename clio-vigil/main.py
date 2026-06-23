@@ -584,6 +584,7 @@ def main():
     )
     parser.add_argument("--run",            action="store_true", help="Kör collect+filter pipeline")
     parser.add_argument("--caption-check", action="store_true", help="Hämta YouTube auto-captions (Sprint B)")
+    parser.add_argument("--download",      action="store_true", help="Förladda audio för köade objekt (utan transkription)")
     parser.add_argument("--transcribe",    action="store_true", help="Kör transkriptionskö (Whisper, hoppar captioned)")
     parser.add_argument("--summarize",     action="store_true", help="Kör summering (Claude)")
     parser.add_argument("--index",         action="store_true", help="Kör RAG-indexering (Qdrant)")
@@ -608,7 +609,8 @@ def main():
     args = parser.parse_args()
 
     any_action = any([
-        args.run, args.caption_check, args.transcribe, args.summarize, args.index,
+        args.run, args.caption_check, args.download, args.transcribe,
+        args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
@@ -731,6 +733,14 @@ def main():
         )
         _odoo_sync("efter caption-check")
 
+    if args.download:
+        from transcriber import run_download_queue
+        counts = run_download_queue(conn, domain=args.domain, max_items=args.max * 2)
+        logger.info(
+            f"Förladning: {counts['downloaded']} nedladdade, "
+            f"{counts['skipped']} redan klara, {counts['failed']} fel"
+        )
+
     if args.transcribe or args.full:
         _odoo_pull("före transkription")
         from transcriber import run_transcription_queue
@@ -762,10 +772,8 @@ def main():
         _sys.path.insert(0, str(_Path(__file__).parent.parent))
         from classifiers.uap_pipeline import run_uap_classifier
         try:
-            import sys as _s2
-            _s2.path.insert(0, str(_Path(__file__).parent.parent / "clio_odoo"))
-            from clio_odoo import connect as _odoo_connect
-            _odoo_env = _odoo_connect()
+            from odoo_writer import get_odoo_env as _get_odoo_env
+            _odoo_env = _get_odoo_env()
         except Exception as _e:
             logger.error(f"Odoo-anslutning misslyckades: {_e}")
             _odoo_env = None

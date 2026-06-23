@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_profile_list" model="ir.ui.view">
+    <field name="name">clio.recruiter.profile.list</field>
+    <field name="model">clio.recruiter.profile</field>
+    <field name="arch" type="xml">
+      <list string="Rekryterarprofiler">
+        <field name="name"            string="Profil"/>
+        <field name="target_role"     string="Målroll"/>
+        <field name="target_seniority" string="Senioritet"/>
+        <field name="email"           string="Mottagare"/>
+        <field name="language"        string="Språk" widget="badge"/>
+        <field name="match_count"     string="Matchningar"/>
+        <field name="active"          column_invisible="True"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_profile_form" model="ir.ui.view">
+    <field name="name">clio.recruiter.profile.form</field>
+    <field name="model">clio.recruiter.profile</field>
+    <field name="arch" type="xml">
+      <form string="Rekryterarprofil">
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_matches"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-list">
+              <field name="match_count" widget="statinfo" string="Matchningar"/>
+            </button>
+          </div>
+          <field name="active" widget="boolean_toggle" nolabel="1"/>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Profilnamn…"/></h1>
+          </div>
+          <group>
+            <group string="Rapport">
+              <field name="email"    string="Mottagaradress"/>
+              <field name="language" string="Språk"/>
+            </group>
+            <group string="Konfidentialitet">
+              <field name="confidential_client" string="Konfidentiell klient"/>
+              <field name="client_hint"         string="Klientbeskrivning"
+                     invisible="not confidential_client"/>
+            </group>
+          </group>
+          <group string="Målkandidat">
+            <group>
+              <field name="target_role"       string="Målroll"/>
+              <field name="target_seniority"  string="Senioritetsnivå"/>
+            </group>
+            <group>
+              <field name="target_industries"     string="Målbranscher"
+                     widget="text" placeholder="En bransch per rad…"/>
+            </group>
+          </group>
+          <group string="Kandidatprofil">
+            <field name="target_characteristics" string="Eftersökta egenskaper"
+                   widget="text" placeholder="En egenskap per rad…" nolabel="1"/>
+            <field name="target_avoid" string="Undvik"
+                   widget="text" placeholder="En per rad…" nolabel="1"/>
+          </group>
+          <group string="Triggersignaler">
+            <field name="trigger_signals_high"   string="Högvärda signaler"
+                   widget="text" placeholder="En signal per rad…" nolabel="1"/>
+            <field name="trigger_signals_medium" string="Medelvärda signaler"
+                   widget="text" placeholder="En signal per rad…" nolabel="1"/>
+          </group>
+          <notebook>
+            <page string="Matchhistorik">
+              <field name="match_ids" readonly="1">
+                <list default_order="sent_at desc">
+                  <field name="sent_at"          string="Skickat"/>
+                  <field name="target_company"   string="Bolag"/>
+                  <field name="signal_type"      string="Signaltyp"/>
+                  <field name="match_score"      string="Score"/>
+                  <field name="estimated_timeline" string="Horisont"/>
+                  <field name="recommended_action" string="Åtgärd"/>
+                  <field name="article_title"    string="Artikel"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_recruiter_profile_search" model="ir.ui.view">
+    <field name="name">clio.recruiter.profile.search</field>
+    <field name="model">clio.recruiter.profile</field>
+    <field name="arch" type="xml">
+      <search string="Sök profiler">
+        <field name="name"/>
+        <field name="target_role"/>
+        <filter name="active" string="Aktiva" domain="[('active','=',True)]"/>
+        <filter name="archived" string="Arkiverade" domain="[('active','=',False)]"/>
+        <group expand="0" string="Gruppera per">
+          <filter name="group_language" string="Språk" context="{'group_by': 'language'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_recruiter_profile" model="ir.actions.act_window">
+    <field name="name">Rekryterarprofiler</field>
+    <field name="res_model">clio.recruiter.profile</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{"search_default_active": 1}</field>
+  </record>
+
+</odoo>
