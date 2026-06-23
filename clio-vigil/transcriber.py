@@ -155,10 +155,11 @@ def download_audio(item: dict) -> Optional[Path]:
         ok = _download_youtube(url, output_path)
 
     elif source_type == "rss":
-        # Försök med sparad enclosure-URL (satt av rss_collector om tillgänglig),
-        # annars fall tillbaka på item-URL (kan vara artikel, inte ljud)
         raw = json.loads(item["raw_metadata"] or "{}")
-        audio_url = raw.get("enclosure_url") or url
+        audio_url = raw.get("enclosure_url")
+        if not audio_url:
+            logger.warning(f"RSS-item {item_id} saknar enclosure_url — ingen audio")
+            return None
         logger.info(f"Laddar ned RSS-audio: {audio_url[:70]}")
         ok = _download_url(audio_url, output_path)
 
@@ -193,6 +194,36 @@ def _should_preempt(conn, current_id: int, current_priority: float) -> Optional[
     return row["id"] if row else None
 
 
+def _extract_text_article(conn, item_id: int, item: dict) -> bool:
+    """Extraherar text från RSS-artikel utan ljud-enclosure via text_extractor."""
+    from text_extractor import extract
+    from orchestrator import transition
+
+    transition(conn, item_id, "transcribing")
+    conn.commit()
+
+    result = extract(
+        url=item["url"],
+        item_id=item_id,
+        source_name=item.get("source_name") or "",
+        date=(item.get("published_at") or "")[:10],
+    )
+
+    if not result:
+        logger.warning(f"Textextraktion misslyckades för item {item_id} — filtrerar bort")
+        transition(conn, item_id, "filtered_out")
+        conn.commit()
+        return False
+
+    transition(conn, item_id, "transcribed", transcript_path=result["transcript_path"])
+    conn.commit()
+    logger.info(
+        f"Artikel extraherad: {result['word_count']} ord "
+        f"-> {Path(result['transcript_path']).name}"
+    )
+    return True
+
+
 def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     """
     Transkriberar ett bevakningsobjekt med faster-whisper.
@@ -210,6 +241,11 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     if not item:
         logger.error(f"Item {item_id} hittades inte i databasen")
         return False
+
+    # RSS utan enclosure_url → textextraktion istället för Whisper
+    _raw_meta = json.loads(item["raw_metadata"] or "{}")
+    if item["source_type"] == "rss" and not _raw_meta.get("enclosure_url"):
+        return _extract_text_article(conn, item_id, dict(item))
 
     # Profil och modell
     profile_name = domain_config.get("transcription_profile", "default")
