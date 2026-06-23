@@ -181,6 +181,88 @@ def write_matches_to_odoo(profile: dict, matches: list) -> None:
         _logger.warning("odoo_writer: kunde inte spara matchningar i Odoo: %s", exc)
 
 
+def write_recruiter_match(profile: dict, matches: list) -> None:
+    """
+    Skapar clio.recruiter.match-poster i Odoo för rekryterarläge.
+
+    Letar upp clio.recruiter.profile på name — skapar profilen om den saknas.
+    Skriver recruiter-specifika fält: target_company, candidate_profile,
+    estimated_timeline, contact_hint.
+
+    Args:
+        profile: Profildict (från profile_loader.load_profile), profile_type=recruiter
+        matches: Lista av MatchedArticle-objekt (från reporter.py)
+    """
+    if not matches:
+        return
+
+    profile_name = (profile.get("name") or "").strip()
+    if not profile_name:
+        _logger.debug("write_recruiter_match: profile.name saknas — hoppar över")
+        return
+
+    try:
+        from clio_odoo import connect
+    except ImportError:
+        _logger.debug("write_recruiter_match: clio_odoo saknas — hoppar över")
+        return
+
+    try:
+        env = connect()
+        Profile = env["clio.recruiter.profile"]
+        Match   = env["clio.recruiter.match"]
+
+        existing = Profile.search_read([("name", "=", profile_name)], ["id"], limit=1)
+        if existing:
+            profile_id = existing[0]["id"]
+        else:
+            target = profile.get("target_candidate") or {}
+            signals = profile.get("trigger_signals") or {}
+            Profile.create({
+                "name":                    profile_name,
+                "email":                   profile.get("email", ""),
+                "language":                profile.get("language", "sv"),
+                "target_role":             target.get("role", ""),
+                "target_seniority":        target.get("seniority", ""),
+                "target_characteristics":  "\n".join(target.get("characteristics") or []),
+                "target_avoid":            "\n".join(target.get("avoid") or []),
+                "target_industries":       "\n".join(profile.get("target_industries") or []),
+                "trigger_signals_high":    "\n".join(signals.get("high_value") or []),
+                "trigger_signals_medium":  "\n".join(signals.get("medium_value") or []),
+                "confidential_client":     bool(profile.get("confidential_client", True)),
+                "client_hint":             profile.get("client_hint", ""),
+            })
+            # create() returnerar OdooRecordset — hämta integer-id via search_read
+            created = Profile.search_read([("name", "=", profile_name)], ["id"], limit=1)
+            profile_id = created[0]["id"]
+            _logger.info("write_recruiter_match: skapade ny profil '%s' (id=%s)", profile_name, profile_id)
+
+        sent_at = _utcnow_str()
+        created = 0
+        for m in matches:
+            article = m.article
+            result  = m.result
+            Match.create({
+                "profile_id":         profile_id,
+                "article_url":        getattr(article, "url", "") or "",
+                "article_title":      (getattr(article, "title", "") or "")[:500],
+                "target_company":     (getattr(result, "target_company", "") or "")[:255],
+                "candidate_profile":  (getattr(result, "candidate_profile", "") or "")[:255],
+                "signal_type":        (getattr(result, "signal_type", "") or "")[:100],
+                "match_score":        int(getattr(result, "match_score", 0)),
+                "estimated_timeline": (getattr(result, "estimated_timeline", "") or "")[:100],
+                "contact_hint":       (getattr(result, "contact_hint", "") or "")[:255],
+                "recommended_action": (getattr(result, "recommended_action", "") or "")[:100],
+                "sent_at":            sent_at,
+            })
+            created += 1
+
+        _logger.info("write_recruiter_match: %d matchning(ar) sparade för '%s'", created, profile_name)
+
+    except Exception as exc:
+        _logger.warning("write_recruiter_match: kunde inte spara i Odoo: %s", exc)
+
+
 def write_heartbeat(
     env,
     status: str,

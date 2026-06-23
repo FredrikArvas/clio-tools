@@ -102,6 +102,11 @@ sources:
       weight: 1.2
       # archive: true   # Avkommentera för att arkivera hela podden lokalt
 
+    - url: https://anchor.fm/s/1120e1b00/podcast/rss
+      name: Reality Check with Ross Coulthart
+      maturity: etablerad
+      weight: 1.3
+
     - url: https://audioboom.com/channels/5024014.rss
       name: That UFO Podcast
       maturity: etablerad
