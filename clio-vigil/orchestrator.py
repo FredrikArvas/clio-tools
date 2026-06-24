@@ -139,6 +139,41 @@ CREATE TABLE IF NOT EXISTS source_archives (
 );
 CREATE INDEX IF NOT EXISTS idx_archive_source ON source_archives(source_name);
 CREATE INDEX IF NOT EXISTS idx_archive_url    ON source_archives(url);
+
+-- Clio Lobbying: journalister och artikelkopplingar
+CREATE TABLE IF NOT EXISTS journalists (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,
+    publication     TEXT NOT NULL,
+    domain          TEXT,               -- vigil-domän: ufo, ai
+    email           TEXT,               -- manuellt ifyllt
+    topics          TEXT,               -- JSON-lista med ämnesord
+    profile         TEXT,               -- Claude-genererad intresseprofil
+    article_count   INTEGER DEFAULT 0,
+    last_seen_at    TEXT,
+    created_at      TEXT DEFAULT (datetime('now')),
+    updated_at      TEXT DEFAULT (datetime('now')),
+    UNIQUE(name, publication)
+);
+CREATE INDEX IF NOT EXISTS idx_journalist_domain ON journalists(domain);
+CREATE INDEX IF NOT EXISTS idx_journalist_name   ON journalists(name);
+
+CREATE TABLE IF NOT EXISTS journalist_articles (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    journalist_id   INTEGER NOT NULL REFERENCES journalists(id),
+    item_id         INTEGER REFERENCES vigil_items(id),
+    extracted_at    TEXT DEFAULT (datetime('now')),
+    UNIQUE(journalist_id, item_id)
+);
+
+-- Clio Lobbying: logg över pitch-körningar
+CREATE TABLE IF NOT EXISTS pitch_runs (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_text        TEXT,
+    domain            TEXT,
+    journalist_count  INTEGER DEFAULT 0,
+    created_at        TEXT DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------

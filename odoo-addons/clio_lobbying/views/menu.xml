@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Rotmeny ────────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_lobbying_root"
+            name="Clio Lobbying"
+            sequence="86"
+            groups="base.group_user"/>
+
+  <!-- ── Händelser ──────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_lobbying_events"
+            name="Händelser"
+            parent="menu_clio_lobbying_root"
+            action="action_clio_lobbying_event"
+            sequence="10"/>
+
+  <!-- ── Pitch-kö ───────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_lobbying_pitch_queue"
+            name="Pitch-kö"
+            parent="menu_clio_lobbying_root"
+            action="action_clio_lobbying_pitch_queue"
+            sequence="20"/>
+
+  <!-- ── Skickade ───────────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_lobbying_pitch_sent"
+            name="Skickade"
+            parent="menu_clio_lobbying_root"
+            action="action_clio_lobbying_pitch_sent"
+            sequence="30"/>
+
+  <!-- ── Journalister ───────────────────────────────────────────────────── -->
+  <menuitem id="menu_clio_lobbying_journalists"
+            name="Journalister"
+            parent="menu_clio_lobbying_root"
+            action="action_clio_lobbying_journalist"
+            sequence="40"/>
+
+</odoo>

@@ -1,0 +1,8 @@
+[Unit]
+Description=Clio Lobbying — vaktar trigger-fil från Odoo
+
+[Path]
+PathExists=/home/clioadmin/clio-tools/clio-vigil/data/.lobbying_trigger
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Clio Lobbying — kör lobbying_trigger_runner vid trigger-fil
+After=network.target
+
+[Service]
+Type=oneshot
+User=clioadmin
+WorkingDirectory=/home/clioadmin/clio-tools
+ExecStart=/usr/bin/python3 clio-vigil/lobbying_trigger_runner.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -597,6 +597,12 @@ def main():
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
+    parser.add_argument("--extract-journalists", action="store_true", help="Extrahera journalistbylines från indexerade objekt")
+    parser.add_argument("--build-profiles",      action="store_true", help="Bygg journalist-profiler via Claude (Clio Lobbying)")
+    parser.add_argument("--pitch",               type=str,            help="Generera pitch-utkast för en händelse (Clio Lobbying)")
+    parser.add_argument("--pitch-send",          action="store_true", help="Skicka pitch-utkast via mail (kräver --pitch)")
+    parser.add_argument("--pitch-account",       type=str, default="clio", help="Mailkonto för pitch-sändning (default: clio)")
+    parser.add_argument("--event-id",            type=int,            help="Odoo event-ID för pitch write-back (Clio Lobbying)")
     parser.add_argument("--classify-uap",    action="store_true", help="Klassificera queued UFO-items och skapa pending Odoo-encounters")
     parser.add_argument("--seed-sources",    action="store_true", help="Importera YAML-källkonfiguration till Odoo (engångsimport)")
     parser.add_argument("--archive-sources", action="store_true", help="Arkivera källor med archive:true i YAML (Sprint C)")
@@ -615,6 +621,7 @@ def main():
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
         args.archive_sources, bool(args.archive_source),
+        args.extract_journalists, args.build_profiles, bool(args.pitch),
     ])
     if not any_action:
         _interactive_menu()
@@ -783,6 +790,47 @@ def main():
                 f"UAP-klassificering: {counts['classified']} klassificerade, "
                 f"{counts['imported']} importerade till Odoo"
             )
+
+    if args.extract_journalists:
+        from journalist_extractor import run_extractor
+        counts = run_extractor(conn, domain=args.domain, max_items=200)
+        logger.info(
+            "Journalist-extraktion: %d processerade, %d bylines, %d utan byline",
+            counts["processed"], counts["extracted"], counts["skipped"],
+        )
+        if _odoo_env:
+            _odoo_sync("efter journalist-extraktion")
+
+    if args.build_profiles:
+        from journalist_extractor import build_profiles
+        counts = build_profiles(conn, domain=args.domain, max_journalists=20)
+        logger.info(
+            "Profil-bygge: %d byggda, %d hoppade, %d misslyckade",
+            counts["built"], counts["skipped"], counts["failed"],
+        )
+
+    if args.pitch:
+        from pitcher import run_pitch
+        results = run_pitch(
+            conn,
+            event_text=args.pitch,
+            domain=args.domain,
+            send=args.pitch_send,
+            from_account=args.pitch_account,
+            dry_run=args.dry_run,
+            odoo_event_id=getattr(args, "event_id", None),
+            odoo_env=_odoo_env,
+        )
+        print(f"\n{'─'*72}")
+        print(f"🎯 Pitch-utkast — {len(results)} journalister matchade")
+        print(f"{'─'*72}")
+        for r in results:
+            status = "✓ Skickat" if r["sent"] else ("📧 " + (r["email"] or "Ingen mail"))
+            print(f"\n{r['journalist']} ({r['publication']}) — {status}")
+            print(f"Anledning: {r['match_reason']}")
+            print("─" * 40)
+            print(r["pitch_text"])
+        print(f"\n{'─'*72}")
 
     if args.digest or args.full:
         _odoo_pull("före digest")

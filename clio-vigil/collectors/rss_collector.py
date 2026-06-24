@@ -122,6 +122,14 @@ def collect_rss(conn, domain_config: dict) -> dict:
                     except Exception:
                         pass
 
+                # Extrahera byline för journalist-tracking
+                author = None
+                if hasattr(entry, "author_detail") and entry.author_detail:
+                    author = entry.author_detail.get("name", "")
+                if not author and hasattr(entry, "author"):
+                    author = entry.author or ""
+                author = author.strip() or None
+
                 item_id = upsert_item(
                     conn,
                     url=item_url,
@@ -138,6 +146,7 @@ def collect_rss(conn, domain_config: dict) -> dict:
                         "feed_url": url,
                         "feed_title": feed.feed.get("title", ""),
                         "enclosure_url": enclosure_url,
+                        "author": author,
                     })
                 )
 

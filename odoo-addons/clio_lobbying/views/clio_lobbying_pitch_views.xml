@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_pitch_list" model="ir.ui.view">
+    <field name="name">clio.lobbying.pitch.list</field>
+    <field name="model">clio.lobbying.pitch</field>
+    <field name="arch" type="xml">
+      <list string="Pitchar" decoration-muted="state == 'dismissed'"
+            decoration-success="state in ('sent','responded')">
+        <field name="journalist_id"/>
+        <field name="journalist_publication"/>
+        <field name="journalist_email" optional="show"/>
+        <field name="event_id"/>
+        <field name="subject"/>
+        <field name="state" widget="badge"
+               decoration-secondary="state == 'draft'"
+               decoration-info="state == 'approved'"
+               decoration-success="state in ('sent','responded')"
+               decoration-danger="state == 'dismissed'"/>
+        <field name="sent_at" optional="show"/>
+        <button name="action_approve"      type="object" string="Godkänn"
+                attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+        <button name="action_mark_sent"   type="object" string="Skickad"
+                attrs="{'invisible': [('state', 'not in', ['draft','approved'])]}"/>
+        <button name="action_dismiss"     type="object" string="Avvisa"
+                attrs="{'invisible': [('state', 'in', ['sent','responded','dismissed'])]}"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_pitch_form" model="ir.ui.view">
+    <field name="name">clio.lobbying.pitch.form</field>
+    <field name="model">clio.lobbying.pitch</field>
+    <field name="arch" type="xml">
+      <form string="Pitch">
+        <header>
+          <button name="action_approve"      type="object" string="Godkänn"     class="btn-primary"
+                  attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+          <button name="action_mark_sent"   type="object" string="Markera skickad" class="btn-secondary"
+                  attrs="{'invisible': [('state', 'not in', ['draft','approved'])]}"/>
+          <button name="action_mark_responded" type="object" string="Fått svar"  class="btn-success"
+                  attrs="{'invisible': [('state', '!=', 'sent')]}"/>
+          <button name="action_dismiss"     type="object" string="Avvisa"        class="btn-danger"
+                  attrs="{'invisible': [('state', 'in', ['sent','responded','dismissed'])]}"/>
+          <button name="action_reset_draft" type="object" string="Återställ"     class="btn-secondary"
+                  attrs="{'invisible': [('state', 'in', ['sent','responded'])]}"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,approved,sent,responded"/>
+        </header>
+        <sheet>
+          <group>
+            <group string="Mottagare">
+              <field name="journalist_id"/>
+              <field name="journalist_publication" readonly="1"/>
+              <field name="journalist_email"       readonly="1"/>
+            </group>
+            <group string="Händelse">
+              <field name="event_id"/>
+              <field name="sent_at" readonly="1"/>
+            </group>
+          </group>
+          <group string="Matchningsgrund">
+            <field name="match_reason" nolabel="1" readonly="1"/>
+          </group>
+          <group string="Pitch-text">
+            <field name="subject" placeholder="Ämnesrad"/>
+            <field name="pitch_text" nolabel="1" widget="text"
+                   placeholder="Pitch-utkastet från Claude. Redigera fritt."/>
+          </group>
+          <group string="Uppföljning" attrs="{'invisible': [('state', 'not in', ['sent','responded'])]}">
+            <field name="response_notes" widget="text" nolabel="1"
+                   placeholder="Journalistens svar, uppföljningsnoteringar…"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_pitch_search" model="ir.ui.view">
+    <field name="name">clio.lobbying.pitch.search</field>
+    <field name="model">clio.lobbying.pitch</field>
+    <field name="arch" type="xml">
+      <search string="Sök pitchar">
+        <field name="journalist_id"/>
+        <field name="event_id"/>
+        <field name="subject"/>
+        <filter string="Utkast"    name="draft"     domain="[('state','=','draft')]"/>
+        <filter string="Godkända"  name="approved"  domain="[('state','=','approved')]"/>
+        <filter string="Skickade"  name="sent"      domain="[('state','in',['sent','responded'])]"/>
+        <filter string="Avvisade"  name="dismissed" domain="[('state','=','dismissed')]"/>
+        <group expand="0" string="Gruppera efter">
+          <filter string="Journalist" name="grp_journalist" context="{'group_by':'journalist_id'}"/>
+          <filter string="Händelse"   name="grp_event"      context="{'group_by':'event_id'}"/>
+          <filter string="Status"     name="grp_state"      context="{'group_by':'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
+  <record id="action_clio_lobbying_pitch_queue" model="ir.actions.act_window">
+    <field name="name">Pitch-kö</field>
+    <field name="res_model">clio.lobbying.pitch</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('state', 'in', ['draft', 'approved'])]</field>
+    <field name="search_view_id" ref="view_clio_lobbying_pitch_search"/>
+  </record>
+
+  <record id="action_clio_lobbying_pitch_sent" model="ir.actions.act_window">
+    <field name="name">Skickade pitchar</field>
+    <field name="res_model">clio.lobbying.pitch</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('state', 'in', ['sent', 'responded'])]</field>
+    <field name="search_view_id" ref="view_clio_lobbying_pitch_search"/>
+  </record>
+
+</odoo>
