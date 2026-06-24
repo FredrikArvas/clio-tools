@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_lobbying_journalist_user,clio.lobbying.journalist user,model_clio_lobbying_journalist,base.group_user,1,0,0,0
+access_clio_lobbying_journalist_admin,clio.lobbying.journalist admin,model_clio_lobbying_journalist,base.group_system,1,1,1,1
+access_clio_lobbying_event_user,clio.lobbying.event user,model_clio_lobbying_event,base.group_user,1,1,1,0
+access_clio_lobbying_event_admin,clio.lobbying.event admin,model_clio_lobbying_event,base.group_system,1,1,1,1
+access_clio_lobbying_pitch_user,clio.lobbying.pitch user,model_clio_lobbying_pitch,base.group_user,1,1,1,0
+access_clio_lobbying_pitch_admin,clio.lobbying.pitch admin,model_clio_lobbying_pitch,base.group_system,1,1,1,1

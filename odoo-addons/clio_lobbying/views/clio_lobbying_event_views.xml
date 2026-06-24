@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_event_list" model="ir.ui.view">
+    <field name="name">clio.lobbying.event.list</field>
+    <field name="model">clio.lobbying.event</field>
+    <field name="arch" type="xml">
+      <list string="Händelser" decoration-muted="state == 'closed'">
+        <field name="name"/>
+        <field name="domain" widget="badge"
+               decoration-info="domain == 'ufo'"
+               decoration-warning="domain == 'ai'"/>
+        <field name="pitch_count" string="Pitchar"/>
+        <field name="sent_count"  string="Skickade"/>
+        <field name="triggered_at" string="Senast triggrad" optional="show"/>
+        <field name="state" widget="badge"
+               decoration-secondary="state == 'draft'"
+               decoration-warning="state == 'pitching'"
+               decoration-info="state == 'review'"
+               decoration-success="state == 'closed'"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Kanban ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_event_kanban" model="ir.ui.view">
+    <field name="name">clio.lobbying.event.kanban</field>
+    <field name="model">clio.lobbying.event</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="state" class="o_kanban_small_column">
+        <field name="name"/>
+        <field name="domain"/>
+        <field name="pitch_count"/>
+        <field name="sent_count"/>
+        <field name="state"/>
+        <templates>
+          <t t-name="card">
+            <div class="oe_kanban_global_click">
+              <strong><field name="name"/></strong>
+              <div class="text-muted small mt-1">
+                <field name="domain" widget="badge"/> ·
+                <field name="pitch_count"/> pitchar ·
+                <field name="sent_count"/> skickade
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_event_form" model="ir.ui.view">
+    <field name="name">clio.lobbying.event.form</field>
+    <field name="model">clio.lobbying.event</field>
+    <field name="arch" type="xml">
+      <form string="Händelse">
+        <header>
+          <button name="action_generate_pitches" type="object"
+                  string="Generera pitchar" class="btn-primary"
+                  attrs="{'invisible': [('state', 'in', ['closed'])]}"
+                  confirm="Triggar pitch-generering för alla matchade journalister. Fortsätt?"/>
+          <button name="action_extract_journalists" type="object"
+                  string="Uppdatera journalister" class="btn-secondary"
+                  attrs="{'invisible': [('state', '=', 'closed')]}"
+                  help="Extraherar bylines och bygger profiler för domänen."/>
+          <button name="action_mark_review" type="object"
+                  string="Öppna granskning" class="btn-secondary"
+                  attrs="{'invisible': [('state', '!=', 'pitching')]}"/>
+          <button name="action_close" type="object"
+                  string="Avsluta kampanj" class="btn-secondary"
+                  attrs="{'invisible': [('state', 'in', ['draft', 'closed'])]}"/>
+          <button name="action_reopen" type="object"
+                  string="Återöppna" class="btn-secondary"
+                  attrs="{'invisible': [('state', '!=', 'closed')]}"/>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="draft,pitching,review,closed"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button class="oe_stat_button" type="object"
+                    name="action_view_pitches_draft" icon="fa-edit">
+              <field name="pitch_count" widget="statinfo" string="Pitchar"/>
+            </button>
+            <button class="oe_stat_button" type="object"
+                    name="action_view_pitches_sent" icon="fa-paper-plane">
+              <field name="sent_count" widget="statinfo" string="Skickade"/>
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Händelsenamn"/></h1>
+          </div>
+          <group>
+            <group string="Inställningar">
+              <field name="domain"/>
+              <field name="source_url" widget="url"/>
+            </group>
+            <group string="Pipeline">
+              <field name="triggered_at" readonly="1"/>
+              <field name="triggered_by" readonly="1"/>
+              <field name="trigger_status" readonly="1" widget="badge"
+                     decoration-warning="trigger_status == 'running'"
+                     decoration-success="trigger_status == 'done'"
+                     decoration-danger="trigger_status == 'error'"/>
+            </group>
+          </group>
+          <group string="Händelsebeskrivning">
+            <field name="event_text" nolabel="1" widget="text"
+                   placeholder="Beskriv händelsen i detalj. Används som underlag för Claude att generera individuella pitch-utkast…"/>
+          </group>
+          <notebook>
+            <page string="Pitch-utkast">
+              <field name="pitch_ids" nolabel="1">
+                <list decoration-muted="state == 'dismissed'"
+                      decoration-success="state in ('sent','responded')">
+                  <field name="journalist_id"/>
+                  <field name="journalist_publication"/>
+                  <field name="state" widget="badge"
+                         decoration-secondary="state == 'draft'"
+                         decoration-info="state == 'approved'"
+                         decoration-success="state in ('sent','responded')"
+                         decoration-danger="state == 'dismissed'"/>
+                  <field name="subject"/>
+                  <field name="sent_at" optional="show"/>
+                  <button name="action_approve"  type="object" string="Godkänn"
+                          attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                  <button name="action_mark_sent" type="object" string="Markera skickad"
+                          attrs="{'invisible': [('state', 'not in', ['draft','approved'])]}"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_event_search" model="ir.ui.view">
+    <field name="name">clio.lobbying.event.search</field>
+    <field name="model">clio.lobbying.event</field>
+    <field name="arch" type="xml">
+      <search string="Sök händelser">
+        <field name="name"/>
+        <field name="event_text"/>
+        <filter string="Aktiva"   name="active"   domain="[('state','not in',['closed'])]"/>
+        <filter string="UAP/UFO"  name="ufo"      domain="[('domain','=','ufo')]"/>
+        <filter string="AI"       name="ai"        domain="[('domain','=','ai')]"/>
+        <filter string="Granskning" name="review"  domain="[('state','=','review')]"/>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
+  <record id="action_clio_lobbying_event" model="ir.actions.act_window">
+    <field name="name">Händelser</field>
+    <field name="res_model">clio.lobbying.event</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="search_view_id" ref="view_clio_lobbying_event_search"/>
+    <field name="context">{'search_default_active': 1}</field>
+  </record>
+
+</odoo>

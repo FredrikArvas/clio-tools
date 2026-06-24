@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Listvy ─────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_journalist_list" model="ir.ui.view">
+    <field name="name">clio.lobbying.journalist.list</field>
+    <field name="model">clio.lobbying.journalist</field>
+    <field name="arch" type="xml">
+      <list string="Journalister" decoration-muted="state == 'archived'">
+        <field name="name"/>
+        <field name="publication"/>
+        <field name="domain" widget="badge"
+               decoration-info="domain == 'ufo'"
+               decoration-warning="domain == 'ai'"/>
+        <field name="email" optional="show"/>
+        <field name="article_count" string="Artiklar"/>
+        <field name="pitch_count"   string="Pitchar"/>
+        <field name="last_seen_at"  string="Senast sedd" optional="show"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'active'"
+               decoration-warning="state == 'paused'"
+               decoration-muted="state == 'archived'"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ── Formulärvy ─────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_journalist_form" model="ir.ui.view">
+    <field name="name">clio.lobbying.journalist.form</field>
+    <field name="model">clio.lobbying.journalist</field>
+    <field name="arch" type="xml">
+      <form string="Journalist">
+        <header>
+          <field name="state" widget="statusbar"
+                 statusbar_visible="active,paused,archived"/>
+          <button name="action_view_articles" type="object"
+                  string="Visa artiklar" class="btn-secondary"
+                  icon="fa-newspaper-o"/>
+          <button name="action_view_pitches" type="object"
+                  string="Visa pitchar" class="btn-secondary"
+                  icon="fa-envelope"/>
+          <button name="action_create_partner" type="object"
+                  string="Kontakt" class="btn-secondary"
+                  icon="fa-user"/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button class="oe_stat_button" type="object"
+                    name="action_view_articles" icon="fa-newspaper-o">
+              <field name="article_count" widget="statinfo" string="Artiklar"/>
+            </button>
+            <button class="oe_stat_button" type="object"
+                    name="action_view_pitches" icon="fa-envelope">
+              <field name="pitch_count" widget="statinfo" string="Pitchar"/>
+            </button>
+          </div>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Journalistens namn"/></h1>
+            <h2><field name="publication" placeholder="Publikation / redaktion"/></h2>
+          </div>
+          <group>
+            <group string="Kontakt">
+              <field name="email"/>
+              <field name="partner_id"/>
+              <field name="domain"/>
+            </group>
+            <group string="Statistik">
+              <field name="article_count" readonly="1"/>
+              <field name="last_seen_at"  readonly="1"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Intresseprofil">
+              <field name="topics" placeholder="Kommaseparerade ämnesord (auto-genererade)"/>
+              <field name="profile" widget="text" readonly="1"
+                     placeholder="Genereras automatiskt av pipeline (--build-profiles)…"/>
+            </page>
+            <page string="Anteckningar">
+              <field name="notes" widget="text"
+                     placeholder="Relationshistorik, kontaktpreferenser, senaste möte…"/>
+            </page>
+            <page string="Pitchar">
+              <field name="pitch_ids" nolabel="1">
+                <list>
+                  <field name="event_id"/>
+                  <field name="state" widget="badge"
+                         decoration-info="state == 'draft'"
+                         decoration-success="state in ('sent','responded')"
+                         decoration-danger="state == 'dismissed'"/>
+                  <field name="sent_at"/>
+                  <field name="subject"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ── Sökvy ──────────────────────────────────────────────────────────── -->
+  <record id="view_clio_lobbying_journalist_search" model="ir.ui.view">
+    <field name="name">clio.lobbying.journalist.search</field>
+    <field name="model">clio.lobbying.journalist</field>
+    <field name="arch" type="xml">
+      <search string="Sök journalister">
+        <field name="name" string="Namn"/>
+        <field name="publication" string="Publikation"/>
+        <field name="topics" string="Ämnesord"/>
+        <filter string="UAP/UFO"   name="ufo" domain="[('domain','=','ufo')]"/>
+        <filter string="AI"        name="ai"  domain="[('domain','=','ai')]"/>
+        <separator/>
+        <filter string="Aktiva"   name="active"    domain="[('state','=','active')]"/>
+        <filter string="Har mail" name="has_email" domain="[('email','!=',False),('email','!=','')]"/>
+        <filter string="Har profil" name="has_profile" domain="[('profile','!=',False)]"/>
+        <group expand="0" string="Gruppera efter">
+          <filter string="Publikation" name="grp_pub" context="{'group_by':'publication'}"/>
+          <filter string="Domän"       name="grp_dom" context="{'group_by':'domain'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ── Action ─────────────────────────────────────────────────────────── -->
+  <record id="action_clio_lobbying_journalist" model="ir.actions.act_window">
+    <field name="name">Journalister</field>
+    <field name="res_model">clio.lobbying.journalist</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_clio_lobbying_journalist_search"/>
+    <field name="context">{'search_default_active': 1}</field>
+  </record>
+
+</odoo>

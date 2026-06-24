@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Journalist-flik på res.partner ────────────────────────────────── -->
+  <record id="view_partner_journalist_tab" model="ir.ui.view">
+    <field name="name">res.partner.journalist.tab</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+
+      <!-- Lägg till stat-knapp i button_box -->
+      <xpath expr="//div[@name='button_box']" position="inside">
+        <button class="oe_stat_button" type="object"
+                name="action_create_journalist" icon="fa-microphone"
+                attrs="{'invisible': [('is_journalist', '=', True)]}">
+          <span class="o_stat_text">Lägg till som journalist</span>
+        </button>
+        <button class="oe_stat_button" type="object"
+                name="action_view_pitches" icon="fa-paper-plane"
+                attrs="{'invisible': [('is_journalist', '=', False)]}">
+          <field name="lobbying_pitch_count" widget="statinfo" string="Pitchar"/>
+        </button>
+        <button class="oe_stat_button" type="object"
+                name="action_view_articles" icon="fa-newspaper-o"
+                attrs="{'invisible': [('is_journalist', '=', False)]}">
+          <field name="vigil_article_count" widget="statinfo" string="Artiklar"/>
+        </button>
+      </xpath>
+
+      <!-- Lägg till journalist-flik sist i notebook -->
+      <xpath expr="//notebook" position="inside">
+        <page string="Journalist" name="journalist_tab"
+              attrs="{'invisible': [('is_journalist', '=', False)]}">
+          <group>
+            <field name="journalist_id" nolabel="1">
+              <form>
+                <group>
+                  <group string="Profil">
+                    <field name="publication"/>
+                    <field name="domain" widget="badge"/>
+                    <field name="email"/>
+                    <field name="topics"/>
+                  </group>
+                  <group string="Statistik">
+                    <field name="article_count" readonly="1"/>
+                    <field name="last_seen_at"  readonly="1"/>
+                    <field name="state" widget="badge"/>
+                  </group>
+                </group>
+                <group string="Intresseprofil">
+                  <field name="profile" widget="text" readonly="1" nolabel="1"/>
+                </group>
+              </form>
+            </field>
+          </group>
+
+          <separator string="Bevakade artiklar"/>
+          <field name="vigil_article_ids" nolabel="1" readonly="1">
+            <list>
+              <field name="title"/>
+              <field name="source_name" string="Källa"/>
+              <field name="published_at" string="Publicerat"/>
+              <field name="state" widget="badge"/>
+              <field name="url" widget="url" string="Länk" optional="show"/>
+            </list>
+          </field>
+
+          <separator string="Skickade pitchar"/>
+          <field name="lobbying_pitch_ids" nolabel="1" readonly="1">
+            <list>
+              <field name="event_id" string="Händelse"/>
+              <field name="subject"/>
+              <field name="state" widget="badge"
+                     decoration-success="state in ('sent','responded')"
+                     decoration-secondary="state == 'draft'"
+                     decoration-danger="state == 'dismissed'"/>
+              <field name="sent_at" string="Skickad"/>
+            </list>
+          </field>
+        </page>
+      </xpath>
+
+    </field>
+  </record>
+
+</odoo>
