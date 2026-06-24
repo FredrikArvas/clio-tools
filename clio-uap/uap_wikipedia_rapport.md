@@ -265,6 +265,84 @@ Under hösten och vintern 2024 rapporterades okända drönare/UAV-svärmar över
 
 ---
 
+### 11. Spökraketerna — Skandinavien (sommaren–hösten 1946)
+
+**Primärkällor:**
+- Swedish Defence Staff (Försvarsstaben), rapport om spökraketerna, 1946. Tillgänglig via Krigsarkivet, Stockholm.
+- Anders Liljegren & Clas Svahn, *UFOs and the Swedish Military*, AFU (Archives for the Unexplained), Norrköping 1995
+- Wikipedia: [Ghost rockets](https://en.wikipedia.org/wiki/Ghost_rockets) (Wikidata Q2037682)
+
+Under sommaren 1946 rapporterades hundratals observationer av raketliknande objekt över Sverige, Norge och Finland. Det svenska försvaret tog saken allvarligt — observationerna inträffade mitt under kalla krigets begynnelse och misstänktes inledningsvis vara sovjetiska provskjutningar. Totalt registrerades över 2 000 rapporter. Några föremål spårades av radar; inget förklarades officiellt.
+
+**Wikipedia depth-score per språk (alla 14):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Grekiska (el) | 0.858 | 26 363 | 7 | 20 | 2024-08-03 |
+| 2 | Engelska (en) | 0.637 | 14 650 | 7 | 11 | 2026-06-10 |
+| 3 | Franska (fr) | 0.593 | 16 527 | 7 | 11 | 2026-05-01 |
+| 4 | Kinesiska (zh) | 0.583 | 9 475 | 11 | 6 | 2025-11-10 |
+| 5 | Finska (fi) | 0.532 | 11 238 | 5 | 17 | 2025-04-19 |
+| 6 | Spanska (es) | 0.498 | 13 578 | 6 | 10 | 2026-04-05 |
+| 7 | Ryska (ru) | 0.475 | 13 673 | 6 | 4 | 2025-11-15 |
+| 8 | Vietnamesiska (vi) | 0.427 | 11 828 | 5 | 6 | 2025-03-30 |
+| 9 | Japanska (ja) | 0.297 | 3 251 | 5 | 6 | 2025-10-21 |
+| 10 | Italienska (it) | 0.293 | 4 475 | 4 | 4 | 2025-11-30 |
+| 11 | Tyska (de) | 0.245 | 3 169 | 5 | 3 | 2025-06-10 |
+| 12 | Bulgariska (bg) | 0.152 | 3 253 | 2 | 2 | 2021-03-05 |
+| 13 | **Svenska (sv)** | **0.109** | **4 138** | **1** | **0** | **2024-06-21** |
+| 14 | Kroatiska (hr) | 0.100 | 1 474 | 2 | 2 | 2023-06-07 |
+
+**Totalt: 14 språk.** Svenska Wikipedia — landets eget mest kända UAP-fall — hamnar på näst sista plats. 1 sektion, 0 källhänvisningar. Grekiska Wikipedia (#1) har 26 363 bytes och 20 källor.
+
+---
+
+### 12. Foo fighters — Europa och Stilla havet (1944–1945)
+
+**Primärkällor:**
+- US Army Air Forces, rapporter från 415th Night Fighter Squadron (publicerade i *Stars and Stripes* december 1944)
+- Graeme Rendall, *UFOs Before Roswell: European Foo Fighters 1940–1945*, Reiver Country Books 2021, ISBN 9798464991583
+- Wikipedia: [Foo fighter](https://en.wikipedia.org/wiki/Foo_fighter) (Wikidata Q942268)
+
+Termen "foo fighter" myntades av amerikanska nattjaktpiloter ur 415th Night Fighter Squadron som sedan oktober 1944 rapporterade lysande klot som följde deras plan över ockuperat Europa. Fenomenet rapporterades parallellt av brittiska, tyska och japanska piloter. Japanska militärpiloter rapporterade liknande observationer över Indiska oceanen (1941) och Salomonöarna (1942).
+
+**Wikipedia depth-score per språk (topp 14 av 28):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Persiska (fa) | 0.896 | 33 129 | 7 | 60 | 2026-05-12 |
+| 2 | Engelska (en) | 0.860 | 26 349 | 8 | 60 | 2026-04-16 |
+| 3 | Italienska (it) | 0.476 | 12 981 | 9 | 6 | 2025-11-13 |
+| 4 | Polska (pl) | 0.410 | 11 316 | 8 | 11 | 2025-07-20 |
+| 5 | Ryska (ru) | 0.393 | 12 870 | 5 | 10 | 2026-04-22 |
+| 6 | Japanska (ja) | 0.391 | 10 444 | 10 | 4 | 2026-03-16 |
+| 7 | Franska (fr) | 0.355 | 6 162 | 7 | 5 | 2025-08-07 |
+| 8 | Portugisiska (pt) | 0.266 | 4 994 | 3 | 11 | 2024-07-12 |
+| 9 | Tjeckiska (cs) | 0.251 | 3 651 | 7 | 5 | 2025-12-04 |
+| 10 | Ukrainska (uk) | 0.250 | 7 802 | 4 | 11 | 2025-09-12 |
+| 11 | Indonesiska (id) | 0.232 | 10 167 | 2 | 0 | 2025-04-26 |
+| 12 | Spanska (es) | 0.230 | 6 013 | 5 | 0 | 2026-03-05 |
+| 13 | Rumänska (ro) | 0.228 | 5 280 | 3 | 3 | 2022-11-28 |
+| 14 | Tyska (de) | 0.203 | 5 692 | 5 | 2 | 2025-09-19 |
+
+Svenska (sv) 0.088 (#21), danska (da) 0.088 (#22), norska (no) 0.084 (#23) — de skandinaviska länderna vars piloter faktiskt såg foo fighters under kriget täcker fenomenet sämst.
+
+**Totalt: 28 språk** — bredaste internationella täckning av alla WWII-relaterade fall i studien. Persiska/farsi (#1) slår engelska för ett väst-europeiskt/amerikanskt krigsfall.
+
+---
+
+### Not: Japan och atombomberna — en vit fläck
+
+Användarfråga för detta projekt: *Finns dokumenterade UAP-observationer i samband med atombombningarna av Hiroshima (6 aug 1945) och Nagasaki (9 aug 1945)?*
+
+Den japanska foo fighter-artikeln (フー・ファイター) täcker observationer från Indiska oceanen 1941 och Salomonöarna 1942, samt bekräftar att japanska militärpiloter rapporterade samma fenomen som de allierade piloterna. Artikeln hoppar sedan till 1945 enbart för att citera en Time Magazine-artikel om europeiska observationer — ingen koppling till Hiroshima eller Nagasaki.
+
+**Wikipedia-status:** Ingen artikel i något av 300+ Wikipedia-språk kopplar UAP-/foo fighter-fenomenet till atombombningarna i Japan 1945. Det är ett dokumenterat gap: observationer av ovanliga ljusfenomen runt explosionerna förekommer i primärkällor (bl.a. vittnesmål i Studien om bombernas effekter, US Strategic Bombing Survey 1946) men har inte kodifierats i Wikipedia.
+
+**Källa för gap-konstaterandet:** Genomsökning av japanska Wikipedia-kategorin 未確認飛行物体 (oidentifierade flygande objekt) och artikeln フー・ファイター, körning 2026-06-24. US Strategic Bombing Survey: *The Effects of Atomic Bombs on Hiroshima and Nagasaki*, US GPO, Washington D.C. 1946.
+
+---
+
 ## Tre analytiska mönster
 
 ### Mönster 1: Åldersparadoxen
@@ -282,7 +360,10 @@ Wikipedia-bredden korrelerar starkare med fallens ålder och kulturella spridnin
 | Varginha | 1996 | 11 | Ej officiellt bekräftat |
 | Phoenix Lights | 1997 | 24 | Gouvernör bekräftade 2007 |
 | **Nimitz** | **2004** | **5** | **Pentagon + Senat 2020/2023** |
+| Spökraketerna | 1946 | 14 | Försvarsstaben, ej förklarat |
+| Foo fighters WWII | 1944–45 | **28** | Ej förklarat |
 | Drönarvågen BE/DK | 2024 | **0** | Militären bekräftade incidenter |
+| Japan/atombomb | 1945 | **0** | Vit fläck — primärkällor finns |
 
 Roswell — vars fysiska bevis aldrig officiellt bekräftats — har 13× fler Wikipedia-språk än det Pentagon-bekräftade Nimitz-fallet. Wikipedia mäter kulturell penetration, inte evidens. Kulturell penetration kräver decennier av berättande.
 
@@ -347,6 +428,9 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 8. Phoenix Lights: *Arizona Republic* 18 jun 1997; Symington vittnesmål NPC nov 2007
 9. Nimitz: US DoD presskonferens 27 apr 2020; Fravor, US Senate, 26 jul 2023
 10. Drönarvågen 2024: US DoD presskonferenser nov–dec 2024; UK MoD bekräftelse RAF-baser nov 2024
+11. Spökraketerna: Försvarsstaben rapport 1946 (Krigsarkivet, Stockholm); Liljegren & Svahn, *UFOs and the Swedish Military*, AFU 1995
+12. Foo fighters: 415th Night Fighter Squadron rapporter 1944; Rendall, *UFOs Before Roswell*, Reiver Country Books 2021
+13. Japan/atombomb (gap): US Strategic Bombing Survey, *Effects of Atomic Bombs on Hiroshima and Nagasaki*, US GPO 1946
 
 **Metodkällor:**
 - Wikidata Entity API: `wikidata.org/wiki/Special:EntityData/[QID].json`
@@ -362,6 +446,8 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 - Belgienvågen: Q815525 — `en.wikipedia.org/wiki/Belgian_UFO_wave`
 - Florence 1954: Q3631265 — `it.wikipedia.org/wiki/Avvistamento_di_UFO_a_Firenze`
 - Ariel School: Q108803795 — `en.wikipedia.org/wiki/Ariel_School_UFO_incident`
+- Spökraketerna: Q2037682 — `en.wikipedia.org/wiki/Ghost_rockets`
+- Foo fighters: Q942268 — `en.wikipedia.org/wiki/Foo_fighter`
 - Drönarvågen global: Q131703518 — `en.wikipedia.org/wiki/2024_drone_sightings`
 - Drönarvågen USA: Q131438281 — `en.wikipedia.org/wiki/2024_United_States_drone_sightings`
 
