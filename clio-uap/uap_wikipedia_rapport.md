@@ -331,6 +331,67 @@ Svenska (sv) 0.088 (#21), danska (da) 0.088 (#22), norska (no) 0.084 (#23) — d
 
 ---
 
+### 13. 1952 Washington D.C. — Capitoliumflygningarna (juli 1952)
+
+**Primärkällor:**
+- Edward J. Ruppelt, *The Report on Unidentified Flying Objects*, Doubleday 1956. Ruppelt var chef för US Air Force Project Blue Book 1951–53.
+- USAF Project Blue Book-filer, National Archives (Record Group 341), Washington D.C. Digitaliserade av Fold3.com.
+- Wikipedia: [1952 Washington, D.C., UFO incident](https://en.wikipedia.org/wiki/1952_Washington,_D.C.,_UFO_incident) (Wikidata Q2656375)
+
+Natten 19–20 juli 1952 dök okända radarekot upp på Nationals Airport och Andrews Air Force Base i Washington D.C. F-94-jaktplan skickades upp; radarekona försvann när planen närmade sig och återkom när de lämnade området. Incidenten upprepades 26–27 juli. Den 29 juli höll US Air Force sin dittills mest välbesökta presskonferens — General John Samford höll en timmes genomgång om "okända flygande föremål" inför 200 journalister, men fann ingen officiell förklaring.
+
+**Wikipedia depth-score per språk (alla 14):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Koreanska (ko) | 0.929 | 32 794 | 15 | 78 | 2025-08-14 |
+| 2 | Engelska (en) | 0.908 | 29 593 | 14 | 94 | 2026-06-15 |
+| 3 | Vietnamesiska (vi) | 0.739 | 31 592 | 12 | 57 | 2025-06-07 |
+| 4 | Portugisiska (pt) | 0.731 | 28 490 | 11 | 72 | 2024-11-06 |
+| 5 | Kinesiska (zh) | 0.700 | 27 530 | 11 | 63 | 2025-11-10 |
+| 6 | Ryska (ru) | 0.444 | 15 081 | 10 | 14 | 2025-07-16 |
+| 7 | Ukrainska (uk) | 0.384 | 16 550 | 9 | 14 | 2025-08-16 |
+| 8 | Japanska (ja) | 0.294 | 8 636 | 8 | 2 | 2025-05-31 |
+| 9 | Italienska (it) | 0.252 | 5 784 | 7 | 7 | 2025-11-09 |
+| 10 | Franska (fr) | 0.225 | 4 009 | 4 | 3 | 2026-03-28 |
+| 11 | Hebreiska (he) | 0.218 | 6 379 | 6 | 8 | 2025-06-02 |
+| 12 | Kroatiska (hr) | 0.124 | 4 118 | 3 | 3 | 2024-12-01 |
+| 13 | Turkiska (tr) | 0.052 | 1 379 | 1 | 2 | 2025-08-08 |
+| 14 | Estniska (et) | 0.021 | 696 | 0 | 0 | 2022-11-30 |
+
+**Totalt: 14 språk.** Koreanska #1 (0.929) — oväntat starkt för en USA-händelse. Franska #10 (0.225) trots GEIPAN-effekten. Det är ett av de mest välundersökta fallen i Project Blue Book-arkivet och det enda som föranledde en officiell presskonferens på Air Force-nivå.
+
+---
+
+### Vetenskaplig fördjupning: Beatriz Villarroel / VASCO-projektet (2025)
+
+**Primärkällor:**
+- Beatriz Villarroel & Stephen Bruehl, *"Aligned, Multiple-transient Events in the First Palomar Sky Survey"*, Publications of the Astronomical Society of the Pacific, vol. 137, nr. 10, oktober 2025. DOI: 10.1088/1538-3873/ae0afe
+- Beatriz Villarroel & Stephen Bruehl, *"Transients in the Palomar Observatory Sky Survey (POSS-I) may be associated with nuclear testing and reports of unidentified anomalous phenomena"*, Scientific Reports, vol. 15, nr. 34125, 20 oktober 2025. DOI: 10.1038/s41598-025-21620-3. PMC: 12537931
+- Rymdstyrelsen.se, *"Beatriz Villarroel om VASCO-projektet, mystiska ljusfenomen och jakten på teknosignaturer"*, februari 2026: https://www.rymdstyrelsen.se/upptack-rymden/bloggen/2026/02/beatriz-villarroel-om-vasco-projektet-mystiska-ljusfenomen-och-jakten-pa-teknosignaturer/
+- Wikipedia: [Aligned, Multiple-transient Events in the First Palomar Sky Survey](https://en.wikipedia.org/wiki/Aligned,_Multiple-transient_Events_in_the_First_Palomar_Sky_Survey) (Wikidata Q136699759, 1 språk: engelska)
+
+**Vad är VASCO?** VASCO (Vanishing & Appearing Sources during a Century of Observations) är ett projekt lett av Beatriz Villarroel vid Stockholms universitet / Nordic Institute for Theoretical Physics. Det söker efter ljuskällor som försvunnit eller dykt upp på historiska astronomiska fotografiska glasplåtar — plåtar som aldrig var avsedda att dokumentera UAP, men som kan ha gjort det av misstag.
+
+**Fynden:**
+De digitaliserade plåtarna från Mount Palomar Observatory (POSS-I, 1950-talets himmelssurvey) innehåller tillfälliga ljusblixtar — *transienter* — som inte kan förklaras av kända himmelsfenomen. Villarroel och Bruehl analyserade dessa mot två externa datakällor:
+1. **Kärnvapenprov**: frekvensen av transienter ökade signifikant under perioder av kärnvapenstestning
+2. **UAP-rapporter**: UFOCAT-databasen (Center for UFO Studies) — frekvensen korrelerar med civila UAP-observationer, inklusive *sommaren 1952* — samma period som incidenten över Washington D.C.
+
+Det starkaste statistiska fyndet: ett ~30% signifikant *underskott* av ljusblixtar i jordens skugga på ~42 000 km höjd. Det tyder på solreflektioner från reella objekt snarare än instrumentfel — om man tar resultaten för goda.
+
+**Hypotesen:** Villarroel och Bruehl presenterar två alternativa förklaringar. De finner den första osannolik och föredrar den andra:
+1. Ett tidigare okänt atmosfäriskt fenomen utlöst av kärnvapenutlösningar
+2. *Kärnvapen attraherar UAP*
+
+**Koppling till Japan-frågan:** Om hypotesen håller — att kärnexplosioner ökar UAP-aktivitet — är Hiroshima (6 aug 1945) och Nagasaki (9 aug 1945) de historiskt sett *tidigaste* tänkbara exemplen på det mönstret. Det gör Japan-vitan ännu mer intressant som forskningslucka.
+
+**Vetenskaplig mottagning:** Bred skepticism. arXiv vägrade arkivera preprints ("otillräcklig forskning"). Kritiker: Wiescher (kärnavfall ger ljusglimtar), Gillum/SETI (meteorer rakt mot teleskopet), Kirkpatrick (solstormar eller höghöjdsballonger), Hambly (bör analysera originalplåtar, inte digitala kopior), Lupton/Princeton (svag statistisk analys). Å andra sidan: en oberoende föranalys av Ivo Busko (fd. NASA) på Hamburg Observatory fann liknande transienter i deras 1950-talsplåtar — ett preliminärt oberoende stöd för fenomenets existens.
+
+**Wikipedia-status:** Artikeln om de två artiklarna finns enbart på engelska (Q136699759). Villarroel själv har ingen egen Wikipedia-artikel på något språk per 2026-06-24.
+
+---
+
 ### Not: Japan och atombomberna — en vit fläck
 
 Användarfråga för detta projekt: *Finns dokumenterade UAP-observationer i samband med atombombningarna av Hiroshima (6 aug 1945) och Nagasaki (9 aug 1945)?*
@@ -362,6 +423,7 @@ Wikipedia-bredden korrelerar starkare med fallens ålder och kulturella spridnin
 | **Nimitz** | **2004** | **5** | **Pentagon + Senat 2020/2023** |
 | Spökraketerna | 1946 | 14 | Försvarsstaben, ej förklarat |
 | Foo fighters WWII | 1944–45 | **28** | Ej förklarat |
+| Washington D.C. | 1952 | 14 | USAF presskonferens; ej förklarat |
 | Drönarvågen BE/DK | 2024 | **0** | Militären bekräftade incidenter |
 | Japan/atombomb | 1945 | **0** | Vit fläck — primärkällor finns |
 
@@ -430,7 +492,9 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 10. Drönarvågen 2024: US DoD presskonferenser nov–dec 2024; UK MoD bekräftelse RAF-baser nov 2024
 11. Spökraketerna: Försvarsstaben rapport 1946 (Krigsarkivet, Stockholm); Liljegren & Svahn, *UFOs and the Swedish Military*, AFU 1995
 12. Foo fighters: 415th Night Fighter Squadron rapporter 1944; Rendall, *UFOs Before Roswell*, Reiver Country Books 2021
-13. Japan/atombomb (gap): US Strategic Bombing Survey, *Effects of Atomic Bombs on Hiroshima and Nagasaki*, US GPO 1946
+13. Washington D.C. 1952: Ruppelt, *Report on Unidentified Flying Objects*, Doubleday 1956; USAF Project Blue Book (NARA RG 341)
+14. Japan/atombomb (gap): US Strategic Bombing Survey, *Effects of Atomic Bombs on Hiroshima and Nagasaki*, US GPO 1946
+15. Villarroel/VASCO: Villarroel & Bruehl, *Scientific Reports* 15:34125, 2025, DOI 10.1038/s41598-025-21620-3; *PASP* 137:10, 2025, DOI 10.1088/1538-3873/ae0afe
 
 **Metodkällor:**
 - Wikidata Entity API: `wikidata.org/wiki/Special:EntityData/[QID].json`
@@ -448,6 +512,8 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 - Ariel School: Q108803795 — `en.wikipedia.org/wiki/Ariel_School_UFO_incident`
 - Spökraketerna: Q2037682 — `en.wikipedia.org/wiki/Ghost_rockets`
 - Foo fighters: Q942268 — `en.wikipedia.org/wiki/Foo_fighter`
+- Washington D.C. 1952: Q2656375 — `en.wikipedia.org/wiki/1952_Washington,_D.C.,_UFO_incident`
+- VASCO/Villarroel-artiklarna: Q136699759 — `en.wikipedia.org/wiki/Aligned,_Multiple-transient_Events_in_the_First_Palomar_Sky_Survey`
 - Drönarvågen global: Q131703518 — `en.wikipedia.org/wiki/2024_drone_sightings`
 - Drönarvågen USA: Q131438281 — `en.wikipedia.org/wiki/2024_United_States_drone_sightings`
 
