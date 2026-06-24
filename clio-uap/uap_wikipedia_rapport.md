@@ -208,6 +208,63 @@ Under en fotbollsmatch (Fiorentina–Pistoiese) bevittnade ca 10 000 åskådare 
 
 ---
 
+### 9. Ariel School — Ruwa, Zimbabwe (16 september 1994)
+
+**Primärkällor:**
+- Dr. John E. Mack (Harvard Medical School), intervjuer med 62 skolbarn, dokumenterade i *Passport to the Cosmos*, Crown Publishers 1999
+- Cynthia Hind, rapport i *UFO Afrinews* nr 11, 1994
+- Dokumentärfilm: *Ariel Phenomenon* (Randall Nickerson, 2022)
+- Wikipedia: [Ariel School UFO incident](https://en.wikipedia.org/wiki/Ariel_School_UFO_incident) (Wikidata Q108803795)
+
+Under rasten den 16 september 1994 rapporterade 62 elever (ålder 6–12) vid Ariel School att de bevittnade ett ovalt föremål som landade på ett fält intill skolan. Vittnen beskrev varelser utanför föremålet. Lärare och föräldrar var inne i skolan vid tillfället. Dr. John Mack från Harvard genomförde enskilda intervjuer med barnen. Ingen av vittnena har sedan dess återkallat sina berättelser.
+
+**Wikipedia depth-score per språk (alla 6):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Franska (fr) | 0.913 | 21 275 | 10 | 81 | 2026-06-20 |
+| 2 | Tyska (de) | 0.741 | 20 016 | 5 | 105 | 2025-07-05 |
+| 3 | Engelska (en) | 0.739 | 16 880 | 7 | 95 | 2026-06-18 |
+| 4 | Vietnamesiska (vi) | 0.725 | 18 723 | 7 | 83 | 2026-06-11 |
+| 5 | Portugisiska (pt) | 0.367 | 9 540 | 6 | 22 | 2025-07-14 |
+| 6 | Italienska (it) | 0.209 | 4 178 | 3 | 10 | 2025-11-12 |
+
+**Totalt: 6 språk.** Franska toppar igen (0.913). Tyska och vietnamesiska slår engelska. Artikeln saknar bilder på engelska och tyska — en barnvittnesincident utan fotodokumentation.
+
+---
+
+### 10. Drönarvågen 2024 — global och europeisk
+
+**Primärkällor:**
+- US Department of Defense, presskonferenser november–december 2024 (drone sightings över NAS Lakehurst, Wright-Patterson AFB m.fl.)
+- Wikipedia: [2024 drone sightings](https://en.wikipedia.org/wiki/2024_drone_sightings) (global, Wikidata Q131703518)
+- Wikipedia: [2024 United States drone sightings](https://en.wikipedia.org/wiki/2024_United_States_drone_sightings) (Wikidata Q131438281)
+
+Under hösten och vintern 2024 rapporterades okända drönare/UAV-svärmar över militäranläggningar och tätorter i USA (New Jersey, Virginia, Ohio), Storbritannien och Tyskland. I Europa bekräftade det brittiska försvaret incidenter vid RAF Lakenheath, RAF Mildenhall och RAF Feltwell. Belgien och Danmark rapporterade liknande incidenter men dessa är i nuläget (2026-06-24) **inte inkluderade** i Wikipedias globala drönarartikel.
+
+**Wikipedia depth-score — global artikel (Q131703518):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Engelska (en) | 1.000 | 15 718 | 13 | 59 | 2026-05-14 |
+
+**Totalt: 1 språk.** Den globala artikeln täcker UK och Tyskland i Europa — Belgien och Danmark nämns inte.
+
+**Wikipedia depth-score — US-fokuserad artikel (Q131438281):**
+
+| # | Språk | Score | Bytes | Sektioner | Källor | Senast redigerad |
+|---|---|---|---|---|---|---|
+| 1 | Engelska (en) | 0.923 | 130 665 | 23 | 361 | 2026-06-22 |
+| 2 | Serbiska (sr) | 0.850 | 155 250 | 15 | 409 | 2026-01-17 |
+| 3 | Makedonska (mk) | 0.147 | 24 133 | 3 | 61 | 2026-03-20 |
+| 4 | Tyska (de) | 0.141 | 16 987 | 6 | 32 | 2026-04-13 |
+| 5 | Hebreiska (he) | 0.087 | 8 360 | 2 | 19 | 2025-06-02 |
+| 6 | Franska (fr) | 0.063 | 5 373 | 1 | 10 | 2026-05-09 |
+
+**Totalt: 6 språk.** Serbiska (0.850) djupare än engelska i byte-volym (155 250 bytes). Den belgiska och danska drönarvågen saknar Wikipedia-artikel i något språk.
+
+---
+
 ## Tre analytiska mönster
 
 ### Mönster 1: Åldersparadoxen
@@ -221,9 +278,11 @@ Wikipedia-bredden korrelerar starkare med fallens ålder och kulturella spridnin
 | Roswell | 1947 | **68** | Delvis (GAO-rapport 1994) |
 | Rendlesham | 1980 | 18 | Halt-memo avklassificerat, UK NA |
 | Belgienvågen | 1989 | 16 | Officiell belgisk militärrapport |
+| Ariel School | 1994 | 6 | Ej officiellt; Harvard-dokumenterat |
 | Varginha | 1996 | 11 | Ej officiellt bekräftat |
 | Phoenix Lights | 1997 | 24 | Gouvernör bekräftade 2007 |
 | **Nimitz** | **2004** | **5** | **Pentagon + Senat 2020/2023** |
+| Drönarvågen BE/DK | 2024 | **0** | Militären bekräftade incidenter |
 
 Roswell — vars fysiska bevis aldrig officiellt bekräftats — har 13× fler Wikipedia-språk än det Pentagon-bekräftade Nimitz-fallet. Wikipedia mäter kulturell penetration, inte evidens. Kulturell penetration kräver decennier av berättande.
 
@@ -283,9 +342,11 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 3. Roswell: US GAO rapport B-257012, juli 1994; US AAF pressmeddelande 8 juli 1947
 4. Rendlesham: Lt. Col. Charles Halt memo 13 jan 1981, UK NA ref. DEFE 24/1948
 5. Belgienvågen: Force Aérienne Belge rapport 1991
-6. Varginha: Claudeir Covo, *O Caso Varginha*, CICOANI 1996
-7. Phoenix Lights: *Arizona Republic* 18 jun 1997; Symington vittnesmål NPC nov 2007
-8. Nimitz: US DoD presskonferens 27 apr 2020; Fravor, US Senate, 26 jul 2023
+6. Ariel School: Dr. John E. Mack, *Passport to the Cosmos*, Crown Publishers 1999; Cynthia Hind, *UFO Afrinews* nr 11, 1994; dokumentär *Ariel Phenomenon* (R. Nickerson, 2022)
+7. Varginha: Claudeir Covo, *O Caso Varginha*, CICOANI 1996
+8. Phoenix Lights: *Arizona Republic* 18 jun 1997; Symington vittnesmål NPC nov 2007
+9. Nimitz: US DoD presskonferens 27 apr 2020; Fravor, US Senate, 26 jul 2023
+10. Drönarvågen 2024: US DoD presskonferenser nov–dec 2024; UK MoD bekräftelse RAF-baser nov 2024
 
 **Metodkällor:**
 - Wikidata Entity API: `wikidata.org/wiki/Special:EntityData/[QID].json`
@@ -300,6 +361,9 @@ Tyska (plats 12, 0.282) är oväntat lågt för en av världens mest välresurse
 - Nimitz: Q48805044 — `en.wikipedia.org/wiki/USS_Nimitz_UFO_incident`
 - Belgienvågen: Q815525 — `en.wikipedia.org/wiki/Belgian_UFO_wave`
 - Florence 1954: Q3631265 — `it.wikipedia.org/wiki/Avvistamento_di_UFO_a_Firenze`
+- Ariel School: Q108803795 — `en.wikipedia.org/wiki/Ariel_School_UFO_incident`
+- Drönarvågen global: Q131703518 — `en.wikipedia.org/wiki/2024_drone_sightings`
+- Drönarvågen USA: Q131438281 — `en.wikipedia.org/wiki/2024_United_States_drone_sightings`
 
 ---
 
