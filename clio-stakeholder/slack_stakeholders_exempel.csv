@@ -1,0 +1,5 @@
+Namn,Roll/titel,Intern/Extern,Admin/Ägare,Nyckelkanaler,Meddelanden (period),Aktiva dagar,Ggr @-nämnd,Svarar/initierar,User groups
+Anna Berg,Projektledare,Intern,Ja,#projekt-x #ledning,412,58,73,Initierar mest,@ledning
+Karl Nyström,CTO,Intern,Nej,#arkitektur #ledning,38,21,64,Taggad men tyst,@ledning
+Sara Holm,Utvecklare,Intern,Nej,#projekt-x #dev,506,61,29,Svarar mest,@utvecklare
+Leverantör AB,Extern partner,Connect-partner,Nej,#projekt-x-extern,84,30,12,Blandat,
