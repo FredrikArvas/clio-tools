@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Toppmeny -->
+  <menuitem id="menu_uap_root"
+            name="UAP"
+            sequence="90"/>
+
+  <!-- Encounters -->
+  <menuitem id="menu_uap_encounters"
+            name="Encounters"
+            parent="menu_uap_root"
+            action="action_uap_encounter"
+            sequence="10"/>
+
+  <!-- Series -->
+  <menuitem id="menu_uap_series"
+            name="Series"
+            parent="menu_uap_root"
+            action="action_uap_series"
+            sequence="15"/>
+
+  <!-- Raw Reports -->
+  <menuitem id="menu_uap_reports"
+            name="Raw Reports"
+            parent="menu_uap_root"
+            action="action_uap_report"
+            sequence="18"/>
+
+  <!-- Organisations -->
+  <menuitem id="menu_uap_organisations"
+            name="Organisations"
+            parent="menu_uap_root"
+            action="action_uap_organisations"
+            sequence="20"/>
+
+  <!-- Databases -->
+  <menuitem id="menu_uap_databases"
+            name="Databases"
+            parent="menu_uap_root"
+            action="action_uap_database"
+            sequence="30"/>
+
+  <!-- Sources -->
+  <menuitem id="menu_uap_sources"
+            name="Sources"
+            parent="menu_uap_root"
+            action="action_uap_source"
+            sequence="40"/>
+
+  <!-- Verification Log -->
+  <menuitem id="menu_uap_verification"
+            name="Verification Log"
+            parent="menu_uap_root"
+            action="action_uap_verification"
+            sequence="50"/>
+
+</odoo>

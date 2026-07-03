@@ -1,8 +1,10 @@
 """
 odoo_writer.py
 Skriver körningsresultat från clio-agent-job till Odoo:
-  - clio.job.match       — en post per matchad artikel per kandidat
-  - clio.tool.heartbeat  — en post per körning (upsert på tool_name)
+  - clio.media.article    — delad artikelbank (clio_media-modulen)
+  - clio.job.match        — en post per matchad artikel per kandidat
+  - clio.recruiter.match  — en post per matchad artikel för rekryterare
+  - clio.tool.heartbeat   — en post per körning (upsert på tool_name)
 
 Kraschsäkert: Odoo är ett extra lager, inte ett hårdberoende.
 Om anslutning saknas eller misslyckas loggas en varning och körningen fortsätter.
@@ -37,7 +39,7 @@ def get_odoo_env():
 
 def load_known_article_ids(env) -> set[str]:
     """
-    Hämtar alla kända artikel-IDs från Odoo i en enda bulk-fråga.
+    Hämtar alla kända artikel-IDs från clio.media.article i en enda bulk-fråga.
     Returnerar ett tomt set om Odoo inte är tillgängligt.
 
     Används i run.py för att filtrera redan-sedda artiklar INNAN analysen —
@@ -46,7 +48,7 @@ def load_known_article_ids(env) -> set[str]:
     if env is None:
         return set()
     try:
-        rows = env["clio.job.article"].search_read([], ["article_id"])
+        rows = env["clio.media.article"].search_read([], ["article_id"])
         ids = {r["article_id"] for r in rows}
         _logger.debug("load_known_article_ids: %d kända artikel-IDs hämtade", len(ids))
         return ids
@@ -57,7 +59,7 @@ def load_known_article_ids(env) -> set[str]:
 
 def write_articles_to_odoo(env, articles: list[dict]) -> None:
     """
-    Skriver analyserade artiklar till clio.job.article i Odoo.
+    Skriver analyserade artiklar till clio.media.article i Odoo.
 
     Varje artikel är en dict med nycklarna:
         article_id, url, title, source, match_score, is_matched,
@@ -68,7 +70,7 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
     if env is None or not articles:
         return
 
-    Article = env["clio.job.article"]
+    Article = env["clio.media.article"]
     now = _utcnow_str()
     created = skipped = failed = 0
 
@@ -100,7 +102,6 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
         except Exception as exc:
             msg = str(exc).lower()
             if "unik" in msg or "unique" in msg or "uniq" in msg:
-                # Parallel körning — annan profil hann skriva artikeln först
                 skipped += 1
                 _logger.debug("write_articles_to_odoo: skip duplicate %s", a.get("article_id", "")[:12])
             else:
@@ -113,6 +114,47 @@ def write_articles_to_odoo(env, articles: list[dict]) -> None:
     )
     if skipped:
         print(f"[clio-job] Artiklar till Odoo: {created} nya, {skipped} redan inlagda av parallell körning.")
+
+
+def _get_or_create_media_article(env, article, result) -> int | bool:
+    """
+    Slår upp eller skapar en clio.media.article-post för en matchad artikel.
+    Returnerar Odoo-ID (int) eller False vid fel.
+    """
+    art_url = getattr(article, "url", "") or ""
+    if not art_url:
+        return False
+    try:
+        Article = env["clio.media.article"]
+        rows = Article.search_read([("url", "=", art_url)], ["id"], limit=1)
+        if rows:
+            return rows[0]["id"]
+        # Artikel ej ännu skriven (kan hända om write_articles_to_odoo inte körts ännu)
+        now = _utcnow_str()
+        published = getattr(article, "published", None)
+        if published:
+            try:
+                if hasattr(published, "strftime"):
+                    published = published.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    published = str(published)[:19].replace("T", " ")
+            except Exception:
+                published = False
+        art_id = Article.create({
+            "article_id":  getattr(article, "article_id", "") or "",
+            "url":         art_url,
+            "title":       (getattr(article, "title", "") or "")[:500],
+            "source":      getattr(article, "source", "") or "",
+            "published":   published or False,
+            "first_seen":  now,
+            "body_snippet": (getattr(article, "body_snippet", "") or "")[:1000],
+            "match_score": int(getattr(result, "match_score", 0)),
+            "is_matched":  True,
+        })
+        return art_id
+    except Exception as exc:
+        _logger.warning("_get_or_create_media_article: %s", exc)
+        return False
 
 
 def write_matches_to_odoo(profile: dict, matches: list) -> None:
@@ -160,7 +202,6 @@ def write_matches_to_odoo(profile: dict, matches: list) -> None:
 
         created = 0
         for m in matches:
-            # MatchedArticle har .article (Article) och .result (AnalysisResult)
             article = m.article
             result  = m.result
             Match.create({
@@ -177,7 +218,6 @@ def write_matches_to_odoo(profile: dict, matches: list) -> None:
         log.info(f"odoo_writer: {created} matchning(ar) sparade för {email}")
 
     except Exception as exc:  # noqa: BLE001
-        # Aldrig krasch — Odoo är ett extra lager, inte ett hårdberoende
         _logger.warning("odoo_writer: kunde inte spara matchningar i Odoo: %s", exc)
 
 
@@ -186,8 +226,7 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
     Skapar clio.recruiter.match-poster i Odoo för rekryterarläge.
 
     Letar upp clio.recruiter.profile på name — skapar profilen om den saknas.
-    Skriver recruiter-specifika fält: target_company, candidate_profile,
-    estimated_timeline, contact_hint.
+    Artiklar länkas via clio.media.article (article_id Many2one).
 
     Args:
         profile: Profildict (från profile_loader.load_profile), profile_type=recruiter
@@ -220,7 +259,6 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
             signals = profile.get("trigger_signals") or {}
             Profile.create({
                 "name":                    profile_name,
-                "email":                   profile.get("email", ""),
                 "language":                profile.get("language", "sv"),
                 "target_role":             target.get("role", ""),
                 "target_seniority":        target.get("seniority", ""),
@@ -232,9 +270,8 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
                 "confidential_client":     bool(profile.get("confidential_client", True)),
                 "client_hint":             profile.get("client_hint", ""),
             })
-            # create() returnerar OdooRecordset — hämta integer-id via search_read
-            created = Profile.search_read([("name", "=", profile_name)], ["id"], limit=1)
-            profile_id = created[0]["id"]
+            created_profile = Profile.search_read([("name", "=", profile_name)], ["id"], limit=1)
+            profile_id = created_profile[0]["id"]
             _logger.info("write_recruiter_match: skapade ny profil '%s' (id=%s)", profile_name, profile_id)
 
         sent_at = _utcnow_str()
@@ -242,10 +279,12 @@ def write_recruiter_match(profile: dict, matches: list) -> None:
         for m in matches:
             article = m.article
             result  = m.result
+
+            media_article_id = _get_or_create_media_article(env, article, result)
+
             Match.create({
                 "profile_id":         profile_id,
-                "article_url":        getattr(article, "url", "") or "",
-                "article_title":      (getattr(article, "title", "") or "")[:500],
+                "article_id":         media_article_id,
                 "target_company":     (getattr(result, "target_company", "") or "")[:255],
                 "candidate_profile":  (getattr(result, "candidate_profile", "") or "")[:255],
                 "signal_type":        (getattr(result, "signal_type", "") or "")[:100],

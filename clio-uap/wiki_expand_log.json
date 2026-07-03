@@ -1,0 +1,57 @@
+{
+  "subcats": {
+    "new": 322,
+    "l1_skip": 27,
+    "l2_enrich": 688,
+    "no_date": 186,
+    "errors": 2
+  },
+  "uap_terms": {
+    "new": 0,
+    "l1_skip": 14,
+    "l2_enrich": 6,
+    "no_cat": 9,
+    "errors": 0
+  },
+  "lists": {
+    "new": 3,
+    "l1_skip": 3,
+    "no_article": 10,
+    "rows": 6,
+    "errors": 0
+  },
+  "wikidata": {
+    "new": 0,
+    "l1_skip": 1,
+    "l2_skip": 45,
+    "errors": 0
+  },
+  "country_lists": {
+    "new": 225,
+    "l1_skip": 0,
+    "no_date": 0,
+    "no_article": 0,
+    "errors": 0
+  },
+  "films": {
+    "new": 57,
+    "l1_skip": 7,
+    "errors": 0
+  },
+  "nordic": {
+    "new": 0,
+    "l1_skip": 0,
+    "l2_enrich": 0,
+    "no_cat": 5,
+    "no_article": 6,
+    "no_date": 0,
+    "errors": 0
+  },
+  "uso": {
+    "new": 0,
+    "l1_skip": 20,
+    "l2_enrich": 6,
+    "no_summary": 4,
+    "errors": 0
+  }
+}

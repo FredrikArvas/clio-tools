@@ -138,7 +138,7 @@ def run(
 
     # Ladda källor
     try:
-        sources = load_sources()
+        sources = load_sources(env=odoo_env)
     except ImportError as e:
         print(f"[FEL] {e}", file=sys.stderr)
         return -1
