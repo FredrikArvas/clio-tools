@@ -181,3 +181,9 @@ sources:
 # Transkription
 max_priority_duration_minutes: 90   # Objekt över denna längd får reducerat prioritetstal
 whisper_model: medium               # tiny | base | small | medium | large-v3
+
+    - url: https://www.fokus.se/om/ufo/feed/
+      name: Fokus — UFO/UAP
+      maturity: etablerad
+      weight: 1.4
+      auth_env: FOKUS_RSS_AUTH

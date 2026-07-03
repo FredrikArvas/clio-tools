@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ══════════════════════════════════════════════════════
+       List view
+  ══════════════════════════════════════════════════════ -->
+  <record id="view_uap_report_list" model="ir.ui.view">
+    <field name="name">uap.report.list</field>
+    <field name="model">uap.report</field>
+    <field name="arch" type="xml">
+      <list string="Raw Reports" decoration-muted="status == 'duplicate'" decoration-danger="status == 'rejected'">
+        <field name="report_date"/>
+        <field name="raw_title"/>
+        <field name="country_id"/>
+        <field name="location_text"/>
+        <field name="reporter_type"/>
+        <field name="shape"/>
+        <field name="database_id"/>
+        <field name="status" widget="badge"
+               decoration-success="status == 'linked'"
+               decoration-warning="status == 'unlinked'"
+               decoration-danger="status in ('duplicate', 'rejected')"/>
+        <field name="encounter_id"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════
+       Form view
+  ══════════════════════════════════════════════════════ -->
+  <record id="view_uap_report_form" model="ir.ui.view">
+    <field name="name">uap.report.form</field>
+    <field name="model">uap.report</field>
+    <field name="arch" type="xml">
+      <form string="Raw Report">
+        <header>
+          <field name="status" widget="statusbar"
+                 statusbar_visible="unlinked,linked,duplicate,rejected"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="raw_title" placeholder="Title"/></h1>
+          </div>
+
+          <group>
+            <group string="Source">
+              <field name="database_id"/>
+              <field name="external_id"/>
+              <field name="import_batch"/>
+              <field name="posted_date"/>
+            </group>
+            <group string="Observation">
+              <field name="report_date"/>
+              <field name="reporter_type"/>
+              <field name="shape"/>
+              <field name="duration_text"/>
+            </group>
+          </group>
+
+          <group string="Location">
+            <group>
+              <field name="country_id"/>
+              <field name="location_text"/>
+            </group>
+            <group>
+              <field name="geo_lat"/>
+              <field name="geo_lng"/>
+            </group>
+          </group>
+
+          <group string="Pipeline">
+            <field name="encounter_id"/>
+            <field name="canonical_id" invisible="status != 'duplicate'"/>
+          </group>
+
+          <notebook>
+            <page string="Description">
+              <field name="raw_description" nolabel="1"/>
+            </page>
+            <page string="Duplicates" invisible="not duplicate_ids">
+              <field name="duplicate_ids" nolabel="1">
+                <list>
+                  <field name="report_date"/>
+                  <field name="raw_title"/>
+                  <field name="database_id"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════
+       Search view
+  ══════════════════════════════════════════════════════ -->
+  <record id="view_uap_report_search" model="ir.ui.view">
+    <field name="name">uap.report.search</field>
+    <field name="model">uap.report</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="raw_title"/>
+        <field name="country_id"/>
+        <field name="database_id"/>
+        <field name="import_batch"/>
+        <filter name="unlinked"  string="Unlinked"  domain="[('status','=','unlinked')]"/>
+        <filter name="linked"    string="Linked"    domain="[('status','=','linked')]"/>
+        <filter name="duplicate" string="Duplicate" domain="[('status','=','duplicate')]"/>
+        <filter name="has_coords" string="Has Coordinates"
+                domain="[('geo_lat','!=',0),('geo_lng','!=',0)]"/>
+        <group expand="0" string="Group By">
+          <filter name="by_country"  string="Country"  context="{'group_by': 'country_id'}"/>
+          <filter name="by_database" string="Database" context="{'group_by': 'database_id'}"/>
+          <filter name="by_status"   string="Status"   context="{'group_by': 'status'}"/>
+          <filter name="by_batch"    string="Batch"    context="{'group_by': 'import_batch'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- ══════════════════════════════════════════════════════
+       Action
+  ══════════════════════════════════════════════════════ -->
+  <record id="action_uap_report" model="ir.actions.act_window">
+    <field name="name">Raw Reports</field>
+    <field name="res_model">uap.report</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{'search_default_unlinked': 1}</field>
+  </record>
+
+</odoo>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Listvy -->
+  <record id="view_uap_database_tree" model="ir.ui.view">
+    <field name="name">uap.database.list</field>
+    <field name="model">uap.database</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="db_type"/>
+        <field name="language"/>
+        <field name="record_count"/>
+        <field name="encounter_count" string="Encounters"/>
+        <field name="last_synced"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Formvy -->
+  <record id="view_uap_database_form" model="ir.ui.view">
+    <field name="name">uap.database.form</field>
+    <field name="model">uap.database</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="%(action_uap_encounter)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-list">
+              <field name="encounter_count" widget="statinfo" string="Encounters"/>
+            </button>
+          </div>
+
+          <group string="Database">
+            <field name="name"/>
+            <field name="partner_id"/>
+            <field name="db_type"/>
+            <field name="db_url" widget="url"/>
+            <field name="language"/>
+          </group>
+
+          <group string="Statistics">
+            <field name="record_count"/>
+            <field name="last_synced"/>
+          </group>
+
+          <notebook>
+            <page string="Description">
+              <field name="description" nolabel="1" placeholder="Describe this database..."/>
+            </page>
+            <page string="Encounters">
+              <field name="encounter_ids" nolabel="1">
+                <list>
+                  <field name="encounter_id"/>
+                  <field name="title_en"/>
+                  <field name="date_observed"/>
+                  <field name="region"/>
+                  <field name="encounter_class"/>
+                  <field name="status"/>
+                </list>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sökvy -->
+  <record id="view_uap_database_search" model="ir.ui.view">
+    <field name="name">uap.database.search</field>
+    <field name="model">uap.database</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <field name="partner_id"/>
+        <separator/>
+        <filter string="Reporting DB"  name="reporting" domain="[('db_type','=','reporting')]"/>
+        <filter string="Archive"       name="archive"   domain="[('db_type','=','archive')]"/>
+        <group expand="0" string="Group By">
+          <filter string="Owner Org" name="by_org"  context="{'group_by': 'partner_id'}"/>
+          <filter string="Type"      name="by_type" context="{'group_by': 'db_type'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_uap_database" model="ir.actions.act_window">
+    <field name="name">Databases</field>
+    <field name="res_model">uap.database</field>
+    <field name="view_mode">list,form</field>
+    <field name="search_view_id" ref="view_uap_database_search"/>
+  </record>
+
+</odoo>
