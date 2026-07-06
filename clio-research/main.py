@@ -156,6 +156,17 @@ def _run_media_pipeline(protocol: dict, run_id: str, state: dict, status_mailer)
     state["last_completed_phase"] = 2
     _save_state(state, coded_articles)
 
+    logger.info("=== Media-fas 2b: Odoo-skrivning ===")
+    try:
+        import odoo_media_writer
+        odoo_media_writer.write_media_articles(
+            coded_articles,
+            protocol_id=protocol["protocol_id"],
+            run_id=run_id,
+        )
+    except Exception as exc:
+        logger.warning("[main] Odoo-skrivning misslyckades (körning fortsätter): %s", exc)
+
     logger.info("=== Media-fas 3: Rapport ===")
     report_path = media_report_builder.build(protocol, coded_articles, run_id, DONE_DIR)
     state["report_path"] = str(report_path)
