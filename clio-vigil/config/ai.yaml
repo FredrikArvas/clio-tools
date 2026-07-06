@@ -62,6 +62,17 @@ sources:
 
   youtube_channels: []
 
+  # Google News RSS — trending-signal för pitching
+  google_news:
+    lang: en
+    country: US
+    weight: 1.5
+    queries:
+      - "AI regulation Europe"
+      - "artificial intelligence law"
+      - "AI safety legislation"
+      - "EU AI Act"
+
 # Transkription
 max_priority_duration_minutes: 60
 whisper_model: medium
