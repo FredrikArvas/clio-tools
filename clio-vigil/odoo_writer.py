@@ -195,6 +195,44 @@ def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None) -> int
     return synced
 
 
+def sync_journalists_from_conn(odoo_env, conn) -> int:
+    """Upsert:ar journalister från SQLite till clio.lobbying.journalist."""
+    if odoo_env is None:
+        return 0
+    try:
+        rows = conn.execute("SELECT * FROM journalists").fetchall()
+    except Exception as exc:
+        _logger.warning("sync_journalists_from_conn: SQLite-läsfel: %s", exc)
+        return 0
+    if not rows:
+        return 0
+
+    Journalist = odoo_env["clio.lobbying.journalist"]
+    synced = 0
+    for row in rows:
+        vals = {
+            "name":          row["name"],
+            "publication":   row["publication"],
+            "domain":        row["domain"],
+            "email":         row["email"] or False,
+            "topics":        row["topics"] or False,
+            "profile":       row["profile"] or False,
+            "article_count": row["article_count"] or 0,
+        }
+        try:
+            existing = Journalist.search([("name", "=", row["name"]), ("publication", "=", row["publication"])], limit=1)
+            if existing:
+                existing.write(vals)
+            else:
+                Journalist.create(vals)
+            synced += 1
+        except Exception as exc:
+            _logger.warning("sync_journalists_from_conn: %s/%s fel: %s", row["name"], row["publication"], exc)
+
+    _logger.info("sync_journalists_from_conn: %d/%d journalister synkade", synced, len(rows))
+    return synced
+
+
 # ---------------------------------------------------------------------------
 # Leveransposter
 # ---------------------------------------------------------------------------
