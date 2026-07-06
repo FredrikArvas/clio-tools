@@ -298,6 +298,16 @@ def cmd_analyze(args):
     return 0
 
 
+def cmd_classify(args):
+    """Klassificera clio.media.article efter UAP-relevans via Claude."""
+    import config
+    from uap_classify import classify_unclassified
+    print("\n[classify] Klassificerar oklassificerade artiklar...")
+    n = classify_unclassified(dry_run=args.dry_run)
+    print(f"[classify] {n} artiklar klassificerade.")
+    return 0
+
+
 def cmd_sync_qdrant(args):
     """Indexera UAP-encounters i Qdrant."""
     from qdrant_index import index_all
@@ -332,6 +342,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     p_qdrant = sub.add_parser("sync-qdrant", help="Indexera i Qdrant")
     p_qdrant.add_argument("--dry-run", action="store_true")
 
+    # classify
+    p_classify = sub.add_parser("classify", help="Klassificera artiklar efter UAP-relevans")
+    p_classify.add_argument("--dry-run", action="store_true")
+
     # analyze
     p_analyze = sub.add_parser("analyze", help="Analysera slow-motion-video med Claude Vision")
     p_analyze.add_argument("--video", required=True,
@@ -364,6 +378,7 @@ def main(argv=None) -> None:
         "sync-neo4j":  cmd_sync_neo4j,
         "sync-qdrant": cmd_sync_qdrant,
         "analyze":     cmd_analyze,
+        "classify":    cmd_classify,
     }
     func = dispatch.get(args.command)
     if func:
