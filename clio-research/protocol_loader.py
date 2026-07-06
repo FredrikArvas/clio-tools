@@ -21,6 +21,7 @@ def load(protocol_id: str, inbox_dir: Path) -> dict:
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
+    _detect_and_normalize_type(data)
     _validate(data, path)
     _normalize(data)
 
@@ -68,6 +69,31 @@ def _normalize(data: dict) -> None:
     out.setdefault("status_updates", True)
     out.setdefault("index_in_qdrant", True)
     out.setdefault("qdrant_collection", "vigil_research")
+
+
+def _detect_and_normalize_type(data: dict) -> None:
+    """Detektera protokolltyp (academic_research / media_research) och normalisera."""
+    is_media = "primary_media" in data.get("sources", {})
+    data["protocol_type"] = "media_research" if is_media else "academic_research"
+    if is_media:
+        _normalize_media_protocol(data)
+
+
+def _normalize_media_protocol(data: dict) -> None:
+    """Sätt synthetic question + search_strategy för media-protokoll."""
+    rq = data.get("research_question", {})
+    primary = rq.get("primary", "")
+    if "question" not in data:
+        data["question"] = {
+            "natural_language": primary,
+            "keywords_primary": {"sv": ["UAP", "UFO"], "en": ["UAP", "UFO"]},
+        }
+    if "search_strategy" not in data:
+        countries = [
+            g.get("country", "?")
+            for g in data.get("sources", {}).get("primary_media", [])
+        ]
+        data["search_strategy"] = {"phases": [], "regions": countries}
 
 
 def source_id(title: str, year: int | None, doi: str | None) -> str:
