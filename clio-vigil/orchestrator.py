@@ -139,6 +139,34 @@ CREATE TABLE IF NOT EXISTS source_archives (
 );
 CREATE INDEX IF NOT EXISTS idx_archive_source ON source_archives(source_name);
 CREATE INDEX IF NOT EXISTS idx_archive_url    ON source_archives(url);
+CREATE TABLE IF NOT EXISTS journalists (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,
+    publication     TEXT NOT NULL,
+    domain          TEXT,
+    email           TEXT,
+    topics          TEXT,
+    profile         TEXT,
+    article_count   INTEGER DEFAULT 0,
+    last_seen_at    TEXT,
+    created_at      TEXT DEFAULT (datetime('now')),
+    updated_at      TEXT DEFAULT (datetime('now')),
+    UNIQUE(name, publication)
+);
+CREATE TABLE IF NOT EXISTS journalist_articles (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    journalist_id   INTEGER NOT NULL REFERENCES journalists(id),
+    item_id         INTEGER REFERENCES vigil_items(id),
+    extracted_at    TEXT DEFAULT (datetime('now')),
+    UNIQUE(journalist_id, item_id)
+);
+CREATE TABLE IF NOT EXISTS pitch_runs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_text      TEXT,
+    domain          TEXT,
+    journalist_count INTEGER DEFAULT 0,
+    created_at      TEXT DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------

@@ -596,6 +596,12 @@ def main():
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
+    parser.add_argument("--extract-journalists", action="store_true", help="Extrahera journalistbylines ur insamlade artiklar")
+    parser.add_argument("--build-profiles",      action="store_true", help="Bygg journalist-profiler via Claude")
+    parser.add_argument("--pitch",               type=str,            help="Generera pitch-utkast för en händelse (event-text som argument)")
+    parser.add_argument("--pitch-send",          action="store_true", help="Skicka pitch via mail (kräver --pitch + .env i clio-agent-mail)")
+    parser.add_argument("--pitch-account",       type=str, default="clio", help="Mailkonto för sändning (default: clio)")
+    parser.add_argument("--event-id",            type=int,            help="Odoo event-ID för write-back av pitch-poster")
     parser.add_argument("--classify-uap",    action="store_true", help="Klassificera queued UFO-items och skapa pending Odoo-encounters")
     parser.add_argument("--seed-sources",    action="store_true", help="Importera YAML-källkonfiguration till Odoo (engångsimport)")
     parser.add_argument("--archive-sources", action="store_true", help="Arkivera källor med archive:true i YAML (Sprint C)")
@@ -612,6 +618,7 @@ def main():
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
+        args.extract_journalists, bool(args.pitch),
         args.archive_sources, bool(args.archive_source),
     ])
     if not any_action:
@@ -784,6 +791,41 @@ def main():
         subs_info = f", {counts['subscribers']} prenumeranter" if "subscribers" in counts else ""
         logger.info(f"Digest: {counts['items']} objekt skickade{subs_info}")
         _odoo_sync("efter digest")
+
+    if args.extract_journalists:
+        from journalist_extractor import run_extractor
+        counts = run_extractor(conn, domain=args.domain)
+        logger.info(
+            "Journalist-extraktion: %d nya, %d uppdaterade, %d filtrerade",
+            counts.get("created", 0), counts.get("updated", 0), counts.get("filtered", 0),
+        )
+        if _odoo_env:
+            from odoo_writer import sync_journalists_from_conn
+            sync_journalists_from_conn(_odoo_env, conn)
+            logger.info("Journalister synkade till Odoo")
+
+    if args.pitch:
+        from pitcher import run_pitch
+        results = run_pitch(
+            conn,
+            event_text=args.pitch,
+            domain=args.domain,
+            send=args.pitch_send,
+            from_account=args.pitch_account,
+            dry_run=args.dry_run,
+            odoo_event_id=args.event_id,
+            odoo_env=_odoo_env if args.event_id else None,
+        )
+        logger.info(
+            "Pitch-pipeline klar: %d utkast genererade%s",
+            len(results),
+            " (dry-run)" if args.dry_run else "",
+        )
+        if args.dry_run:
+            for r in results:
+                print("")
+                print("--- {} ({}) ---".format(r["journalist"], r["publication"]))
+                print(r.get("pitch_text", ""))
 
     # Heartbeat — alltid vid körning med pipeline-steg
     if _odoo_env is not None and any([
