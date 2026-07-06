@@ -43,6 +43,7 @@ from orchestrator import init_db, stats, domain_stats, upsert_item, transition
 from filter import run_filter
 from collectors.rss_collector import collect_rss
 from collectors.youtube_collector import collect_youtube
+from collectors.google_news_collector import collect_google_news
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -235,6 +236,7 @@ def pick_source(conn) -> None:
         print(f"\n  Hämtar [{domain_id}]...")
         rss_counts = collect_rss(conn, filtered_config)
         yt_counts  = collect_youtube(conn, filtered_config)
+        collect_google_news(conn, filtered_config)
         new = rss_counts["discovered"] + yt_counts["discovered"]
         total_new += new
         print(f"  → {new} nya objekt")
@@ -255,6 +257,7 @@ def run_pipeline(conn, domain_id: str) -> None:
     # Steg 1: Insamling
     rss_counts = collect_rss(conn, config)
     yt_counts = collect_youtube(conn, config)
+    gn_counts = collect_google_news(conn, config)
 
     total_discovered = rss_counts["discovered"] + yt_counts["discovered"]
     logger.info(f"Insamling: {total_discovered} nya objekt")

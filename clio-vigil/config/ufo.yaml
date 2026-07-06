@@ -127,6 +127,13 @@ sources:
       maturity: tidig
       weight: 0.8
 
+
+    - url: https://www.fokus.se/om/ufo/feed/
+      name: "Fokus — UFO/UAP"
+      maturity: etablerad
+      weight: 1.4
+      auth_env: FOKUS_RSS_AUTH
+
   # YouTube-kanaler — @handle-format (robustare än kanal-ID)
   youtube_channels:
     - channel_id: "@theblackvault"
@@ -173,6 +180,20 @@ sources:
   #   weight: 1.1
   #   crawl_depth: 2
 
+  # Google News RSS — trending-signal för pitching
+  # weight högre än standard (1.2) för att prioritera mainstream-spridning
+  google_news:
+    lang: en
+    country: US
+    weight: 1.5
+    queries:
+      - "UAP disclosure"
+      - "UFO military government"
+      - "non-human intelligence"
+      - "Pentagon UAP report"
+      - "UFO whistleblower"
+
 # Transkription
 max_priority_duration_minutes: 90   # Objekt över denna längd får reducerat prioritetstal
 whisper_model: medium               # tiny | base | small | medium | large-v3
+
