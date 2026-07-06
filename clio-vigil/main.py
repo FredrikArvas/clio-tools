@@ -799,8 +799,8 @@ def main():
         from journalist_extractor import run_extractor
         counts = run_extractor(conn, domain=args.domain)
         logger.info(
-            "Journalist-extraktion: %d nya, %d uppdaterade, %d filtrerade",
-            counts.get("created", 0), counts.get("updated", 0), counts.get("filtered", 0),
+            "Journalist-extraktion: %d bylines, %d utan byline, %d filtrerade",
+            counts.get("extracted", 0), counts.get("skipped", 0), 0,
         )
         if _odoo_env:
             from odoo_writer import sync_journalists_from_conn

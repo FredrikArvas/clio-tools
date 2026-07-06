@@ -34,6 +34,7 @@ _SKIP_AUTHORS = {
     "staff", "staff writer", "staff reporter", "editors", "redaktionen",
     "the editors", "associated press", "ap", "tt", "reuters", "afp", "np",
     "admin", "administrator", "unknown", "anonymous",
+    "podcast", "podcasts",
 }
 
 
@@ -83,6 +84,9 @@ def _clean_name(raw: str) -> Optional[str]:
         return None
     # Generiska bylines
     if name.lower() in _SKIP_AUTHORS:
+        return None
+    # Podcastnamn och kanalnamn är inte journalister
+    if "podcast" in name.lower() or "channel" in name.lower():
         return None
     # Bara siffror eller symboler
     if not re.search(r"[a-zA-ZåäöÅÄÖ]", name):
@@ -157,7 +161,7 @@ def run_extractor(conn, domain: Optional[str] = None, max_items: int = 200) -> d
     rows = conn.execute(
         f"""SELECT vi.id, vi.source_name, vi.domain, vi.raw_metadata, vi.title
             FROM vigil_items vi
-            WHERE vi.state IN ('indexed','notified','summarized')
+            WHERE vi.state NOT IN ('error')
               AND vi.id NOT IN (SELECT item_id FROM journalist_articles WHERE item_id IS NOT NULL)
               {domain_clause}
             ORDER BY vi.published_at DESC
@@ -175,7 +179,7 @@ def run_extractor(conn, domain: Optional[str] = None, max_items: int = 200) -> d
         except (json.JSONDecodeError, TypeError):
             pass
 
-        author = metadata.get("author")
+        author = _clean_name(metadata.get("author") or "")
         if not author:
             counts["skipped"] += 1
             continue
