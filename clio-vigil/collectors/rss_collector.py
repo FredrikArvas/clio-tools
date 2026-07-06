@@ -77,7 +77,22 @@ def collect_rss(conn, domain_config: dict) -> dict:
         maturity = source.get("maturity", "tidig")
         weight = source.get("weight", 1.0)
 
-        logger.info(f"RSS: hämtar {name} ({url})")
+        # HTTP Basic Auth via env-variabel: AUTH_ENV=USER:PASSWORD (base64 ej nödvändigt)
+        auth_env = source.get("auth_env")
+        if auth_env:
+            import os, urllib.parse
+            creds = os.environ.get(auth_env, "")
+            if ":" in creds:
+                user, password = creds.split(":", 1)
+                parsed = urllib.parse.urlparse(url)
+                url = parsed._replace(
+                    netloc=f"{urllib.parse.quote(user)}:{urllib.parse.quote(password)}@{parsed.hostname}"
+                    + (f":{parsed.port}" if parsed.port else "")
+                ).geturl()
+            else:
+                logger.warning(f"RSS auth_env {auth_env} saknas eller har fel format (USER:PASSWORD)")
+
+        logger.info(f"RSS: hämtar {name} ({source['url']})")
 
         try:
             feed = feedparser.parse(url)
