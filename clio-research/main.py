@@ -108,36 +108,105 @@ def _cmd_status(run_id: str) -> None:
 
 def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
     import protocol_loader
+    import status_mailer
+
+    protocol = protocol_loader.load(protocol_id, INBOX_DIR)
+    run_id = resume_run_id or protocol["run_id"]
+
+    state = _init_state(run_id, protocol_id)
+    _save_state(state, [])
+
+    if protocol.get("protocol_type") == "media_research":
+        _run_media_pipeline(protocol, run_id, state, status_mailer)
+    else:
+        _run_academic_pipeline(protocol, run_id, state, resume_run_id, status_mailer)
+
+    _move_to_done(run_id)
+    logger.info("Körning %s klar.", run_id)
+
+
+def _run_media_pipeline(protocol: dict, run_id: str, state: dict, status_mailer) -> None:
+    """Media-research spår: insamling → kodning → rapport → leverans."""
+    import media_connector
+    import media_coder
+    import media_report_builder
+    import qdrant_indexer
+
+    question = protocol["question"]["natural_language"]
+
+    logger.info("=== Media-fas 1: Artikelinsamling ===")
+    articles = media_connector.collect(protocol)
+    state["sources_collected"] = len(articles)
+    _save_state(state, articles)
+
+    if not articles:
+        status_mailer.send_anomaly(
+            run_id, 1,
+            "Artikelinsamling returnerade 0 artiklar. Kontrollera vigil_ufo och GDELT.",
+            question=question,
+        )
+
+    status_mailer.send_phase_complete(
+        run_id, 1, "Artikelinsamling",
+        source_count=len(articles), relevant_count=len(articles), question=question,
+    )
+
+    logger.info("=== Media-fas 2: Kodning (%d artiklar) ===", len(articles))
+    coded_articles = media_coder.code_articles(articles, protocol)
+    state["last_completed_phase"] = 2
+    _save_state(state, coded_articles)
+
+    logger.info("=== Media-fas 3: Rapport ===")
+    report_path = media_report_builder.build(protocol, coded_articles, run_id, DONE_DIR)
+    state["report_path"] = str(report_path)
+    state["last_completed_phase"] = 3
+    _save_state(state, coded_articles)
+
+    logger.info("=== Media-fas 4: Leverans ===")
+    if report_path.exists():
+        qdrant_indexer.index_report(protocol, [], report_path, run_id)
+        status_mailer.send_final_report(run_id, report_path, question=question)
+    else:
+        logger.warning("Rapport saknas vid leverans-fas")
+
+    state["last_completed_phase"] = 4
+    _save_state(state, coded_articles)
+
+
+def _run_academic_pipeline(
+    protocol: dict,
+    run_id: str,
+    state: dict,
+    resume_run_id: str | None,
+    status_mailer,
+) -> None:
+    """Akademiskt spår (oförändrat från R1.3)."""
     import search_runner
     import citation_chaser
     import credibility_scorer
     import relevance_filter
     import report_builder
-    import status_mailer
     import qdrant_indexer
 
-    protocol = protocol_loader.load(protocol_id, INBOX_DIR)
-    run_id = resume_run_id or protocol["run_id"]
     question = protocol["question"]["natural_language"]
 
     if resume_run_id:
-        state = _load_state(resume_run_id)
-        sources = state.get("sources", [])
-        seen_ids = set(s["source_id"] for s in sources if s.get("source_id"))
-        start_phase = state.get("last_completed_phase", 0) + 1
+        loaded = _load_state(resume_run_id)
+        sources = loaded.get("sources", [])
+        seen_ids = {s["source_id"] for s in sources if s.get("source_id")}
+        start_phase = loaded.get("last_completed_phase", 0) + 1
         logger.info("Återupptar körning %s från fas %d", run_id, start_phase)
     else:
-        # Ladda cachade källor från tidigare körningar
         cached = qdrant_indexer.load_cached_sources(question)
         sources = cached
-        seen_ids = set(s["source_id"] for s in cached if s.get("source_id"))
+        seen_ids = {s["source_id"] for s in cached if s.get("source_id")}
         if cached:
             logger.info("Laddade %d cachade källor från Qdrant", len(cached))
         start_phase = 1
         logger.info("Startar ny körning: %s", run_id)
 
-    state = _init_state(run_id, protocol_id)
     _save_state(state, sources)
+    relevant_sources: list[dict] = []
 
     phases = protocol["search_strategy"]["phases"]
 
@@ -152,40 +221,37 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
             logger.info("=== Fas %d: %s ===", phase_num, label)
             new = search_runner.run_phase(phase_def, protocol, seen_ids)
             sources.extend(new)
-
-            if len(new) == 0:
-                msg = f"Fas {phase_num} ({label}): Noll resultat"
-                logger.warning(msg)
-                question = protocol["question"].get("natural_language", "")
-                status_mailer.send_anomaly(run_id, phase_num, msg, question=question)
+            if not new:
+                status_mailer.send_anomaly(
+                    run_id, phase_num,
+                    f"Fas {phase_num} ({label}): Noll resultat",
+                    question=question,
+                )
 
         elif phase_num == 5:
             logger.info("=== Fas 5: Citation chase ===")
             credibility_scorer.score_all(sources)
-            new = citation_chaser.chase(sources, seen_ids, depth=1)
-            sources.extend(new)
+            sources.extend(citation_chaser.chase(sources, seen_ids, depth=1))
 
         elif phase_num == 6:
-            logger.info("=== Fas 6: Credibility scoring ===")
+            logger.info("=== Fas 6: Credibility scoring + relevansfilter ===")
             credibility_scorer.score_all(sources)
-            logger.info("=== Fas 6.5: Relevansfiltrering ===")
             relevant_sources = relevance_filter.filter_by_relevance(sources, question)
             state["relevant_sources_count"] = len(relevant_sources)
             if not relevant_sources:
                 status_mailer.send_anomaly(
                     run_id, 6,
-                    f"Relevansfilter returnerade 0 av {len(sources)} källor. "
-                    f"Kontrollera söktermer i protokollet.",
+                    f"Relevansfilter: 0 av {len(sources)} källorna passerade.",
                     question=question,
                 )
 
         elif phase_num == 7:
-            logger.info("=== Fas 7: Rapport building ===")
+            logger.info("=== Fas 7: Rapport ===")
             report_path = report_builder.build(protocol, relevant_sources, run_id, DONE_DIR)
             state["report_path"] = str(report_path)
 
         elif phase_num == 8:
-            logger.info("=== Fas 8: Delivery ===")
+            logger.info("=== Fas 8: Leverans ===")
             rp = Path(state.get("report_path", ""))
             if rp.exists():
                 qdrant_indexer.index_report(protocol, relevant_sources, rp, run_id)
@@ -198,16 +264,12 @@ def _cmd_run(protocol_id: str, resume_run_id: str | None) -> None:
         _save_state(state, sources)
 
         if protocol["output"].get("status_updates") and phase_num <= 4:
-            question = protocol["question"].get("natural_language", "")
             status_mailer.send_phase_complete(
                 run_id, phase_num, label,
                 source_count=len(sources),
                 relevant_count=len([s for s in sources if s.get("phase_found") == phase_num]),
                 question=question,
             )
-
-    _move_to_done(run_id)
-    logger.info("Körning %s klar. Källor: %d", run_id, len(sources))
 
 
 def _init_state(run_id: str, protocol_id: str) -> dict:
