@@ -12,24 +12,83 @@ Kraschsäkert: Odoo är ett extra lager. Om anslutning saknas fortsätter körni
 from __future__ import annotations
 
 import logging
-import sys
+import os
+import xmlrpc.client
 from datetime import datetime, timezone
 from pathlib import Path
 
 _logger = logging.getLogger(__name__)
 
-_CLIO_ODOO_PATH = Path(__file__).parent.parent / "clio_core"
+
+class _XmlRpcEnv:
+    """Tunn XML-RPC-wrapper som efterliknar OdooConnector-gränssnittet."""
+
+    def __init__(self, url: str, db: str, uid: int, password: str) -> None:
+        self._db = db
+        self._uid = uid
+        self._pw = password
+        self._models = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/object")
+
+    def __getitem__(self, model: str) -> "_XmlRpcModel":
+        return _XmlRpcModel(self._models, self._db, self._uid, self._pw, model)
 
 
-def _get_env():
-    """Returnerar OdooConnector eller None."""
+class _XmlRpcModel:
+    def __init__(self, proxy, db, uid, pw, model) -> None:
+        self._proxy = proxy
+        self._db = db
+        self._uid = uid
+        self._pw = pw
+        self._model = model
+
+    def search_read(self, domain, fields):
+        return self._proxy.execute_kw(
+            self._db, self._uid, self._pw,
+            self._model, "search_read", [domain], {"fields": fields},
+        )
+
+    def create(self, vals: dict) -> int:
+        return self._proxy.execute_kw(
+            self._db, self._uid, self._pw,
+            self._model, "create", [vals],
+        )
+
+
+def _get_env() -> _XmlRpcEnv | None:
+    """Anslut via XML-RPC med ODOO_* från miljön. Returnerar None vid fel."""
     try:
-        sys.path.insert(0, str(_CLIO_ODOO_PATH))
-        from clio_odoo import connect
-        return connect()
+        from dotenv import load_dotenv
+        _load_env()
+        url = os.environ["ODOO_URL"]
+        db = os.environ["ODOO_DB"]
+        user = os.environ["ODOO_USER"]
+        pw = os.environ["ODOO_PASSWORD"]
+        common = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/common")
+        uid = common.authenticate(db, user, pw, {})
+        if not uid:
+            _logger.warning("[odoo_media_writer] Autentisering misslyckades (uid=False)")
+            return None
+        _logger.info("[odoo_media_writer] Ansluten till %s/%s som uid=%s", url, db, uid)
+        return _XmlRpcEnv(url, db, uid, pw)
     except Exception as exc:
         _logger.warning("[odoo_media_writer] Odoo-anslutning misslyckades: %s", exc)
         return None
+
+
+def _load_env() -> None:
+    try:
+        from dotenv import load_dotenv
+        here = Path(__file__).resolve().parent
+        for candidate in [
+            here / ".env",
+            here.parent / ".env",
+            here.parent / "clio-uap" / ".env",
+        ]:
+            if candidate.exists():
+                load_dotenv(candidate, override=False)
+                return
+    except ImportError:
+        pass
 
 
 def _utcnow_str() -> str:
