@@ -64,19 +64,49 @@ def _match_journalists(conn, event_text: str, domain: Optional[str]) -> list[dic
         logger.warning("Inga journalister med profil hittades.")
         return []
 
-    # Bygg lista för Claude att bedöma
+    # Slå upp vilka publikationer som är trending på Google News just nu
+    _trending_pubs: dict = {}
+    try:
+        _domain_filter = ("AND source_type='google_news' AND domain = ?", [domain]) if domain \
+            else ("AND source_type='google_news'", [])
+        _rows = conn.execute(
+            "SELECT source_name, COUNT(*) as cnt FROM vigil_items "
+            "WHERE raw_metadata LIKE '%google_trending%' "
+            + _domain_filter[0] +
+            " GROUP BY source_name",
+            _domain_filter[1],
+        ).fetchall()
+        _trending_pubs = {r["source_name"]: r["cnt"] for r in _rows}
+    except Exception as _te:
+        logger.debug("google_trending-lookup misslyckades: %s", _te)
+
+    # Bygg lista för Claude att bedöma — annotate trending-publikationer
+    def _journalist_line(i: int, j) -> str:
+        tag = ""
+        pub = j["publication"] or ""
+        if pub in _trending_pubs:
+            tag = f" [TRENDING: {_trending_pubs[pub]} artiklar på Google News idag]"
+        return f"{i+1}. {j['name']} ({pub}){tag}: {j['profile'][:200]}"
+
     journalist_list = "\n".join(
-        f"{i+1}. {j['name']} ({j['publication']}): {j['profile'][:200]}"
-        for i, j in enumerate(journalists)
+        _journalist_line(i, j) for i, j in enumerate(journalists)
+    )
+
+    trending_note = (
+        "\n\nOBS: Journalister markerade med [TRENDING] kommer från publikationer som "
+        "just nu bevakar detta ämne aktivt (Google News-signal). "
+        "Prioritera dem om de i övrigt matchar händelsen."
+        if _trending_pubs else ""
     )
 
     prompt = (
         f"Du är en PR-strateg. Nedan är en händelse och en lista journalister med profiler.\n"
         f"Välj de {MAX_JOURNALISTS_PER_PITCH} journalister som mest sannolikt är intresserade "
         f"av händelsen. Svara ENBART med ett JSON-objekt på formen:\n"
-        f'{{\"matches\": [{{\"index\": 1, \"reason\": \"...\"}}, ...]}}\n\n'
+        '{"matches": [{"index": 1, "reason": "..."}}, ...]}\n\n'
         f"Händelse:\n{event_text}\n\n"
         f"Journalister:\n{journalist_list}"
+        f"{trending_note}"
     )
 
     client = anthropic.Anthropic()
