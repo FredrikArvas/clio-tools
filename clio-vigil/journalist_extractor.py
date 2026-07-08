@@ -94,6 +94,17 @@ def _clean_name(raw: str) -> Optional[str]:
     return name
 
 
+def split_authors(raw: str) -> list[str]:
+    """Delar upp ett multi-byline-fält i enskilda namn.
+    'A, B and C' -> ['A', 'B', 'C'].
+    Returnerar tomma listan om inga giltiga namn hittas.
+    """
+    # Ersätt " and " med komma, sedan split på komma
+    normalized = re.sub(r"\s+and\s+", ",", raw, flags=re.IGNORECASE)
+    parts = [p.strip() for p in normalized.split(",")]
+    return [n for n in (_clean_name(p) for p in parts) if n]
+
+
 # ---------------------------------------------------------------------------
 # Databas — journalists och journalist_articles
 # ---------------------------------------------------------------------------
@@ -179,14 +190,15 @@ def run_extractor(conn, domain: Optional[str] = None, max_items: int = 200) -> d
         except (json.JSONDecodeError, TypeError):
             pass
 
-        author = _clean_name(metadata.get("author") or "")
-        if not author:
+        authors = split_authors(metadata.get("author") or "")
+        if not authors:
             counts["skipped"] += 1
             continue
 
         publication = row["source_name"] or "Okänd"
-        upsert_journalist(conn, author, publication, row["domain"], row["id"])
-        counts["extracted"] += 1
+        for author in authors:
+            upsert_journalist(conn, author, publication, row["domain"], row["id"])
+        counts["extracted"] += len(authors)
 
     logger.info(
         "Byline-extraktion: %d processerade, %d bylines, %d utan byline",
