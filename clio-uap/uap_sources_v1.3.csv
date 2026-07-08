@@ -1,0 +1,880 @@
+uap_source_id,source_type,first_name,last_name,role,organization,website,podcast_name,rss_feed,focus_areas,language,country,city,credibility_tier,social_media,email,phone,notes,data_source
+UAP-PRS-keanleslie-0001,person,Leslie,Kean,journalist,,https://lesliekean.com,,,disclosure;aerial;historical,en,USA,New York,1,@lesliekean,,,NYT-artikeln 2017 om Pentagon UAP-program. Medförfattare Grusch-artikeln 2023.,manual_clio
+UAP-PRS-blumenthalralph-0002,person,Ralph,Blumenthal,journalist,NYT,https://ralphblumenthal.com,,,disclosure;aerial;historical,en,USA,New York,1,@ralphblumenthal,,,NYT-journalist. Medförfattare Pentagon/AATIP-artikeln 2017.,manual_clio
+UAP-PRS-cooperhelene-0003,person,Helene,Cooper,journalist,NYT,https://nytimes.com,,,aerial;military,en,USA,Washington DC,1,@helenecooper,,,Pentagon-korrespondent NYT. Medförfattare UAP-artiklarna 2017.,manual_clio
+UAP-PRS-benderbryan-0004,person,Bryan,Bender,journalist,POLITICO,https://politico.com,,,disclosure;military;policy,en,USA,Washington DC,1,@bryandbender,,,POLITICO. Täcker militär och UAP-disclosure.,manual_clio
+UAP-PRS-mcmillantim-0005,person,Tim,McMillan,journalist,The Debrief,https://thedebrief.org,,,aerial;military;disclosure,en,USA,,1,@timmcmillan,,,The Debrief. Djuprapportering om UAP och AARO.,manual_clio
+UAP-PRS-sharpchristopher-0006,person,Christopher,Sharp,journalist,The Debrief,https://thedebrief.org,,,disclosure;aerial;policy,en,USA,,1,@christophersharp,,,The Debrief. Täcker Congressional UAP-hearings.,manual_clio
+UAP-PRS-knappgeorge-0007,person,George,Knapp,journalist,KLAS-TV,https://georgeknapp.com,,,aerial;historical;whistleblower,en,USA,Las Vegas NV,1,@georgeknapp,,,KLAS-TV Las Vegas. Bob Lazar-intervjun 1989.,manual_clio
+UAP-PRS-rogowaytyler-0008,person,Tyler,Rogoway,journalist,The Drive,https://thedrive.com/the-war-zone,,,aerial;military;official,en,USA,,1,@tylermrogoway,,,The War Zone. Djupanalys av militär UAP.,manual_clio
+UAP-PRS-graffgarrett-0009,person,Garrett,Graff,journalist,WIRED,https://wired.com,,,historical;disclosure,en,USA,Washington DC,1,@vermontgmg,,,WIRED. Bok om Roswell och UAP-historia.,manual_clio
+UAP-PRS-shellenbergermic-0010,person,Michael,Shellenberger,journalist,Public,https://public.substack.com,,,disclosure;policy,en,USA,San Francisco,1,@shellenberger,,,Public Substack. Täcker UAP-disclosure.,manual_clio
+UAP-PRS-speigellee-0011,person,Lee,Speigel,journalist,,,,,historical;aerial,en,USA,,2,,,,Fd AOL News / HuffPost UAP-korrespondent.,manual_clio
+UAP-PRS-coulthartross-0012,person,Ross,Coulthart,journalist,News Nation,https://rosscoulthart.com,,,aerial;whistleblower;disclosure,en,Australia,Sydney,1,@rosscoulthart,,,News Nation. In Plain Sight. Kontaktade Grusch 2023.,manual_clio
+UAP-PRS-elizondolue-0013,person,Lue,Elizondo,researcher;whistleblower,,https://luiselizondo-official.com,,,aerial;military;disclosure,en,USA,Washington DC,1,@luiselizondo,,,Fd AATIP-chef Pentagon. Central disclosure-figur.,manual_clio
+UAP-PRS-mellonchristophe-0014,person,Christopher,Mellon,official;researcher,,https://christophermellon.net,,,policy;disclosure;military,en,USA,Washington DC,1,@christophermellon,,,Fd biträdande försvarsminister underrättelse. TTSA-rådgivare.,manual_clio
+UAP-PRS-gruschdavid-0015,person,David,Grusch,whistleblower,,,,,aerial;crash_retrieval;disclosure,en,USA,Washington DC,1,@daviddgrusch,,,NRO/NGA-analytiker. Congressional testimony 2023 om crash retrieval-program.,manual_clio
+UAP-PRS-nellkarl-0016,person,Karl,Nell,whistleblower;official,,,,,aerial;crash_retrieval;disclosure,en,USA,,1,,,,Pensionerad colonel. Grusch-korroboratör. UAP Task Force.,manual_clio
+UAP-PRS-gravesryan-0017,person,Ryan,Graves,researcher;pilot,Americans for Safe Aerospace,https://americansforspacefreedom.org,,,aerial;pilot;safety,en,USA,,1,@uncertainvector,,,Fd F/A-18-pilot. Congressional testimony.,manual_clio
+UAP-PRS-fravordavid-0018,person,David,Fravor,pilot,,,,,aerial;pilot;military,en,USA,,1,@davefravorUSN,,,Fd commander USS Nimitz-incident 2004. Tic Tac-vittne.,manual_clio
+UAP-PRS-puthoffhal-0019,person,Hal,Puthoff,scientist;researcher,EarthTech,https://earthtech.org,,,physics;consciousness;crash_retrieval,en,USA,Austin TX,1,@halputhoff,,,Fd SRI. EarthTech. TTSA-vetenskaplig rådgivare.,manual_clio
+UAP-PRS-daviseric-0020,person,Eric,Davis,scientist;researcher,EarthTech,https://earthtech.org,,,physics;crash_retrieval;materials,en,USA,Austin TX,1,,,,EarthTech. Wilson-Davis-memo.,manual_clio
+UAP-PRS-nolangarry-0021,person,Garry,Nolan,scientist;researcher,Stanford,https://garrynolan.com,,,biology;materials;crash_retrieval,en,USA,Stanford CA,1,@garrypnolan,,,Stanfordprofessor patologi. NHI-biologiskt material.,manual_clio
+UAP-PRS-knuthkevin-0022,person,Kevin,Knuth,scientist;researcher,UAlbany,https://kevinknuth.com,,,physics;aerial,en,USA,Albany NY,1,@kevinknuth,,,UAlbany fysikprofessor. UAP-rörelsefysik.,manual_clio
+UAP-PRS-loebavi-0023,person,Avi,Loeb,scientist;researcher,Harvard,https://loebgroup.org,Galileo Project,,space;materials;exoplanet,en,Israel,Cambridge MA,1,@aviloeb,,,Harvard-astrofysiker. Galileo Project. Oumuamua-hypotes.,manual_clio
+UAP-PRS-kellehercolm-0024,person,Colm,Kelleher,scientist,NIDS,,,,biology;consciousness;crash_retrieval,en,USA,Las Vegas NV,1,,,,Biokemist. Skinwalker Ranch. NIDS.,manual_clio
+UAP-PRS-villarroelbeatri-0025,person,Beatriz,Villarroel,scientist;researcher,Stockholm University,https://vasco.wholetomato.com,,,space;historical;transients,sv;en,Sweden,Stockholm,1,@beatrizvillarr,,,VASCO-projektet. Korrelation kärnvapenprov / 1952 Washington.,manual_clio
+UAP-PRS-teodoranimassimo-0026,person,Massimo,Teodorani,scientist,,,,,aerial;physics;hessdalen,it,Italy,Bologna,1,,,,Astrofysiker. Projekt Hessdalen. Plasma-fenomen.,manual_clio
+UAP-PRS-stranderling-0027,person,Erling,Strand,scientist,Ostfold University,https://hessdalen.org,,,aerial;physics;hessdalen,no,Norway,Østfold,1,,,,Leder Project Hessdalen.,manual_clio
+UAP-PRS-haugebjrngitle-0028,person,Bjørn Gitle,Hauge,scientist,,https://hessdalen.org,,,aerial;physics;hessdalen,no,Norway,,1,,,,Hessdalen. Elektromagnetisk analys.,manual_clio
+UAP-PRS-vallejacques-0029,person,Jacques,Vallée,researcher;scientist,,,,,aerial;consciousness;historical,fr,France,Paris,1,@jacquesvallee,,,Fd astrofysiker/VC Silicon Valley. Passport to Magonia.,manual_clio
+UAP-PRS-friedmanstanton-0030,person,Stanton,Friedman,researcher;author,,,,,aerial;crash_retrieval;historical,en,Canada,Fredericton NB,1,,,,Fd kärnfysiker. Cosmic Watergate. Deceased 2019.,manual_clio
+UAP-PRS-hynekjallen-0031,person,J. Allen,Hynek,scientist;researcher,,,,,aerial;historical;official,en,USA,Chicago IL,1,,,,Fd Northwestern-astronomer. Project Blue Book-rådgivare. Deceased 1986.,manual_clio
+UAP-PRS-dolanrichard-0032,person,Richard,Dolan,researcher;author,,https://richarddolanpress.com,Richard Dolan Show,https://feeds.libsyn.com/richard-dolan-show/rss,historical;disclosure;aerial,en,USA,Rochester NY,1,@rdolanufobooks,,,Historiker. UFOs and the National Security State.,manual_clio
+UAP-PRS-sturrockpeter-0033,person,Peter,Sturrock,scientist;researcher,Stanford,,,,physics;aerial;historical,en,USA,Stanford CA,1,,,,Fd Stanfordprofessor astrofysik. Sturrock-panelen 1997.,manual_clio
+UAP-PRS-rodeghiermark-0034,person,Mark,Rodeghier,researcher,CUFOS,https://cufos.org,,,aerial;historical;statistics,en,USA,Chicago IL,1,,,,J. Allen Hynek Center for UFO Studies.,manual_clio
+UAP-PRS-swordsmichael-0035,person,Michael,Swords,researcher;academic,,,,,historical;aerial;academic,en,USA,Kalamazoo MI,1,,,,UFOs and Government (medförfattare).,manual_clio
+UAP-PRS-powellrobert-0036,person,Robert,Powell,researcher,SCU,https://ufoscientific.com,,,aerial;physics;scientific,en,USA,,1,,,,SCU-grundare. Vetenskaplig UAP-analys.,manual_clio
+UAP-PRS-sparksbrad-0037,person,Brad,Sparks,researcher,,,,,historical;aerial;statistics,en,USA,,1,,,,UFO-statistik och historisk analys. CUFOS-samarbete.,manual_clio
+UAP-PRS-maccabeebruce-0038,person,Bruce,Maccabee,scientist;researcher,,https://brumac.mysite.com,,,aerial;photographic;physics,en,USA,,2,,,,Fd Naval Surface Warfare Center. UAP-fotoanalys.,manual_clio
+UAP-PRS-hastingsrobert-0039,person,Robert,Hastings,researcher,,https://ufohastings.com,,,nuclear;military;aerial,en,USA,,1,@rfhastings,,,UAP vid kärnvapenanläggningar.,manual_clio
+UAP-PRS-corbelljeremy-0040,person,Jeremy,Corbell,filmmaker;podcaster,,https://jeremycorbell.com,Weaponized,https://feeds.megaphone.fm/weaponized,aerial;crash_retrieval;whistleblower,en,USA,Los Angeles CA,2,@jeremycorbell,,,Dokumentärfilmare. Weaponized-podcast med Knapp.,manual_clio
+UAP-PRS-foxjames-0041,person,James,Fox,filmmaker,,https://jamesfox.com,,,aerial;historical;disclosure,en,USA,Los Angeles CA,1,@jamesfoxufo,,,The Phenomenon. Moment of Contact (Varginha).,manual_clio
+UAP-PRS-moultonhowelinda-0042,person,Linda,Moulton Howe,journalist;podcaster,Earthfiles,https://earthfiles.com,Earthfiles,https://feeds.megaphone.fm/earthfiles,aerial;animal_mutilation;crop_circles;consciousness,en,USA,,2,@earthfiles,,,Investigativ journalist. Animal mutilation-forskning.,manual_clio
+UAP-PRS-churchjimmy-0043,person,Jimmy,Church,podcaster,,https://jimmychurch.com,Fade to Black,https://feeds.megaphone.fm/fadetoblack,aerial;consciousness;disclosure,en,USA,,2,@jimmychurchradio,,,Nightly UAP-talk show.,manual_clio
+UAP-PRS-spragueryan-0044,person,Ryan,Sprague,journalist;podcaster,,https://ryansprague.com,Somewhere in the Skies,https://feeds.libsyn.com/somewhere-in-the-skies/rss,aerial;witnesses;disclosure,en,USA,,2,@ryangsprague,,,Humanistisk approach till UAP-vittnen.,manual_clio
+UAP-PRS-greenewaldjrjohn-0045,person,John,Greenewald Jr,researcher;podcaster,The Black Vault,https://theblackvault.com,The Black Vault Podcast,https://feeds.buzzsprout.com/1601640.rss,disclosure;official;foia,en,USA,,1,@blackvaultcom,,,FOIA-specialist. Tusentals UAP-dokument.,manual_clio
+UAP-PRS-strieberwhitley-0046,person,Whitley,Strieber,author;podcaster,,https://unknowncountry.com,Dreamland,https://feeds.unknowncountry.com/dreamland,consciousness;abduction,en,USA,,2,@whitleystrieber,,,Communion. Dreamland-podcast.,manual_clio
+UAP-PRS-greersteven-0047,person,Steven,Greer,researcher,Disclosure Project,https://siriusdisclosure.com,,,consciousness;disclosure;crash_retrieval,en,USA,,2,@stevengreer,,,Grundare Disclosure Project. CE5-protokoll. Kontroversiell.,manual_clio
+UAP-PRS-delongetom-0048,person,Tom,DeLonge,author;entrepreneur,TTSA,https://tothestars.academy,,,aerial;disclosure;consciousness,en,USA,San Diego CA,2,@tomdelonge,,,Grundare TTSA. Blink-182. AATIP-videorna.,manual_clio
+UAP-PRS-camerongrant-0049,person,Grant,Cameron,researcher,,https://presidentialufo.com,,,historical;disclosure;consciousness,en,Canada,Winnipeg MB,2,@grantcameron,,,Presidential UFO. Forskar om presidenter och UAP.,manual_clio
+UAP-PRS-mackjohn-0050,person,John,Mack,researcher;academic,Harvard,,,,abduction;consciousness;psychology,en,USA,Cambridge MA,1,,,,Fd Harvard-psykiatriprofessor. Deceased 2004.,manual_clio
+UAP-PRS-hopkinsbudd-0051,person,Budd,Hopkins,researcher,Intruders Foundation,,,,abduction;consciousness,en,USA,New York NY,1,,,,Pionjär abduction-forskning. Deceased 2011.,manual_clio
+UAP-PRS-jacobsdavid-0052,person,David,Jacobs,researcher;academic,Temple University,https://ufoabduction.com,,,abduction;consciousness,en,USA,Philadelphia PA,2,,,,Temple University (em.). Hypnoterapi och abduction.,manual_clio
+UAP-PRS-mardenkathleen-0053,person,Kathleen,Marden,researcher,,https://kathleenmarden.com,,,abduction;consciousness;historical,en,USA,,2,@kathy_marden,,,Niece till Betty Hill. Abduction-forskning.,manual_clio
+UAP-PRS-waltontravis-0054,person,Travis,Walton,witness,,https://travis-walton.com,,,abduction;aerial;historical,en,USA,Snowflake AZ,2,@travis_walton,,,Fire in the Sky. Abduktion 1975.,manual_clio
+UAP-PRS-lazarbob-0055,person,Bob,Lazar,witness;researcher,,,,,crash_retrieval;physics;propulsion,en,USA,Las Vegas NV,2,@boblazar,,,Area 51/S-4. Reverse-engineered craft. Kontroversiell.,manual_clio
+UAP-PRS-bassettsteven-0056,person,Steven,Bassett,researcher;activist,PRG,https://paradigmresearchgroup.org,,,disclosure;policy;political,en,USA,Washington DC,2,@paradigmrg,,,Paradigm Research Group. Lobbyist för Congressional UAP-hearing.,manual_clio
+UAP-PRS-davenportpeter-0057,person,Peter,Davenport,researcher,NUFORC,https://nuforc.org,,,aerial;reporting,en,USA,Harrington WA,1,,,,Chef för NUFORC.,manual_clio
+UAP-PRS-sheehandaniel-0058,person,Daniel,Sheehan,researcher;lawyer,Romero Institute,https://romero-institute.org,,,disclosure;legal;policy,en,USA,Santa Cruz CA,1,@danielpsheehan,,,Advokat. UAP-disclosure juridik.,manual_clio
+UAP-PRS-feschinofrank-0059,person,Frank,Feschino,researcher;author,,https://frankfeschino.com,,,aerial;historical;military,en,USA,,2,,,,Shoot Them Down. 1952 Washington D.C.-vågen.,manual_clio
+UAP-PRS-pasulkadianawals-0060,person,Diana Walsh,Pasulka,academic,UNC Wilmington,https://dianawalshpasulka.com,,,consciousness;academic;religion,en,USA,Wilmington NC,1,,,,American Cosmic. UAP och religion.,manual_clio
+UAP-PRS-kripaljeffrey-0061,person,Jeffrey,Kripal,academic,Rice University,https://ruf.rice.edu,,,consciousness;academic;religion,en,USA,Houston TX,1,,,,Authors of the Impossible. UAP och mysticism.,manual_clio
+UAP-PRS-westmick-0062,person,Mick,West,researcher;debunker,Metabunk,https://metabunk.org,,,debunking;aerial;analysis,en,USA,,2,@mickwest,,,Metabunk.org. Systematisk debunking.,manual_clio
+UAP-PRS-sheafferrobert-0063,person,Robert,Sheaffer,researcher;debunker,,https://badufos.blogspot.com,,,debunking;historical,en,USA,,2,@rshfeaffer,,,CSICOP. Bad UFOs-bloggen.,manual_clio
+UAP-PRS-obergjames-0064,person,James,Oberg,researcher;debunker,,,,,debunking;space;orbital,en,USA,,1,,,,Fd NASA. Rymdfenomen och misidentifikation.,manual_clio
+UAP-PRS-shostakseth-0065,person,Seth,Shostak,scientist;debunker,SETI Institute,https://seti.org,,,seti;debunking;space,en,USA,Mountain View CA,1,@sethshostak,,,Fd SETI Institute. Skeptisk kommentator.,manual_clio
+UAP-PRS-tysonneildegrass-0066,person,Neil deGrasse,Tyson,scientist;debunker,Hayden Planetarium,https://haydenplanetarium.org,,,space;debunking;aerial,en,USA,New York NY,1,@neiltyson,,,Astrofysiker. Skeptisk men öppen.,manual_clio
+UAP-PRS-colavitojason-0067,person,Jason,Colavito,researcher;debunker,,https://jasoncolavito.com,,,debunking;ancient_aliens;historical,en,USA,,2,@jasoncolavito,,,Kritisk analys av ancient aliens och UAP-pseudovetenskap.,manual_clio
+UAP-PRS-kakumichio-0068,person,Michio,Kaku,scientist,,https://mkaku.org,,,physics;space;consciousness,en,USA,New York NY,1,@michiokaku,,,Teoretisk fysiker. Kommenterar regelbundet UAP.,manual_clio
+UAP-PRS-popenick-0069,person,Nick,Pope,journalist;researcher,,https://nickpope.net,,,aerial;policy;official,en,UK,London,1,@nickpope99,,,Fd MoD UAP-utredare. Författare och kommentator.,manual_clio
+UAP-PRS-clarkedavid-0070,person,David,Clarke,researcher;academic,Sheffield Hallam,https://drdavidclarke.co.uk,,,historical;official;uk,en,UK,Sheffield,1,@davidclarkeufo,,,Journalism prof. Brittiska MoD UAP-filer.,manual_clio
+UAP-PRS-goodtimothy-0071,person,Timothy,Good,researcher;author,,,,,aerial;historical;disclosure,en,UK,London,1,,,,Above Top Secret. Alien Liaison.,manual_clio
+UAP-PRS-randlesjenny-0072,person,Jenny,Randles,researcher;author,BUFORA,,,,historical;uk;abduction,en,UK,Manchester,1,,,,UFO Reality. Fd BUFORA.,manual_clio
+UAP-PRS-redfernnick-0073,person,Nick,Redfern,researcher;author,,https://nickredfern.blogspot.com,,,aerial;conspiracy;historical,en,UK,,2,@nickredfernFort,,,Prolific UFO-författare. Brittisk bakgrund.,manual_clio
+UAP-PRS-heseltinegary-0074,person,Gary,Heseltine,researcher,UFO Truth,https://ufotruth.co.uk,UFO Truth Magazine,,aerial;disclosure;official,en,UK,Yorkshire,2,@garyheseltine,,,UFO Truth Magazine. Fd polisinspektör.,manual_clio
+UAP-PRS-mantlephilip-0075,person,Philip,Mantle,researcher,,https://flyingsaucerreview.com,,,aerial;historical;abduction,en,UK,Yorkshire,2,@philip_mantle,,,Brittisk UFO-historiker. Fd MUFON UK-chef.,manual_clio
+UAP-PRS-koiisaac-0076,person,Isaac,Koi,researcher,,https://isaackoi.com,,,historical;legal;aerial,en,UK,London,1,,,,Jurist och UAP-historiker. Digitaliserat arkiv.,manual_clio
+UAP-PRS-brunigeorgina-0077,person,Georgina,Bruni,researcher;author,,,,,historical;uk;official,en,UK,London,2,,,,You Can't Tell the People — Rendlesham.,manual_clio
+UAP-PRS-shoughmartin-0078,person,Martin,Shough,researcher,,,,,aerial;physics;historical,en,UK,,1,,,,Analytisk UAP-forskning. NARCAP-samarbeten.,manual_clio
+UAP-PRS-hallidayron-0079,person,Ron,Halliday,researcher,,,,,historical;uk;scotland,en,UK,Scotland,2,,,,Skotsk UFO-historia.,manual_clio
+UAP-PRS-campbellsteuart-0080,person,Steuart,Campbell,researcher;debunker,,,,,debunking;historical;uk,en,UK,Edinburgh,2,,,,Skeptisk brittisk UAP-analys.,manual_clio
+UAP-PRS-mckinnongary-0081,person,Gary,McKinnon,researcher;hacker,,,,,disclosure;crash_retrieval;space,en,UK,London,2,,,,Hackade NASA/Pentagon 2002. Extraditionsfall.,manual_clio
+UAP-PRS-svahnclas-0082,person,Clas,Svahn,researcher,AFU,https://ufo.se,,,historical;nordic;aerial,sv,Sweden,Stockholm,1,@classvahn,,,AFU. Sveriges mest citerade UAP-historiker.,manual_clio
+UAP-PRS-liljegrenanders-0083,person,Anders,Liljegren,researcher,AFU,https://ufo.se,,,historical;nordic;ghost_rockets,sv,Sweden,Norrköping,1,,,,AFU-grundare. Spökraketerna 1946.,manual_clio
+UAP-PRS-bartollkarlgsta-0084,person,Karl-Gösta,Bartoll,researcher,,,,,historical;nordic;ghost_rockets,sv,Sweden,,2,,,,Spökrake-utredare. FRA-samarbete 1940-talet.,manual_clio
+UAP-PRS-olzonmartin-0085,person,Martin,Olzon,researcher,AFU,https://ufo.se,,,historical;nordic,sv,Sweden,,2,,,,AFU-arkivarie.,manual_clio
+UAP-PRS-rehngosta-0086,person,Gosta,Rehn,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Tidig svensk UFO-forskare.,manual_clio
+UAP-PRS-brnneolejonny-0087,person,Ole Jonny,Brænne,researcher,,,,,historical;nordic;ghost_rockets,no,Norway,Oslo,2,,,,Norsk UFO-historiker. Spökraketerna.,manual_clio
+UAP-PRS-havikleif-0088,person,Leif,Havik,researcher,,,,,historical;nordic,no,Norway,,2,,,,Norsk UFO-forskning.,manual_clio
+UAP-PRS-viitajorma-0089,person,Jorma,Viita,researcher,,,,,historical;nordic,fi,Finland,Helsinki,2,,,,Finsk UAP-forskning.,manual_clio
+UAP-PRS-hansenkim-0090,person,Kim,Hansen,researcher,,,,,historical;nordic,da,Denmark,Copenhagen,2,,,,Dansk UFO-historia.,manual_clio
+UAP-PRS-henningsenole-0091,person,Ole,Henningsen,researcher,,,,,historical;nordic,da,Denmark,,2,,,,Dansk UAP-historiker.,manual_clio
+UAP-PRS-bourdaisgildas-0092,person,Gildas,Bourdais,researcher,,,,,historical;disclosure;official,fr,France,Paris,1,,,,COMETA-rapporten. Franska UFO-historiker.,manual_clio
+UAP-PRS-aigoinmichel-0093,person,Michel,Aigoin,official,IHEDN,,,,aerial;official,fr,France,,1,,,,COMETA-rapporten 1999. Fd IHEDN.,manual_clio
+UAP-PRS-sillardyves-0094,person,Yves,Sillard,official,CNES,,,,aerial;official,fr,France,,1,,,,Chef CNES. COMETA-deltagare.,manual_clio
+UAP-PRS-gresljeangabriel-0095,person,Jean-Gabriel,Greslé,official;researcher,Air France,,,,aerial;official;pilot,fr,France,,1,,,,Fd Air France-pilot. COMETA-bidragsgivare.,manual_clio
+UAP-PRS-mariefranck-0096,person,Franck,Marie,researcher,,,,,historical;aerial,fr,France,,2,,,,Traditionell UAP-forskning i Frankrike.,manual_clio
+UAP-PRS-riberaantonio-0097,person,Antonio,Ribera,researcher;author,,,,,historical;latin_america,es,Spain,Barcelona,1,,,,Spansk UAP-pionjär. Deceased.,manual_clio
+UAP-PRS-ballesterolmosvi-0098,person,Vicente-Juan,Ballester Olmos,researcher,FOTOCAT,https://fotocat.blogspot.com,,,aerial;historical;debunking,es,Spain,Valencia,2,@vicentejballest,,,FOTOCAT-projektet. Rigorös fotoanalys.,manual_clio
+UAP-PRS-borrazaymerichma-0099,person,Manuel,Borraz Aymerich,researcher;debunker,,https://mbufo.blogspot.com,,,debunking;historical;aerial,es,Spain,,2,,,,Kritisk analys av spanska UAP-fall.,manual_clio
+UAP-PRS-pinottiroberto-0100,person,Roberto,Pinotti,researcher,CUN,https://cun-italia.net,,,historical;aerial,it,Italy,Florence,1,,,,Chef CUN — Centro UFOlogico Nazionale.,manual_clio
+UAP-PRS-forgioneadriano-0101,person,Adriano,Forgione,journalist,Fenomenum,https://fenomeniumag.it,,,historical;aerial,it,Italy,,2,,,,Fenomenum Magazine.,manual_clio
+UAP-PRS-harrispaola-0102,person,Paola,Harris,researcher,,https://paolaharrisintl.com,,,aerial;disclosure;historical,en,Italy,Denver CO,2,@paolaharris,,,Italian-amerikan. UAP-forskning.,manual_clio
+UAP-PRS-polidoromassimo-0103,person,Massimo,Polidoro,researcher;debunker,CICAP,https://massimopolidoro.com,,,debunking;historical;critical,it,Italy,Milan,2,,,,CICAP. Italiensk skeptiker.,manual_clio
+UAP-PRS-castellanflavio-0104,person,Flavio,Castellan,researcher,,,,,historical;aerial,it,Italy,,2,,,,Italiensk UAP-historiker.,manual_clio
+UAP-PRS-hesemannmichael-0105,person,Michael,Hesemann,researcher;author,,https://michaelhesemann.com,,,aerial;historical;disclosure,de,Germany,Düsseldorf,1,,,,Die UFO-Frage. Producent.,manual_clio
+UAP-PRS-vonludwigerillob-0106,person,Illobrand,von Ludwiger,scientist,MUFON-CES,,,,aerial;physics;historical,de,Germany,Munich,1,,,,MUFON-CES. Fysikanalys av tyska UAP-fall.,manual_clio
+UAP-PRS-hausdorfhartwig-0107,person,Hartwig,Hausdorf,researcher;author,,,,,aerial;historical;ancient_aliens,de,Germany,,2,,,,Tysk UFO-författare.,manual_clio
+UAP-PRS-meessenauguste-0108,person,Auguste,Meessen,scientist,SOBEPS,,,,aerial;physics;belgium,fr,Belgium,Brussels,1,,,,Fysikaprofessor. Belgiska vågen 1989–91.,manual_clio
+UAP-PRS-azhazhavladimir-0109,person,Vladimir,Azhazha,researcher,,,,,aerial;historical;underwater,ru,Russia,Moscow,2,,,,Rysk oceanograf. USO-expert.,manual_clio
+UAP-PRS-zigelfelix-0110,person,Felix,Zigel,scientist,Moscow Aviation Institute,,,,aerial;historical;physics,ru,Russia,Moscow,1,,,,Fd Moskva Aviation Institute. UAP-pionjär. Deceased.,manual_clio
+UAP-PRS-subbotinnikolai-0111,person,Nikolai,Subbotin,researcher,RUFORS,https://rufors.ru,,,aerial;reporting;russia,ru,Russia,Perm,2,,,,RUFORS — Russian UFO Research Station.,manual_clio
+UAP-PRS-belimovgennady-0112,person,Gennady,Belimov,journalist,,,,,aerial;historical;russia,ru,Russia,,2,,,,Rysk UAP-journalist.,manual_clio
+UAP-PRS-plaksinalexander-0113,person,Alexander,Plaksin,researcher,,,,,aerial;historical;russia,ru,Russia,,2,,,,Rysk UAP-historiker.,manual_clio
+UAP-PRS-shilisun-0114,person,Sun,Shili,researcher,CURO,,,,disclosure;space;asia,zh,China,Beijing,2,,,,Grundare China UFO Research Org. Fd diplomat.,manual_clio
+UAP-PRS-jingpingzhang-0115,person,Zhang,Jingping,researcher,CURO,,,,aerial;asia;reporting,zh,China,Beijing,2,,,,Kinesisk UFO Research Organisation.,manual_clio
+UAP-PRS-linhungchu-0116,person,Hung-Chu,Lin,researcher,,,,,aerial;asia,zh,Taiwan,Taipei,2,,,,Taiwanesisk UFO-forskning.,manual_clio
+UAP-PRS-nakamuratsutomu-0117,person,Tsutomu,Nakamura,researcher,,,,,aerial;historical;asia,ja,Japan,Tokyo,2,,,,Japansk UAP-forskning.,manual_clio
+UAP-PRS-yaoijunichi-0118,person,Junichi,Yaoi,journalist,,,,,aerial;historical,ja,Japan,Tokyo,2,,,,Japansk UAP-journalist.,manual_clio
+UAP-PRS-nakagawahiroshi-0119,person,Hiroshi,Nakagawa,researcher,,,,,aerial;historical;asia,ja,Japan,,2,,,,Japansk UFO-historia.,manual_clio
+UAP-PRS-gevaerdademarjos-0120,person,Ademar José,Gevaerd,journalist,UFO Magazine Brasil,https://ufo.com.br,,,aerial;historical;latin_america,pt,Brazil,Curitiba,1,@ajogevaerd,,,UFO Magazine Brasil. Ledande brasiliansk UAP-täckning.,manual_clio
+UAP-PRS-lafaceguilherme-0121,person,Guilherme,Laface,journalist,OVNI Oficial,https://ovnioficial.com,,,aerial;brazil;disclosure,pt,Brazil,São Paulo,2,,,,OVNI Oficial YouTube/nyhetskanal.,manual_clio
+UAP-PRS-boaventuraedison-0122,person,Edison,Boaventura,researcher,,,,,aerial;latin_america;brazil,pt,Brazil,São Paulo,2,,,,Brasiliansk UAP-forskning.,manual_clio
+UAP-PRS-borgesalexandre-0123,person,Alexandre,Borges,researcher,,,,,aerial;latin_america;brazil,pt,Brazil,,2,,,,Brasiliansk UAP-historiker.,manual_clio
+UAP-PRS-bravorodrigo-0124,person,Rodrigo,Bravo,official,CEFAA,https://cefaa.gob.cl,,,aerial;official;pilot,es,Chile,Santiago,1,,,,Fd chef CEFAA. Militärpilot.,manual_clio
+UAP-PRS-arcinegasjulio-0125,person,Julio,Arcinegas,researcher,CEFAA,https://cefaa.gob.cl,,,aerial;official;latin_america,es,Chile,Santiago,2,,,,CEFAA-analytiker.,manual_clio
+UAP-PRS-maussanjaime-0126,person,Jaime,Maussan,journalist,,https://jaimemaussan.com,,,aerial;latin_america;disclosure,es,Mexico,Mexico City,2,@jaimemaussan1,,,Mexikansk TV-journalist. Kontroversiell.,manual_clio
+UAP-PRS-yturriagarzasant-0127,person,Santiago,Yturria Garza,researcher,,,,,aerial;historical;latin_america,es,Mexico,Monterrey,2,,,,Mexikansk UAP-historiker.,manual_clio
+UAP-PRS-clementecarlos-0128,person,Carlos,Clemente,researcher,,,,,aerial;historical;latin_america,es,Argentina,Buenos Aires,2,,,,Argentinsk UAP-historiker.,manual_clio
+UAP-PRS-marioquique-0129,person,Quique,Mario,researcher,,,,,aerial;latin_america,es,Argentina,,2,,,,Argentinsk UFO-forskning.,manual_clio
+UAP-PRS-suchodolertal-0130,person,Tal,Suchodoler,researcher,,,,,aerial;middle_east,he,Israel,,2,,,,Israelsk UAP-forskning.,manual_clio
+UAP-PRS-akdoganhaktan-0131,person,Haktan,Akdogan,researcher,Sirius UFO,https://sirius.net.tr,,,aerial;middle_east;turkey,tr,Turkey,Istanbul,2,,,,Sirius UFO Space Sciences Research Center.,manual_clio
+UAP-PRS-hellyerpaul-0132,person,Paul,Hellyer,official,,,,,disclosure;policy,en,Canada,Toronto ON,1,,,,Fd kanadensisk försvarsminister. Deceased 2021.,manual_clio
+UAP-PRS-viggianivictor-0133,person,Victor,Viggiani,researcher,,,,,disclosure;historical,en,Canada,Toronto ON,2,,,,Kanadensisk UAP-forskare.,manual_clio
+UAP-PRS-chalkerbill-0134,person,Bill,Chalker,researcher,,,,,historical;aerial;australia,en,Australia,Sydney,1,,,,The OZ Files. Australiensisk UAP-historiker.,manual_clio
+UAP-PRS-basterfieldkeith-0135,person,Keith,Basterfield,researcher,,,,,historical;aerial,en,Australia,Adelaide,2,,,,Australiensisk UAP-historiker.,manual_clio
+UAP-ORG-mufon-0136,organization,,,MUFON,MUFON,https://mufon.com,,,aerial;reporting;investigation,en,USA,Irvine CA,2,@mufonhq,,,Mutual UFO Network. Världens största civila UAP-org.,manual_clio
+UAP-ORG-nuforc-0137,organization,,,NUFORC,NUFORC,https://nuforc.org,,,aerial;reporting,en,USA,Harrington WA,1,,,,National UFO Reporting Center.,manual_clio
+UAP-ORG-afuarchivesforth-0138,organization,,,AFU — Archives for the Unexplained,AFU — Archives for the Unexplained,https://ufo.se,,,historical;nordic;archival,sv,Sweden,Norrköping,1,,,,Världens troligen största UAP-arkiv. Grundat 1973.,manual_clio
+UAP-ORG-geipan-0139,organization,,,GEIPAN,GEIPAN,https://geipan.fr,,,aerial;official;disclosure,fr,France,Toulouse,1,,,,Officiell fransk UAP-utredningsenhet under CNES.,manual_clio
+UAP-ORG-cefaa-0140,organization,,,CEFAA,CEFAA,https://cefaa.gob.cl,,,aerial;official;latin_america,es,Chile,Santiago,1,,,,Officiell chilensk UAP-utredningsenhet.,manual_clio
+UAP-ORG-aaro-0141,organization,,,AARO,AARO,https://aaro.mil,,,aerial;official;policy;military,en,USA,Washington DC,1,,,,Pentagons officiella UAP-kontor sedan 2022.,manual_clio
+UAP-ORG-ttsatothestarsac-0142,organization,,,TTSA — To The Stars Academy,TTSA — To The Stars Academy,https://tothestars.academy,,,aerial;materials;disclosure,en,USA,Encinitas CA,2,,,,Tom DeLonge. AATIP-videorna.,manual_clio
+UAP-ORG-cufos-0143,organization,,,CUFOS,CUFOS,https://cufos.org,,,historical;aerial;scientific,en,USA,Chicago IL,1,,,,J. Allen Hynek Center for UFO Studies.,manual_clio
+UAP-ORG-scuscientificcoa-0144,organization,,,SCU — Scientific Coalition for UAP Studies,SCU — Scientific Coalition for UAP Studies,https://ufoscientific.com,,,aerial;physics;scientific,en,USA,,1,,,,Vetenskapliga UAP-analyser.,manual_clio
+UAP-ORG-narcap-0145,organization,,,NARCAP,NARCAP,https://narcap.org,,,aerial;aviation;safety,en,USA,,1,,,,National Aviation Reporting Center on Anomalous Phenomena.,manual_clio
+UAP-ORG-galileoproject-0146,organization,,,Galileo Project,Galileo Project,https://galileo.cfa.harvard.edu,,,space;scientific;materials,en,USA,Cambridge MA,1,,,,Harvard-baserat UAP-sökprojekt.,manual_clio
+UAP-ORG-solfoundation-0147,organization,,,Sol Foundation,Sol Foundation,https://thesolfoundation.org,,,policy;disclosure;academic,en,USA,Washington DC,1,,,,Policy think tank. Garry Nolan.,manual_clio
+UAP-ORG-nids-0148,organization,,,NIDS,NIDS,,,,aerial;consciousness;crash_retrieval,en,USA,Las Vegas NV,1,,,,National Institute for Discovery Science. Bigelow. Nedlagt 2004.,manual_clio
+UAP-ORG-earthtechinterna-0149,organization,,,EarthTech International,EarthTech International,https://earthtech.org,,,physics;crash_retrieval;materials,en,USA,Austin TX,1,,,,Puthoff och Davis. Advanced propulsion.,manual_clio
+UAP-ORG-thedebrief-0150,organization,,,The Debrief,The Debrief,https://thedebrief.org,,https://thedebrief.org/feed/,aerial;disclosure;military;investigative,en,USA,,1,,,,Investigativ nyhetsajt. Tim McMillan.,manual_clio
+UAP-ORG-thedrivethewarzo-0151,organization,,,The Drive — The War Zone,The Drive — The War Zone,https://thedrive.com/the-war-zone,,https://www.thedrive.com/the-war-zone/feed,aerial;military;official,en,USA,,1,,,,Tyler Rogoway.,manual_clio
+UAP-ORG-mysterywire-0152,organization,,,Mystery Wire,Mystery Wire,https://mysterywire.com,,,aerial;whistleblower;investigative,en,USA,Las Vegas NV,1,,,,George Knapp.,manual_clio
+UAP-ORG-newsnationuap-0153,organization,,,News Nation UAP,News Nation UAP,https://newsnation.com,,,aerial;disclosure;news,en,USA,Chicago IL,1,,,,Ross Coulthart.,manual_clio
+UAP-ORG-nicap-0154,organization,,,NICAP,NICAP,,,,historical;aerial,en,USA,Washington DC,1,,,,National Investigations Committee on Aerial Phenomena. 1956–1980.,manual_clio
+UAP-ORG-apro-0155,organization,,,APRO,APRO,,,,historical;aerial;abduction,en,USA,Tucson AZ,1,,,,Aerial Phenomena Research Org. 1952–1988.,manual_clio
+UAP-ORG-projecthessdalen-0156,organization,,,Project Hessdalen,Project Hessdalen,https://www.hessdalen.org,,,aerial;physics;norway,no,Norway,Hessdalen,1,,,,Vetenskaplig mätstation. Hessdalen-ljusen sedan 1984.,manual_clio
+UAP-ORG-sobeps-0157,organization,,,SOBEPS,SOBEPS,,,,aerial;historical;belgium,fr,Belgium,Brussels,1,,,,Société Belge d'Étude des Phénomènes Spatiaux. Belgisk UAP-vågen.,manual_clio
+UAP-ORG-bufora-0158,organization,,,BUFORA,BUFORA,https://bufora.org.uk,,,aerial;historical;uk,en,UK,London,2,,,,British UFO Research Association. Grundad 1964.,manual_clio
+UAP-ORG-cuncentroufologi-0159,organization,,,CUN — Centro Ufologico Nazionale,CUN — Centro Ufologico Nazionale,https://cun-italia.net,,,historical;aerial;italy,it,Italy,Rome,1,,,,Italiens största UAP-organisation.,manual_clio
+UAP-ORG-rufors-0160,organization,,,RUFORS,RUFORS,https://rufors.ru,,,aerial;reporting;russia,ru,Russia,Perm,2,,,,Russian UFO Research Station.,manual_clio
+UAP-ORG-curochinauforese-0161,organization,,,CURO — China UFO Research Organization,CURO — China UFO Research Organization,,,,aerial;reporting;asia,zh,China,Beijing,2,,,,Kinesisk officiellt erkänd UFO-organisation.,manual_clio
+UAP-ORG-siriusufospacesc-0162,organization,,,Sirius UFO Space Sciences Research Center,Sirius UFO Space Sciences Research Center,https://sirius.net.tr,,,aerial;middle_east;turkey,tr,Turkey,Istanbul,2,,,,Haktan Akdogan.,manual_clio
+UAP-ORG-ufomagazinebrasi-0163,organization,,,UFO Magazine Brasil,UFO Magazine Brasil,https://ufo.com.br,,,aerial;historical;latin_america,pt,Brazil,Curitiba,1,,,,Adelmar Gevaerd.,manual_clio
+UAP-ORG-ufosverigesufo-0164,organization,,,UFO-Sverige / SUFO,UFO-Sverige / SUFO,https://ufo.se,,,historical;nordic;aerial,sv,Sweden,Stockholm,2,,,,Paraplyorganisation.,manual_clio
+UAP-ORG-pufendorfinstitu-0165,organization,,,Pufendorf Institute UAP Group,Pufendorf Institute UAP Group,https://www.pufendorf.lu.se,,,academic;nordic;disclosure,sv,Sweden,Lund,1,,,,Lunds universitets Pufendorf-institut.,manual_clio
+UAP-ORG-mittskifte-0166,organization,,,MittSkifte,MittSkifte,https://mittskifte.org,,,disclosure;nordic;political,sv,Sweden,,2,,,,Svensk disclosure-org med riksdagsfokus.,manual_clio
+UAP-ORG-anomalousagenda-0167,organization,,,Anomalous Agenda,Anomalous Agenda,https://anomalousagenda.com,,,academic;disclosure;nordic,sv;en,Sweden,,1,,,,Kopplat till Pufendorf/Lunds univ.,manual_clio
+UAP-ORG-openmindstv-0168,organization,,,OpenMinds.tv,OpenMinds.tv,https://openminds.tv,Open Minds UFO Radio,https://feeds.feedburner.com/OpenMindsRadio,aerial;disclosure,en,USA,Tempe AZ,2,,,,Nyheter och podcast.,manual_clio
+UAP-PRS-blomqvisthkan-0169,person,Håkan,Blomqvist,researcher,AFU,https://ufo.se,,,historical;nordic;consciousness,sv,Sweden,Norrköping,1,,,,AFU. Forskar om kontaktfallen och svensk UFO-historia. Blogg om esoterisk UAP.,manual_clio
+UAP-PRS-knudsenpia-0170,person,Pia,Knudsen,researcher,AFU,https://ufo.se,,,historical;nordic;archival,sv,Sweden,Norrköping,2,,,,AFU-arkivarie.,manual_clio
+UAP-PRS-isakssonstefan-0171,person,Stefan,Isaksson,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Svensk UFO-forskning. Lokala siktningsrapporter.,manual_clio
+UAP-PRS-karlssonlage-0172,person,Lage,Karlsson,researcher,,,,,historical;nordic;ghost_rockets,sv,Sweden,,2,,,,Spökraketerna och tidig svensk UAP-historia.,manual_clio
+UAP-PRS-sundbergjanove-0173,person,Jan-Ove,Sundberg,researcher,GUST,https://gust.se,,,aerial;underwater;nordic,sv,Sweden,,2,,,,GUST — Global Underwater Search Team. USO-forskning i svenska vatten.,manual_clio
+UAP-PRS-hemborgkarl-0174,person,Karl,Hemborg,researcher;blogger,,,,,historical;nordic;disclosure,sv,Sweden,,2,,,,Bloggare och UAP-kommentator. Kontakt med AFU. Intresserad av disclosure.,manual_clio
+UAP-PRS-perssonthomaset-0175,person,Thomas ET,Persson,researcher;podcaster,,,,,consciousness;nordic;aerial,sv,Sweden,,2,,,,CE5 och kontaktforskning. Koppling till Medveten Kontakt-nätverket.,manual_clio
+UAP-PRS-blixtleif-0176,person,Leif,Blixt,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Svensk UFO-historiker. Lokala observationer.,manual_clio
+UAP-PRS-fredrikssonsveno-0177,person,Sven-Olof,Fredriksson,researcher,,,,,historical;nordic,sv,Sweden,Gothenburg,2,,,,Göteborgsk UAP-forskning. GICOFF.,manual_clio
+UAP-PRS-jonssonkjell-0178,person,Kjell,Jonsson,researcher,GICOFF,,,,historical;nordic,sv,Sweden,Gothenburg,2,,,,Göteborgs UFO-sällskap. Lokala iakttagelser.,manual_clio
+UAP-PRS-gustavssonroger-0179,person,Roger,Gustavsson,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Svensk UAP-historiker. Trolle-fallet och 1950-talsfallen.,manual_clio
+UAP-PRS-toftnerandreas-0180,person,Andreas,Toftner,researcher,NETI,,,,aerial;nordic;historical,no,Norway,Oslo,2,,,,Norsk UFO-forskning. NETI — Norwegian Extraterrestrial Investigation.,manual_clio
+UAP-PRS-kvamjrragnar-0181,person,Ragnar,Kvam Jr,journalist,VG,https://vg.no,,,aerial;nordic;news,no,Norway,Oslo,2,,,,VG-journalist. Täckt norska UAP-observationer.,manual_clio
+UAP-PRS-eriksentorhkon-0182,person,Tor Håkon,Eriksen,researcher,,,,,aerial;nordic;hessdalen,no,Norway,,2,,,,Norsk UAP-forskning. Hessdalen-koppling.,manual_clio
+UAP-PRS-roedoddgunnar-0183,person,Odd-Gunnar,Roed,researcher,,,,,aerial;nordic;historical,no,Norway,Bergen,2,,,,Bergensk UAP-historiker.,manual_clio
+UAP-PRS-aasheimknut-0184,person,Knut,Aasheim,researcher,,,,,aerial;nordic,no,Norway,,2,,,,Norsk UFO-reporter. Lokala siktningar.,manual_clio
+UAP-PRS-wulfsbergnorheim-0185,person,Terje,Wulfsberg Norheim,researcher,NUF,,,,aerial;nordic;reporting,no,Norway,Oslo,2,,,,NUF — Norsk UFO-Forening.,manual_clio
+UAP-PRS-sandbergmcguinne-0186,person,Johan,Sandberg McGuinne,researcher,,,,,historical;nordic;consciousness,no,Norway,,2,,,,Norsk kontaktforskning och UAP-historia.,manual_clio
+UAP-PRS-kjeldstedegon-0187,person,Egon,Kjeldsted,researcher,SUFOI,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,Copenhagen,1,,,,SUFOI — Skandinavisk UFO Information. Ledande dansk UAP-organisation.,manual_clio
+UAP-PRS-mllerhansenkim-0188,person,Kim,Møller Hansen,researcher,SUFOI,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,Copenhagen,1,,,,SUFOI-redaktör. Dansk UFO-databas.,manual_clio
+UAP-PRS-svenningclaus-0189,person,Claus,Svenning,researcher,SUFOI,https://sufoi.dk,,,historical;nordic,da,Denmark,,2,,,,SUFOI-medarbetare.,manual_clio
+UAP-PRS-haunstrupsren-0190,person,Søren,Haunstrup,researcher,,,,,historical;nordic;debunking,da,Denmark,,2,,,,Dansk skeptisk UAP-analys.,manual_clio
+UAP-PRS-moesmannmichael-0191,person,Michael,Moesmann,researcher,,,,,historical;nordic,da,Denmark,Aarhus,2,,,,Jysk UAP-forskning.,manual_clio
+UAP-PRS-gjerloffanders-0192,person,Anders,Gjerloff,researcher;academic,University of Copenhagen,,,,academic;nordic;historical,da,Denmark,Copenhagen,2,,,,Akademisk UAP-forskning. Kulturhistoriskt perspektiv.,manual_clio
+UAP-PRS-teerikorpipekka-0193,person,Pekka,Teerikorpi,scientist,Turun yliopisto,,,,space;physics;seti,fi,Finland,Turku,2,,,,Astronom. Har kommenterat UAP-frågan ur vetenskapligt perspektiv.,manual_clio
+UAP-PRS-holmbjrn-0194,person,Björn,Holm,researcher,,,,,historical;nordic,fi,Finland,Helsinki,2,,,,Finsk UAP-historiker. Svenska Finland.,manual_clio
+UAP-PRS-koivulatapani-0195,person,Tapani,Koivula,researcher,,,,,historical;nordic;aerial,fi,Finland,,2,,,,Finsk UAP-forskning. Siktningar i norra Finland.,manual_clio
+UAP-PRS-luukanenkilderau-0196,person,Rauni-Leena,Luukanen-Kilde,researcher,,,,,consciousness;abduction;nordic,fi,Finland,,2,,,,Fd chief medical officer i Lappland. Abduction-forskning. Kontroversiell. Deceased 2015.,manual_clio
+UAP-PRS-haraldssonerlend-0197,person,Erlendur,Haraldsson,scientist;researcher,University of Iceland,,,,consciousness;psychology;parapsychology,is,Iceland,Reykjavik,1,,,,Fd psykologiprofessor Háskóli Islands. Parapsykologi och anomalösa fenomen.,manual_clio
+UAP-PRS-rnnordahleirkur-0198,person,Eiríkur,Örn Norðdahl,journalist,RÚV,https://ruv.is,,,aerial;news;nordic,is,Iceland,Reykjavik,2,,,,Islands public broadcaster. Täckt anomala fenomen.,manual_clio
+UAP-PRS-sigurjnssonsigur-0199,person,Sigurður,Sigurjónsson,researcher,,,,,historical;nordic;aerial,is,Iceland,,2,,,,Isländsk UAP-intressent. Siktningar kring geotermala områden.,manual_clio
+UAP-PRS-bjrnssonrni-0200,person,Árni,Björnsson,researcher,,,,,historical;folklore;nordic,is,Iceland,Reykjavik,2,,,,Folklorist. Isländsk tradition av ljusfenomen (huldufólk-kontext).,manual_clio
+UAP-PRS-geislerjohn-0201,person,John,Geisler,researcher,,,,,aerial;arctic;nordic,da,Greenland,Nuuk,3,,,,Dansk-grönländsk UAP-intressent. Arktiska anomalier.,manual_clio
+UAP-PRS-olsenmalik-0202,person,Malik,Olsen,researcher,,,,,aerial;arctic;underwater,kl,Greenland,Ilulissat,3,,,,Grönländsk UAP-rapportering. Undersøiske anomalier.,manual_clio
+UAP-PRS-brenigleon-0203,person,Leon,Brenig,scientist,ULB,,,,physics;aerial;belgium,fr,Belgium,Brussels,1,,,,Professor teoretisk fysik Université Libre de Bruxelles. Belgiska vågen.,manual_clio
+UAP-PRS-clerebautlucien-0204,person,Lucien,Clerebaut,researcher,SOBEPS,,,,aerial;historical;belgium,fr,Belgium,Brussels,1,,,,SOBEPS-sekreterare. Koordinerade belgisk UAP-våg 1989–91.,manual_clio
+UAP-PRS-debrouwerwilfrie-0205,person,Wilfried,De Brouwer,official,Belgian Air Force,,,,aerial;military;official;belgium,fr,Belgium,Brussels,1,,,,Fd general belgisk flygvapnet. Presskonferens 1990 om F-16-jagning av UAP.,manual_clio
+UAP-PRS-ferrynpatrick-0206,person,Patrick,Ferryn,researcher,SOBEPS,,,,aerial;historical;belgium,fr,Belgium,Brussels,2,,,,SOBEPS. Belgisk UAP-dokumentation.,manual_clio
+UAP-PRS-vertongenjeanluc-0207,person,Jean-Luc,Vertongen,researcher,,,,,aerial;belgium,fr,Belgium,,2,,,,Belgisk UAP-historiker.,manual_clio
+UAP-PRS-lecletrenaud-0208,person,Renaud,Leclet,journalist,RTBF,https://rtbf.be,,,aerial;news;belgium,fr,Belgium,Brussels,2,,,,RTBF-journalist. Täckt belgisk UAP-historia.,manual_clio
+UAP-PRS-denocladenis-0209,person,Denis,Denocla,researcher,,,,,historical;aerial;france,fr,France,,2,,,,Fransk UAP-historiker. Analys av klassiska franska fall.,manual_clio
+UAP-PRS-passotxavier-0210,person,Xavier,Passot,official,GEIPAN,https://geipan.fr,,,aerial;official;france,fr,France,Toulouse,1,,,,Nuvarande chef GEIPAN (från 2014).,manual_clio
+UAP-PRS-velascojeanjacqu-0211,person,Jean-Jacques,Velasco,official,CNES/GEIPAN,,,,aerial;official;france,fr,France,Toulouse,1,,,,Fd chef GEIPAN (1983–2004). Transé-en-Provence-fallet.,manual_clio
+UAP-PRS-savaresermi-0212,person,Rémi,Savarese,researcher,,,,,historical;aerial;france,fr,France,,2,,,,Fransk UAP-forskning. Sydamerikanska kontakter.,manual_clio
+UAP-PRS-gurinpierre-0213,person,Pierre,Guérin,scientist,Institut d'Astrophysique de Paris,,,,physics;aerial;historical,fr,France,Paris,1,,,,Fd astrofysiker IAP. Engagerad i seriös UAP-forskning på 1970-80-tal.,manual_clio
+UAP-PRS-poherclaude-0214,person,Claude,Poher,scientist,CNES,,,,physics;aerial;official,fr,France,,1,,,,Fd CNES-raketteknikern. Grundade GEPAN (föregångare till GEIPAN) 1977.,manual_clio
+UAP-PRS-weinsteindominiq-0215,person,Dominique,Weinstein,researcher,,,,,aerial;aviation;pilot,fr,France,,1,,,,Pilot-UAP-falldatabas. Samarbetar med NARCAP.,manual_clio
+UAP-PRS-mheustbertrand-0216,person,Bertrand,Méheust,researcher;academic,,,,,consciousness;historical;psychology,fr,France,,1,,,,Sociolog. Science-fiction et soucoupes volantes. UAP i kulturhistorisk kontext.,manual_clio
+UAP-PRS-grosspatrick-0217,person,Patrick,Gross,researcher,,https://ufologie.patrickgross.org,,,historical;aerial;france,fr,France,Strasbourg,2,,,,Ufologie.net. Exceptionellt detaljerad fallbas och analys.,manual_clio
+UAP-PRS-salasrobert-0218,person,Robert,Salas,whistleblower;official,USAF,,,,nuclear;military;aerial,en,USA,,1,,,,Fd USAF-officer. Malmstrom AFB-incidenten 1967. UAP och kärnvapen.,manual_clio
+UAP-PRS-randallbob-0219,person,Bob,Randall,researcher,,,,,historical;uk;official,en,UK,,2,,,,Brittisk UAP-historiker. MoD-koppling.,manual_clio
+UAP-PRS-fowleromar-0220,person,Omar,Fowler,researcher,Phenomena Research Association,,,,aerial;uk;historical,en,UK,Derby,2,,,,PRA. Brittisk UAP-forskning.,manual_clio
+UAP-PRS-hansonjohn-0221,person,John,Hanson,researcher,,,,,historical;uk;official,en,UK,,2,,,,Haunted Skies-serien. Brittiska UAP-fall. 12 volymer.,manual_clio
+UAP-PRS-hollowaydawn-0222,person,Dawn,Holloway,researcher,,,,,historical;uk,en,UK,,2,,,,Haunted Skies-medförfattare.,manual_clio
+UAP-PRS-thomasandy-0223,person,Andy,Thomas,researcher,,https://vital-signs.co.uk,,,aerial;crop_circles;uk,en,UK,,2,,,,Vital Signs. Crop circles och UAP.,manual_clio
+UAP-PRS-goodtimothy-0224,person,Timothy,Good,researcher;author,,,,,aerial;historical;disclosure,en,UK,London,1,,,,Above Top Secret. Alien Liaison. Duplicate från v1.0 — behålls.,manual_clio
+UAP-PRS-williamsmatthew-0225,person,Matthew,Williams,researcher,,,,,aerial;crop_circles;uk,en,UK,Wales,2,,,,Walisisk UAP-forskning. Crop circles.,manual_clio
+UAP-PRS-merasteve-0226,person,Steve,Mera,researcher,MAPIT,https://mapit.net,,,aerial;uk;historical,en,UK,Manchester,2,,,,MAPIT — Manchester Association of Paranormal Investigation & Training.,manual_clio
+UAP-PRS-scottirena-0227,person,Irena,Scott,scientist;researcher,,,,,aerial;historical;nuclear,en,USA,Columbus OH,2,,,,Fd DIA-analytiker. Inside the Black Vault.,manual_clio
+UAP-PRS-veitkarl-0228,person,Karl,Veit,researcher,DUIST,,,,historical;aerial;germany,de,Germany,Wiesbaden,1,,,,Grundare Deutsche UFO/IFO-Studiengemeinschaft (DUIST) 1954. Pionjär.,manual_clio
+UAP-PRS-veithanna-0229,person,Hanna,Veit,researcher,DUIST,,,,historical;aerial;germany,de,Germany,Wiesbaden,1,,,,Medgrundare DUIST. Ledde org tillsammans med Karl Veit.,manual_clio
+UAP-PRS-walterwerner-0230,person,Werner,Walter,researcher;debunker,CENAP,https://cenap.de,,,debunking;historical;germany,de,Germany,Mannheim,2,,,,CENAP — Centrales Erforschungsnetz außergewöhnlicher Phänomene. Skeptisk analys.,manual_clio
+UAP-PRS-maginulrich-0231,person,Ulrich,Magin,researcher;debunker,,,,,debunking;historical;germany,de,Germany,,2,,,,Tysk skeptisk UAP-historiker.,manual_clio
+UAP-PRS-naussmichael-0232,person,Michael,Nauss,researcher,,,,,aerial;germany;historical,de,Germany,,2,,,,Tysk UAP-forskning.,manual_clio
+UAP-PRS-khlerhansjrgen-0233,person,Hansjürgen,Köhler,researcher,GEP,,,,aerial;germany;historical,de,Germany,,2,,,,GEP — Gesellschaft zur Erforschung des UFO-Phänomens.,manual_clio
+UAP-PRS-feistlerainer-0234,person,Rainer,Feistle,researcher,,,,,aerial;germany;historical,de,Germany,Stuttgart,2,,,,MUFON-CES-samarbete. Württembergska UAP-fall.,manual_clio
+UAP-PRS-meckelburgernst-0235,person,Ernst,Meckelburg,researcher;author,,,,,aerial;historical;consciousness,de,Austria,Vienna,2,,,,Österrikisk UAP-författare. Kosmisk kontaktforskning.,manual_clio
+UAP-PRS-vondnikenerich-0236,person,Erich,von Däniken,researcher;author,,https://daniken.com,,,ancient_aliens;historical;space,de,Switzerland,Beatenberg,2,,,,Chariots of the Gods. Schweizisk. Kontroversiell men inflytelserik.,manual_clio
+UAP-PRS-brginluc-0237,person,Luc,Bürgin,journalist;researcher,,,,,historical;aerial;switzerland,de,Switzerland,Basel,2,,,,Schweizisk UAP-historiker och journalist.,manual_clio
+UAP-PRS-furgermichael-0238,person,Michael,Furger,journalist,NZZ,https://nzz.ch,,,aerial;news;switzerland,de,Switzerland,Zürich,2,,,,NZZ-journalist. Täckt UAP-ämnen i schweizisk kontext.,manual_clio
+UAP-PRS-aldrichjan-0239,person,Jan,Aldrich,researcher,Project 1947,,,,historical;aerial;official,en,Netherlands,,2,,,,Project 1947. Historiska UAP-dokument.,manual_clio
+UAP-PRS-nanningarob-0240,person,Rob,Nanninga,researcher;debunker,Skepter,,,,debunking;historical;netherlands,nl,Netherlands,,2,,,,Skepter-redaktör. Holländsk skeptisk UAP-analys.,manual_clio
+UAP-PRS-vankampenhans-0241,person,Hans,van Kampen,researcher,,,,,aerial;historical;netherlands,nl,Netherlands,,2,,,,Holländsk UAP-historiker.,manual_clio
+UAP-PRS-hinfelaarhenk-0242,person,Henk,Hinfelaar,researcher,,,,,historical;netherlands;aerial,nl,Netherlands,,2,,,,Holländsk UAP-forskning.,manual_clio
+UAP-PRS-fernandesjoaquim-0243,person,Joaquim,Fernandes,researcher;academic,UFP,,,,historical;aerial;consciousness,pt,Portugal,Porto,1,,,,Univ. Fernando Pessoa. Fatima-UAP-koppling. Heavenly Lights.,manual_clio
+UAP-PRS-darmadafina-0244,person,Fina,d'Armada,researcher,,,,,historical;aerial;portugal,pt,Portugal,,2,,,,Medförfattare Heavenly Lights. Fatima-forskning.,manual_clio
+UAP-PRS-ansbroeamonn-0245,person,Eamonn,Ansbro,scientist,SETI Ireland,,,,space;seti;aerial,en,Ireland,,2,,,,Astronomer. SETI och UAP i Irland.,manual_clio
+UAP-PRS-hennessyanne-0246,person,Anne,Hennessy,researcher,,,,,abduction;psychology,en,Ireland,,2,,,,Irländsk UAP-forskning. Abduction-perspektiv.,manual_clio
+UAP-PRS-cielebiapiotr-0247,person,Piotr,Cielebiaś,researcher,NPN,https://npn.pl,,,aerial;historical;poland,pl,Poland,Kraków,2,,,,NPN — Nautilus Polska. Ledande polsk UAP-organisation.,manual_clio
+UAP-PRS-bernatowiczrober-0248,person,Robert,Bernatowicz,researcher,NPN,https://npn.pl,,,aerial;reporting;poland,pl,Poland,,2,,,,NPN-medarbetare. Polsk UAP-rapportering.,manual_clio
+UAP-PRS-pidaltom-0249,person,Tomáš,Přidal,researcher,,,,,aerial;historical;czech,cs,Czech Republic,Prague,2,,,,Tjeckisk UAP-historiker.,manual_clio
+UAP-PRS-gershteinmikhail-0250,person,Mikhail,Gershtein,researcher,,,,,aerial;historical;russia;ukraine,ru,Ukraine,Kyiv,2,,,,Ryskspråkig ukrainsk UAP-historiker. Slavisk UFO-databas.,manual_clio
+UAP-PRS-hindcynthia-0251,person,Cynthia,Hind,researcher,,,,,aerial;historical;africa,en,South Africa,Harare,1,,,,UFOs Over Africa. Pionjär inom afrikansk UAP-forskning. Deceased.,manual_clio
+UAP-PRS-delportmarc-0252,person,Marc,Delport,researcher,,,,,aerial;historical;africa,en,South Africa,Johannesburg,2,,,,Sydafrikansk UAP-forskning.,manual_clio
+UAP-PRS-bhattacharyasubr-0253,person,Subrata,Bhattacharya,researcher,,,,,aerial;historical;asia,en,India,Kolkata,2,,,,Indisk UAP-forskning.,manual_clio
+UAP-PRS-banerjeesarbani-0254,person,Sarbani,Banerjee,researcher,,,,,aerial;historical;india,en,India,,2,,,,Indisk UFO-historiker.,manual_clio
+UAP-PRS-ramirezreyesluis-0255,person,Luis,Ramirez Reyes,researcher,,,,,aerial;latin_america;historical,es,Mexico,Mexico City,2,,,,Mexikansk UAP-historiker och organisatör.,manual_clio
+UAP-PRS-choyanthony-0256,person,Anthony,Choy,researcher,CONTACT,,,,aerial;latin_america;peru,es,Peru,Lima,2,,,,Peruansk UAP-forskning. CONTACT Peru.,manual_clio
+UAP-PRS-escalantehector-0257,person,Hector,Escalante,researcher,,,,,aerial;latin_america;historical,es,Venezuela,Caracas,2,,,,Venezuelansk UAP-historiker.,manual_clio
+UAP-PRS-leechungsun-0258,person,Chung-Sun,Lee,researcher,,,,,aerial;asia;historical,ko,South Korea,Seoul,2,,,,Sydkoreansk UAP-forskning.,manual_clio
+UAP-PRS-suwannatthapol-0259,person,Natthapol,Suwan,researcher,,,,,aerial;asia,th,Thailand,Bangkok,3,,,,Thailändsk UAP-intressent.,manual_clio
+UAP-PRS-ammourirami-0260,person,Rami,Ammouri,researcher,,,,,aerial;middle_east,ar,UAE,Dubai,2,,,,UAP-intressent i Gulfregionen.,manual_clio
+UAP-PRS-aljarwanibrahim-0261,person,Ibrahim,Al-Jarwan,scientist,Dubai Astronomy Group,https://dubaiastronomy.com,,,space;astronomy;middle_east,ar,UAE,Dubai,2,,,,Dubai Astronomy Group. Relevant för regional rymdövervakning och anomalier.,manual_clio
+UAP-PRS-bottmurray-0262,person,Murray,Bott,researcher,,,,,aerial;australia,en,New Zealand,Auckland,2,,,,Nyzeeländsk UAP-forskning.,manual_clio
+UAP-PRS-douglasskeith-0263,person,Keith,Douglass,researcher,,,,,historical;aerial,en,New Zealand,Wellington,2,,,,Nyzeeländsk UAP-historiker. Kaikoura-filmen 1978.,manual_clio
+UAP-PRS-pinesmatthew-0264,person,Matthew,Pines,researcher,BFSI,https://bfsi.org,,,policy;disclosure;national_security,en,USA,Washington DC,2,@matthewpines,,,Bitcoin Policy Institute. UAP och nationell säkerhet.,manual_clio
+UAP-PRS-pasulkadiana-0265,person,Diana,Pasulka,academic,UNC Wilmington,https://dianawalshpasulka.com,,,consciousness;academic;religion,en,USA,Wilmington NC,1,,,,American Cosmic. UAP och religion.,manual_clio
+UAP-PRS-pittmanross-0266,person,Ross,Pittman,researcher;journalist,Conscious Life News,,,,consciousness;disclosure,en,USA,,2,,,,Alternativa nyheter om UAP och consciousness.,manual_clio
+UAP-PRS-tsoukalosgiorgio-0267,person,Giorgio,Tsoukalos,journalist;podcaster,,,Ancient Aliens,,ancient_aliens;historical;space,en,USA,,3,@tsoukalos,,,Ancient Aliens-programmet. Populärkultur.,manual_clio
+UAP-PRS-youngsteph-0268,person,Steph,Young,journalist;author,,,,,historical;crash_retrieval;aerial,en,USA,,2,,,,UAP-historiker. Crash retrieval-fokus.,manual_clio
+UAP-PRS-redfernnick-0269,person,Nick,Redfern,researcher;author,,https://nickredfern.blogspot.com,,,aerial;conspiracy;historical,en,UK,Dallas TX,2,@nickredfernFort,,,Duplicate. Brittisk bakgrund bosatt i USA.,manual_clio
+UAP-ORG-sufoiskandinavis-0270,organization,,,SUFOI — Skandinavisk UFO Information,SUFOI — Skandinavisk UFO Information,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,Copenhagen,1,,,,Ledande dansk UAP-organisation.,manual_clio
+UAP-ORG-nufnorskufoforen-0271,organization,,,NUF — Norsk UFO-Forening,NUF — Norsk UFO-Forening,,,,aerial;nordic;reporting,no,Norway,Oslo,2,,,,Norsk UFO-förening.,manual_clio
+UAP-ORG-gicoffgteborgsuf-0272,organization,,,GICOFF — Göteborgs UFO-Sällskap,GICOFF — Göteborgs UFO-Sällskap,,,,historical;nordic,sv,Sweden,Gothenburg,2,,,,Göteborgs UFO-Sällskap. Grundat 1958.,manual_clio
+UAP-ORG-gustglobalunderw-0273,organization,,,GUST — Global Underwater Search Team,GUST — Global Underwater Search Team,https://gust.se,,,aerial;underwater;nordic,sv,Sweden,,2,,,,USO-forskning i svenska vatten.,manual_clio
+UAP-ORG-cenapcentraleser-0274,organization,,,CENAP — Centrales Erforschungsnetz außergewöhnlicher Phänomene,CENAP — Centrales Erforschungsnetz außergewöhnlicher Phänomene,https://cenap.de,,,debunking;historical;germany,de,Germany,Mannheim,2,,,,Tysk skeptisk UAP-organisation.,manual_clio
+UAP-ORG-gepgesellschaftz-0275,organization,,,GEP — Gesellschaft zur Erforschung des UFO-Phänomens,GEP — Gesellschaft zur Erforschung des UFO-Phänomens,,,,aerial;germany;historical,de,Germany,,2,,,,Tysk UFO-sällskap.,manual_clio
+UAP-ORG-duistdeutscheufo-0276,organization,,,DUIST — Deutsche UFO/IFO-Studiengemeinschaft,DUIST — Deutsche UFO/IFO-Studiengemeinschaft,,,,historical;aerial;germany,de,Germany,Wiesbaden,1,,,,Grundad 1954. Pionjär i tysk UAP-forskning.,manual_clio
+UAP-ORG-npnnautiluspolsk-0277,organization,,,NPN — Nautilus Polska,NPN — Nautilus Polska,https://npn.pl,,,aerial;historical;poland,pl,Poland,Kraków,2,,,,Ledande polsk UAP-organisation.,manual_clio
+UAP-ORG-isgpinstitutefor-0278,organization,,,ISGP — Institute for the Study of Globalization and Covert Politics,ISGP — Institute for the Study of Globalization and Covert Politics,https://isgp-studies.com,,,historical;political;disclosure,en,Netherlands,Amsterdam,2,,,,Analytisk djupdykning i hemliga program inkl. UAP.,manual_clio
+UAP-ORG-contactperu-0279,organization,,,CONTACT Peru,CONTACT Peru,,,,aerial;latin_america;peru,es,Peru,Lima,2,,,,Peruansk UAP-organisation.,manual_clio
+UAP-ORG-dubaiastronomygr-0280,organization,,,Dubai Astronomy Group,Dubai Astronomy Group,https://dubaiastronomy.com,,,space;astronomy;middle_east,ar,UAE,Dubai,2,,,,Relevant för regional rymdövervakning.,manual_clio
+UAP-ORG-hessdaleninstitu-0281,organization,,,Hessdalen Institute,Hessdalen Institute,https://hessdalen.org,,,aerial;physics;norway;hessdalen,no,Norway,Hessdalen,1,,,,Samordnar vetenskaplig forskning kring Hessdalen-ljusen.,manual_clio
+UAP-ORG-mufonces-0282,organization,,,MUFON-CES,MUFON-CES,,,,aerial;physics;germany,de,Germany,Munich,1,,,,Central European Section of MUFON. Illobrand von Ludwiger.,manual_clio
+UAP-ORG-earthfiles-0283,organization,,,Earthfiles,Earthfiles,https://earthfiles.com,Earthfiles,https://feeds.megaphone.fm/earthfiles,aerial;animal_mutilation;crop_circles,en,USA,,2,,,,Linda Moulton Howe.,manual_clio
+UAP-ORG-sigap-0284,organization,,,SIGAP,SIGAP,https://sigap.com,,,aerial;uk,en,UK,,2,,,,Study and Investigation Group on Aerial Phenomena.,manual_clio
+UAP-ORG-anomalousresearc-0285,organization,,,Anomalous Research UK,Anomalous Research UK,,,,aerial;uk;historical,en,UK,,2,,,,Brittisk UAP-forskning.,manual_clio
+UAP-ORG-caipancolloquesu-0286,organization,,,CAIPAN — Colloque sur les Anomalies dans l'Espace Proche et Aérien de la Terre,CAIPAN — Colloque sur les Anomalies dans l'Espace Proche et Aérien de la Terre,,,,aerial;academic;france,fr,France,Paris,1,,,,Vetenskaplig konferens arrangerad av GEIPAN 2014. Viktig referenspunkt.,manual_clio
+UAP-PRS-mrnernilsaxel-0287,person,Nils-Axel,Mörner,scientist,Stockholm University,,,,physics;geology;nordic,sv,Sweden,Stockholm,1,,,,Fd professor paleogeofysik. Engagerat sig i UAP-fenomenet i sent karriärskede. Deceased 2020.,manual_clio
+UAP-PRS-kuhlemannbertil-0288,person,Bertil,Kuhlemann,researcher,,,,,historical;nordic;ghost_rockets,sv,Sweden,,2,,,,Tidig svensk UFO-utredare. Aktiv på 1950–60-tal.,manual_clio
+UAP-PRS-schalinsven-0289,person,Sven,Schalin,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Tidig UFO-forskning i Sverige. Korresponderade med internationella org.,manual_clio
+UAP-PRS-thrnblomrichard-0290,person,Richard,Thörnblom,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Känd för Väddö-fallen och 1960-talsobservationer.,manual_clio
+UAP-PRS-franznke-0291,person,Åke,Franzén,researcher,,,,,historical;underwater;nordic,sv,Sweden,Stockholm,2,,,,Vrakletare. Undersökte spökubåtsfenomenet 1980-tal i Stockholms skärgård.,manual_clio
+UAP-PRS-kessoningvar-0292,person,Ingvar,Åkesson,researcher,AFU,https://ufo.se,,,historical;nordic;archival,sv,Sweden,Norrköping,2,,,,AFU-arkivarie och registrator. Katalogiserat tusentals svenska fall.,manual_clio
+UAP-PRS-martinssonperaxe-0293,person,Per-Axel,Martinsson,researcher,,,,,historical;nordic,sv,Sweden,,2,,,,Svensk UFO-forskning. Lokala rapporter södra Sverige.,manual_clio
+UAP-PRS-lindblombo-0294,person,Bo,Lindblom,researcher,,,,,historical;nordic;ghost_rockets,sv,Sweden,,2,,,,Spökraketerna. Intervjuat militära vittnen.,manual_clio
+UAP-PRS-lindgrenhenrik-0295,person,Henrik,Lindgren,journalist,SVT,https://svt.se,,,aerial;news;nordic,sv,Sweden,Stockholm,2,,,,SVT-journalist som täckt UAP-frågan i svensk public service-kontext.,manual_clio
+UAP-PRS-sundnerik-0296,person,Erik,Sundén,journalist,SR,https://sverigesradio.se,,,aerial;news;nordic,sv,Sweden,Stockholm,2,,,,Sveriges Radio. UAP-reportage.,manual_clio
+UAP-PRS-carnebornove-0297,person,Ove,Carneborn,researcher,,,,,historical;nordic;consciousness,sv,Sweden,Gothenburg,2,,,,Kontaktforskning och consciousness-perspektiv inom svensk UAP-rörelse.,manual_clio
+UAP-PRS-furuholthvard-0298,person,Håvard,Furuholt,journalist,Dagbladet,https://dagbladet.no,,,aerial;news;nordic,no,Norway,Oslo,2,,,,Dagbladet-journalist. Täckt norska UAP-siktningar.,manual_clio
+UAP-PRS-aamodtgeir-0299,person,Geir,Aamodt,researcher,NUF,,,,aerial;nordic;reporting,no,Norway,,2,,,,NUF-representant. Norska rapportfall.,manual_clio
+UAP-PRS-weierudfrode-0300,person,Frode,Weierud,researcher,,,,,historical;nordic;ghost_rockets,no,Norway,,1,,,,Norsk kryptolog. Analyserat spökraketerna och militärkorrespondens.,manual_clio
+UAP-PRS-bjerknessteinar-0301,person,Steinar,Bjerknes,researcher,,,,,historical;nordic;consciousness,no,Norway,Tromsø,2,,,,Nordnorsk UAP-forskning. Arktiska observationer.,manual_clio
+UAP-PRS-roarslthunnils-0302,person,Nils,Roar Sælthun,scientist,University of Oslo,,,,physics;aerial;nordic,no,Norway,Oslo,2,,,,Hydrologist som rapporterat och analyserat norska ljusfenomen.,manual_clio
+UAP-PRS-hgsethunni-0303,person,Unni,Høgseth,journalist,NRK,https://nrk.no,,,aerial;news;nordic,no,Norway,Oslo,2,,,,NRK-journalist. Norsk public service-täckning av UAP.,manual_clio
+UAP-PRS-lilletvedtbjarne-0304,person,Bjarne,Lilletvedt,researcher,,,,,aerial;nordic;historical,no,Norway,Stavanger,2,,,,Vestlandsk UAP-forskning.,manual_clio
+UAP-PRS-kjeldsmarkjohn-0305,person,John,Kjeldsmark,researcher,SUFOI,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,Copenhagen,2,,,,SUFOI-medarbetare. Dansk UAP-databas.,manual_clio
+UAP-PRS-laursendan-0306,person,Dan,Laursen,researcher,,,,,historical;nordic;debunking,da,Denmark,,2,,,,Dansk skeptisk analys av UAP-fall.,manual_clio
+UAP-PRS-hansenkjeld-0307,person,Kjeld,Hansen,journalist,DR,https://dr.dk,,,aerial;news;nordic,da,Denmark,Copenhagen,2,,,,DR — Danmarks Radio. Täckt UAP-ämnen i dansk public service.,manual_clio
+UAP-PRS-laigaardjens-0308,person,Jens,Laigaard,researcher,SUFOI,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,,2,,,,SUFOI. UFO-årbog redaktör. Statistisk analys av danska fall.,manual_clio
+UAP-PRS-vesborgpeter-0309,person,Peter,Vesborg,scientist,DTU,https://dtu.dk,,,physics;seti;space,da,Denmark,Copenhagen,2,,,,DTU-forskare. Kommenterat UAP-frågan ur vetenskaplig synvinkel.,manual_clio
+UAP-PRS-taskinenpekka-0310,person,Pekka,Taskinen,researcher,,,,,historical;nordic;aerial,fi,Finland,,2,,,,Finsk UAP-historiker. Dokumenterat finska fall.,manual_clio
+UAP-PRS-mkinenesa-0311,person,Esa,Mäkinen,journalist,Helsingin Sanomat,https://hs.fi,,,aerial;news;nordic,fi,Finland,Helsinki,2,,,,Helsingin Sanomat. Täckt UAP-frågan i finsk media.,manual_clio
+UAP-PRS-ihonenmarkku-0312,person,Markku,Ihonen,researcher,,,,,historical;nordic;consciousness,fi,Finland,Tampere,2,,,,Finsk kontaktforskning och UAP-historia.,manual_clio
+UAP-PRS-soldjouni-0313,person,Jouni,Sold,researcher,,,,,aerial;nordic;reporting,fi,Finland,,2,,,,Finsk UAP-rapportering. Norra Finland.,manual_clio
+UAP-PRS-hafsteinvaldimar-0314,person,Valdimar,Hafstein,researcher;academic,University of Iceland,,,,folklore;consciousness;nordic,is,Iceland,Reykjavik,2,,,,Folklorist. Isländska traditioner om ljusfenomen och oförklarade upplevelser.,manual_clio
+UAP-PRS-jnassonbjrn-0315,person,Björn,Jónasson,journalist,Morgunblaðið,https://mbl.is,,,aerial;news;nordic,is,Iceland,Reykjavik,2,,,,Morgunblaðið. Isländsk press. Täckt anomala luftfenomen.,manual_clio
+UAP-PRS-sveinssonpll-0316,person,Páll,Sveinsson,researcher,,,,,aerial;nordic;historical,is,Iceland,Akureyri,2,,,,Nordisländsk UAP-forskning. Geotermala ljusfenomen.,manual_clio
+UAP-PRS-pharabodjeanpier-0317,person,Jean-Pierre,Pharabod,scientist,,,,,physics;aerial;belgium,fr,Belgium,,1,,,,Fysiker. Bidrog till vetenskaplig analys av belgiska UAP-vågen 1989–91.,manual_clio
+UAP-PRS-verbekemarianne-0318,person,Marianne,Verbeke,researcher,SOBEPS,,,,aerial;historical;belgium,fr,Belgium,Brussels,2,,,,SOBEPS-medarbetare. Belgisk UAP-dokumentation.,manual_clio
+UAP-PRS-ledantalain-0319,person,Alain,Ledant,researcher,,,,,aerial;historical;belgium,fr,Belgium,Liège,2,,,,Liègebaserad UAP-forskning.,manual_clio
+UAP-PRS-campionedmond-0320,person,Edmond,Campion,researcher,,,,,aerial;belgium;historical,fr,Belgium,,2,,,,Belgisk UFO-historiker.,manual_clio
+UAP-PRS-waumanskris-0321,person,Kris,Waumans,journalist,VRT,https://vrt.be,,,aerial;news;belgium,nl,Belgium,Brussels,2,,,,VRT Nieuws. Flamländsk public service. Täckt UAP-ämnen.,manual_clio
+UAP-PRS-ceulemansfilip-0322,person,Filip,Ceulemans,researcher,,,,,aerial;belgium;historical,nl,Belgium,Antwerp,2,,,,Flamländsk UAP-historiker.,manual_clio
+UAP-PRS-esterlealain-0323,person,Alain,Esterle,official,CNES/GEPAN,,,,aerial;official;france,fr,France,Toulouse,1,,,,Fd chef GEPAN (1983). Tätt samarbete med militär. Rapport nr 1977.,manual_clio
+UAP-PRS-lagrangepierre-0324,person,Pierre,Lagrange,researcher;academic,EHESS,,,,historical;academic;france,fr,France,Paris,2,,,,"EHESS-sociolog. Vetenskapssociologi och UAP. ""La guerre des soucoupes"".",manual_clio
+UAP-PRS-mesnardjol-0325,person,Joël,Mesnard,researcher,,https://infosite.ovni.net,,,aerial;historical;france,fr,France,,2,,,,LDLN (Lumières dans la Nuit). Redaktör för inflytelserik fransk UAP-tidskrift.,manual_clio
+UAP-PRS-bowencharles-0326,person,Charles,Bowen,researcher,FSR,,,,historical;aerial;france;uk,fr;en,France,,1,,,,Flying Saucer Review-redaktör. Internationell UAP-täckning.,manual_clio
+UAP-PRS-michelaim-0327,person,Aimé,Michel,researcher;author,,,,,historical;aerial;physics,fr,France,,1,,,,Pionjär. Orthoteni-hypotesen. Flying Saucers and the Straight-Line Mystery 1958. Deceased.,manual_clio
+UAP-PRS-guieujimmy-0328,person,Jimmy,Guieu,author;researcher,,,,,historical;aerial;consciousness,fr,France,,2,,,,Tidig fransk sci-fi-författare och UAP-popularisatör. Deceased.,manual_clio
+UAP-PRS-lagardefernand-0329,person,Fernand,Lagarde,researcher,,,,,historical;aerial;france,fr,France,,2,,,,Analyserade franska landsättningsfall. Statistisk metod.,manual_clio
+UAP-PRS-halletmarc-0330,person,Marc,Hallet,researcher;debunker,,,,,debunking;historical;belgium;france,fr,Belgium,Liège,2,,,,Franskspråkig skeptisk analys. Belgien/Frankrike.,manual_clio
+UAP-PRS-pinvidicthierry-0331,person,Thierry,Pinvidic,researcher,,,,,historical;aerial;france,fr,France,,2,,,,OVNI: les premiers documents officiels français. Archivist.,manual_clio
+UAP-PRS-diniluc-0332,person,Luc,Dini,researcher,,,,,aerial;france;historical,fr,France,,2,,,,Provencalsk UAP-forskning. Tranquillan-fallet.,manual_clio
+UAP-PRS-dorisabelle-0333,person,Isabelle,Doré,researcher,GEIPAN,https://geipan.fr,,,aerial;official;france,fr,France,Toulouse,2,,,,GEIPAN-analytiker. Fallhandläggning.,manual_clio
+UAP-PRS-lesliedesmond-0334,person,Desmond,Leslie,researcher;author,,,,,historical;aerial;uk,en,UK,London,1,,,,Medförfattare Flying Saucers Have Landed (1953) med Adamski. Pionjär. Deceased.,manual_clio
+UAP-PRS-trenchbrinsleyle-0335,person,Brinsley Le Poer,Trench,researcher;author,,,,,historical;aerial;uk,en,UK,London,2,,,,The Sky People. Tidig brittisk UAP-författare. Lord Clancarty. Deceased.,manual_clio
+UAP-PRS-creightongordon-0336,person,Gordon,Creighton,researcher,FSR,,,,historical;aerial;uk,en,UK,London,1,,,,Flying Saucer Review-redaktör i decennier. Tolkade globala fall. Deceased.,manual_clio
+UAP-PRS-spencerjohn-0337,person,John,Spencer,researcher,BUFORA,,,,historical;aerial;abduction;uk,en,UK,London,2,,,,BUFORA-ordförande. The UFO Encyclopedia.,manual_clio
+UAP-PRS-rimmerjohn-0338,person,John,Rimmer,researcher,Magonia,https://magoniamagazine.blogspot.com,,,historical;debunking;uk,en,UK,London,2,,,,Magonia Magazine. Psykosocial UAP-hypotes.,manual_clio
+UAP-PRS-rogersonpeter-0339,person,Peter,Rogerson,researcher,Magonia,,,,historical;debunking;uk,en,UK,,2,,,,Magonia. MUFOB. Kritisk historisk analys.,manual_clio
+UAP-PRS-mcclurekevin-0340,person,Kevin,McClure,researcher,,,,,historical;debunking;uk,en,UK,Newcastle,2,,,,Abduction-skeptiker. Brittisk kritisk analys.,manual_clio
+UAP-PRS-evanshilary-0341,person,Hilary,Evans,researcher,,,,,historical;consciousness;abduction;uk,en,UK,London,2,,,,Visions Apparitions Alien Visitors. Psykologisk UAP-analys. Deceased.,manual_clio
+UAP-PRS-randlesrobert-0342,person,Robert,Randles,researcher,,,,,historical;uk,en,UK,Manchester,2,,,,Make av Jenny Randles. Brittisk UAP-historiker.,manual_clio
+UAP-PRS-birdsallgraham-0343,person,Graham,Birdsall,journalist,UFO Magazine UK,,,,aerial;historical;uk,en,UK,Yorkshire,1,,,,Grundare och redaktör UFO Magazine UK. 1989–2003. Deceased 2003.,manual_clio
+UAP-PRS-birdsallmark-0344,person,Mark,Birdsall,journalist,UFO Magazine UK,,,,aerial;historical;uk,en,UK,Yorkshire,2,,,,Medredaktör UFO Magazine UK. Bror till Graham Birdsall.,manual_clio
+UAP-PRS-beerlionel-0345,person,Lionel,Beer,researcher,BUFORA,,,,historical;aerial;uk,en,UK,London,2,,,,BUFORA. Tidig brittisk UFO-databas.,manual_clio
+UAP-PRS-haltcharles-0346,person,Charles,Halt,whistleblower;official,USAF,,,,aerial;military;official;uk,en,UK,Rendlesham,1,,,,Lt Col USAF. Rendlesham Forest-incidenten 1980. Halt-memoet.,manual_clio
+UAP-PRS-turtillpeter-0347,person,Peter,Turtill,witness;researcher,,,,,aerial;uk;historical,en,UK,Suffolk,2,,,,Vittne Rendlesham-incidenten 1980.,manual_clio
+UAP-PRS-butlerbrenda-0348,person,Brenda,Butler,researcher,,,,,historical;uk;official,en,UK,Suffolk,2,,,,Sky Crash. Medförfattare. Tidigt Rendlesham-dokument 1984.,manual_clio
+UAP-PRS-streetdot-0349,person,Dot,Street,researcher,,,,,historical;uk;official,en,UK,,2,,,,Sky Crash-medförfattare. Rendlesham-forskning.,manual_clio
+UAP-PRS-ursellpat-0350,person,Pat,Ursell,researcher,,,,,historical;uk,en,UK,,2,,,,Brittisk UAP-historiker. Lokala fall.,manual_clio
+UAP-PRS-hodriendave-0351,person,Dave,Hodrien,researcher,Birmingham UFO Group,https://bufog.com,,,aerial;uk;reporting,en,UK,Birmingham,2,,,,BUFOG — Birmingham UFO Group. Aktiv rapportsamling.,manual_clio
+UAP-PRS-watsonnigel-0352,person,Nigel,Watson,researcher;author,,,,,historical;uk;debunking,en,UK,,2,,,,UFOs of the First World War. Brittisk UAP-historiker.,manual_clio
+UAP-PRS-veitkarlludwig-0353,person,Karl-Ludwig,Veit,researcher,DUIST,,,,historical;aerial;germany,de,Germany,Wiesbaden,2,,,,Fortsatte DUIST efter Karl Veit. Redaktör UFO-Nachrichten.,manual_clio
+UAP-PRS-schneideradolf-0354,person,Adolf,Schneider,researcher,,,,,historical;aerial;germany,de,Germany,,2,,,,Tidig tysk UAP-analytiker. 1950-60-talsfall.,manual_clio
+UAP-PRS-braunklaus-0355,person,Klaus,Braun,researcher,GEP,,,,aerial;germany;historical,de,Germany,Frankfurt,2,,,,GEP-medarbetare. Frankfurtområdets UAP-fall.,manual_clio
+UAP-PRS-fiebagjohannes-0356,person,Johannes,Fiebag,researcher;author,,,,,historical;aerial;consciousness,de,Germany,,2,,,,Tysk UAP-författare. Kontakt-fenomenet. Deceased.,manual_clio
+UAP-PRS-fiebagpeter-0357,person,Peter,Fiebag,researcher;author,,,,,historical;aerial;consciousness,de,Germany,,2,,,,Bror till Johannes. Medförfattare UAP-böcker.,manual_clio
+UAP-PRS-daehnhardtrainer-0358,person,Rainer,Daehnhardt,researcher,,,,,aerial;germany;historical,de,Germany,Munich,2,,,,Bayersk UAP-forskning.,manual_clio
+UAP-PRS-degnerkai-0359,person,Kai,Degner,researcher,,,,,aerial;germany;reporting,de,Germany,,2,,,,Modern tysk UAP-rapportering och databas.,manual_clio
+UAP-PRS-schrattmichael-0360,person,Michael,Schratt,researcher,,,,,aerial;crash_retrieval;historical,en,USA,,2,,,,Aerospace historian. Hemliga flygplan kontra UAP-identifikation.,manual_clio
+UAP-PRS-krassapeter-0361,person,Peter,Krassa,researcher;author,,,,,historical;aerial;ancient_aliens,de,Austria,Vienna,2,,,,Österrikisk UAP-författare. Danikens krets. Deceased.,manual_clio
+UAP-PRS-bostaleos-0362,person,Leos,Bosta,researcher,,,,,aerial;historical;austria,de,Austria,Vienna,2,,,,Österrikisk UAP-historiker.,manual_clio
+UAP-PRS-meiereduard-0363,person,Eduard,Meier,witness,,https://bea-meier.ch,,,consciousness;contact;historical,de,Switzerland,Hinwil,3,,,,Billy Meier. Kontroversiella kontaktfall sedan 1970-tal. Mycket debatterat.,manual_clio
+UAP-PRS-stevenswendelle-0364,person,Wendelle,Stevens,researcher,,,,,historical;contact;aerial,en,USA,Tucson AZ,2,,,,Investigerade Meier-fallet. Fd USAF pilot. Deceased.,manual_clio
+UAP-PRS-hesemannmichael-0365,person,Michael,Hesemann,researcher;author,,https://michaelhesemann.com,,,aerial;historical;disclosure,de,Germany,Düsseldorf,1,,,,Duplicate — se v1.0. Behåller för kontinuitet.,manual_clio
+UAP-PRS-popovichpavel-0366,person,Pavel,Popovich,official,Soviet Space Program,,,,aerial;space;official;russia,ru,Russia,Moscow,1,,,,Kosmonaut. General. Ordförande All-Union UFO Association. Deceased 2009.,manual_clio
+UAP-PRS-platovyuri-0367,person,Yuri,Platov,scientist,Russian Academy of Sciences,,,,physics;aerial;official;russia,ru,Russia,Moscow,1,,,,Ryska vetenskapsakademin. Ledde officiell UAP-undersökningsgrupp 1980-2000.,manual_clio
+UAP-PRS-listratovanatoly-0368,person,Anatoly,Listratov,official,Soviet Military,,,,aerial;military;official;russia,ru,Russia,Moscow,2,,,,Sovjet-militär UAP-program. SETKA-projektet.,manual_clio
+UAP-PRS-vasinmikhail-0369,person,Mikhail,Vasin,scientist,,,,,space;physics;russia,ru,Russia,Moscow,2,,,,Vasin-Shcherbakov-hypotesen om månens artificiella ursprung. Kontroversiell.,manual_clio
+UAP-PRS-bachurinemil-0370,person,Emil,Bachurin,researcher,,,,,aerial;historical;russia,ru,Russia,,2,,,,Rysk UAP-historiker. Analyserat Soviet-era-fall.,manual_clio
+UAP-PRS-shurinovboris-0371,person,Boris,Shurinov,researcher,,,,,aerial;historical;russia,ru,Russia,Moscow,2,,,,Rysk UFO-reporter och historiker.,manual_clio
+UAP-PRS-lishenryk-0372,person,Henryk,Lis,researcher,,,,,aerial;historical;poland,pl,Poland,Warsaw,2,,,,Polsk UAP-historiker. Varsaw-baserad forskning.,manual_clio
+UAP-PRS-bzowskikrzysztof-0373,person,Krzysztof,Bzowski,researcher,NPN,https://npn.pl,,,aerial;reporting;poland,pl,Poland,Gdańsk,2,,,,NPN Tricity. Polsk UAP-rapportering.,manual_clio
+UAP-PRS-baszczykartur-0374,person,Artur,Błaszczyk,researcher,,,,,aerial;poland;historical,pl,Poland,Wrocław,2,,,,Schlesisk UAP-forskning.,manual_clio
+UAP-PRS-buntovilya-0375,person,Ilya,Buntov,researcher,,,,,aerial;historical;russia;ukraine,ru,Ukraine,Kharkiv,2,,,,Östukrainska UAP-rapporter.,manual_clio
+UAP-PRS-psarevvalentin-0376,person,Valentin,Psarev,researcher,,,,,aerial;historical;ukraine,uk,Ukraine,Kyiv,2,,,,Ukrainsk UAP-historiker.,manual_clio
+UAP-PRS-popovichmilan-0377,person,Milan,Popovich,researcher,,,,,aerial;historical;balkans,sr,Serbia,Belgrade,2,,,,Serbisk UAP-forskning. Balkanska observationer.,manual_clio
+UAP-PRS-krmeljmilo-0378,person,Miloš,Krmelj,researcher,,,,,aerial;historical;balkans,sl,Slovenia,Ljubljana,2,,,,Slovenisk UAP-historiker.,manual_clio
+UAP-PRS-josbentezjuan-0379,person,Juan,José Benítez,researcher;author,,https://jjbenitez.com,,,historical;aerial;latin_america,es,Spain,Bilbao,1,,,,Kabinettsfall-trilogin (Caballo de Troya ej UAP men känd). UAP-böcker om spanska fall.,manual_clio
+UAP-PRS-caravacajosanton-0380,person,José Antonio,Caravaca,researcher,,https://caravaca-ufo.blogspot.com,,,historical;aerial;spain,es,Spain,Murcia,2,,,,Distortion Theory. Analyserar spanska fall med psykologisk modell.,manual_clio
+UAP-PRS-farriolsrafael-0381,person,Rafael,Farriols,researcher,,,,,historical;aerial;spain,es,Spain,Barcelona,2,,,,Undersökte Manises-incidenten 1979. Finansierade UAP-forskning.,manual_clio
+UAP-PRS-fernndezjulio-0382,person,Julio,Fernández,researcher;journalist,,,,,historical;aerial;official,es,Spain,Madrid,2,,,,Spanska militärfiler om UAP. Journalist.,manual_clio
+UAP-PRS-fernndezbuenolor-0383,person,Lorenzo,Fernández Bueno,researcher,,,,,aerial;spain;historical,es,Spain,,2,,,,Spansk UAP-forskning.,manual_clio
+UAP-PRS-malangacorrado-0384,person,Corrado,Malanga,researcher,University of Pisa,,,,abduction;consciousness;biology,it,Italy,Pisa,2,,,,Fd professor kemi. Hypnos-regression och abduction-forskning.,manual_clio
+UAP-PRS-cabassirenzo-0385,person,Renzo,Cabassi,researcher,CUN,https://cun-italia.net,,,aerial;historical;italy,it,Italy,,2,,,,CUN-medarbetare. Italiensk UAP-fall.,manual_clio
+UAP-PRS-vergamaurizio-0386,person,Maurizio,Verga,researcher,,,,,historical;aerial;italy,it,Italy,Milan,2,,,,Italian UAP Catalog (ITACAT). Rigorös fallkatalog.,manual_clio
+UAP-PRS-russoedoardo-0387,person,Edoardo,Russo,researcher,CISU,https://cisu.org,,,historical;aerial;italy,it,Italy,Turin,1,,,,CISU — Centro Italiano Studi Ufologici. Statistisk metod.,manual_clio
+UAP-PRS-introvignegianma-0388,person,Gian Marco,Introvigne,researcher;academic,CESNUR,,,,consciousness;religion;academic,it,Italy,Turin,2,,,,Religionssociolog. UAP i religiöst perspektiv. CESNUR.,manual_clio
+UAP-PRS-chiumientoantoni-0389,person,Antonio,Chiumiento,researcher,,,,,aerial;italy;historical,it,Italy,,2,,,,Italiensk UAP-historiker.,manual_clio
+UAP-PRS-rutkowskichris-0390,person,Chris,Rutkowski,researcher,Ufology Research,,,,aerial;reporting;statistics,en,Canada,Winnipeg MB,1,,,,Canadian UFO Survey. Årsrapport sedan 1989. Mest rigorös kanadensisk statistik.,manual_clio
+UAP-PRS-dittmangeoff-0391,person,Geoff,Dittman,researcher,Ufology Research,,,,aerial;reporting;statistics,en,Canada,Winnipeg MB,2,,,,Medarbetare Canadian UFO Survey.,manual_clio
+UAP-PRS-brayarthur-0392,person,Arthur,Bray,researcher,,,,,historical;aerial;official,en,Canada,Ottawa ON,2,,,,The UFO Connection. Kanadensiska militärdokument. Deceased.,manual_clio
+UAP-PRS-campagnapalmiro-0393,person,Palmiro,Campagna,researcher,,,,,historical;aerial;canada,en,Canada,Ottawa ON,2,,,,Storm Over Shag Harbour. Kanadensisk ingenjör och UAP-historiker.,manual_clio
+UAP-PRS-ledgerdon-0394,person,Don,Ledger,researcher,,,,,historical;aerial;canada,en,Canada,Nova Scotia,2,,,,Dark Object. Shag Harbour-incidenten 1967.,manual_clio
+UAP-PRS-aykroydrobert-0395,person,Robert,Aykroyd,researcher,,,,,historical;aerial;canada,en,Canada,,2,,,,Dan Aykroyds far. Kanadensisk UFO-intressent. Deceased.,manual_clio
+UAP-PRS-aykroyddan-0396,person,Dan,Aykroyd,researcher;entertainer,,,,,historical;aerial;disclosure,en,Canada,Toronto ON,2,@DanAykroyd,,,Skådespelare. Alien Autopsy-värd. Offentlig UAP-förespråkare.,manual_clio
+UAP-PRS-godicvladimir-0397,person,Vladimir,Godic,researcher,UFOAA,,,,aerial;historical;australia,en,Australia,Melbourne,2,,,,UFO Association of Australia. Melbournebaserad.,manual_clio
+UAP-PRS-simpsongeorge-0398,person,George,Simpson,researcher,,,,,aerial;historical;australia,en,Australia,,2,,,,Australiensisk UAP-historiker. Frederick Valentich-fallet 1978.,manual_clio
+UAP-PRS-hainesrichard-0399,person,Richard,Haines,scientist,NARCAP,https://narcap.org,,,aerial;aviation;pilot;photographic,en,USA,,1,,,,Fd NASA-psykolog. Grundare NARCAP. Pilotsäkerhet och UAP.,manual_clio
+UAP-PRS-rodwellmary-0400,person,Mary,Rodwell,researcher,ACERN,https://acern.com.au,,,abduction;consciousness;australia,en,Australia,Perth,2,,,,ACERN — Australian Close Encounter Resource Network. Abduction-stöd.,manual_clio
+UAP-PRS-cathiebruce-0401,person,Bruce,Cathie,researcher;pilot,,,,,aerial;physics;grid,en,New Zealand,Auckland,2,,,,Fd RNZAF-pilot. Harmonic Grid-teorin. Kaikoura-incident 1978.,manual_clio
+UAP-PRS-fogartyquentin-0402,person,Quentin,Fogarty,journalist,,,,,aerial;news,en,New Zealand,,2,,,,TV-journalist. Ombord Kaikoura-filmen 1978.,manual_clio
+UAP-PRS-vanvlierdencarl-0403,person,Carl,van Vlierden,researcher,,,,,aerial;historical;africa,en,South Africa,Pretoria,2,,,,Sydafrikansk UAP-historiker. Ariel School-fallet 1994.,manual_clio
+UAP-PRS-mackjohn-0404,person,John,Mack,researcher;academic,Harvard,,,,abduction;consciousness;psychology,en,USA,Cambridge MA,1,,,,Duplicate. Utredde Ariel School-fallet i Zimbabwe 1994.,manual_clio
+UAP-PRS-cidanaluisa-0405,person,Ana Luisa,Cid,researcher,,,,,aerial;latin_america;reporting,es,Mexico,Mexico City,2,,,,Mexikansk UAP-journalist och fotograf. Arkiverat hundratals fall.,manual_clio
+UAP-PRS-salazaralfonso-0406,person,Alfonso,Salazar,researcher,,,,,aerial;latin_america;aviation,es,Mexico,Mexico City,2,,,,Fd Aeromexico-pilot. Pilotsiktningar i Mexico.,manual_clio
+UAP-PRS-ferrizsantacruzp-0407,person,Pedro,Ferriz Santa Cruz,journalist,,,,,aerial;latin_america;historical,es,Mexico,Mexico City,1,,,,Fd TV-journalist. Pionjär i mexikansk UAP-täckning. Deceased.,manual_clio
+UAP-PRS-zerpafabio-0408,person,Fabio,Zerpa,researcher,,,,,historical;latin_america;consciousness,es,Argentina,Buenos Aires,2,,,,Uruguayansk-argentinsk UAP-pionjär. Mångårig forskning.,manual_clio
+UAP-PRS-rebissogiesedani-0409,person,Daniel,Rebisso Giese,researcher,,,,,historical;latin_america;brazil,pt,Brazil,,2,,,,Braziliansk UAP-historiker. Operation Prato 1977.,manual_clio
+UAP-PRS-alcntaratila-0410,person,Átila,Alcântara,official,Brazilian Air Force,,,,aerial;military;official;brazil,pt,Brazil,Brasília,1,,,,Fd Sargento Força Aérea. Vittne Operation Prato. Varginha-koppling.,manual_clio
+UAP-PRS-petitmarco-0411,person,Marco,Petit,researcher,,,,,aerial;latin_america;brazil,pt,Brazil,Rio de Janeiro,2,,,,Brasiliansk UAP-forskning. Rio-baserad.,manual_clio
+UAP-PRS-lusticchettithia-0412,person,Thiago,Luís Ticchetti,researcher,,,,,aerial;historical;brazil,pt,Brazil,Brasília,2,,,,Brasiliansk UAP-historiker. Militär dokumentation.,manual_clio
+UAP-PRS-enriquebanchsrob-0413,person,Roberto,Enrique Banchs,researcher,,,,,historical;latin_america;argentina,es,Argentina,Buenos Aires,1,,,,Argentinsk UAP-pionjär. CEFAI. Rigorös fallkatalog.,manual_clio
+UAP-PRS-fernndezgustavo-0414,person,Gustavo,Fernández,researcher,,,,,aerial;latin_america;argentina,es,Argentina,Mendoza,2,,,,Andinska UAP-observationer. Mendoza-baserad.,manual_clio
+UAP-PRS-riverajoslay-0415,person,José Lay,Rivera,official,CEFAA,https://cefaa.gob.cl,,,aerial;official;chile,es,Chile,Santiago,1,,,,CEFAA-direktör. Lett officiell chilensk UAP-utredning.,manual_clio
+UAP-PRS-sotojavier-0416,person,Javier,Soto,researcher,,,,,aerial;latin_america;chile,es,Chile,Valparaíso,2,,,,Chilensk UAP-forskning. Valparaíso-regionen.,manual_clio
+UAP-PRS-ngelflorezluis-0417,person,Luis,Ángel Florez,researcher,,,,,aerial;latin_america;colombia,es,Colombia,Bogotá,2,,,,Colombiansk UAP-forskning.,manual_clio
+UAP-PRS-torresmilton-0418,person,Milton,Torres,pilot,USAF,,,,aerial;military;pilot,es,USA,Miami FL,1,,,,Kubanskt ursprung. USAF-pilot 1957. Beordrad att skjuta ner UAP. MoD-dokument.,manual_clio
+UAP-PRS-pazwellssixto-0419,person,Sixto,Paz Wells,researcher,,,,,consciousness;contact;latin_america,es,Peru,Lima,2,,,,Peruansk kontaktforskare. RAMA-rörelsen. Kontroversiell.,manual_clio
+UAP-PRS-castillorincnenr-0420,person,Enrique,Castillo Rincón,researcher,,,,,consciousness;contact;latin_america,es,Colombia,Bogotá,2,,,,Colombiansk kontaktforskare. UFOs: A Great New Dawn for Humanity.,manual_clio
+UAP-PRS-yamamotoyoshihik-0421,person,Yoshihiko,Yamamoto,researcher,,,,,aerial;historical;asia,ja,Japan,Tokyo,2,,,,Japansk UAP-historiker. JAL 1628-incidenten 1986.,manual_clio
+UAP-PRS-ebizukakenjiro-0422,person,Kenjiro,Ebizuka,researcher,,,,,aerial;historical;asia,ja,Japan,Osaka,2,,,,Osaka-baserad japonsk UAP-forskning.,manual_clio
+UAP-PRS-iijimatatsuo-0423,person,Tatsuo,Iijima,journalist,,,,,aerial;news;asia,ja,Japan,Tokyo,2,,,,Japansk UAP-journalist.,manual_clio
+UAP-PRS-gongfuchen-0424,person,Chen,Gongfu,researcher,,,,,aerial;asia;historical,zh,China,Shanghai,2,,,,Kinesisk UAP-forskning. Shanghaibaserad.,manual_clio
+UAP-PRS-dongpaul-0425,person,Paul,Dong,researcher,,,,,aerial;asia;historical,zh;en,China,Oakland CA,2,,,,Kinesisk-amerikan. UFOs Over Modern China. Brobyggare kina-väst.,manual_clio
+UAP-PRS-tharoorkanishk-0426,person,Kanishk,Tharoor,journalist,Foreign Policy,,,,aerial;news;asia,en,India,New Delhi,2,,,,Utrikespolitisk journalist. Kommenterat UAP-disclosure ur indiskt perspektiv.,manual_clio
+UAP-PRS-tejalaxman-0427,person,Laxman,Teja,researcher,,,,,aerial;historical;india,en,India,Hyderabad,2,,,,Indisk UAP-forskning.,manual_clio
+UAP-PRS-leejungmo-0428,person,Jung-Mo,Lee,researcher,,,,,aerial;asia;historical,ko,South Korea,Seoul,2,,,,Sydkoreansk UAP-forskning.,manual_clio
+UAP-PRS-jafariparviz-0429,person,Parviz,Jafari,pilot,IIAF,,,,aerial;military;pilot;middle_east,fa,Iran,Tehran,1,,,,Fd general iransk flygvapnet. Tehran-incidenten 1976. Beordrades anfalla UAP. Kongresshörning 2007.,manual_clio
+UAP-PRS-lipkinyoav-0430,person,Yoav,Lipkin,researcher,,,,,aerial;middle_east;historical,he,Israel,Tel Aviv,2,,,,Israelisk UAP-forskning.,manual_clio
+UAP-PRS-eshedhaim-0431,person,Haim,Eshed,official,Israeli Space Agency,,,,space;official;disclosure;middle_east,he,Israel,,1,,,,Fd chef Israeli Space Agency. 2020: uttalade sig om galaktiska federation. Kontroversiellt.,manual_clio
+UAP-PRS-dietrichalex-0432,person,Alex,Dietrich,pilot,US Navy,,,,aerial;pilot;military,en,USA,,1,,,,Fd US Navy F/A-18-pilot. Nimitz-incidenten 2004. Tic Tac-vittne.,manual_clio
+UAP-PRS-underwoodchad-0433,person,Chad,Underwood,pilot,US Navy,,,,aerial;pilot;military,en,USA,,1,,,,Fd US Navy pilot. Filmade Tic Tac-UAP:n 2004 med FLIR.,manual_clio
+UAP-PRS-vorheesgary-0434,person,Gary,Vorhees,pilot,US Navy,,,,aerial;pilot;military,en,USA,,2,,,,USS Theodore Roosevelt-incidenten. Gimbal-video.,manual_clio
+UAP-PRS-accoindanny-0435,person,Danny,Accoin,pilot,US Navy,,,,aerial;pilot;military,en,USA,,1,,,,Fd US Navy pilot. Roosevelt-UAP-incidenterna 2014–15.,manual_clio
+UAP-PRS-daykevin-0436,person,Kevin,Day,official,US Navy,,,,aerial;military;radar,en,USA,,1,,,,USS Princeton radar operator. Nimitz-incidenten. Spårade UAP i 2 veckor.,manual_clio
+UAP-PRS-jacobsrobert-0437,person,Robert,Jacobs,whistleblower,USAF,,,,aerial;military;nuclear,en,USA,,2,,,,Fd USAF lieutenant. UAP interfererade med ICBM-test 1964 på Vandenberg.,manual_clio
+UAP-PRS-pennistonjames-0438,person,James,Penniston,witness;official,USAF,,,,aerial;military;uk,en,UK,Rendlesham,1,,,,USAF staff sergeant. Rendlesham Forest. Rörde vid landad craft.,manual_clio
+UAP-PRS-burroughsjohn-0439,person,John,Burroughs,witness;official,USAF,,,,aerial;military;uk,en,UK,Rendlesham,1,,,,USAF airman. Rendlesham Forest. Nära kontakt.,manual_clio
+UAP-PRS-zabelbryce-0440,person,Bryce,Zabel,journalist;podcaster,,https://brycezabel.com,Need to Know,https://feeds.buzzsprout.com/1572251.rss,disclosure;policy;news,en,USA,Los Angeles CA,2,@brycezabel,,,Need to Know-podcast med Ross Coulthart. TV-producent. Former MUFON chairman.,manual_clio
+UAP-PRS-hanksmicah-0441,person,Micah,Hanks,journalist;podcaster,The Debrief,https://thedebrief.org,The Debrief Weekly Report,https://thedebrief.org/feed/podcast/,aerial;disclosure;historical,en,USA,,2,@micahhanks,,,The Debrief. Podcaster. The UFO Trail-blogg.,manual_clio
+UAP-PRS-jimenezluis-0442,person,Luis,Jimenez,journalist;podcaster,,,UFO Rabbit Hole,,aerial;disclosure;news,es;en,USA,,2,,,,Spanskspråkig UAP-podcast för latinamerikansk publik.,manual_clio
+UAP-PRS-patelparik-0443,person,Parik,Patel,podcaster,,,The UAP Podcast,,aerial;disclosure;news,en,USA,,2,,,,Brittisk-amerikansk UAP-podcast. Intervjuer med forskare.,manual_clio
+UAP-PRS-shafersarah-0444,person,Sarah,Shafer,podcaster,,,Shattered Reality Podcast,,consciousness;aerial;abduction,en,USA,,2,,,,UAP och consciousness-fokuserad podcast.,manual_clio
+UAP-PRS-clellandmike-0445,person,Mike,Clelland,researcher;podcaster,,https://hiddenexperience.blogspot.com,The Unseen,,abduction;consciousness;owls,en,USA,,2,,,,The Messengers. Ugglor och abduction-forskning. Personlig erfarenhet.,manual_clio
+UAP-PRS-orozcogeraldine-0446,person,Geraldine,Orozco,researcher,,,,,abduction;consciousness;dna,en,USA,,2,,,,DNA-förändringar och abduction-upplevelser. Personligt vittnesmål.,manual_clio
+UAP-PRS-gallaghermike-0447,person,Mike,Gallagher,official,US Congress,,,,policy;disclosure;military,en,USA,Washington DC,1,,,,Fd kongressledamot (R-WI). UAP-hearings 2023. House Armed Services.,manual_clio
+UAP-PRS-turnermike-0448,person,Mike,Turner,official,US Congress,,,,policy;disclosure;military,en,USA,Washington DC,1,,,,House Intelligence Committee chairman. UAP-briefingar.,manual_clio
+UAP-PRS-gallegoruben-0449,person,Ruben,Gallego,official,US Congress,,,,policy;disclosure,en,USA,Washington DC,2,,,,Kongressledamot (D-AZ). UAP-hearings.,manual_clio
+UAP-PRS-carsonandr-0450,person,André,Carson,official,US Congress,,,,policy;disclosure,en,USA,Washington DC,1,,,,House Intelligence Committee. UAP-hearings. Öppen för transparency.,manual_clio
+UAP-PRS-burchetttim-0451,person,Tim,Burchett,official,US Congress,,,,policy;disclosure,en,USA,Washington DC,1,@timburchett,,,Kongressledamot (R-TN). Stark disclosure-förespråkare. UAP-hearings 2023.,manual_clio
+UAP-PRS-gaetzmatt-0452,person,Matt,Gaetz,official,US Congress,,,,policy;disclosure,en,USA,Washington DC,2,,,,Kongressledamot. Medinitiativ UAP-legislation.,manual_clio
+UAP-PRS-schumerchuck-0453,person,Chuck,Schumer,official,US Senate,,,,policy;disclosure,en,USA,Washington DC,1,,,,Senatens majoritetsledare. NDAA UAP-disclosure amendment 2023.,manual_clio
+UAP-PRS-rubiomarco-0454,person,Marco,Rubio,official,US Senate,,,,policy;disclosure;military,en,USA,Washington DC,1,,,,Senate Intelligence Committee. Drev på AATIP-transparens och UAP-rapportering.,manual_clio
+UAP-PRS-gillibrandkirste-0455,person,Kirsten,Gillibrand,official,US Senate,,,,policy;disclosure,en,USA,Washington DC,1,,,,Föreslog AARO-lagstiftningen. Senate Armed Services.,manual_clio
+UAP-ORG-cisucentroitalia-0456,organization,,,CISU — Centro Italiano Studi Ufologici,CISU — Centro Italiano Studi Ufologici,https://cisu.org,,,historical;aerial;italy,it,Italy,Turin,1,,,,Edoardo Russo. Rigorös statistisk UAP-analys.,manual_clio
+UAP-ORG-caipan-0457,organization,,,CAIPAN,CAIPAN,,,,aerial;academic;france,fr,France,Paris,1,,,,Colloque GEIPAN 2014. Vetenskaplig konferens om UAP.,manual_clio
+UAP-ORG-project1947-0458,organization,,,Project 1947,Project 1947,,,,historical;aerial;official,en,USA,,1,,,,Jan Aldrich. Samlar historiska UAP-dokument 1947–.,manual_clio
+UAP-ORG-ufologyresearchc-0459,organization,,,Ufology Research Canada,Ufology Research Canada,,,,aerial;reporting;statistics,en,Canada,Winnipeg MB,1,,,,Chris Rutkowski. Canadian UFO Survey sedan 1989.,manual_clio
+UAP-ORG-ufoaaufoassociat-0460,organization,,,UFOAA — UFO Association of Australia,UFOAA — UFO Association of Australia,,,,aerial;historical;australia,en,Australia,Melbourne,2,,,,Australiensisk UAP-organisation.,manual_clio
+UAP-ORG-acern-0461,organization,,,ACERN,ACERN,https://acern.com.au,,,abduction;consciousness;australia,en,Australia,Perth,2,,,,Mary Rodwell. Australian Close Encounter Resource Network.,manual_clio
+UAP-ORG-americansforsafe-0462,organization,,,Americans for Safe Aerospace,Americans for Safe Aerospace,https://americansforspacefreedom.org,,,aerial;aviation;pilot;policy,en,USA,,1,,,,Ryan Graves. Pilotsäkerhet och UAP-rapportering.,manual_clio
+UAP-ORG-intrudersfoundat-0463,organization,,,Intruders Foundation,Intruders Foundation,,,,abduction;consciousness,en,USA,New York NY,1,,,,Budd Hopkins. Abduction-stöd och forskning.,manual_clio
+UAP-ORG-irvainternationa-0464,organization,,,IRVA — International Remote Viewing Association,IRVA — International Remote Viewing Association,https://irva.org,,,consciousness;remote_viewing,en,USA,,2,,,,Fjärrskådning som metod i UAP-kontext.,manual_clio
+UAP-ORG-flyingsaucerrevi-0465,organization,,,Flying Saucer Review,Flying Saucer Review,,,,historical;aerial;uk,en,UK,London,1,,,,Världens äldsta UAP-tidskrift. Grundad 1955. Gordon Creighton.,manual_clio
+UAP-ORG-magoniamagazine-0466,organization,,,Magonia Magazine,Magonia Magazine,https://magoniamagazine.blogspot.com,,,historical;debunking;uk,en,UK,London,2,,,,John Rimmer. Psykosocial UAP-hypotes.,manual_clio
+UAP-ORG-birminghamufogro-0467,organization,,,Birmingham UFO Group — BUFOG,Birmingham UFO Group — BUFOG,https://bufog.com,,,aerial;uk;reporting,en,UK,Birmingham,2,,,,Dave Hodrien. Aktiv rapportsamling.,manual_clio
+UAP-ORG-ldlnlumiresdansl-0468,organization,,,LDLN — Lumières dans la Nuit,LDLN — Lumières dans la Nuit,,,,historical;aerial;france,fr,France,,1,,,,Joël Mesnard. Inflytelserik fransk UAP-tidskrift 1957–2009.,manual_clio
+UAP-ORG-hessdalenams-0469,organization,,,Hessdalen AMS,Hessdalen AMS,https://hessdalen.org/ams,,,aerial;physics;norway;hessdalen,no,Norway,Hessdalen,1,,,,Automatisk mätstation. Realtidsdata om Hessdalen-ljusen.,manual_clio
+UAP-ORG-mufongermany-0470,organization,,,MUFON Germany,MUFON Germany,,,,aerial;germany;reporting,de,Germany,,2,,,,Tysk gren av MUFON.,manual_clio
+UAP-ORG-ufoforschungberl-0471,organization,,,UFO-Forschung Berlin,UFO-Forschung Berlin,,,,aerial;germany;historical,de,Germany,Berlin,2,,,,Berlinska UAP-forskargrupp.,manual_clio
+UAP-ORG-magoniamagazine-0472,organization,,,Magonia Magazine,Magonia Magazine,https://magoniamagazine.blogspot.com,,,historical;debunking;uk,en,UK,London,2,,,,John Rimmer. Psykosocial UAP-hypotes. Duplicate — se ovan.,manual_clio
+UAP-ORG-newsnationuapcov-0473,organization,,,News Nation — UAP coverage,News Nation — UAP coverage,https://newsnation.com,,,aerial;disclosure;news,en,USA,Chicago IL,1,,,,Ross Coulthart. Prime time UAP-täckning.,manual_clio
+UAP-ORG-sufoiskandinavis-0474,organization,,,SUFOI — Skandinavisk UFO Information,SUFOI — Skandinavisk UFO Information,https://sufoi.dk,,,historical;nordic;aerial,da,Denmark,Copenhagen,1,,,,Ledande dansk UAP-organisation. Duplicate — se v1.1.,manual_clio
+UAP-ORG-narcap-0475,organization,,,NARCAP,NARCAP,https://narcap.org,,,aerial;aviation;safety,en,USA,,1,,,,National Aviation Reporting Center. Richard Haines. Duplicate — se v1.0.,manual_clio
+UAP-PRS-adamskigeorge-0476,person,George,Adamski,researcher,,https://en.wikipedia.org/wiki/George_Adamski,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: George Adamski,wikipedia_en
+UAP-PRS-alexanderjohnb-0477,person,John B.,Alexander,researcher,,https://en.wikipedia.org/wiki/John_B._Alexander,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John B. Alexander,wikipedia_en
+UAP-PRS-angelucciorfeo-0478,person,Orfeo,Angelucci,researcher,,https://en.wikipedia.org/wiki/Orfeo_Angelucci,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Orfeo Angelucci,wikipedia_en
+UAP-PRS-apostoldan-0479,person,Dan,Apostol,researcher,,https://en.wikipedia.org/wiki/Dan_Apostol,,,aerial;disclosure,en,Romania,,2,,,,Wikipedia [en]: Dan Apostol,wikipedia_en
+UAP-PRS-appellestuart-0480,person,Stuart,Appelle,researcher,,https://en.wikipedia.org/wiki/Stuart_Appelle,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Stuart Appelle,wikipedia_en
+UAP-PRS-aykroyddan-0481,person,Dan,Aykroyd,researcher,,https://en.wikipedia.org/wiki/Dan_Aykroyd,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Dan Aykroyd,wikipedia_en
+UAP-PRS-bassettstephen-0482,person,Stephen,Bassett,researcher,,https://en.wikipedia.org/wiki/Stephen_Bassett_%28lobbyist%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Stephen Bassett (lobbyist),wikipedia_en
+UAP-PRS-bellart-0483,person,Art,Bell,researcher,,https://en.wikipedia.org/wiki/Art_Bell,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Art Bell,wikipedia_en
+UAP-PRS-bennewitzpaul-0484,person,Paul,Bennewitz,researcher,,https://en.wikipedia.org/wiki/Paul_Bennewitz,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Paul Bennewitz,wikipedia_en
+UAP-PRS-bergierjacques-0485,person,Jacques,Bergier,researcher,,https://en.wikipedia.org/wiki/Jacques_Bergier,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Jacques Bergier,wikipedia_en
+UAP-PRS-birneswilliamj-0486,person,William J.,Birnes,researcher,,https://en.wikipedia.org/wiki/William_J._Birnes,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: William J. Birnes,wikipedia_en
+UAP-PRS-bloecherted-0487,person,Ted,Bloecher,researcher,,https://en.wikipedia.org/wiki/Ted_Bloecher,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ted Bloecher,wikipedia_en
+UAP-PRS-burginluc-0488,person,Luc,Bürgin,researcher,,https://en.wikipedia.org/wiki/Luc_B%C3%BCrgin,,,aerial;disclosure,en,Germany,,2,,,,Wikipedia [en]: Luc Bürgin,wikipedia_en
+UAP-PRS-cassirermanfred-0489,person,Manfred,Cassirer,researcher,,https://en.wikipedia.org/wiki/Manfred_Cassirer,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Manfred Cassirer,wikipedia_en
+UAP-PRS-chalkerbill-0490,person,Bill,Chalker,researcher,,https://en.wikipedia.org/wiki/Bill_Chalker,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Bill Chalker,wikipedia_en
+UAP-PRS-brinsleytrench8t-0491,person,8th Earl of Clancarty,Brinsley Trench,researcher,,https://en.wikipedia.org/wiki/Brinsley_Trench%2C_8th_Earl_of_Clancarty,,,aerial;disclosure,en,UK,,2,,,,"Wikipedia [en]: Brinsley Trench, 8th Earl of Clancarty",wikipedia_en
+UAP-PRS-clancysusan-0492,person,Susan,Clancy,researcher,,https://en.wikipedia.org/wiki/Susan_Clancy,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Susan Clancy,wikipedia_en
+UAP-PRS-clarkjerome-0493,person,Jerome,Clark,researcher,,https://en.wikipedia.org/wiki/Jerome_Clark,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jerome Clark,wikipedia_en
+UAP-PRS-deanrobert-0494,person,Robert,Dean,researcher,,https://en.wikipedia.org/wiki/Robert_Dean_%28ufologist%29,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Robert Dean (ufologist),wikipedia_en
+UAP-PRS-dennisglenn-0495,person,Glenn,Dennis,researcher,,https://en.wikipedia.org/wiki/Glenn_Dennis,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Glenn Dennis,wikipedia_en
+UAP-PRS-drakewraymond-0496,person,W. Raymond,Drake,researcher,,https://en.wikipedia.org/wiki/W._Raymond_Drake,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: W. Raymond Drake,wikipedia_en
+UAP-PRS-edwardsfrank-0497,person,Frank,Edwards,researcher,,https://en.wikipedia.org/wiki/Frank_Edwards_%28writer_and_broadcaster%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Frank Edwards (writer and broadcaster),wikipedia_en
+UAP-PRS-egnewdanielle-0498,person,Danielle,Egnew,researcher,,https://en.wikipedia.org/wiki/Danielle_Egnew,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Danielle Egnew,wikipedia_en
+UAP-PRS-fanthorpelionel-0499,person,Lionel,Fanthorpe,researcher,,https://en.wikipedia.org/wiki/Lionel_Fanthorpe,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Lionel Fanthorpe,wikipedia_en
+UAP-PRS-foleydave-0500,person,Dave,Foley,researcher,,https://en.wikipedia.org/wiki/Dave_Foley,,,aerial;disclosure,en,Canada,,2,,,,Wikipedia [en]: Dave Foley,wikipedia_en
+UAP-PRS-fowlerraymonde-0501,person,Raymond E.,Fowler,researcher,,https://en.wikipedia.org/wiki/Raymond_E._Fowler,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Raymond E. Fowler,wikipedia_en
+UAP-PRS-freixedosalvador-0502,person,Salvador,Freixedo,researcher,,https://en.wikipedia.org/wiki/Salvador_Freixedo,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Salvador Freixedo,wikipedia_en
+UAP-PRS-friedmanstantont-0503,person,Stanton T.,Friedman,researcher,,https://en.wikipedia.org/wiki/Stanton_T._Friedman,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Stanton T. Friedman,wikipedia_en
+UAP-PRS-friendrobert-0504,person,Robert,Friend,researcher,,https://en.wikipedia.org/wiki/Robert_Friend_%28pilot%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Robert Friend (pilot),wikipedia_en
+UAP-PRS-frydaniel-0505,person,Daniel,Fry,researcher,,https://en.wikipedia.org/wiki/Daniel_Fry,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Daniel Fry,wikipedia_en
+UAP-PRS-fullerjohng-0506,person,John G.,Fuller,researcher,,https://en.wikipedia.org/wiki/John_G._Fuller,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John G. Fuller,wikipedia_en
+UAP-PRS-gairyeric-0507,person,Eric,Gairy,researcher,,https://en.wikipedia.org/wiki/Eric_Gairy,,,aerial;disclosure,en,Netherlands,,2,,,,Wikipedia [en]: Eric Gairy,wikipedia_en
+UAP-PRS-gerstenpeter-0508,person,Peter,Gersten,researcher,,https://en.wikipedia.org/wiki/Peter_Gersten,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Peter Gersten,wikipedia_en
+UAP-PRS-greengabriel-0509,person,Gabriel,Green,researcher,,https://en.wikipedia.org/wiki/Gabriel_Green_%28ufologist%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gabriel Green (ufologist),wikipedia_en
+UAP-PRS-greerstevenm-0510,person,Steven M.,Greer,researcher,,https://en.wikipedia.org/wiki/Steven_M._Greer,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Steven M. Greer,wikipedia_en
+UAP-PRS-haischbernard-0511,person,Bernard,Haisch,researcher,,https://en.wikipedia.org/wiki/Bernard_Haisch,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Bernard Haisch,wikipedia_en
+UAP-PRS-hallrichardh-0512,person,Richard H.,Hall,researcher,,https://en.wikipedia.org/wiki/Richard_H._Hall,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Richard H. Hall,wikipedia_en
+UAP-PRS-halpennybrucebar-0513,person,Bruce Barrymore,Halpenny,researcher,,https://en.wikipedia.org/wiki/Bruce_Barrymore_Halpenny,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Bruce Barrymore Halpenny,wikipedia_en
+UAP-PRS-harderjames-0514,person,James,Harder,researcher,,https://en.wikipedia.org/wiki/James_Harder,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: James Harder,wikipedia_en
+UAP-PRS-hartmannwilliamk-0515,person,William Kenneth,Hartmann,researcher,,https://en.wikipedia.org/wiki/William_Kenneth_Hartmann,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: William Kenneth Hartmann,wikipedia_en
+UAP-PRS-hellyerpaul-0516,person,Paul,Hellyer,researcher,,https://en.wikipedia.org/wiki/Paul_Hellyer,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Paul Hellyer,wikipedia_en
+UAP-PRS-hendryallan-0517,person,Allan,Hendry,researcher,,https://en.wikipedia.org/wiki/Allan_Hendry,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Allan Hendry,wikipedia_en
+UAP-PRS-hillpaulr-0518,person,Paul R.,Hill,researcher,,https://en.wikipedia.org/wiki/Paul_R._Hill,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Paul R. Hill,wikipedia_en
+UAP-PRS-hobanaion-0519,person,Ion,Hobana,researcher,,https://en.wikipedia.org/wiki/Ion_Hobana,,,aerial;disclosure,en,Romania,,2,,,,Wikipedia [en]: Ion Hobana,wikipedia_en
+UAP-PRS-holeyjanudo-0520,person,Jan Udo,Holey,researcher,,https://en.wikipedia.org/wiki/Jan_Udo_Holey,,,aerial;disclosure,en,Germany,,2,,,,Wikipedia [en]: Jan Udo Holey,wikipedia_en
+UAP-PRS-horowitzmitch-0521,person,Mitch,Horowitz,researcher,,https://en.wikipedia.org/wiki/Mitch_Horowitz,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Mitch Horowitz,wikipedia_en
+UAP-PRS-jacobsdavidm-0522,person,David M.,Jacobs,researcher,,https://en.wikipedia.org/wiki/David_M._Jacobs,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: David M. Jacobs,wikipedia_en
+UAP-PRS-jessupmorrisk-0523,person,Morris K.,Jessup,researcher,,https://en.wikipedia.org/wiki/Morris_K._Jessup,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Morris K. Jessup,wikipedia_en
+UAP-PRS-jimeneziker-0524,person,Iker,Jiménez,researcher,,https://en.wikipedia.org/wiki/Iker_Jim%C3%A9nez,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Iker Jiménez,wikipedia_en
+UAP-PRS-kazantsevalexand-0525,person,Alexander,Kazantsev,researcher,,https://en.wikipedia.org/wiki/Alexander_Kazantsev,,,aerial;disclosure,en,Russia,,2,,,,Wikipedia [en]: Alexander Kazantsev,wikipedia_en
+UAP-PRS-keeljohn-0526,person,John,Keel,researcher,,https://en.wikipedia.org/wiki/John_Keel,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John Keel,wikipedia_en
+UAP-PRS-keyhoedonald-0527,person,Donald,Keyhoe,researcher,,https://en.wikipedia.org/wiki/Donald_Keyhoe,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Donald Keyhoe,wikipedia_en
+UAP-PRS-kimballpaul-0528,person,Paul,Kimball,researcher,,https://en.wikipedia.org/wiki/Paul_Kimball,,,aerial;disclosure,en,Canada,,2,,,,Wikipedia [en]: Paul Kimball,wikipedia_en
+UAP-PRS-klarerelizabeth-0529,person,Elizabeth,Klarer,researcher,,https://en.wikipedia.org/wiki/Elizabeth_Klarer,,,aerial;disclosure,en,South Africa,,2,,,,Wikipedia [en]: Elizabeth Klarer,wikipedia_en
+UAP-PRS-klassphilipj-0530,person,Philip J.,Klass,researcher,,https://en.wikipedia.org/wiki/Philip_J._Klass,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Philip J. Klass,wikipedia_en
+UAP-PRS-lapazlincoln-0531,person,Lincoln,LaPaz,researcher,,https://en.wikipedia.org/wiki/Lincoln_LaPaz,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Lincoln LaPaz,wikipedia_en
+UAP-PRS-laynemeade-0532,person,Meade,Layne,researcher,,https://en.wikipedia.org/wiki/Meade_Layne,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Meade Layne,wikipedia_en
+UAP-PRS-leirroger-0533,person,Roger,Leir,researcher,,https://en.wikipedia.org/wiki/Roger_Leir,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Roger Leir,wikipedia_en
+UAP-PRS-linajuri-0534,person,Jüri,Lina,researcher,,https://en.wikipedia.org/wiki/J%C3%BCri_Lina,,,aerial;disclosure,en,Russia,,2,,,,Wikipedia [en]: Jüri Lina,wikipedia_en
+UAP-PRS-loebavi-0535,person,Avi,Loeb,researcher,,https://en.wikipedia.org/wiki/Avi_Loeb,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Avi Loeb,wikipedia_en
+UAP-PRS-mackjohne-0536,person,John E.,Mack,researcher,,https://en.wikipedia.org/wiki/John_E._Mack,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John E. Mack,wikipedia_en
+UAP-PRS-maussanjaime-0537,person,Jaime,Maussan,researcher,,https://en.wikipedia.org/wiki/Jaime_Maussan,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Jaime Maussan,wikipedia_en
+UAP-PRS-mccaslandneil-0538,person,Neil,McCasland,researcher,,https://en.wikipedia.org/wiki/Neil_McCasland,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Neil McCasland,wikipedia_en
+UAP-PRS-mcdonaldjamese-0539,person,James E.,McDonald,researcher,,https://en.wikipedia.org/wiki/James_E._McDonald,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: James E. McDonald,wikipedia_en
+UAP-PRS-meheustbertrand-0540,person,Bertrand,Méheust,researcher,,https://en.wikipedia.org/wiki/Bertrand_M%C3%A9heust,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Bertrand Méheust,wikipedia_en
+UAP-PRS-meierbilly-0541,person,Billy,Meier,researcher,,https://en.wikipedia.org/wiki/Billy_Meier,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Billy Meier,wikipedia_en
+UAP-PRS-migueresjean-0542,person,Jean,Miguères,researcher,,https://en.wikipedia.org/wiki/Jean_Migu%C3%A8res,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Jean Miguères,wikipedia_en
+UAP-PRS-misrakipaul-0543,person,Paul,Misraki,researcher,,https://en.wikipedia.org/wiki/Paul_Misraki,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Paul Misraki,wikipedia_en
+UAP-PRS-moorebill-0544,person,Bill,Moore,researcher,,https://en.wikipedia.org/wiki/Bill_Moore_%28ufologist%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Bill Moore (ufologist),wikipedia_en
+UAP-PRS-mortonseandavid-0545,person,Sean David,Morton,researcher,,https://en.wikipedia.org/wiki/Sean_David_Morton,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Sean David Morton,wikipedia_en
+UAP-PRS-moseleyjamesw-0546,person,James W.,Moseley,researcher,,https://en.wikipedia.org/wiki/James_W._Moseley,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: James W. Moseley,wikipedia_en
+UAP-PRS-novelgordon-0547,person,Gordon,Novel,researcher,,https://en.wikipedia.org/wiki/Gordon_Novel,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gordon Novel,wikipedia_en
+UAP-PRS-wellssixtopaz-0548,person,Sixto Paz,Wells,researcher,,https://en.wikipedia.org/wiki/Sixto_Paz_Wells,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Sixto Paz Wells,wikipedia_en
+UAP-PRS-persingermichael-0549,person,Michael,Persinger,researcher,,https://en.wikipedia.org/wiki/Michael_Persinger,,,aerial;disclosure,en,Canada,,2,,,,Wikipedia [en]: Michael Persinger,wikipedia_en
+UAP-PRS-popovichmarina-0550,person,Marina,Popovich,researcher,,https://en.wikipedia.org/wiki/Marina_Popovich,,,aerial;disclosure,en,Russia,,2,,,,Wikipedia [en]: Marina Popovich,wikipedia_en
+UAP-PRS-randlekevind-0551,person,Kevin D.,Randle,researcher,,https://en.wikipedia.org/wiki/Kevin_D._Randle,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Kevin D. Randle,wikipedia_en
+UAP-PRS-reichwilhelm-0552,person,Wilhelm,Reich,researcher,,https://en.wikipedia.org/wiki/Wilhelm_Reich,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Wilhelm Reich,wikipedia_en
+UAP-PRS-roachfrankline-0553,person,Franklin E.,Roach,researcher,,https://en.wikipedia.org/wiki/Franklin_E._Roach,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Franklin E. Roach,wikipedia_en
+UAP-PRS-romanekstan-0554,person,Stan,Romanek,researcher,,https://en.wikipedia.org/wiki/Stan_Romanek,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Stan Romanek,wikipedia_en
+UAP-PRS-ruehlfranklin-0555,person,Franklin,Ruehl,researcher,,https://en.wikipedia.org/wiki/Franklin_Ruehl,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Franklin Ruehl,wikipedia_en
+UAP-PRS-ruppeltedwardj-0556,person,Edward J.,Ruppelt,researcher,,https://en.wikipedia.org/wiki/Edward_J._Ruppelt,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Edward J. Ruppelt,wikipedia_en
+UAP-PRS-rutledgeharley-0557,person,Harley,Rutledge,researcher,,https://en.wikipedia.org/wiki/Harley_Rutledge,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Harley Rutledge,wikipedia_en
+UAP-PRS-salatunjacob-0558,person,Jacob,Salatun,researcher,,https://en.wikipedia.org/wiki/Jacob_Salatun,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Jacob Salatun,wikipedia_en
+UAP-PRS-schulzpaul-0559,person,Paul,Schulz,researcher,,https://en.wikipedia.org/wiki/Paul_Schulz_%28ufologist%29,,,aerial;disclosure,en,Germany,,2,,,,Wikipedia [en]: Paul Schulz (ufologist),wikipedia_en
+UAP-PRS-shuttlewoodarthu-0560,person,Arthur,Shuttlewood,researcher,,https://en.wikipedia.org/wiki/Arthur_Shuttlewood,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Arthur Shuttlewood,wikipedia_en
+UAP-PRS-smithwilbertbroc-0561,person,Wilbert Brockhouse,Smith,researcher,,https://en.wikipedia.org/wiki/Wilbert_Brockhouse_Smith,,,aerial;disclosure,en,Canada,,2,,,,Wikipedia [en]: Wilbert Brockhouse Smith,wikipedia_en
+UAP-PRS-soulegardner-0562,person,Gardner,Soule,researcher,,https://en.wikipedia.org/wiki/Gardner_Soule,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gardner Soule,wikipedia_en
+UAP-PRS-spiersdeathofmax-0563,person,Death of Max,Spiers,researcher,,https://en.wikipedia.org/wiki/Death_of_Max_Spiers,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Death of Max Spiers,wikipedia_en
+UAP-PRS-steigerbrad-0564,person,Brad,Steiger,researcher,,https://en.wikipedia.org/wiki/Brad_Steiger,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Brad Steiger,wikipedia_en
+UAP-PRS-strainuemil-0565,person,Emil,Străinu,researcher,,https://en.wikipedia.org/wiki/Emil_Str%C4%83inu,,,aerial;disclosure,en,Romania,,2,,,,Wikipedia [en]: Emil Străinu,wikipedia_en
+UAP-PRS-stringfieldleona-0566,person,Leonard H.,Stringfield,researcher,,https://en.wikipedia.org/wiki/Leonard_H._Stringfield,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Leonard H. Stringfield,wikipedia_en
+UAP-PRS-sturrockpetera-0567,person,Peter A.,Sturrock,researcher,,https://en.wikipedia.org/wiki/Peter_A._Sturrock,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Peter A. Sturrock,wikipedia_en
+UAP-PRS-thomaschan-0568,person,Chan,Thomas,researcher,,https://en.wikipedia.org/wiki/Chan_Thomas,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Chan Thomas,wikipedia_en
+UAP-PRS-tsoukalosgiorgio-0569,person,Giorgio A.,Tsoukalos,researcher,,https://en.wikipedia.org/wiki/Giorgio_A._Tsoukalos,,,aerial;disclosure,en,Greece,,2,,,,Wikipedia [en]: Giorgio A. Tsoukalos,wikipedia_en
+UAP-PRS-tasselgeorgevan-0570,person,George Van,Tassel,researcher,,https://en.wikipedia.org/wiki/George_Van_Tassel,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: George Van Tassel,wikipedia_en
+UAP-PRS-vigaypaul-0571,person,Paul,Vigay,researcher,,https://en.wikipedia.org/wiki/Paul_Vigay,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Paul Vigay,wikipedia_en
+UAP-PRS-volkeigor-0572,person,Igor,Volke,researcher,,https://en.wikipedia.org/wiki/Igor_Volke,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Igor Volke,wikipedia_en
+UAP-PRS-wallpatrick-0573,person,Patrick,Wall,researcher,,https://en.wikipedia.org/wiki/Patrick_Wall,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Patrick Wall,wikipedia_en
+UAP-PRS-wilsoncolin-0574,person,Colin,Wilson,researcher,,https://en.wikipedia.org/wiki/Colin_Wilson,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Colin Wilson,wikipedia_en
+UAP-PRS-woodrewgreta-0575,person,Greta,Woodrew,researcher,,https://en.wikipedia.org/wiki/Greta_Woodrew,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Greta Woodrew,wikipedia_en
+UAP-PRS-zerpafabio-0576,person,Fabio,Zerpa,researcher,,https://en.wikipedia.org/wiki/Fabio_Zerpa,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Fabio Zerpa,wikipedia_en
+UAP-PRS-ziegelfelix-0577,person,Felix,Ziegel,researcher,,https://en.wikipedia.org/wiki/Felix_Ziegel,,,aerial;disclosure,en,Russia,,2,,,,Wikipedia [en]: Felix Ziegel,wikipedia_en
+UAP-PRS-wassilkosereckiz-0578,person,Zoe,Wassilko-Serecki,researcher,,https://en.wikipedia.org/wiki/Zoe_Wassilko-Serecki,,,aerial;disclosure,en,Austria,,2,,,,Wikipedia [en]: Zoe Wassilko-Serecki,wikipedia_en
+UAP-PRS-constabletrevorj-0579,person,Trevor James,Constable,author,,https://en.wikipedia.org/wiki/Trevor_James_Constable,,,aerial;disclosure,en,Germany,,2,,,,Wikipedia [en]: Trevor James Constable,wikipedia_en
+UAP-PRS-felixaladino-0580,person,Aladino,Félix,author,,https://en.wikipedia.org/wiki/Aladino_F%C3%A9lix,,,aerial;disclosure,en,Brazil,,2,,,,Wikipedia [en]: Aladino Félix,wikipedia_en
+UAP-PRS-obsequensjulius-0581,person,Julius,Obsequens,author,,https://en.wikipedia.org/wiki/Julius_Obsequens,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Julius Obsequens,wikipedia_en
+UAP-PRS-posadasj-0582,person,J.,Posadas,author,,https://en.wikipedia.org/wiki/J._Posadas,,,aerial;disclosure,en,Argentina,,2,,,,Wikipedia [en]: J. Posadas,wikipedia_en
+UAP-PRS-sendyjean-0583,person,Jean,Sendy,author,,https://en.wikipedia.org/wiki/Jean_Sendy,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Jean Sendy,wikipedia_en
+UAP-PRS-svozilkarl-0584,person,Karl,Svozil,author,,https://en.wikipedia.org/wiki/Karl_Svozil,,,aerial;disclosure,en,Austria,,2,,,,Wikipedia [en]: Karl Svozil,wikipedia_en
+UAP-PRS-sichaowang-0585,person,Wang,Sichao,author,,https://en.wikipedia.org/wiki/Wang_Sichao,,,aerial;disclosure,en,China,,2,,,,Wikipedia [en]: Wang Sichao,wikipedia_en
+UAP-PRS-wilkinsharoldt-0586,person,Harold T.,Wilkins,author,,https://en.wikipedia.org/wiki/Harold_T._Wilkins,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Harold T. Wilkins,wikipedia_en
+UAP-PRS-barkergray-0587,person,Gray,Barker,author,,https://en.wikipedia.org/wiki/Gray_Barker,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gray Barker,wikipedia_en
+UAP-PRS-benderalbertk-0588,person,Albert K.,Bender,author,,https://en.wikipedia.org/wiki/Albert_K._Bender,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Albert K. Bender,wikipedia_en
+UAP-PRS-bethurumtruman-0589,person,Truman,Bethurum,author,,https://en.wikipedia.org/wiki/Truman_Bethurum,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Truman Bethurum,wikipedia_en
+UAP-PRS-cannondolores-0590,person,Dolores,Cannon,author,,https://en.wikipedia.org/wiki/Dolores_Cannon,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Dolores Cannon,wikipedia_en
+UAP-PRS-colbycb-0591,person,C. B.,Colby,author,,https://en.wikipedia.org/wiki/C._B._Colby,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: C. B. Colby,wikipedia_en
+UAP-PRS-coopermiltonwill-0592,person,Milton William,Cooper,author,,https://en.wikipedia.org/wiki/Milton_William_Cooper,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Milton William Cooper,wikipedia_en
+UAP-PRS-corlisswilliamr-0593,person,William R.,Corliss,author,,https://en.wikipedia.org/wiki/William_R._Corliss,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: William R. Corliss,wikipedia_en
+UAP-PRS-dionerobert-0594,person,Robert,Dione,author,,https://en.wikipedia.org/wiki/Robert_Dione,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Robert Dione,wikipedia_en
+UAP-PRS-bessorjohnphilip-0595,person,John Philip,Bessor,author,,https://en.wikipedia.org/wiki/John_Philip_Bessor,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John Philip Bessor,wikipedia_en
+UAP-PRS-jorjanijason-0596,person,Jason,Jorjani,author,,https://en.wikipedia.org/wiki/Jason_Jorjani,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jason Jorjani,wikipedia_en
+UAP-PRS-leegloria-0597,person,Gloria,Lee,author,,https://en.wikipedia.org/wiki/Gloria_Lee,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gloria Lee,wikipedia_en
+UAP-PRS-levesquethomasal-0598,person,Thomas Allen,LeVesque,author,,https://en.wikipedia.org/wiki/Thomas_Allen_LeVesque,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Thomas Allen LeVesque,wikipedia_en
+UAP-PRS-marrsjim-0599,person,Jim,Marrs,author,,https://en.wikipedia.org/wiki/Jim_Marrs,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jim Marrs,wikipedia_en
+UAP-PRS-mengerhoward-0600,person,Howard,Menger,author,,https://en.wikipedia.org/wiki/Howard_Menger,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Howard Menger,wikipedia_en
+UAP-PRS-nelsonbuck-0601,person,Buck,Nelson,author,,https://en.wikipedia.org/wiki/Buck_Nelson,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Buck Nelson,wikipedia_en
+UAP-PRS-pagethorntonleig-0602,person,Thornton Leigh,Page,author,,https://en.wikipedia.org/wiki/Thornton_Leigh_Page,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Thornton Leigh Page,wikipedia_en
+UAP-PRS-sagancarl-0603,person,Carl,Sagan,author,,https://en.wikipedia.org/wiki/Carl_Sagan,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Carl Sagan,wikipedia_en
+UAP-PRS-sandowgreg-0604,person,Greg,Sandow,author,,https://en.wikipedia.org/wiki/Greg_Sandow,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Greg Sandow,wikipedia_en
+UAP-PRS-siegmeisterwalte-0605,person,Walter,Siegmeister,author,,https://en.wikipedia.org/wiki/Walter_Siegmeister,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Walter Siegmeister,wikipedia_en
+UAP-PRS-tonniesmac-0606,person,Mac,Tonnies,author,,https://en.wikipedia.org/wiki/Mac_Tonnies,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Mac Tonnies,wikipedia_en
+UAP-PRS-wilcockdavid-0607,person,David,Wilcock,author,,https://en.wikipedia.org/wiki/David_Wilcock,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: David Wilcock,wikipedia_en
+UAP-PRS-williamsongeorge-0608,person,George Hunt,Williamson,author,,https://en.wikipedia.org/wiki/George_Hunt_Williamson,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: George Hunt Williamson,wikipedia_en
+UAP-PRS-steelagent-0609,person,Agent,Steel,researcher,,https://en.wikipedia.org/wiki/Agent_Steel,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Agent Steel,wikipedia_en
+UAP-PRS-eshedhaim-0610,person,Haim,Eshed,researcher,,https://en.wikipedia.org/wiki/Haim_Eshed,,,aerial;disclosure,en,Germany,,2,,,,Wikipedia [en]: Haim Eshed,wikipedia_en
+UAP-PRS-hayakawanorio-0611,person,Norio,Hayakawa,researcher,,https://en.wikipedia.org/wiki/Norio_Hayakawa,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Norio Hayakawa,wikipedia_en
+UAP-PRS-ickedavid-0612,person,David,Icke,researcher,,https://en.wikipedia.org/wiki/David_Icke,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: David Icke,wikipedia_en
+UAP-PRS-langdonreuben-0613,person,Reuben,Langdon,researcher,,https://en.wikipedia.org/wiki/Reuben_Langdon,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Reuben Langdon,wikipedia_en
+UAP-PRS-learjohn-0614,person,John,Lear,researcher,,https://en.wikipedia.org/wiki/John_Lear,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: John Lear,wikipedia_en
+UAP-PRS-rensejeff-0615,person,Jeff,Rense,researcher,,https://en.wikipedia.org/wiki/Jeff_Rense,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jeff Rense,wikipedia_en
+UAP-PRS-huntingghost-0616,person,Ghost,hunting,researcher,,https://en.wikipedia.org/wiki/Ghost_hunting,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ghost hunting,wikipedia_en
+UAP-PRS-alvisbrandon-0617,person,Brandon,Alvis,researcher,,https://en.wikipedia.org/wiki/Brandon_Alvis,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Brandon Alvis,wikipedia_en
+UAP-PRS-societytheatlant-0618,person,The Atlantic Paranormal,Society,researcher,,https://en.wikipedia.org/wiki/The_Atlantic_Paranormal_Society,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: The Atlantic Paranormal Society,wikipedia_en
+UAP-PRS-auerbachloyd-0619,person,Loyd,Auerbach,researcher,,https://en.wikipedia.org/wiki/Loyd_Auerbach,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Loyd Auerbach,wikipedia_en
+UAP-PRS-baganszak-0620,person,Zak,Bagans,researcher,,https://en.wikipedia.org/wiki/Zak_Bagans,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Zak Bagans,wikipedia_en
+UAP-PRS-battfred-0621,person,Fred,Batt,researcher,,https://en.wikipedia.org/wiki/Fred_Batt,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Fred Batt,wikipedia_en
+UAP-PRS-baylessraymond-0622,person,Raymond,Bayless,researcher,,https://en.wikipedia.org/wiki/Raymond_Bayless,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Raymond Bayless,wikipedia_en
+UAP-PRS-beckjordjonerik-0623,person,Jon-Erik,Beckjord,researcher,,https://en.wikipedia.org/wiki/Jon-Erik_Beckjord,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jon-Erik Beckjord,wikipedia_en
+UAP-PRS-belangerjeff-0624,person,Jeff,Belanger,researcher,,https://en.wikipedia.org/wiki/Jeff_Belanger,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jeff Belanger,wikipedia_en
+UAP-PRS-belangermichelle-0625,person,Michelle,Belanger,researcher,,https://en.wikipedia.org/wiki/Michelle_Belanger,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Michelle Belanger,wikipedia_en
+UAP-PRS-bergararyan-0626,person,Ryan,Bergara,researcher,,https://en.wikipedia.org/wiki/Ryan_Bergara,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ryan Bergara,wikipedia_en
+UAP-PRS-magazinebeyondin-0627,person,Beyond Investigation,Magazine,researcher,,https://en.wikipedia.org/wiki/Beyond_Investigation_Magazine,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Beyond Investigation Magazine,wikipedia_en
+UAP-PRS-biddlekenny-0628,person,Kenny,Biddle,researcher,,https://en.wikipedia.org/wiki/Kenny_Biddle,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Kenny Biddle,wikipedia_en
+UAP-PRS-broomefiona-0629,person,Fiona,Broome,researcher,,https://en.wikipedia.org/wiki/Fiona_Broome,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Fiona Broome,wikipedia_en
+UAP-PRS-bruniamy-0630,person,Amy,Bruni,researcher,,https://en.wikipedia.org/wiki/Amy_Bruni,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Amy Bruni,wikipedia_en
+UAP-PRS-baxterbryan-0631,person,Bryan &,Baxter,researcher,,https://en.wikipedia.org/wiki/Bryan_%26_Baxter,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Bryan & Baxter,wikipedia_en
+UAP-PRS-buellryan-0632,person,Ryan,Buell,researcher,,https://en.wikipedia.org/wiki/Ryan_Buell,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ryan Buell,wikipedia_en
+UAP-PRS-burnspatrick-0633,person,Patrick,Burns,researcher,,https://en.wikipedia.org/wiki/Patrick_Burns_%28paranormal_investigator%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Patrick Burns (paranormal investigator),wikipedia_en
+UAP-PRS-unsolvedbuzzfeed-0634,person,BuzzFeed,Unsolved,researcher,,https://en.wikipedia.org/wiki/BuzzFeed_Unsolved,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: BuzzFeed Unsolved,wikipedia_en
+UAP-PRS-caluaged-0635,person,Ed,Caluag,researcher,,https://en.wikipedia.org/wiki/Ed_Caluag,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Ed Caluag,wikipedia_en
+UAP-PRS-cornelltony-0636,person,Tony,Cornell,researcher,,https://en.wikipedia.org/wiki/Tony_Cornell,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Tony Cornell,wikipedia_en
+UAP-PRS-investigatorscov-0637,person,Coventry Paranormal,Investigators,researcher,,https://en.wikipedia.org/wiki/Coventry_Paranormal_Investigators,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Coventry Paranormal Investigators,wikipedia_en
+UAP-PRS-dupontjonas-0638,person,Jonas,Dupont,researcher,,https://en.wikipedia.org/wiki/Jonas_Dupont,,,aerial;disclosure,en,France,,2,,,,Wikipedia [en]: Jonas Dupont,wikipedia_en
+UAP-PRS-fieldingyvette-0639,person,Yvette,Fielding,researcher,,https://en.wikipedia.org/wiki/Yvette_Fielding,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Yvette Fielding,wikipedia_en
+UAP-PRS-fitzgeraldbarry-0640,person,Barry,Fitzgerald,researcher,,https://en.wikipedia.org/wiki/Barry_Fitzgerald_%28investigator%29,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Barry Fitzgerald (investigator),wikipedia_en
+UAP-PRS-flemingchris-0641,person,Chris,Fleming,researcher,,https://en.wikipedia.org/wiki/Chris_Fleming_%28TV_personality%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Chris Fleming (TV personality),wikipedia_en
+UAP-PRS-fontanadavid-0642,person,David,Fontana,researcher,,https://en.wikipedia.org/wiki/David_Fontana,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: David Fontana,wikipedia_en
+UAP-PRS-gatollarimustafa-0643,person,Mustafa,Gatollari,researcher,,https://en.wikipedia.org/wiki/Mustafa_Gatollari,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Mustafa Gatollari,wikipedia_en
+UAP-PRS-gonsalvessteve-0644,person,Steve,Gonsalves,researcher,,https://en.wikipedia.org/wiki/Steve_Gonsalves,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Steve Gonsalves,wikipedia_en
+UAP-PRS-chickengoodnight-0645,person,Goodnight,Chicken,researcher,,https://en.wikipedia.org/wiki/Goodnight_Chicken,,,aerial;disclosure,en,China,,2,,,,Wikipedia [en]: Goodnight Chicken,wikipedia_en
+UAP-PRS-granberryjulian-0646,person,Julian,Granberry,researcher,,https://en.wikipedia.org/wiki/Julian_Granberry,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Julian Granberry,wikipedia_en
+UAP-PRS-grebennikovvikto-0647,person,Viktor,Grebennikov,researcher,,https://en.wikipedia.org/wiki/Viktor_Grebennikov,,,aerial;disclosure,en,Russia,,2,,,,Wikipedia [en]: Viktor Grebennikov,wikipedia_en
+UAP-PRS-greenandrew-0648,person,Andrew,Green,researcher,,https://en.wikipedia.org/wiki/Andrew_Green_%28ghost_hunter%29,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Andrew Green (ghost hunter),wikipedia_en
+UAP-PRS-groffnick-0649,person,Nick,Groff,researcher,,https://en.wikipedia.org/wiki/Nick_Groff,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Nick Groff,wikipedia_en
+UAP-PRS-grossemaurice-0650,person,Maurice,Grosse,researcher,,https://en.wikipedia.org/wiki/Maurice_Grosse,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Maurice Grosse,wikipedia_en
+UAP-PRS-guileyrosemaryel-0651,person,Rosemary Ellen,Guiley,researcher,,https://en.wikipedia.org/wiki/Rosemary_Ellen_Guiley,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Rosemary Ellen Guiley,wikipedia_en
+UAP-PRS-stromberggustaf-0652,person,Gustaf,Strömberg,researcher,,https://en.wikipedia.org/wiki/Gustaf_Str%C3%B6mberg,,,aerial;disclosure,en,Sweden,,2,,,,Wikipedia [en]: Gustaf Strömberg,wikipedia_en
+UAP-PRS-hamiltonthomasgl-0653,person,Thomas Glendenning,Hamilton,researcher,,https://en.wikipedia.org/wiki/Thomas_Glendenning_Hamilton,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Thomas Glendenning Hamilton,wikipedia_en
+UAP-PRS-hawesjason-0654,person,Jason,Hawes,researcher,,https://en.wikipedia.org/wiki/Jason_Hawes,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Jason Hawes,wikipedia_en
+UAP-PRS-hernandezroz-0655,person,Roz,Hernandez,researcher,,https://en.wikipedia.org/wiki/Roz_Hernandez,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Roz Hernandez,wikipedia_en
+UAP-PRS-holzerhans-0656,person,Hans,Holzer,researcher,,https://en.wikipedia.org/wiki/Hans_Holzer,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Hans Holzer,wikipedia_en
+UAP-PRS-hopewilliam-0657,person,William,Hope,researcher,,https://en.wikipedia.org/wiki/William_Hope_%28paranormal_investigator%29,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: William Hope (paranormal investigator),wikipedia_en
+UAP-PRS-houdiniharry-0658,person,Harry,Houdini,researcher,,https://en.wikipedia.org/wiki/Harry_Houdini,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Harry Houdini,wikipedia_en
+UAP-PRS-kaplanstephen-0659,person,Stephen,Kaplan,researcher,,https://en.wikipedia.org/wiki/Stephen_Kaplan_%28paranormal_investigator%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Stephen Kaplan (paranormal investigator),wikipedia_en
+UAP-PRS-ladenchelsea-0660,person,Chelsea,Laden,researcher,,https://en.wikipedia.org/wiki/Chelsea_Laden,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Chelsea Laden,wikipedia_en
+UAP-PRS-mackenbergrose-0661,person,Rose,Mackenberg,researcher,,https://en.wikipedia.org/wiki/Rose_Mackenberg,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Rose Mackenberg,wikipedia_en
+UAP-PRS-madejshane-0662,person,Shane,Madej,researcher,,https://en.wikipedia.org/wiki/Shane_Madej,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Shane Madej,wikipedia_en
+UAP-PRS-matthewsrupert-0663,person,Rupert,Matthews,researcher,,https://en.wikipedia.org/wiki/Rupert_Matthews,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Rupert Matthews,wikipedia_en
+UAP-PRS-normanernest-0664,person,Ernest,Norman,researcher,,https://en.wikipedia.org/wiki/Ernest_Norman,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ernest Norman,wikipedia_en
+UAP-PRS-novellasteven-0665,person,Steven,Novella,researcher,,https://en.wikipedia.org/wiki/Steven_Novella,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Steven Novella,wikipedia_en
+UAP-PRS-okeeffeciaran-0666,person,Ciarán,O'Keeffe,researcher,,https://en.wikipedia.org/wiki/Ciar%C3%A1n_O%27Keeffe,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Ciarán O'Keeffe,wikipedia_en
+UAP-PRS-owenscraig-0667,person,Craig,Owens,researcher,,https://en.wikipedia.org/wiki/Craig_Owens_%28author%29,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Craig Owens (author),wikipedia_en
+UAP-PRS-investigatorspar-0668,person,Paranormal Site,Investigators,researcher,,https://en.wikipedia.org/wiki/Paranormal_Site_Investigators,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Paranormal Site Investigators,wikipedia_en
+UAP-PRS-paridustin-0669,person,Dustin,Pari,researcher,,https://en.wikipedia.org/wiki/Dustin_Pari,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Dustin Pari,wikipedia_en
+UAP-PRS-porsennan-0670,person,N.,Porsenna,researcher,,https://en.wikipedia.org/wiki/N._Porsenna,,,aerial;disclosure,en,Romania,,2,,,,Wikipedia [en]: N. Porsenna,wikipedia_en
+UAP-PRS-portercarmen-0671,person,Carmen,Porter,researcher,,https://en.wikipedia.org/wiki/Carmen_Porter,,,aerial;disclosure,en,Spain,,2,,,,Wikipedia [en]: Carmen Porter,wikipedia_en
+UAP-PRS-priceharry-0672,person,Harry,Price,researcher,,https://en.wikipedia.org/wiki/Harry_Price,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Harry Price,wikipedia_en
+UAP-PRS-radfordbenjamin-0673,person,Benjamin,Radford,researcher,,https://en.wikipedia.org/wiki/Benjamin_Radford,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Benjamin Radford,wikipedia_en
+UAP-PRS-randijames-0674,person,James,Randi,researcher,,https://en.wikipedia.org/wiki/James_Randi,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: James Randi,wikipedia_en
+UAP-PRS-rogodscott-0675,person,D. Scott,Rogo,researcher,,https://en.wikipedia.org/wiki/D._Scott_Rogo,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: D. Scott Rogo,wikipedia_en
+UAP-PRS-sarchieralph-0676,person,Ralph,Sarchie,researcher,,https://en.wikipedia.org/wiki/Ralph_Sarchie,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ralph Sarchie,wikipedia_en
+UAP-PRS-trespasses2012sa-0677,person,2012 Saudi Arabia mass,trespasses,researcher,,https://en.wikipedia.org/wiki/2012_Saudi_Arabia_mass_trespasses,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: 2012 Saudi Arabia mass trespasses,wikipedia_en
+UAP-PRS-steingordon-0678,person,Gordon,Stein,researcher,,https://en.wikipedia.org/wiki/Gordon_Stein,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Gordon Stein,wikipedia_en
+UAP-PRS-talleybrett-0679,person,Brett,Talley,researcher,,https://en.wikipedia.org/wiki/Brett_Talley,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Brett Talley,wikipedia_en
+UAP-PRS-tandyvic-0680,person,Vic,Tandy,researcher,,https://en.wikipedia.org/wiki/Vic_Tandy,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Vic Tandy,wikipedia_en
+UAP-PRS-tangodave-0681,person,Dave,Tango,researcher,,https://en.wikipedia.org/wiki/Dave_Tango,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Dave Tango,wikipedia_en
+UAP-PRS-thongplubkapol-0682,person,Kapol,Thongplub,researcher,,https://en.wikipedia.org/wiki/Kapol_Thongplub,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Kapol Thongplub,wikipedia_en
+UAP-PRS-tiwarigaurav-0683,person,Gaurav,Tiwari,researcher,,https://en.wikipedia.org/wiki/Gaurav_Tiwari,,,aerial;disclosure,en,India,,2,,,,Wikipedia [en]: Gaurav Tiwari,wikipedia_en
+UAP-PRS-tralinsrobert-0684,person,Robert,Tralins,researcher,,https://en.wikipedia.org/wiki/Robert_Tralins,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Robert Tralins,wikipedia_en
+UAP-PRS-underwoodpeter-0685,person,Peter,Underwood,researcher,,https://en.wikipedia.org/wiki/Peter_Underwood_%28parapsychologist%29,,,aerial;disclosure,en,UK,,2,,,,Wikipedia [en]: Peter Underwood (parapsychologist),wikipedia_en
+UAP-PRS-warrenedandlorra-0686,person,Ed and Lorraine,Warren,researcher,,https://en.wikipedia.org/wiki/Ed_and_Lorraine_Warren,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Ed and Lorraine Warren,wikipedia_en
+UAP-PRS-warrened-0687,person,Ed,Warren,researcher,,https://en.wikipedia.org/wiki/Ed_Warren,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Ed Warren,wikipedia_en
+UAP-PRS-warrenlorraine-0688,person,Lorraine,Warren,researcher,,https://en.wikipedia.org/wiki/Lorraine_Warren,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Lorraine Warren,wikipedia_en
+UAP-PRS-weidmankatrina-0689,person,Katrina,Weidman,researcher,,https://en.wikipedia.org/wiki/Katrina_Weidman,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Katrina Weidman,wikipedia_en
+UAP-PRS-williamskris-0690,person,Kris,Williams,researcher,,https://en.wikipedia.org/wiki/Kris_Williams_%28investigator%29,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: Kris Williams (investigator),wikipedia_en
+UAP-PRS-wilsongrant-0691,person,Grant,Wilson,researcher,,https://en.wikipedia.org/wiki/Grant_Wilson,,,aerial;disclosure,en,USA,,2,,,,Wikipedia [en]: Grant Wilson,wikipedia_en
+UAP-PRS-zaffisjohn-0692,person,John,Zaffis,researcher,,https://en.wikipedia.org/wiki/John_Zaffis,,,aerial;disclosure,en,,,2,,,,Wikipedia [en]: John Zaffis,wikipedia_en
+UAP-PRS-cremebenjamin-0693,person,Benjamin,Creme,researcher,,https://fr.wikipedia.org/wiki/Benjamin_Creme,,,aerial;disclosure,fr,UK,,2,,,,Wikipedia [fr]: Benjamin Creme,wikipedia_fr
+UAP-PRS-gilroyrex-0694,person,Rex,Gilroy,researcher,,https://fr.wikipedia.org/wiki/Rex_Gilroy,,,aerial;disclosure,fr,,,2,,,,Wikipedia [fr]: Rex Gilroy,wikipedia_fr
+UAP-PRS-glennrichard-0695,person,Richard,Glenn,researcher,,https://fr.wikipedia.org/wiki/Richard_Glenn,,,aerial;disclosure,fr,,,2,,,,Wikipedia [fr]: Richard Glenn,wikipedia_fr
+UAP-PRS-kernernigel-0696,person,Nigel,Kerner,researcher,,https://fr.wikipedia.org/wiki/Nigel_Kerner,,,aerial;disclosure,fr,,,2,,,,Wikipedia [fr]: Nigel Kerner,wikipedia_fr
+UAP-PRS-mutwavusamazuluc-0697,person,Vusamazulu Credo,Mutwa,researcher,,https://fr.wikipedia.org/wiki/Vusamazulu_Credo_Mutwa,,,aerial;disclosure,fr,South Africa,,2,,,,Wikipedia [fr]: Vusamazulu Credo Mutwa,wikipedia_fr
+UAP-PRS-oberthhermann-0698,person,Hermann,Oberth,researcher,,https://fr.wikipedia.org/wiki/Hermann_Oberth,,,aerial;disclosure,fr,Germany,,2,,,,Wikipedia [fr]: Hermann Oberth,wikipedia_fr
+UAP-PRS-posadasjuan-0699,person,Juan,Posadas,researcher,,https://fr.wikipedia.org/wiki/Juan_Posadas,,,aerial;disclosure,fr,Argentina,,2,,,,Wikipedia [fr]: Juan Posadas,wikipedia_fr
+UAP-PRS-scornauxjacques-0700,person,Jacques,Scornaux,researcher,,https://fr.wikipedia.org/wiki/Jacques_Scornaux,,,aerial;disclosure,fr,,,2,,,,Wikipedia [fr]: Jacques Scornaux,wikipedia_fr
+UAP-PRS-blumrichjosephf-0701,person,Joseph F.,Blumrich,researcher,,https://es.wikipedia.org/wiki/Joseph_F._Blumrich,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Joseph F. Blumrich,wikipedia_es
+UAP-PRS-brunigeorgina-0702,person,Georgina,Bruni,researcher,,https://es.wikipedia.org/wiki/Georgina_Bruni,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Georgina Bruni,wikipedia_es
+UAP-PRS-chernobrovvadim-0703,person,Vadim,Chernobrov,researcher,,https://es.wikipedia.org/wiki/Vadim_Chernobrov,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Vadim Chernobrov,wikipedia_es
+UAP-PRS-choyanthony-0704,person,Anthony,Choy,researcher,,https://es.wikipedia.org/wiki/Anthony_Choy,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Anthony Choy,wikipedia_es
+UAP-PRS-helsingjanvan-0705,person,Jan van,Helsing,researcher,,https://es.wikipedia.org/wiki/Jan_van_Helsing,,,aerial;disclosure,es,Germany,,2,,,,Wikipedia [es]: Jan van Helsing,wikipedia_es
+UAP-PRS-mutwacredo-0706,person,Credo,Mutwa,researcher,,https://es.wikipedia.org/wiki/Credo_Mutwa,,,aerial;disclosure,es,South Africa,,2,,,,Wikipedia [es]: Credo Mutwa,wikipedia_es
+UAP-PRS-riberaantonio-0707,person,Antonio,Ribera,researcher,,https://es.wikipedia.org/wiki/Antonio_Ribera,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Antonio Ribera,wikipedia_es
+UAP-PRS-rodriguezjaime-0708,person,Jaime,Rodríguez,researcher,,https://es.wikipedia.org/wiki/Jaime_Rodr%C3%ADguez_%28uf%C3%B3logo%29,,,aerial;disclosure,es,,,2,,,,Wikipedia [es]: Jaime Rodríguez (ufólogo),wikipedia_es
+UAP-PRS-sitchinzecharia-0709,person,Zecharia,Sitchin,researcher,,https://es.wikipedia.org/wiki/Zecharia_Sitchin,,,aerial;disclosure,es,USA,,2,,,,Wikipedia [es]: Zecharia Sitchin,wikipedia_es
+UAP-PRS-benitezjj-0710,person,J. J.,Benítez,researcher,,https://pt.wikipedia.org/wiki/J._J._Ben%C3%ADtez,,,aerial;disclosure,pt,,,2,,,,Wikipedia [pt]: J. J. Benítez,wikipedia_pt
+UAP-PRS-kuhlesjohn-0711,person,John,Kuhles,researcher,,https://nl.wikipedia.org/wiki/John_Kuhles,,,aerial;disclosure,nl,,,2,,,,Wikipedia [nl]: John Kuhles,wikipedia_nl
+UAP-PRS-nidlesheldan-0712,person,Sheldan,Nidle,researcher,,https://nl.wikipedia.org/wiki/Sheldan_Nidle,,,aerial;disclosure,nl,,,2,,,,Wikipedia [nl]: Sheldan Nidle,wikipedia_nl
+UAP-PRS-waterschootjohnv-0713,person,John van,Waterschoot,researcher,,https://nl.wikipedia.org/wiki/John_van_Waterschoot,,,aerial;disclosure,nl,,,2,,,,Wikipedia [nl]: John van Waterschoot,wikipedia_nl
+UAP-PRS-weverberghjulien-0714,person,Julien,Weverbergh,researcher,,https://nl.wikipedia.org/wiki/Julien_Weverbergh,,,aerial;disclosure,nl,,,2,,,,Wikipedia [nl]: Julien Weverbergh,wikipedia_nl
+UAP-PRS--0715,person,Эрих фон,Дэникен,researcher,,https://ru.wikipedia.org/wiki/%D0%94%D1%8D%D0%BD%D0%B8%D0%BA%D0%B5%D0%BD%2C_%D0%AD%D1%80%D0%B8%D1%85_%D1%84%D0%BE%D0%BD,,,aerial;disclosure,ru,Switzerland,,2,,,,"Wikipedia [ru]: Дэникен, Эрих фон",wikipedia_ru
+UAP-PRS-8-0716,person,"Бринсли, 8-й граф Кланкарти",Тренч,researcher,,https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B5%D0%BD%D1%87%2C_%D0%91%D1%80%D0%B8%D0%BD%D1%81%D0%BB%D0%B8%2C_8-%D0%B9_%D0%B3%D1%80%D0%B0%D1%84_%D0%9A%D0%BB%D0%B0%D0%BD%D0%BA%D0%B0%D1%80%D1%82%D0%B8,,,aerial;disclosure,ru,UK,,2,,,,"Wikipedia [ru]: Тренч, Бринсли, 8-й граф Кланкарти",wikipedia_ru
+UAP-PRS-friedmanstanton-0717,person,Stanton,Friedman,researcher,,https://sv.wikipedia.org/wiki/Stanton_Friedman,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Stanton Friedman,wikipedia_sv
+UAP-PRS-hjorthsune-0718,person,Sune,Hjorth,researcher,,https://sv.wikipedia.org/wiki/Sune_Hjorth,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Sune Hjorth,wikipedia_sv
+UAP-PRS-hopkinsbudd-0719,person,Budd,Hopkins,researcher,,https://sv.wikipedia.org/wiki/Budd_Hopkins,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Budd Hopkins,wikipedia_sv
+UAP-PRS-hynekjosefallen-0720,person,Josef Allen,Hynek,researcher,,https://sv.wikipedia.org/wiki/Josef_Allen_Hynek,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Josef Allen Hynek,wikipedia_sv
+UAP-PRS-keeljohna-0721,person,John A.,Keel,researcher,,https://sv.wikipedia.org/wiki/John_A._Keel,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: John A. Keel,wikipedia_sv
+UAP-PRS-lindbobg-0722,person,Bob G.,Lind,researcher,,https://sv.wikipedia.org/wiki/Bob_G._Lind,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Bob G. Lind,wikipedia_sv
+UAP-PRS-maccabeebruce-0723,person,Bruce,Maccabee,researcher,,https://sv.wikipedia.org/wiki/Bruce_Maccabee,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Bruce Maccabee,wikipedia_sv
+UAP-PRS-popenick-0724,person,Nick,Pope,researcher,,https://sv.wikipedia.org/wiki/Nick_Pope,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Nick Pope,wikipedia_sv
+UAP-PRS-seredadavid-0725,person,David,Sereda,researcher,,https://sv.wikipedia.org/wiki/David_Sereda,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: David Sereda,wikipedia_sv
+UAP-PRS-siitoinpekka-0726,person,Pekka,Siitoin,researcher,,https://sv.wikipedia.org/wiki/Pekka_Siitoin,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Pekka Siitoin,wikipedia_sv
+UAP-PRS-smithwilbertb-0727,person,Wilbert B.,Smith,researcher,,https://sv.wikipedia.org/wiki/Wilbert_B._Smith,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Wilbert B. Smith,wikipedia_sv
+UAP-PRS-stigsjoostaffan-0728,person,Staffan,Stigsjöö,researcher,,https://sv.wikipedia.org/wiki/Staffan_Stigsj%C3%B6%C3%B6,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Staffan Stigsjöö,wikipedia_sv
+UAP-PRS-valleejacques-0729,person,Jacques,Vallée,researcher,,https://sv.wikipedia.org/wiki/Jacques_Vall%C3%A9e,,,aerial;disclosure,sv,Sweden,,2,,,,Wikipedia [sv]: Jacques Vallée,wikipedia_sv
+UAP-PRS-ufologie-0730,person,,Ufologie,researcher,,https://de.wikipedia.org/wiki/Ufologie,,,aerial;disclosure,de,Germany,,2,,,,Wikipedia [de]: Ufologie,wikipedia_de
+UAP-PRS-aldebaraner-0731,person,,Aldebaraner,researcher,,https://de.wikipedia.org/wiki/Aldebaraner,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Aldebaraner,wikipedia_de
+UAP-PRS-angelholm-0732,person,,Ängelholm,researcher,,https://de.wikipedia.org/wiki/%C3%84ngelholm_%28Gemeinde%29,,,aerial;disclosure,de,Sweden,,2,,,,Wikipedia [de]: Ängelholm (Gemeinde),wikipedia_de
+UAP-PRS-aurora-0733,person,,Aurora,researcher,,https://de.wikipedia.org/wiki/Aurora_%28Projekt%29,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Aurora (Projekt),wikipedia_de
+UAP-PRS-saucerthebamboo-0734,person,The Bamboo,Saucer,researcher,,https://de.wikipedia.org/wiki/The_Bamboo_Saucer,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: The Bamboo Saucer,wikipedia_de
+UAP-PRS-1566baslerflugbl-0735,person,Basler Flugblatt von,1566,researcher,,https://de.wikipedia.org/wiki/Basler_Flugblatt_von_1566,,,aerial;disclosure,de,Switzerland,,2,,,,Wikipedia [de]: Basler Flugblatt von 1566,wikipedia_de
+UAP-PRS-benitezjuanjose-0736,person,Juan José,Benítez,researcher,,https://de.wikipedia.org/wiki/Juan_Jos%C3%A9_Ben%C3%ADtez,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Juan José Benítez,wikipedia_de
+UAP-PRS-brownmountainlic-0737,person,,Brown-Mountain-Lichter,researcher,,https://de.wikipedia.org/wiki/Brown-Mountain-Lichter,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Brown-Mountain-Lichter,wikipedia_de
+UAP-PRS-allbruderim-0738,person,Brüder im,All,researcher,,https://de.wikipedia.org/wiki/Br%C3%BCder_im_All,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Brüder im All,wikipedia_de
+UAP-PRS-caldwelljonathan-0739,person,Jonathan Edward,Caldwell,researcher,,https://de.wikipedia.org/wiki/Jonathan_Edward_Caldwell,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Jonathan Edward Caldwell,wikipedia_de
+UAP-PRS-dalnegorsk-0740,person,,Dalnegorsk,researcher,,https://de.wikipedia.org/wiki/Dalnegorsk,,,aerial;disclosure,de,China,,2,,,,Wikipedia [de]: Dalnegorsk,wikipedia_de
+UAP-PRS-elizondoluis-0741,person,Luis,Elizondo,researcher,,https://de.wikipedia.org/wiki/Luis_Elizondo,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Luis Elizondo,wikipedia_de
+UAP-PRS-auerirdischeentf-0742,person,Entführung durch,Außerirdische,researcher,,https://de.wikipedia.org/wiki/Entf%C3%BChrung_durch_Au%C3%9Ferirdische,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Entführung durch Außerirdische,wikipedia_de
+UAP-PRS-exopolitik-0743,person,,Exopolitik,researcher,,https://de.wikipedia.org/wiki/Exopolitik,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Exopolitik,wikipedia_de
+UAP-PRS-exosoziologie-0744,person,,Exosoziologie,researcher,,https://de.wikipedia.org/wiki/Exosoziologie,,,aerial;disclosure,de,UK,,2,,,,Wikipedia [de]: Exosoziologie,wikipedia_de
+UAP-PRS-untertassefliege-0745,person,Fliegende,Untertasse,researcher,,https://de.wikipedia.org/wiki/Fliegende_Untertasse,,,aerial;disclosure,de,France,,2,,,,Wikipedia [de]: Fliegende Untertasse,wikipedia_de
+UAP-PRS-foofighter-0746,person,,Foo-Fighter,researcher,,https://de.wikipedia.org/wiki/Foo-Fighter,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Foo-Fighter,wikipedia_de
+UAP-PRS-garlstedt-0747,person,,Garlstedt,researcher,,https://de.wikipedia.org/wiki/Garlstedt,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Garlstedt,wikipedia_de
+UAP-PRS-rockgiant-0748,person,Giant,Rock,researcher,,https://de.wikipedia.org/wiki/Giant_Rock,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Giant Rock,wikipedia_de
+UAP-PRS-glockedie-0749,person,Die,Glocke,researcher,,https://de.wikipedia.org/wiki/Die_Glocke_%28Pseudowissenschaft%29,,,aerial;disclosure,de,Germany,,2,,,,Wikipedia [de]: Die Glocke (Pseudowissenschaft),wikipedia_de
+UAP-PRS-grey-0750,person,,Grey,researcher,,https://de.wikipedia.org/wiki/Grey_%28Ufologie%29,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Grey (Ufologie),wikipedia_de
+UAP-PRS-woolpitdiegrunen-0751,person,Die grünen Kinder von,Woolpit,researcher,,https://de.wikipedia.org/wiki/Die_gr%C3%BCnen_Kinder_von_Woolpit,,,aerial;disclosure,de,UK,,2,,,,Wikipedia [de]: Die grünen Kinder von Woolpit,wikipedia_de
+UAP-PRS-hessdalenlichter-0752,person,,Hessdalen-Lichter,researcher,,https://de.wikipedia.org/wiki/Hessdalen-Lichter,,,aerial;disclosure,de,Italy,,2,,,,Wikipedia [de]: Hessdalen-Lichter,wikipedia_de
+UAP-PRS-hoiabaciu-0753,person,,Hoia-Baciu,researcher,,https://de.wikipedia.org/wiki/Hoia-Baciu,,,aerial;disclosure,de,Hungary,,2,,,,Wikipedia [de]: Hoia-Baciu,wikipedia_de
+UAP-PRS-kornkreis-0754,person,,Kornkreis,researcher,,https://de.wikipedia.org/wiki/Kornkreis,,,aerial;disclosure,de,UK,,2,,,,Wikipedia [de]: Kornkreis,wikipedia_de
+UAP-PRS-weltenderkriegde-0755,person,Der Krieg der,Welten,researcher,,https://de.wikipedia.org/wiki/Der_Krieg_der_Welten,,,aerial;disclosure,de,UK,,2,,,,Wikipedia [de]: Der Krieg der Welten,wikipedia_de
+UAP-PRS-12majestic-0756,person,Majestic,12,researcher,,https://de.wikipedia.org/wiki/Majestic_12,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Majestic 12,wikipedia_de
+UAP-PRS-marfalichter-0757,person,,Marfa-Lichter,researcher,,https://de.wikipedia.org/wiki/Marfa-Lichter,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Marfa-Lichter,wikipedia_de
+UAP-PRS-blackmenin-0758,person,Men in,Black,researcher,,https://de.wikipedia.org/wiki/Men_in_Black_%28Verschw%C3%B6rungstheorie%29,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Men in Black (Verschwörungstheorie),wikipedia_de
+UAP-PRS-mysteria-0759,person,,Mysteria,researcher,,https://de.wikipedia.org/wiki/Mysteria,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Mysteria,wikipedia_de
+UAP-PRS-dienachtalsdiema-0760,person,als die Marsmenschen Amerika angriffen,Die Nacht,researcher,,https://de.wikipedia.org/wiki/Die_Nacht%2C_als_die_Marsmenschen_Amerika_angriffen,,,aerial;disclosure,de,UK,,2,,,,"Wikipedia [de]: Die Nacht, als die Marsmenschen Amerika angriffen",wikipedia_de
+UAP-PRS-artnahbegegnungd-0761,person,Nahbegegnung der dritten,Art,researcher,,https://de.wikipedia.org/wiki/Nahbegegnung_der_dritten_Art,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Nahbegegnung der dritten Art,wikipedia_de
+UAP-PRS-phenomenanationa-0762,person,National Investigations Committee On Aerial,Phenomena,researcher,,https://de.wikipedia.org/wiki/National_Investigations_Committee_On_Aerial_Phenomena,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: National Investigations Committee On Aerial Phenomena,wikipedia_de
+UAP-PRS-1561nurnbergerfl-0763,person,Nürnberger Flugblatt von,1561,researcher,,https://de.wikipedia.org/wiki/N%C3%BCrnberger_Flugblatt_von_1561,,,aerial;disclosure,de,Germany,,2,,,,Wikipedia [de]: Nürnberger Flugblatt von 1561,wikipedia_de
+UAP-PRS-praastronautik-0764,person,,Prä-Astronautik,researcher,,https://de.wikipedia.org/wiki/Pr%C3%A4-Astronautik,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Prä-Astronautik,wikipedia_de
+UAP-PRS-ufoproject-0765,person,Project,U.F.O.,researcher,,https://de.wikipedia.org/wiki/Project_U.F.O.,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Project U.F.O.,wikipedia_de
+UAP-PRS-rachel-0766,person,,Rachel,researcher,,https://de.wikipedia.org/wiki/Rachel_%28Nevada%29,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Rachel (Nevada),wikipedia_de
+UAP-PRS-reichsflugscheib-0767,person,,Reichsflugscheibe,researcher,,https://de.wikipedia.org/wiki/Reichsflugscheibe,,,aerial;disclosure,de,Germany,,2,,,,Wikipedia [de]: Reichsflugscheibe,wikipedia_de
+UAP-PRS-rendleshamforest-0768,person,,Rendlesham-Forest-Zwischenfall,researcher,,https://de.wikipedia.org/wiki/Rendlesham-Forest-Zwischenfall,,,aerial;disclosure,de,UK,,2,,,,Wikipedia [de]: Rendlesham-Forest-Zwischenfall,wikipedia_de
+UAP-PRS-reptiloide-0769,person,,Reptiloide,researcher,,https://de.wikipedia.org/wiki/Reptiloide,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Reptiloide,wikipedia_de
+UAP-PRS-odenwalddasrunde-0770,person,Das runde Ding vom,Odenwald,researcher,,https://de.wikipedia.org/wiki/Das_runde_Ding_vom_Odenwald,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Das runde Ding vom Odenwald,wikipedia_de
+UAP-PRS-scullyfrank-0771,person,Frank,Scully,researcher,,https://de.wikipedia.org/wiki/Frank_Scully_%28Autor%29,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Frank Scully (Autor),wikipedia_de
+UAP-PRS-shaverrichardsha-0772,person,Richard Sharpe,Shaver,researcher,,https://de.wikipedia.org/wiki/Richard_Sharpe_Shaver,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Richard Sharpe Shaver,wikipedia_de
+UAP-PRS-spatiauxsocieteb-0773,person,Société belge d’étude des phénomènes,spatiaux,researcher,,https://de.wikipedia.org/wiki/Soci%C3%A9t%C3%A9_belge_d%E2%80%99%C3%A9tude_des_ph%C3%A9nom%C3%A8nes_spatiaux,,,aerial;disclosure,de,France,,2,,,,Wikipedia [de]: Société belge d’étude des phénomènes spatiaux,wikipedia_de
+UAP-PRS-sonnenwunder-0774,person,,Sonnenwunder,researcher,,https://de.wikipedia.org/wiki/Sonnenwunder,,,aerial;disclosure,de,Portugal,,2,,,,Wikipedia [de]: Sonnenwunder,wikipedia_de
+UAP-PRS-teufelsmeer-0775,person,,Teufelsmeer,researcher,,https://de.wikipedia.org/wiki/Teufelsmeer,,,aerial;disclosure,de,Japan,,2,,,,Wikipedia [de]: Teufelsmeer,wikipedia_de
+UAP-PRS-brinsleylepoertr-0776,person,8. Earl of Clancarty,Brinsley Le Poer Trench,researcher,,https://de.wikipedia.org/wiki/Brinsley_Le_Poer_Trench%2C_8._Earl_of_Clancarty,,,aerial;disclosure,de,UK,,2,,,,"Wikipedia [de]: Brinsley Le Poer Trench, 8. Earl of Clancarty",wikipedia_de
+UAP-PRS-breezeufowellevo-0777,person,Ufo-Welle von Gulf,Breeze,researcher,,https://de.wikipedia.org/wiki/Ufo-Welle_von_Gulf_Breeze,,,aerial;disclosure,de,USA,,2,,,,Wikipedia [de]: Ufo-Welle von Gulf Breeze,wikipedia_de
+UAP-PRS-tvexperimenturig-0778,person,Uri Geller Live: Ufos und Aliens – Das unglaubliche,TV-Experiment,researcher,,https://de.wikipedia.org/wiki/Uri_Geller_Live%3A_Ufos_und_Aliens_%E2%80%93_Das_unglaubliche_TV-Experiment,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Uri Geller Live: Ufos und Aliens – Das unglaubliche TV-Experiment,wikipedia_de
+UAP-PRS-utsurobune-0779,person,,Utsuro-bune,researcher,,https://de.wikipedia.org/wiki/Utsuro-bune,,,aerial;disclosure,de,Japan,,2,,,,Wikipedia [de]: Utsuro-bune,wikipedia_de
+UAP-PRS-vencecolde-0780,person,Col de,Vence,researcher,,https://de.wikipedia.org/wiki/Col_de_Vence,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Col de Vence,wikipedia_de
+UAP-PRS-vimana-0781,person,,Vimana,researcher,,https://de.wikipedia.org/wiki/Vimana,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Vimana,wikipedia_de
+UAP-PRS-vrilgesellschaft-0782,person,,Vril-Gesellschaft,researcher,,https://de.wikipedia.org/wiki/Vril-Gesellschaft,,,aerial;disclosure,de,Italy,,2,,,,Wikipedia [de]: Vril-Gesellschaft,wikipedia_de
+UAP-PRS-reticulizeta-0783,person,Zeta,Reticuli,researcher,,https://de.wikipedia.org/wiki/Zeta_Reticuli,,,aerial;disclosure,de,,,2,,,,Wikipedia [de]: Zeta Reticuli,wikipedia_de
+UAP-PRS-ufologia-0784,person,,Ufologia,researcher,,https://it.wikipedia.org/wiki/Ufologia,,,aerial;disclosure,it,Germany,,2,,,,Wikipedia [it]: Ufologia,wikipedia_it
+UAP-PRS-aeronave-0785,person,,Aeronave,researcher,,https://it.wikipedia.org/wiki/Aeronave_%28ufologia%29,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Aeronave (ufologia),wikipedia_it
+UAP-PRS-disclosuretheage-0786,person,The Age of,Disclosure,researcher,,https://it.wikipedia.org/wiki/The_Age_of_Disclosure,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: The Age of Disclosure,wikipedia_it
+UAP-PRS-alesenka-0787,person,,Alëšenka,researcher,,https://it.wikipedia.org/wiki/Al%C3%AB%C5%A1enka,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Alëšenka,wikipedia_it
+UAP-PRS-balticoanomaliad-0788,person,Anomalia del Mar,Baltico,researcher,,https://it.wikipedia.org/wiki/Anomalia_del_Mar_Baltico,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Anomalia del Mar Baltico,wikipedia_it
+UAP-PRS-misteriosaarcheo-0789,person,Archeologia,misteriosa,researcher,,https://it.wikipedia.org/wiki/Archeologia_misteriosa,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Archeologia misteriosa,wikipedia_it
+UAP-PRS-solwayastronauta-0790,person,Astronauta di,Solway,researcher,,https://it.wikipedia.org/wiki/Astronauta_di_Solway,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Astronauta di Solway,wikipedia_it
+UAP-PRS-siliceabambagia-0791,person,Bambagia,silicea,researcher,,https://it.wikipedia.org/wiki/Bambagia_silicea,,,aerial;disclosure,it,Italy,,2,,,,Wikipedia [it]: Bambagia silicea,wikipedia_it
+UAP-PRS-terrabase-0792,person,Base,Terra,researcher,,https://it.wikipedia.org/wiki/Base_Terra,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Base Terra,wikipedia_it
+UAP-PRS-washingtoncarose-0793,person,Carosello di,Washington,researcher,,https://it.wikipedia.org/wiki/Carosello_di_Washington,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Carosello di Washington,wikipedia_it
+UAP-PRS-spatialescentren-0794,person,Centre national d'études,spatiales,researcher,,https://it.wikipedia.org/wiki/Centre_national_d%27%C3%A9tudes_spatiales,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Centre national d'études spatiales,wikipedia_it
+UAP-PRS-granocerchinel-0795,person,Cerchi nel,grano,researcher,,https://it.wikipedia.org/wiki/Cerchi_nel_grano,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Cerchi nel grano,wikipedia_it
+UAP-PRS-valleeclassifica-0796,person,Classificazione,Vallée,researcher,,https://it.wikipedia.org/wiki/Classificazione_Vall%C3%A9e,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Classificazione Vallée,wikipedia_it
+UAP-PRS-clipeologia-0797,person,,Clipeologia,researcher,,https://it.wikipedia.org/wiki/Clipeologia,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Clipeologia,wikipedia_it
+UAP-PRS-committeecondon-0798,person,Condon,Committee,researcher,,https://it.wikipedia.org/wiki/Condon_Committee,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Condon Committee,wikipedia_it
+UAP-PRS-contattista-0799,person,,Contattista,researcher,,https://it.wikipedia.org/wiki/Contattista,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Contattista,wikipedia_it
+UAP-PRS-coppensphilip-0800,person,Philip,Coppens,researcher,,https://it.wikipedia.org/wiki/Philip_Coppens,,,aerial;disclosure,it,Belgium,,2,,,,Wikipedia [it]: Philip Coppens,wikipedia_it
+UAP-PRS-aprieilcielosi-0801,person,...E il cielo si,aprì,researcher,,https://it.wikipedia.org/wiki/...E_il_cielo_si_apr%C3%AC,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: ...E il cielo si aprì,wikipedia_it
+UAP-PRS-ebanis-0802,person,,EBANIS,researcher,,https://it.wikipedia.org/wiki/EBANIS,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: EBANIS,wikipedia_it
+UAP-PRS-alienienigmi-0803,person,Enigmi,alieni,researcher,,https://it.wikipedia.org/wiki/Enigmi_alieni,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Enigmi alieni,wikipedia_it
+UAP-PRS-extraterrestre-0804,person,,Extraterrestre,researcher,,https://it.wikipedia.org/wiki/Extraterrestre,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Extraterrestre,wikipedia_it
+UAP-PRS-tornerannogliext-0805,person,Gli extraterrestri,torneranno,researcher,,https://it.wikipedia.org/wiki/Gli_extraterrestri_torneranno_%28film%29,,,aerial;disclosure,it,Germany,,2,,,,Wikipedia [it]: Gli extraterrestri torneranno (film),wikipedia_it
+UAP-PRS-ufologiafalsific-0806,person,Falsificazioni in,ufologia,researcher,,https://it.wikipedia.org/wiki/Falsificazioni_in_ufologia,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Falsificazioni in ufologia,wikipedia_it
+UAP-PRS-basileafenomenoc-0807,person,Fenomeno celeste di,Basilea,researcher,,https://it.wikipedia.org/wiki/Fenomeno_celeste_di_Basilea,,,aerial;disclosure,it,Switzerland,,2,,,,Wikipedia [it]: Fenomeno celeste di Basilea,wikipedia_it
+UAP-PRS-biancafratellanz-0808,person,Fratellanza,Bianca,researcher,,https://it.wikipedia.org/wiki/Fratellanza_Bianca,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Fratellanza Bianca,wikipedia_it
+UAP-PRS-geipan-0809,person,,GEIPAN,researcher,,https://it.wikipedia.org/wiki/GEIPAN,,,aerial;disclosure,it,France,,2,,,,Wikipedia [it]: GEIPAN,wikipedia_it
+UAP-PRS-robertsongiuri-0810,person,Giurì,Robertson,researcher,,https://it.wikipedia.org/wiki/Giur%C3%AC_Robertson,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Giurì Robertson,wikipedia_it
+UAP-PRS-kellyhopkinsvill-0811,person,Goblin di,Kelly-Hopkinsville,researcher,,https://it.wikipedia.org/wiki/Goblin_di_Kelly-Hopkinsville,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Goblin di Kelly-Hopkinsville,wikipedia_it
+UAP-PRS-fireballsgreen-0812,person,Green,fireballs,researcher,,https://it.wikipedia.org/wiki/Green_fireballs,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Green fireballs,wikipedia_it
+UAP-PRS-magentaincidente-0813,person,Incidente di,Magenta,researcher,,https://it.wikipedia.org/wiki/Incidente_di_Magenta,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Incidente di Magenta,wikipedia_it
+UAP-PRS-mantellincidente-0814,person,Incidente di Thomas,Mantell,researcher,,https://it.wikipedia.org/wiki/Incidente_di_Thomas_Mantell,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Incidente di Thomas Mantell,wikipedia_it
+UAP-PRS-ravvicinatoincon-0815,person,Incontro,ravvicinato,researcher,,https://it.wikipedia.org/wiki/Incontro_ravvicinato,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Incontro ravvicinato,wikipedia_it
+UAP-PRS-vrilloninterfere-0816,person,Interferenza di,Vrillon,researcher,,https://it.wikipedia.org/wiki/Interferenza_di_Vrillon,,,aerial;disclosure,it,UK,,2,,,,Wikipedia [it]: Interferenza di Vrillon,wikipedia_it
+UAP-PRS-unitinterplaneta-0817,person,Interplanetary Phenomenon,Unit,researcher,,https://it.wikipedia.org/wiki/Interplanetary_Phenomenon_Unit,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Interplanetary Phenomenon Unit,wikipedia_it
+UAP-PRS-alienainvasione-0818,person,Invasione,aliena,researcher,,https://it.wikipedia.org/wiki/Invasione_aliena,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Invasione aliena,wikipedia_it
+UAP-PRS-magneticoipotesi-0819,person,Ipotesi del campo,magnetico,researcher,,https://it.wikipedia.org/wiki/Ipotesi_del_campo_magnetico,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Ipotesi del campo magnetico,wikipedia_it
+UAP-PRS-extraterrestreip-0820,person,Ipotesi,extraterrestre,researcher,,https://it.wikipedia.org/wiki/Ipotesi_extraterrestre,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Ipotesi extraterrestre,wikipedia_it
+UAP-PRS-marfalucidi-0821,person,Luci di,Marfa,researcher,,https://it.wikipedia.org/wiki/Luci_di_Marfa,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Luci di Marfa,wikipedia_it
+UAP-PRS-magonia-0822,person,,Magonia,researcher,,https://it.wikipedia.org/wiki/Magonia_%28folclore%29,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Magonia (folclore),wikipedia_it
+UAP-PRS-mir-0823,person,,MIR,researcher,,https://it.wikipedia.org/wiki/MIR_%28Men_in_Red%29,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: MIR (Men in Red),wikipedia_it
+UAP-PRS-timemissing-0824,person,Missing,time,researcher,,https://it.wikipedia.org/wiki/Missing_time,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Missing time,wikipedia_it
+UAP-PRS-sirioilmisterodi-0825,person,Il mistero di,Sirio,researcher,,https://it.wikipedia.org/wiki/Il_mistero_di_Sirio,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Il mistero di Sirio,wikipedia_it
+UAP-PRS-flatwoodsmostrod-0826,person,Mostro di,Flatwoods,researcher,,https://it.wikipedia.org/wiki/Mostro_di_Flatwoods,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Mostro di Flatwoods,wikipedia_it
+UAP-PRS-bestiamemutilazi-0827,person,Mutilazione del,bestiame,researcher,,https://it.wikipedia.org/wiki/Mutilazione_del_bestiame,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Mutilazione del bestiame,wikipedia_it
+UAP-PRS-nefilim-0828,person,,Nefilim,researcher,,https://it.wikipedia.org/wiki/Nefilim,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Nefilim,wikipedia_it
+UAP-PRS-basenellisairfor-0829,person,Nellis Air Force,Base,researcher,,https://it.wikipedia.org/wiki/Nellis_Air_Force_Base,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Nellis Air Force Base,wikipedia_it
+UAP-PRS-identificatoogge-0830,person,Oggetto sottomarino non,identificato,researcher,,https://it.wikipedia.org/wiki/Oggetto_sottomarino_non_identificato,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Oggetto sottomarino non identificato,wikipedia_it
+UAP-PRS-pratooperazione-0831,person,Operazione,Prato,researcher,,https://it.wikipedia.org/wiki/Operazione_Prato,,,aerial;disclosure,it,Portugal,,2,,,,Wikipedia [it]: Operazione Prato,wikipedia_it
+UAP-PRS-orb-0832,person,,Orb,researcher,,https://it.wikipedia.org/wiki/Orb_%28fenomeno%29,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Orb (fenomeno),wikipedia_it
+UAP-PRS-ortotenia-0833,person,,Ortotenia,researcher,,https://it.wikipedia.org/wiki/Ortotenia,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Ortotenia,wikipedia_it
+UAP-PRS-palmerraymonda-0834,person,Raymond A.,Palmer,researcher,,https://it.wikipedia.org/wiki/Raymond_A._Palmer,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Raymond A. Palmer,wikipedia_it
+UAP-PRS-tullipapiro-0835,person,Papiro,Tulli,researcher,,https://it.wikipedia.org/wiki/Papiro_Tulli,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Papiro Tulli,wikipedia_it
+UAP-PRS-extraterrestripr-0836,person,Presunte creature,extraterrestri,researcher,,https://it.wikipedia.org/wiki/Presunte_creature_extraterrestri,,,aerial;disclosure,it,Russia,,2,,,,Wikipedia [it]: Presunte creature extraterrestri,wikipedia_it
+UAP-PRS-bookprogettoblue-0837,person,Progetto Blue,Book,researcher,,https://it.wikipedia.org/wiki/Progetto_Blue_Book,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Progetto Blue Book,wikipedia_it
+UAP-PRS-grudgeprogetto-0838,person,Progetto,Grudge,researcher,,https://it.wikipedia.org/wiki/Progetto_Grudge,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Progetto Grudge,wikipedia_it
+UAP-PRS-signprogetto-0839,person,Progetto,Sign,researcher,,https://it.wikipedia.org/wiki/Progetto_Sign,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Progetto Sign,wikipedia_it
+UAP-PRS-setkaprogramma-0840,person,Programma,Setka,researcher,,https://it.wikipedia.org/wiki/Programma_Setka,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Programma Setka,wikipedia_it
+UAP-PRS-cityrainbow-0841,person,Rainbow,City,researcher,,https://it.wikipedia.org/wiki/Rainbow_City_%28luogo_immaginario%29,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Rainbow City (luogo immaginario),wikipedia_it
+UAP-PRS-alienorapimento-0842,person,Rapimento,alieno,researcher,,https://it.wikipedia.org/wiki/Rapimento_alieno,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Rapimento alieno,wikipedia_it
+UAP-PRS-cometarapporto-0843,person,Rapporto,COMETA,researcher,,https://it.wikipedia.org/wiki/Rapporto_COMETA,,,aerial;disclosure,it,France,,2,,,,Wikipedia [it]: Rapporto COMETA,wikipedia_it
+UAP-PRS-fantasmarazzi-0844,person,Razzi,fantasma,researcher,,https://it.wikipedia.org/wiki/Razzi_fantasma,,,aerial;disclosure,it,Sweden,,2,,,,Wikipedia [it]: Razzi fantasma,wikipedia_it
+UAP-PRS-knightsatelliteb-0845,person,Satellite Black,Knight,researcher,,https://it.wikipedia.org/wiki/Satellite_Black_Knight,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Satellite Black Knight,wikipedia_it
+UAP-PRS-seti-0846,person,,SETI,researcher,,https://it.wikipedia.org/wiki/SETI,,,aerial;disclosure,it,Russia,,2,,,,Wikipedia [it]: SETI,wikipedia_it
+UAP-PRS-bugasferadi-0847,person,Sfera di,Buga,researcher,,https://it.wikipedia.org/wiki/Sfera_di_Buga,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Sfera di Buga,wikipedia_it
+UAP-PRS-shiranui-0848,person,,Shiranui,researcher,,https://it.wikipedia.org/wiki/Shiranui,,,aerial;disclosure,it,Japan,,2,,,,Wikipedia [it]: Shiranui,wikipedia_it
+UAP-PRS-shgb0214asorgent-0849,person,Sorgente radio,SHGb02+14a,researcher,,https://it.wikipedia.org/wiki/Sorgente_radio_SHGb02%2B14a,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Sorgente radio SHGb02+14a,wikipedia_it
+UAP-PRS-astronautiteoria-0850,person,Teoria degli antichi,astronauti,researcher,,https://it.wikipedia.org/wiki/Teoria_degli_antichi_astronauti,,,aerial;disclosure,it,USA,,2,,,,Wikipedia [it]: Teoria degli antichi astronauti,wikipedia_it
+UAP-PRS-rettilianoteoria-0851,person,Teoria del complotto,rettiliano,researcher,,https://it.wikipedia.org/wiki/Teoria_del_complotto_rettiliano,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Teoria del complotto rettiliano,wikipedia_it
+UAP-PRS-benningtontriang-0852,person,Triangolo di,Bennington,researcher,,https://it.wikipedia.org/wiki/Triangolo_di_Bennington,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Triangolo di Bennington,wikipedia_it
+UAP-PRS-radicaleufologia-0853,person,Ufologia,radicale,researcher,,https://it.wikipedia.org/wiki/Ufologia_radicale,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Ufologia radicale,wikipedia_it
+UAP-PRS-ummo-0854,person,,Ummo,researcher,,https://it.wikipedia.org/wiki/Ummo,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Ummo,wikipedia_it
+UAP-PRS-shastravaimanika-0855,person,Vaimanika,Shastra,researcher,,https://it.wikipedia.org/wiki/Vaimanika_Shastra,,,aerial;disclosure,it,India,,2,,,,Wikipedia [it]: Vaimanika Shastra,wikipedia_it
+UAP-PRS-extratemporalivi-0856,person,Viaggiatori,extratemporali,researcher,,https://it.wikipedia.org/wiki/Viaggiatori_extratemporali,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Viaggiatori extratemporali,wikipedia_it
+UAP-PRS-vril-0857,person,,Vril,researcher,,https://it.wikipedia.org/wiki/Vril,,,aerial;disclosure,it,Italy,,2,,,,Wikipedia [it]: Vril,wikipedia_it
+UAP-PRS-xenoarcheologia-0858,person,,Xenoarcheologia,researcher,,https://it.wikipedia.org/wiki/Xenoarcheologia,,,aerial;disclosure,it,,,2,,,,Wikipedia [it]: Xenoarcheologia,wikipedia_it
+UAP-PRS-kosmityautopsja-0859,person,Autopsja,kosmity,researcher,,https://pl.wikipedia.org/wiki/Autopsja_kosmity,,,aerial;disclosure,pl,USA,,2,,,,Wikipedia [pl]: Autopsja kosmity,wikipedia_pl
+UAP-PRS-trojkatyczarne-0860,person,Czarne,trójkąty,researcher,,https://pl.wikipedia.org/wiki/Czarne_tr%C3%B3jk%C4%85ty,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Czarne trójkąty,wikipedia_pl
+UAP-PRS-rycerzczarny-0861,person,Czarny,Rycerz,researcher,,https://pl.wikipedia.org/wiki/Czarny_Rycerz_%28teoria_spiskowa%29,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Czarny Rycerz (teoria spiskowa),wikipedia_pl
+UAP-PRS-emilcin-0862,person,,Emilcin,researcher,,https://pl.wikipedia.org/wiki/Emilcin,,,aerial;disclosure,pl,Poland,,2,,,,Wikipedia [pl]: Emilcin,wikipedia_pl
+UAP-PRS-dzieckogwiezdne-0863,person,Gwiezdne,dziecko,researcher,,https://pl.wikipedia.org/wiki/Gwiezdne_dziecko_%28czaszka%29,,,aerial;disclosure,pl,Mexico,,2,,,,Wikipedia [pl]: Gwiezdne dziecko (czaszka),wikipedia_pl
+UAP-PRS-atakamahumanoidz-0864,person,Humanoid z pustyni,Atakama,researcher,,https://pl.wikipedia.org/wiki/Humanoid_z_pustyni_Atakama,,,aerial;disclosure,pl,Spain,,2,,,,Wikipedia [pl]: Humanoid z pustyni Atakama,wikipedia_pl
+UAP-PRS-meduzakosmiczna-0865,person,Kosmiczna,meduza,researcher,,https://pl.wikipedia.org/wiki/Kosmiczna_meduza,,,aerial;disclosure,pl,France,,2,,,,Wikipedia [pl]: Kosmiczna meduza,wikipedia_pl
+UAP-PRS-twarzmarsjanska-0866,person,Marsjańska,Twarz,researcher,,https://pl.wikipedia.org/wiki/Marsja%C5%84ska_Twarz,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Marsjańska Twarz,wikipedia_pl
+UAP-PRS-nexus-0867,person,,Nexus,researcher,,https://pl.wikipedia.org/wiki/Nexus_%28czasopismo%29,,,aerial;disclosure,pl,UK,,2,,,,Wikipedia [pl]: Nexus (czasopismo),wikipedia_pl
+UAP-PRS-swiatnieznany-0868,person,Nieznany,Świat,researcher,,https://pl.wikipedia.org/wiki/Nieznany_%C5%9Awiat,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Nieznany Świat,wikipedia_pl
+UAP-PRS-blueoutofthe-0869,person,Out of the,Blue,researcher,,https://pl.wikipedia.org/wiki/Out_of_the_Blue_%28film_2003%29,,,aerial;disclosure,pl,UK,,2,,,,Wikipedia [pl]: Out of the Blue (film 2003),wikipedia_pl
+UAP-PRS-paleoastronautyk-0870,person,,Paleoastronautyka,researcher,,https://pl.wikipedia.org/wiki/Paleoastronautyka,,,aerial;disclosure,pl,USA,,2,,,,Wikipedia [pl]: Paleoastronautyka,wikipedia_pl
+UAP-PRS-grudgeproject-0871,person,Project,Grudge,researcher,,https://pl.wikipedia.org/wiki/Project_Grudge,,,aerial;disclosure,pl,USA,,2,,,,Wikipedia [pl]: Project Grudge,wikipedia_pl
+UAP-PRS-signproject-0872,person,Project,Sign,researcher,,https://pl.wikipedia.org/wiki/Project_Sign,,,aerial;disclosure,pl,USA,,2,,,,Wikipedia [pl]: Project Sign,wikipedia_pl
+UAP-PRS-pozaziemskichrae-0873,person,Raeliańska Ambasada dla Istot,Pozaziemskich,researcher,,https://pl.wikipedia.org/wiki/Raelia%C5%84ska_Ambasada_dla_Istot_Pozaziemskich,,,aerial;disclosure,pl,France,,2,,,,Wikipedia [pl]: Raeliańska Ambasada dla Istot Pozaziemskich,wikipedia_pl
+UAP-PRS-rods-0874,person,,Rods,researcher,,https://pl.wikipedia.org/wiki/Rods,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Rods,wikipedia_pl
+UAP-PRS-varginha-0875,person,,Varginha,researcher,,https://pl.wikipedia.org/wiki/Varginha,,,aerial;disclosure,pl,Portugal,,2,,,,Wikipedia [pl]: Varginha,wikipedia_pl
+UAP-PRS-wylatowo-0876,person,,Wylatowo,researcher,,https://pl.wikipedia.org/wiki/Wylatowo,,,aerial;disclosure,pl,Poland,,2,,,,Wikipedia [pl]: Wylatowo,wikipedia_pl
+UAP-PRS-waltonazaginieci-0877,person,Zaginięcie Travisa,Waltona,researcher,,https://pl.wikipedia.org/wiki/Zagini%C4%99cie_Travisa_Waltona,,,aerial;disclosure,pl,USA,,2,,,,Wikipedia [pl]: Zaginięcie Travisa Waltona,wikipedia_pl
+UAP-PRS-ogniazielonekule-0878,person,Zielone kule,ognia,researcher,,https://pl.wikipedia.org/wiki/Zielone_kule_ognia,,,aerial;disclosure,pl,,,2,,,,Wikipedia [pl]: Zielone kule ognia,wikipedia_pl
+UAP-PRS-ziemizjawiskaswi-0879,person,Zjawiska świetlne podczas trzęsienia,ziemi,researcher,,https://pl.wikipedia.org/wiki/Zjawiska_%C5%9Bwietlne_podczas_trz%C4%99sienia_ziemi,,,aerial;disclosure,pl,China,,2,,,,Wikipedia [pl]: Zjawiska świetlne podczas trzęsienia ziemi,wikipedia_pl
