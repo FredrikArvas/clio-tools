@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Form view -->
+  <record id="view_clio_theme_config_form" model="ir.ui.view">
+    <field name="name">clio.theme.config.form</field>
+    <field name="model">clio.theme.config</field>
+    <field name="arch" type="xml">
+      <form string="Clio Temainställningar">
+        <sheet>
+          <group string="Navigering (Navbar)">
+            <field name="navbar_bg"/>
+            <field name="navbar_border"/>
+            <field name="navbar_text"/>
+          </group>
+          <group string="Vänstermeny (Sidebar)">
+            <field name="sidebar_bg"/>
+            <field name="sidebar_text"/>
+          </group>
+          <group string="Accentfärg (knappar, rubriker, länkar)">
+            <field name="primary_color"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- List view (behövs för att kunna skapa första record) -->
+  <record id="view_clio_theme_config_list" model="ir.ui.view">
+    <field name="name">clio.theme.config.list</field>
+    <field name="model">clio.theme.config</field>
+    <field name="arch" type="xml">
+      <list string="Clio Temainställningar">
+        <field name="navbar_bg"/>
+        <field name="primary_color"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- Action -->
+  <record id="action_clio_theme_config" model="ir.actions.act_window">
+    <field name="name">Temainställningar</field>
+    <field name="res_model">clio.theme.config</field>
+    <field name="view_mode">list,form</field>
+    <field name="target">current</field>
+  </record>
+
+  <!-- Toppnivåmeny Clio (bara för systemadmins) -->
+  <menuitem id="menu_clio_root"
+            name="Clio"
+            sequence="99"
+            groups="base.group_system"/>
+  <menuitem id="menu_clio_theme"
+            name="Temainställningar"
+            parent="menu_clio_root"
+            action="action_clio_theme_config"
+            sequence="10"/>
+
+</odoo>

@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+  <!-- Injicerar data-db på body för CSS-selektorer -->
   <template id="clio_theme_body_db" inherit_id="web.layout" name="Clio Theme DB Marker">
     <xpath expr="//body" position="attributes">
       <attribute name="t-att-data-db">request.db</attribute>
+    </xpath>
+  </template>
+
+  <!-- Injicerar CSS-variabler från databas-inställningar i <head> -->
+  <template id="clio_theme_vars" inherit_id="web.layout" name="Clio Theme CSS Vars">
+    <xpath expr="//head" position="inside">
+      <t t-set="clio_theme" t-value="request.env['clio.theme.config'].sudo().search([], limit=1)"/>
+      <t t-if="clio_theme and (clio_theme.navbar_bg or clio_theme.primary_color or clio_theme.sidebar_bg)">
+        <style>
+          body[data-db="<t t-esc="request.db or ''"/>"] {
+            <t t-if="clio_theme.navbar_bg">--clio-nav-bg: <t t-esc="clio_theme.navbar_bg"/>;</t>
+            <t t-if="clio_theme.navbar_border">--clio-nav-border: <t t-esc="clio_theme.navbar_border"/>;</t>
+            <t t-if="clio_theme.navbar_text">--clio-nav-text: <t t-esc="clio_theme.navbar_text"/>;</t>
+            <t t-if="clio_theme.sidebar_bg">--clio-sidebar-bg: <t t-esc="clio_theme.sidebar_bg"/>;</t>
+            <t t-if="clio_theme.sidebar_text">--clio-sidebar-text: <t t-esc="clio_theme.sidebar_text"/>;</t>
+            <t t-if="clio_theme.primary_color">
+              --clio-primary: <t t-esc="clio_theme.primary_color"/>;
+              --o-brand-primary: <t t-esc="clio_theme.primary_color"/>;
+              --o-brand-action: <t t-esc="clio_theme.primary_color"/>;
+            </t>
+          }
+        </style>
+      </t>
     </xpath>
   </template>
 
