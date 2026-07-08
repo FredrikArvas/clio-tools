@@ -109,7 +109,7 @@ def format_context(hits: list, is_ncc: bool = False) -> str:
     for i, hit in enumerate(hits, 1):
         p          = hit.payload
         title      = p.get("title", "Okänd")
-        summary    = p.get("summary", "")
+        summary    = p.get("summary") or p.get("text", "")  # clio-vigil (vigil_ufo/vigil_ai) sparar chunk-text som "text", inte "summary"
         if is_ncc:
             source = title
         else:
