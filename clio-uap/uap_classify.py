@@ -1,24 +1,47 @@
-"""uap_classify.py — Klassificerar clio.media.article efter UAP-relevans via Claude."""
+"""uap_classify.py — Klassificerar clio.media.article efter UAP-relevans via Claude.
+
+Använder claude-CLI:t (subprocess, prenumerationsbaserat) — inte anthropic-SDK:t —
+så att bulk-klassificeringen inte drar separata API-tokens.
+"""
 
 from __future__ import annotations
 
 import json
 import logging
-import re
+import subprocess
 import time
 
-import config
 from odoo_sync import get_env
 
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 50
-MAX_BATCHES_PER_RUN = 10       # hårt tak: max 500 artiklar/körning
-MAX_RUNTIME_SECONDS = 20 * 60  # hårt tak: avbryt efter 20 min oavsett
-MAX_TOKENS = 2048
+MAX_BATCHES_PER_RUN = 10        # hårt tak: max 500 artiklar/körning
+MAX_RUNTIME_SECONDS = 20 * 60   # hårt tak: avbryt efter 20 min oavsett
+CLAUDE_TIMEOUT_SECONDS = 120    # hårt tak per claude-anrop
+CLAUDE_MODEL_CLI = "sonnet"
+
+_VALID_CLASSES = ("confirmed", "likely", "uncertain", "off_topic")
+
+_JSON_SCHEMA = json.dumps({
+    "type": "object",
+    "properties": {
+        "classifications": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "relevance_class": {"type": "string", "enum": list(_VALID_CLASSES)},
+                },
+                "required": ["id", "relevance_class"],
+            },
+        },
+    },
+    "required": ["classifications"],
+})
 
 _PROMPT_TEMPLATE = """Klassificera artiklarna nedan efter UAP-relevans.
-Svara ENBART med en JSON-array: [{{"id": 123, "relevance_class": "confirmed"}}, ...]
 
 Tillåtna värden:
   confirmed  - nämner kända fall: AARO, Grusch, Nimitz, GOFAST, GIMBAL, Rendlesham,
@@ -33,10 +56,7 @@ Artiklar:
 
 
 def classify_unclassified(dry_run: bool = False) -> int:
-    import anthropic
-
     env = get_env()
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
     Article = env["clio.media.article"]
 
     start = time.monotonic()
@@ -56,7 +76,7 @@ def classify_unclassified(dry_run: bool = False) -> int:
             logger.info("[uap_classify] Inga fler oklassificerade artiklar.")
             break
 
-        results = _classify_batch(client, rows)
+        results = _classify_batch(rows)
         if not results:
             logger.warning(
                 "[uap_classify] Batch %d gav inget resultat — avbryter (undviker oändlig loop)",
@@ -73,7 +93,7 @@ def classify_unclassified(dry_run: bool = False) -> int:
     return total
 
 
-def _classify_batch(client, rows: list[dict]) -> list[dict]:
+def _classify_batch(rows: list[dict]) -> list[dict]:
     articles_json = json.dumps(
         [{"id": r["id"], "title": r.get("title") or "",
           "snippet": (r.get("body_snippet") or "")[:300]} for r in rows],
@@ -82,33 +102,45 @@ def _classify_batch(client, rows: list[dict]) -> list[dict]:
     prompt = _PROMPT_TEMPLATE.format(articles_json=articles_json)
 
     try:
-        msg = client.messages.create(
-            model=config.CLAUDE_MODEL, max_tokens=MAX_TOKENS,
-            messages=[{"role": "user", "content": prompt}],
+        proc = subprocess.run(
+            ["claude", "--print", "--model", CLAUDE_MODEL_CLI,
+             "--output-format", "json", "--json-schema", _JSON_SCHEMA, prompt],
+            capture_output=True, text=True, timeout=CLAUDE_TIMEOUT_SECONDS,
         )
-        raw = msg.content[0].text
-    except Exception as e:
-        logger.warning("[uap_classify] Claude-anrop misslyckades: %s", e)
+    except subprocess.TimeoutExpired:
+        logger.warning("[uap_classify] claude-CLI tog för lång tid (>%ds)", CLAUDE_TIMEOUT_SECONDS)
+        return []
+    except FileNotFoundError:
+        logger.warning("[uap_classify] claude-CLI hittades inte i PATH")
         return []
 
-    return _parse_response(raw, valid_ids={r["id"] for r in rows})
+    if proc.returncode != 0:
+        logger.warning("[uap_classify] claude-CLI avslutade med kod %d: %s",
+                        proc.returncode, proc.stderr[:300])
+        return []
+
+    return _parse_response(proc.stdout, valid_ids={r["id"] for r in rows})
 
 
 def _parse_response(raw: str, valid_ids: set[int]) -> list[dict]:
-    match = re.search(r"\[.*\]", raw, re.DOTALL)
-    if not match:
-        logger.warning("[uap_classify] Inget JSON-block hittades i svaret")
-        return []
     try:
-        parsed = json.loads(match.group())
+        envelope = json.loads(raw)
     except json.JSONDecodeError as e:
-        logger.warning("[uap_classify] JSON-parsning misslyckades: %s", e)
+        logger.warning("[uap_classify] Kunde inte tolka claude-CLI:ts JSON-kuvert: %s", e)
         return []
 
-    valid_classes = {"confirmed", "likely", "uncertain", "off_topic"}
+    if envelope.get("is_error"):
+        logger.warning("[uap_classify] claude-CLI rapporterade fel: %s", envelope.get("result"))
+        return []
+
+    parsed = (envelope.get("structured_output") or {}).get("classifications")
+    if not parsed:
+        logger.warning("[uap_classify] Inget structured_output i svaret")
+        return []
+
     return [
         r for r in parsed
-        if r.get("id") in valid_ids and r.get("relevance_class") in valid_classes
+        if r.get("id") in valid_ids and r.get("relevance_class") in _VALID_CLASSES
     ]
 
 
