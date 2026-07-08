@@ -1,25 +1,25 @@
 // ── AIAB — Navy/Guld ─────────────────────────────────────────────────────────
 body[data-db="aiab"] .o_main_navbar {
-    background-color: #2A3F6F !important;
-    border-bottom-color: #C8A84B !important;
+    background-color: var(--clio-nav-bg, #2A3F6F) !important;
+    border-bottom-color: var(--clio-nav-border, #C8A84B) !important;
 
-    .o_menu_brand { color: #C8A84B !important; }
+    .o_menu_brand { color: var(--clio-nav-text, #C8A84B) !important; }
 
     .o_navbar_apps_menu .dropdown-toggle,
     .o_main_navbar > ul > li > a,
-    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+    .o_main_navbar > ul > li > span { color: var(--clio-nav-text, #ffffff) !important; }
 }
 
 // ── SSF — Teal ───────────────────────────────────────────────────────────────
 body[data-db^="ssf"] .o_main_navbar {
-    background-color: #1a6e6e !important;
-    border-bottom-color: #14a89e !important;
+    background-color: var(--clio-nav-bg, #1a6e6e) !important;
+    border-bottom-color: var(--clio-nav-border, #14a89e) !important;
 
-    .o_menu_brand { color: #d4f0ee !important; }
+    .o_menu_brand { color: var(--clio-nav-text, #d4f0ee) !important; }
 
     .o_navbar_apps_menu .dropdown-toggle,
     .o_main_navbar > ul > li > a,
-    .o_main_navbar > ul > li > span { color: #ffffff !important; }
+    .o_main_navbar > ul > li > span { color: var(--clio-nav-text, #ffffff) !important; }
 }
 
 // ── TEST/DEMO — Orange varning ────────────────────────────────────────────────
@@ -78,4 +78,27 @@ body[data-db$="_staging"] .o_main_navbar {
         border-radius: 3px;
         pointer-events: none;
     }
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+// Appliceras bara när CSS-variablerna är satta via databas-inställningarna
+body[data-db] .o_action_manager .o_list_view,
+body[data-db] .o_nav_entry {
+    color: var(--clio-sidebar-text) !important;
+}
+body[data-db] .o_main_navbar ~ .o_action_manager {
+    background-color: var(--clio-sidebar-bg) !important;
+}
+
+// ── Primärfärg: knappar ───────────────────────────────────────────────────────
+// Gäller när --clio-primary är satt (via injicerad <style> i head)
+body[data-db] .btn-primary {
+    background-color: var(--clio-primary) !important;
+    border-color: var(--clio-primary) !important;
+}
+
+// ── Primärfärg: formulärrubriker ─────────────────────────────────────────────
+body[data-db] .o_form_view .o_wrap_field > label,
+body[data-db] .breadcrumb-item.active {
+    color: var(--clio-primary) !important;
 }
