@@ -38,6 +38,7 @@ STATES = [
     "filtered_in",
     "filtered_out",
     "queued",
+    "downloaded",     # Audio nedladdad, redo för Whisper
     "transcribing",
     "transcribed",
     "captioned",      # Sprint B: YouTube auto-captions (hoppar över Whisper)
@@ -177,6 +178,8 @@ _MIGRATIONS = [
     # Sprint C: lägg till arkiveringsfält om de saknas
     "ALTER TABLE vigil_items ADD COLUMN archive_downloaded INTEGER DEFAULT 0",
     "ALTER TABLE vigil_items ADD COLUMN archive_path TEXT",
+    # Sprint D: persistent audio-lagring
+    "ALTER TABLE vigil_items ADD COLUMN audio_path TEXT",
 ]
 
 
@@ -382,6 +385,38 @@ def get_next_queued(conn: sqlite3.Connection, domain: Optional[str] = None):
 
     params = (domain,) if domain else ()
     return conn.execute(query, params).fetchone()
+
+def get_next_for_transcription(conn: sqlite3.Connection, domain: Optional[str] = None):
+    """
+    Hämtar nästa objekt för transkription.
+    Prioritetsordning: downloaded (audio klar) > queued text-only (ingen audio).
+    """
+    domain_clause = "AND domain = ?" if domain else ""
+    params = (domain,) if domain else ()
+
+    # 1. Föredra items där audio redan är nedladdat
+    row = conn.execute(
+        f"""SELECT * FROM vigil_items
+              WHERE state = 'downloaded'
+              {domain_clause}
+              ORDER BY priority_score DESC LIMIT 1""",
+        params,
+    ).fetchone()
+    if row:
+        return row
+
+    # 2. Fallback: queued items utan audio (text-only RSS)
+    row = conn.execute(
+        f"""SELECT vi.* FROM vigil_items vi
+              WHERE vi.state = 'queued'
+              {domain_clause}
+              AND vi.source_type = 'rss'
+              AND (json_extract(vi.raw_metadata, '$.enclosure_url') IS NULL
+                   OR json_extract(vi.raw_metadata, '$.enclosure_url') = '')
+              ORDER BY vi.priority_score DESC LIMIT 1""",
+        params,
+    ).fetchone()
+    return row
 
 
 def preempt_current(conn: sqlite3.Connection, current_id: int,

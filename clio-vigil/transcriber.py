@@ -29,6 +29,7 @@ from typing import Optional
 
 from orchestrator import (
     get_next_queued,
+    get_next_for_transcription,
     init_db,
     preempt_current,
     transition,
@@ -221,8 +222,15 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     transcript_json = TRANSCRIPTS_DIR / f"vigil_{item_id}.json"
     transcript_txt  = TRANSCRIPTS_DIR / f"vigil_{item_id}.txt"
 
-    # Ladda ned audio
-    audio_path = download_audio(dict(item))
+    # Använd redan nedladdad fil om möjligt, annars ladda ned
+    existing_path = item["audio_path"] if item["audio_path"] else None
+    if existing_path and Path(existing_path).exists():
+        logger.info(f"Använder befintlig audio: {existing_path}")
+        audio_path = Path(existing_path)
+        _delete_after = False
+    else:
+        audio_path = download_audio(dict(item))
+        _delete_after = True
     if not audio_path:
         transition(conn, item_id, "queued")
         return False
@@ -280,7 +288,8 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
                 preempted = True
                 break
 
-    _cleanup_audio(audio_path)
+    if _delete_after:
+        _cleanup_audio(audio_path)
 
     if preempted:
         return False
@@ -321,7 +330,7 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
     counts = {"completed": 0, "preempted": 0, "failed": 0}
 
     for _ in range(max_items):
-        item = get_next_queued(conn, domain)
+        item = get_next_for_transcription(conn, domain)
         if not item:
             logger.info("Transkriptionskön är tom")
             break
