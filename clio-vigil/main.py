@@ -587,6 +587,7 @@ def main():
     )
     parser.add_argument("--run",            action="store_true", help="Kör collect+filter pipeline")
     parser.add_argument("--caption-check", action="store_true", help="Hämta YouTube auto-captions (Sprint B)")
+    parser.add_argument("--download",      action="store_true", help="Ladda ned audio till /mnt/wde2/clio-vigil-audio/ (Sprint D)")
     parser.add_argument("--transcribe",    action="store_true", help="Kör transkriptionskö (Whisper, hoppar captioned)")
     parser.add_argument("--summarize",     action="store_true", help="Kör summering (Claude)")
     parser.add_argument("--index",         action="store_true", help="Kör RAG-indexering (Qdrant)")
@@ -617,7 +618,7 @@ def main():
     args = parser.parse_args()
 
     any_action = any([
-        args.run, args.caption_check, args.transcribe, args.summarize, args.index,
+        args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.classify_uap, args.seed_sources,
@@ -746,6 +747,15 @@ def main():
             f"{counts['skipped']} till Whisper, {counts['failed']} fel"
         )
         _odoo_sync("efter caption-check")
+
+    if args.download or args.full:
+        from downloader import run_downloader
+        counts = run_downloader(conn, domain=args.domain, max_items=args.max)
+        logger.info(
+            f"Nedladdning: {counts['downloaded']} klara, "
+            f"{counts['failed']} misslyckade"
+        )
+        _odoo_sync("efter nedladdning")
 
     if args.transcribe or args.full:
         _odoo_pull("före transkription")
