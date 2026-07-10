@@ -632,7 +632,7 @@ def main():
 
     # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
     try:
-        from odoo_writer import get_odoo_env, sync_items_from_conn, write_sources, write_heartbeat
+        from odoo_writer import get_odoo_env, sync_items_from_conn, sync_items_to_media, write_sources, write_heartbeat
         from odoo_reader import pull_state_changes
         _odoo_env = get_odoo_env()
     except Exception as _e:
@@ -651,15 +651,21 @@ def main():
             logger.warning("Odoo-pull misslyckades (%s): %s", label, _pe)
 
     def _odoo_sync(label: str = "") -> None:
-        """Synkar aktuella pipeline-objekt till Odoo. Kraschsäkert."""
+        """Synkar pipeline-objekt till clio.vigil.item och clio.media.article."""
         if _odoo_env is None:
             return
         try:
             n = sync_items_from_conn(_odoo_env, conn)
             if n:
-                logger.info("Odoo-sync %s: %d objekt", label, n)
+                logger.info("Odoo-sync (vigil.item) %s: %d objekt", label, n)
         except Exception as _se:
-            logger.warning("Odoo-sync misslyckades (%s): %s", label, _se)
+            logger.warning("Odoo-sync (vigil.item) misslyckades (%s): %s", label, _se)
+        try:
+            m = sync_items_to_media(_odoo_env, conn)
+            if m:
+                logger.info("Odoo-sync (media.article) %s: %d objekt", label, m)
+        except Exception as _me:
+            logger.warning("Odoo-sync (media.article) misslyckades (%s): %s", label, _me)
 
     if args.seed_sources:
         if _odoo_env is None:

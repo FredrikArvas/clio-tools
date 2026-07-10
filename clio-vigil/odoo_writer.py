@@ -234,6 +234,95 @@ def sync_journalists_from_conn(odoo_env, conn) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Sync till clio.media.article
+# ---------------------------------------------------------------------------
+
+_SOURCE_TYPE_TO_MEDIA = {
+    "youtube": "video",
+}
+
+
+def _media_type_from_row(row) -> str:
+    """Avgör media_type: youtube→video, rss med enclosure→podcast, annars article."""
+    source_type = row["source_type"] or "rss"
+    if source_type in _SOURCE_TYPE_TO_MEDIA:
+        return _SOURCE_TYPE_TO_MEDIA[source_type]
+    if source_type == "rss":
+        try:
+            import json
+            meta = json.loads(row["raw_metadata"] or "{}")
+            if meta.get("enclosure_url"):
+                return "podcast"
+        except Exception:
+            pass
+    return "article"
+
+
+def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
+    """
+    Upsert vigil_items till clio.media.article.
+    Kör parallellt med sync_items_from_conn (→ clio.vigil.item).
+    Returnerar antal synkade poster.
+    """
+    if odoo_env is None:
+        return 0
+
+    sync_states = states or SYNC_STATES
+    placeholders = ",".join("?" * len(sync_states))
+
+    try:
+        rows = conn.execute(
+            f"SELECT * FROM vigil_items WHERE state IN ({placeholders})",
+            sync_states,
+        ).fetchall()
+    except Exception as exc:
+        _logger.warning("sync_items_to_media: SQLite-läsfel: %s", exc)
+        return 0
+
+    if not rows:
+        return 0
+
+    Article = odoo_env["clio.media.article"]
+    synced = 0
+
+    for row in rows:
+        url = row["url"] if hasattr(row, "__getitem__") else None
+        if not url:
+            continue
+        try:
+            vals = {
+                "url":             url,
+                "title":           (row["title"] or "")[:500],
+                "source":          (row["source_name"] or "")[:200],
+                "media_type":      _media_type_from_row(row),
+                "published":       _dt(row["published_at"]),
+                "first_seen":      _dt(row["published_at"]) or _utcnow_str(),
+                "data_source":     f"vigil_{row['domain']}",
+                # vigil-utökningsfält
+                "vigil_state":     row["state"] or "discovered",
+                "duration_seconds": int(row["duration_seconds"]) if row["duration_seconds"] else False,
+                "relevance_score": float(row["relevance_score"] or 0.0),
+                "priority_score":  float(row["priority_score"] or 0.0),
+                "source_maturity": row["source_maturity"] or "tidig",
+                "audio_path":      row["archive_path"] if "archive_path" in row.keys() and row["archive_path"] else False,
+            }
+            if row["summary"]:
+                vals["body_snippet"] = row["summary"]
+
+            existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
+            if existing:
+                Article.write([existing[0]["id"]], vals)
+            else:
+                Article.create(vals)
+            synced += 1
+        except Exception as exc:
+            _logger.warning("sync_items_to_media: fel för %s: %s", str(url)[:60], exc)
+
+    _logger.info("sync_items_to_media: %d/%d objekt synkade", synced, len(rows))
+    return synced
+
+
+# ---------------------------------------------------------------------------
 # Leveransposter
 # ---------------------------------------------------------------------------
 
