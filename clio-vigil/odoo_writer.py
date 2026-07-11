@@ -43,10 +43,24 @@ SYNC_STATES = [
 # ---------------------------------------------------------------------------
 
 def get_odoo_env():
-    """Returnerar en ansluten OdooConnector, eller None vid fel."""
+    """
+    Returnerar en ansluten OdooConnector mot vigil-databasen, eller None vid fel.
+    Läser VIGIL_ODOO_URL / VIGIL_ODOO_DB från root-/.env (clio-tools/.env),
+    annars ODOO_URL / ODOO_DB.
+    """
+    import os
+    from pathlib import Path
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(Path(__file__).parent.parent / ".env", override=False)
+    except Exception:
+        pass
     try:
         from clio_odoo import connect
-        return connect()
+        return connect(
+            url=os.environ.get("VIGIL_ODOO_URL") or None,
+            db=os.environ.get("VIGIL_ODOO_DB") or None,
+        )
     except Exception as exc:
         _logger.warning("Odoo-anslutning misslyckades: %s", exc)
         return None
@@ -296,7 +310,7 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
                 "source":          (row["source_name"] or "")[:200],
                 "media_type":      _media_type_from_row(row),
                 "published":       _dt(row["published_at"]),
-                "first_seen":      _dt(row["published_at"]) or _utcnow_str(),
+                "first_seen":      _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
                 "data_source":     f"vigil_{row['domain']}",
                 # vigil-utökningsfält
                 "vigil_state":     row["state"] or "discovered",
