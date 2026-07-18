@@ -114,10 +114,8 @@ def _item_to_vals(row) -> dict:
 def write_sources(odoo_env, sources: list[dict]) -> int:
     """
     Upsert bevakningskällor till clio.vigil.source.
-    Nyckel: url. Returnerar antal synkade källposter.
-
-    Varje post är en dict med nycklarna:
-        name, domain, source_type, url, maturity, weight, active, notes
+    Nyckel: (domain, name). Stöder rss, youtube, google_news, web.
+    Returnerar antal synkade källposter.
     """
     if odoo_env is None or not sources:
         return 0
@@ -126,31 +124,97 @@ def write_sources(odoo_env, sources: list[dict]) -> int:
     synced = 0
 
     for s in sources:
-        url = s.get("url", "").strip()
-        if not url:
+        name   = (s.get("name") or "").strip()
+        domain = s.get("domain", "")
+        if not name or not domain:
             continue
+        source_type = s.get("source_type", s.get("type", "rss"))
         try:
             vals = {
-                "name":        (s.get("name") or url)[:200],
-                "domain":      s.get("domain", ""),
-                "source_type": s.get("source_type", s.get("type", "rss")),
-                "url":         url,
-                "maturity":    s.get("maturity", "tidig"),
-                "weight":      float(s.get("weight", 1.0)),
-                "active":      bool(s.get("active", True)),
-                "notes":       s.get("notes", "") or "",
+                "name":                    name[:200],
+                "domain":                  domain,
+                "source_type":             source_type,
+                "maturity":                s.get("maturity", "tidig"),
+                "weight":                  float(s.get("weight", 1.0)),
+                "active":                  bool(s.get("active", True)),
+                "notes":                   s.get("notes", "") or "",
+                "archive_enabled":         bool(s.get("archive", False)),
+                "auth_env":                s.get("auth_env") or "",
+                "transcription_threshold": float(s.get("transcription_threshold") or 0.0),
             }
-            existing = Source.search_read([("url", "=", url)], ["id"], limit=1)
+            if source_type == "youtube":
+                vals["channel_id"] = s.get("channel_id", "")
+                vals["url"]        = s.get("url", "") or ""
+            elif source_type == "google_news":
+                vals["google_news_query"] = s.get("query", s.get("google_news_query", ""))
+                vals["lang"]    = s.get("lang", "en")
+                vals["country"] = s.get("country", "US")
+            else:
+                vals["url"] = (s.get("url", "") or "").strip()
+
+            existing = Source.search_read(
+                [("domain", "=", domain), ("name", "=", name)], ["id"], limit=1
+            )
             if existing:
                 Source.write([existing[0]["id"]], vals)
             else:
                 Source.create(vals)
             synced += 1
         except Exception as exc:
-            _logger.warning("write_sources: fel för %s: %s", url[:60], exc)
+            _logger.warning("write_sources: fel för %s/%s: %s", domain, name[:40], exc)
 
     _logger.info("write_sources: %d källposter synkade", synced)
     return synced
+
+
+def read_sources(odoo_env, domain: str) -> list[dict]:
+    """
+    Hämtar aktiva bevakningskällor för en domän från clio.vigil.source.
+    Returnerar lista med dicts kompatibla med collector-interfacet.
+    """
+    if odoo_env is None:
+        return []
+
+    rows = odoo_env["clio.vigil.source"].search_read(
+        [("domain", "=", domain), ("active", "=", True)],
+        [
+            "name", "source_type", "url", "channel_id",
+            "google_news_query", "lang", "country",
+            "maturity", "weight", "transcription_threshold",
+            "auth_env", "archive_enabled",
+        ],
+    )
+
+    sources = []
+    for r in rows:
+        s = {
+            "name":        r["name"],
+            "source_type": r["source_type"],
+            "maturity":    r["maturity"] or "tidig",
+            "weight":      r["weight"] or 1.0,
+            "active":      True,
+            "domain":      domain,
+        }
+        if r["transcription_threshold"]:
+            s["transcription_threshold"] = r["transcription_threshold"]
+        if r["auth_env"]:
+            s["auth_env"] = r["auth_env"]
+        if r["archive_enabled"]:
+            s["archive"] = True
+
+        if r["source_type"] == "youtube":
+            s["channel_id"] = r["channel_id"] or ""
+        elif r["source_type"] == "google_news":
+            s["query"]   = r["google_news_query"] or ""
+            s["lang"]    = r["lang"] or "en"
+            s["country"] = r["country"] or "US"
+        else:
+            s["url"] = r["url"] or ""
+
+        sources.append(s)
+
+    _logger.info("read_sources: %d aktiva källor för domän=%s", len(sources), domain)
+    return sources
 
 
 # ---------------------------------------------------------------------------
