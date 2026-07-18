@@ -353,6 +353,8 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
                 counts["preempted"] += 1
                 break  # Jobbyte — starta om loopen med ny prioritetsordning
             else:
+                transition(conn, item_id, "failed")
+                logger.warning(f"Item {item_id} markerad som failed — fortsätter med nästa")
                 counts["failed"] += 1
 
     return counts

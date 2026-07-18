@@ -44,6 +44,7 @@ STATES = [
     "captioned",      # Sprint B: YouTube auto-captions (hoppar över Whisper)
     "indexed",
     "notified",
+    "failed",
 ]
 
 # Källmognadsklasser (ADD beslut: metadata, inte filter)
