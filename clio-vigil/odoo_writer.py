@@ -111,6 +111,31 @@ def _item_to_vals(row) -> dict:
 # Källsynk
 # ---------------------------------------------------------------------------
 
+
+def build_sources_config(sources: list[dict]) -> dict:
+    """
+    Konverterar read_sources()-lista till det format collectors forvanter sig.
+    rss/web -> result["rss"]
+    youtube  -> result["youtube_channels"]
+    google_news -> result["google_news"] (aggregerat)
+    """
+    rss     = [s for s in sources if s["source_type"] in ("rss", "web")]
+    youtube = [s for s in sources if s["source_type"] == "youtube"]
+    gn      = [s for s in sources if s["source_type"] == "google_news"]
+
+    result: dict = {"rss": rss, "youtube_channels": youtube}
+
+    if gn:
+        result["google_news"] = {
+            "lang":    gn[0].get("lang", "en"),
+            "country": gn[0].get("country", "US"),
+            "weight":  max(s.get("weight", 1.5) for s in gn),
+            "queries": [s["query"] for s in gn if s.get("query")],
+        }
+
+    return result
+
+
 def write_sources(odoo_env, sources: list[dict]) -> int:
     """
     Upsert bevakningskällor till clio.vigil.source.
@@ -386,6 +411,19 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
             }
             if row["summary"]:
                 vals["body_snippet"] = row["summary"]
+            if row["transcript_path"]:
+                try:
+                    import json as _json
+                    with open(row["transcript_path"], encoding="utf-8") as _f:
+                        _d = _json.load(_f)
+                    if isinstance(_d, list):
+                        _txt = " ".join(s.get("text", "") for s in _d)
+                    else:
+                        _txt = _d.get("text", "")
+                    if _txt:
+                        vals["transcript_snippet"] = _txt[:65000]
+                except Exception as _te:
+                    _logger.debug("transcript lásfel for %s: %s", str(url)[:60], _te)
 
             existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
             if existing:
