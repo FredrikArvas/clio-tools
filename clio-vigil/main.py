@@ -58,6 +58,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("clio-vigil")
 
+# Module-level Odoo-anslutning (sats i main(), lases av run_pipeline())
+_odoo_env = None
+
 # ---------------------------------------------------------------------------
 # Konfiguration
 # ---------------------------------------------------------------------------
@@ -249,10 +252,44 @@ def pick_source(conn) -> None:
     print(f"\n  ✓ Totalt: {total_new} nya objekt, {total_queued} i kö")
 
 
+def _build_sources_config(sources: list[dict]) -> dict:
+    """
+    Konverterar read_sources()-lista till det format collectors förväntar sig.
+    Möjliggör att YAML-källlistan ersätts av clio.vigil.source i Odoo.
+    """
+    rss     = [s for s in sources if s["source_type"] == "rss"]
+    youtube = [s for s in sources if s["source_type"] == "youtube"]
+    gn      = [s for s in sources if s["source_type"] == "google_news"]
+
+    result: dict = {"rss": rss, "youtube_channels": youtube}
+
+    if gn:
+        result["google_news"] = {
+            "lang":    gn[0].get("lang", "en"),
+            "country": gn[0].get("country", "US"),
+            "weight":  max(s.get("weight", 1.5) for s in gn),
+            "queries": [s["query"] for s in gn if s.get("query")],
+        }
+
+    return result
+
+
 def run_pipeline(conn, domain_id: str) -> None:
     """Kör collect → filter → queue för en domän."""
     logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
     config = load_domain_config(domain_id)
+
+    # Källor: läs från Odoo om anslutning finns, annars YAML-fallback
+    if _odoo_env is not None:
+        from odoo_writer import read_sources
+        odoo_sources = read_sources(_odoo_env, domain_id)
+        if odoo_sources:
+            config["sources"] = _build_sources_config(odoo_sources)
+            logger.info(f"Källor: {len(odoo_sources)} från Odoo (clio.vigil.source)")
+        else:
+            logger.warning(f"Inga aktiva Odoo-källor för domän={domain_id} — faller tillbaka på YAML")
+    else:
+        logger.warning("Ingen Odoo-anslutning — läser källkonfiguration från YAML")
 
     # Steg 1: Insamling
     rss_counts = collect_rss(conn, config)
@@ -582,6 +619,7 @@ def _interactive_menu():
 
 
 def main():
+    global _odoo_env  # satt har, lasas av run_pipeline() pa modulniva
     parser = argparse.ArgumentParser(
         description="clio-vigil — mediebevakning och intelligence-pipeline"
     )
@@ -633,7 +671,7 @@ def main():
 
     # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
     try:
-        from odoo_writer import get_odoo_env, sync_items_from_conn, sync_items_to_media, write_sources, write_heartbeat
+        from odoo_writer import get_odoo_env, sync_items_from_conn, sync_items_to_media, write_sources, read_sources, write_heartbeat
         from odoo_reader import pull_state_changes
         _odoo_env = get_odoo_env()
     except Exception as _e:
