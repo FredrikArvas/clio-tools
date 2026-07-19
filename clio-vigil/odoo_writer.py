@@ -363,9 +363,9 @@ def _media_type_from_row(row) -> str:
 
 def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
     """
-    Upsert vigil_items till clio.media.article.
-    Kör parallellt med sync_items_from_conn (→ clio.vigil.item).
-    Returnerar antal synkade poster.
+    Upsert vigil_items till clio.media.article (redaktionellt arkiv).
+    Skriver bara basdata + vigil_item_id-länken.
+    Vigil-specifik data (state, score, transkript) lasas via lanken.
     """
     if odoo_env is None:
         return 0
@@ -379,13 +379,14 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
             sync_states,
         ).fetchall()
     except Exception as exc:
-        _logger.warning("sync_items_to_media: SQLite-läsfel: %s", exc)
+        _logger.warning("sync_items_to_media: SQLite-lasfel: %s", exc)
         return 0
 
     if not rows:
         return 0
 
-    Article = odoo_env["clio.media.article"]
+    Article   = odoo_env["clio.media.article"]
+    VigilItem = odoo_env["clio.vigil.item"]
     synced = 0
 
     for row in rows:
@@ -393,37 +394,22 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
         if not url:
             continue
         try:
+            # Hitta matchande clio.vigil.item
+            vigil_recs = VigilItem.search_read([("url", "=", url)], ["id"], limit=1)
+            vigil_id = vigil_recs[0]["id"] if vigil_recs else False
+
             vals = {
-                "url":             url,
-                "title":           (row["title"] or "")[:500],
-                "source":          (row["source_name"] or "")[:200],
-                "media_type":      _media_type_from_row(row),
-                "published":       _dt(row["published_at"]),
-                "first_seen":      _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
-                "data_source":     f"vigil_{row['domain']}",
-                # vigil-utökningsfält
-                "vigil_state":     row["state"] or "discovered",
-                "duration_seconds": int(row["duration_seconds"]) if row["duration_seconds"] else False,
-                "relevance_score": float(row["relevance_score"] or 0.0),
-                "priority_score":  float(row["priority_score"] or 0.0),
-                "source_maturity": row["source_maturity"] or "tidig",
-                "audio_path":      row["archive_path"] if "archive_path" in row.keys() and row["archive_path"] else False,
+                "url":         url,
+                "title":       (row["title"] or "")[:500],
+                "source":      (row["source_name"] or "")[:200],
+                "media_type":  _media_type_from_row(row),
+                "published":   _dt(row["published_at"]),
+                "first_seen":  _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
+                "data_source": f"vigil_{row['domain']}",
+                "vigil_item_id": vigil_id,
             }
             if row["summary"]:
                 vals["body_snippet"] = row["summary"]
-            if row["transcript_path"]:
-                try:
-                    import json as _json
-                    with open(row["transcript_path"], encoding="utf-8") as _f:
-                        _d = _json.load(_f)
-                    if isinstance(_d, list):
-                        _txt = " ".join(s.get("text", "") for s in _d)
-                    else:
-                        _txt = _d.get("text", "")
-                    if _txt:
-                        vals["transcript_snippet"] = _txt[:65000]
-                except Exception as _te:
-                    _logger.debug("transcript lásfel for %s: %s", str(url)[:60], _te)
 
             existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
             if existing:
@@ -432,7 +418,7 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
                 Article.create(vals)
             synced += 1
         except Exception as exc:
-            _logger.warning("sync_items_to_media: fel för %s: %s", str(url)[:60], exc)
+            _logger.warning("sync_items_to_media: fel for %s: %s", str(url)[:60], exc)
 
     _logger.info("sync_items_to_media: %d/%d objekt synkade", synced, len(rows))
     return synced
