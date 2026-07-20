@@ -130,24 +130,46 @@ def _audio_duration(audio_path: Path) -> float:
 # Transkribering
 # ---------------------------------------------------------------------------
 
+_KB_MODELS = {
+    "small":  "KBLab/kb-whisper-small",
+    "medium": "KBLab/kb-whisper-medium",
+    "large":  "KBLab/kb-whisper-large",
+}
+_FALLBACK_MODEL = "large-v3"
+
+
+def detect_language(audio_path: Path) -> tuple[str, float]:
+    """
+    Detekterar språk via faster-whisper tiny på de första 30 sek.
+    Returnerar (språkkod, konfidens) t.ex. ("sv", 0.97).
+    """
+    from faster_whisper import WhisperModel
+    print(f"\n[INFO] Detekterar språk i {_BLD}{audio_path.name}{_NRM}  {_GRY}(tiny-modell){_NRM}")
+    model = WhisperModel("tiny", device="cpu", compute_type="int8")
+    _, info = model.transcribe(str(audio_path), language=None, beam_size=1)
+    lang, conf = info.language, info.language_probability
+    label = f"{_GRN}svenska → KB-Whisper{_NRM}" if lang == "sv" else f"{_CYN}{lang} → Whisper {_FALLBACK_MODEL}{_NRM}"
+    print(f"       Detekterat: {_BLD}{lang}{_NRM}  konfidens {conf:.0%}  →  {label}")
+    return lang, conf
+
+
 def transcribe(audio_path: Path, model_size: str = "medium", language: str = "sv") -> list[dict]:
     """
     Transkriberar ljudfil med faster-whisper.
+    language="auto" kör språkdetektering och väljer modell därefter.
     Visar spinner + ETA och kalibrerar maskinhastighet automatiskt.
     """
     from faster_whisper import WhisperModel
 
-    KB_MODELS = {
-        "small":  "KBLab/kb-whisper-small",
-        "medium": "KBLab/kb-whisper-medium",
-        "large":  "KBLab/kb-whisper-large",
-    }
-    model_id  = KB_MODELS.get(model_size, model_size) if language == "sv" else model_size
+    if language == "auto":
+        language, _ = detect_language(audio_path)
+
+    model_id  = _KB_MODELS.get(model_size, model_size) if language == "sv" else _FALLBACK_MODEL
     audio_sec = _audio_duration(audio_path)
     rtf       = _load_rtf(model_size, language)
 
     print(f"\n[INFO] Transkriberar {_BLD}{audio_path.name}{_NRM}")
-    print(f"       Modell: {model_id}  |  Ljudlängd: {_fmt_dur(audio_sec)}")
+    print(f"       Modell: {model_id}  |  Språk: {language}  |  Ljudlängd: {_fmt_dur(audio_sec)}")
     if rtf:
         print(f"       Beräknad tid: ~{_fmt_dur(audio_sec / rtf)}  {_GRY}(baserat på tidigare körning){_NRM}")
     else:
