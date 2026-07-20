@@ -308,8 +308,8 @@ Exempel:
                         help="Hoppa över Claude-annotering — transkribera bara")
     parser.add_argument("--model",    type=str,  default="medium",
                         help="Whisper-modell: tiny, base, small, medium, large (default: medium)")
-    parser.add_argument("--language", type=str,  default="sv",
-                        help="Språk för transkribering (default: sv)")
+    parser.add_argument("--language", type=str,  default="auto",
+                        help="Språk för transkribering: sv, en, de … eller 'auto' för automatisk detektering (default: auto)")
     parser.add_argument("--list-profiles", action="store_true",
                         help="Lista tillgängliga profiler")
     return parser
