@@ -134,6 +134,74 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def import_manual_items(odoo_env, conn) -> int:
+    """
+    Importerar manuellt skapade Odoo-poster till SQLite.
+
+    Kriterier: state='queued', domain satt, source_type satt, URL saknas i SQLite.
+    Returnerar antal importerade poster.
+    """
+    if odoo_env is None:
+        return 0
+
+    try:
+        rows_odoo = odoo_env["clio.vigil.item"].search_read(
+            [("state", "=", "queued")],
+            ["url", "title", "domain", "source_type", "source_name",
+             "priority_score", "published_at", "duration_seconds"],
+        )
+    except Exception as exc:
+        _logger.warning("import_manual_items: kunde inte läsa från Odoo: %s", exc)
+        return 0
+
+    imported = 0
+    for item in rows_odoo:
+        url = item.get("url", "")
+        if not url:
+            continue
+        domain      = item.get("domain") or ""
+        source_type = item.get("source_type") or ""
+        if not domain or not source_type:
+            _logger.debug("import_manual_items: hoppar %s — domain/source_type saknas", url[:60])
+            continue
+
+        exists = conn.execute(
+            "SELECT id FROM vigil_items WHERE url = ?", (url,)
+        ).fetchone()
+        if exists:
+            continue
+
+        try:
+            conn.execute(
+                """INSERT INTO vigil_items
+                   (url, title, domain, source_type, source_name,
+                    priority_score, published_at, duration_seconds,
+                    state, state_updated_at, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?)""",
+                (
+                    url,
+                    item.get("title") or "",
+                    domain,
+                    source_type,
+                    item.get("source_name") or "",
+                    float(item.get("priority_score") or 0.0),
+                    str(item.get("published_at") or "")[:19].replace("T", " ") or None,
+                    item.get("duration_seconds") or None,
+                    _now(),
+                    _now(),
+                ),
+            )
+            conn.commit()
+            _logger.info("import_manual_items: importerade %s (%s)", url[:60], domain)
+            imported += 1
+        except Exception as exc:
+            _logger.warning("import_manual_items: fel för %s: %s", url[:60], exc)
+
+    if imported:
+        _logger.info("import_manual_items: %d manuella poster importerade till SQLite", imported)
+    return imported
+
+
 def load_subscribers(odoo_env) -> list[dict]:
     """
     Läser aktiva prenumeranter från Odoo.

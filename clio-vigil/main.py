@@ -19,7 +19,10 @@ Designbeslut (ADD v0.2, 2026-04-18):
 """
 
 import argparse
+import datetime
+import json
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -628,6 +631,7 @@ def main():
     parser.add_argument("--max",         type=int, default=10, help="Max objekt per steg (default: 10)")
 
     args = parser.parse_args()
+    _started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     any_action = any([
         args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
@@ -646,14 +650,14 @@ def main():
     # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
     try:
         from odoo_writer import get_odoo_env, sync_items_from_conn, sync_items_to_media, write_sources, read_sources, write_heartbeat
-        from odoo_reader import pull_state_changes
+        from odoo_reader import pull_state_changes, import_manual_items
         _odoo_env = get_odoo_env()
     except Exception as _e:
         logger.warning("odoo_writer/reader saknas eller anslutning misslyckades: %s", _e)
         _odoo_env = None
 
     def _odoo_pull(label: str = "") -> None:
-        """Hämtar tillståndsändringar från Odoo → SQLite. Kraschsäkert."""
+        """Hämtar tillståndsändringar och manuella poster från Odoo → SQLite. Kraschsäkert."""
         if _odoo_env is None:
             return
         try:
@@ -662,6 +666,12 @@ def main():
                 logger.info("Odoo→SQLite %s: %d rader uppdaterade", label, n)
         except Exception as _pe:
             logger.warning("Odoo-pull misslyckades (%s): %s", label, _pe)
+        try:
+            n = import_manual_items(_odoo_env, conn)
+            if n:
+                logger.info("Odoo-import %s: %d manuella poster importerade", label, n)
+        except Exception as _ie:
+            logger.warning("import_manual_items misslyckades (%s): %s", label, _ie)
 
     def _odoo_sync(label: str = "") -> None:
         """Synkar pipeline-objekt till clio.vigil.item och clio.media.article."""
@@ -869,6 +879,30 @@ def main():
                             message=f"{total} objekt i vigil.db")
         except Exception as _he:
             logger.warning("Heartbeat misslyckades: %s", _he)
+
+    # Skriv .vigil_status så cockpiten håller sig aktuell även vid timer-körningar
+    try:
+        _step_flags = {
+            "full":       args.full,
+            "run":        args.run,
+            "transcribe": args.transcribe,
+            "summarize":  args.summarize,
+            "index":      args.index,
+            "digest":     args.digest,
+        }
+        _step = next((k for k, v in _step_flags.items() if v), "run")
+        _status_file = Path(__file__).parent / "data" / ".vigil_status"
+        _status_file.parent.mkdir(parents=True, exist_ok=True)
+        _status_file.write_text(json.dumps({
+            "step":         _step,
+            "status":       "done",
+            "started_at":   _started_at,
+            "completed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "triggered_by": "systemd.timer",
+        }))
+        logger.info("vigil_status skriven: steg=%s", _step)
+    except Exception as _se:
+        logger.warning("Kunde inte skriva vigil_status: %s", _se)
 
     conn.close()
 

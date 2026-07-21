@@ -45,6 +45,7 @@ STATES = [
     "indexed",
     "notified",
     "failed",
+    "crashed",        # Oväntat fel under bearbetning — parkerad för manuell granskning, blockerar ej pipelinen
 ]
 
 # Källmognadsklasser (ADD beslut: metadata, inte filter)
@@ -181,6 +182,9 @@ _MIGRATIONS = [
     "ALTER TABLE vigil_items ADD COLUMN archive_path TEXT",
     # Sprint D: persistent audio-lagring
     "ALTER TABLE vigil_items ADD COLUMN audio_path TEXT",
+    # Sprint E: resume-stöd för indexering + kraschisolering
+    "ALTER TABLE vigil_items ADD COLUMN indexed_chunks INTEGER DEFAULT 0",
+    "ALTER TABLE vigil_items ADD COLUMN error_message TEXT",
 ]
 
 

@@ -93,3 +93,149 @@ Repo: `~/clio-odoo-addons/clio_vigil/` (branch `19.0`)
 Databas: `uap` (https://uap.arvas.international)
 Uppgradera: `docker exec odoo19-odoo-1 odoo -c /etc/odoo/odoo.conf -u clio_vigil -d uap --stop-after-init`
 Starta om efter uppgradering: `docker restart odoo19-odoo-1`
+
+---
+
+## Embedding-backend — GPU-problematik (dokumenterat 2026-07-20)
+
+### Rotorsak: go runner saknar GPU-stöd
+
+Ollama 0.20.7 använder två runners beroende på modellarkitektur:
+- **llama runner** — för LLM-modeller (GPT, Llama etc.) → GPU-offload fungerar
+- **go runner** — för BERT-arkitektur-modeller (inkl. bge-m3) → **GPU stöds ej**
+
+`bge-m3` är en BERT-modell → go runner väljs alltid → 100% CPU → ~226 sek/objekt.
+
+Bekräftat i loggar:
+```
+source=runner.go:965 msg="starting go runner"   ← BERT-path, ej llama-path
+GPULayers:[]                                     ← noll GPU-lager tilldelade
+device=CPU size="1.0 GiB"                        ← all vikt på CPU
+```
+
+CUDA-backends finns (`/usr/local/lib/ollama/cuda_v12/libggml-cuda.so`) men laddas aldrig för go runner.
+Parametern `num_gpu` i API-anropet saknar effekt för embedding-modeller.
+
+GPU-hårdvara: GTX 1050 Ti (4 GB), CUDA 12.5, drivrutin 555.42.06 — fungerar tekniskt men når aldrig go runner.
+
+### Lösningsalternativ (ej genomförda)
+
+**Alt 1 — Byt embedding-modell till llama-arkitektur**
+`nomic-embed-text` (GPT-NeoX) → llama runner → GPU offload fungerar.
+Nackdel: 768 dimensioner (mot bge-m3:s 1024) → kräver ny Qdrant-kollektion + full re-indexering.
+
+**Alt 2 — text-embeddings-inference (TEI) container** ← rekommenderas om GPU krävs
+HuggingFace TEI ger fullständigt GPU-stöd för BERT-modeller inkl. bge-m3:
+```bash
+docker run --gpus all -p 8080:80 \
+  ghcr.io/huggingface/text-embeddings-inference:turing-1.5 \
+  --model-id BAAI/bge-m3
+```
+Kompatibel API (OpenAI-format). GTX 1050 Ti = "turing"-bild (compute cap 6.1).
+Nackdel: extra container, 1050 Ti är lågprioritet i TEI:s GPU-stöd.
+
+**Alt 3 — Acceptera CPU** (nuvarande läge)
+~226 sek/objekt, ca 40 objekt i kön = ~2,5 h för full re-indexering.
+Fungerar men kan inte hinna med löpande inmatning vid högt flöde.
+
+### Nuvarande körstatus (2026-07-20)
+
+Nohup-körning av 40 `transcribed`-objekt startades föregående session.
+Kolla status:
+```bash
+ps aux | grep indexer
+# eller
+python main.py --stats
+```
+
+### Beslut (2026-07-20): CPU räcker — ingen GPU-åtgärd krävs
+
+Flödesanalys:
+- Löpande drift: ~20 nya objekt/dag → ~75 min indexering → pipelinen klar långt innan nästa körning
+- Engångsjobb (re-indexering): 50–100 objekt → 3–6 h nohup, stör inget
+
+**CPU är tillräcklig. TEI-container och modellbyte är onödig komplexitet för detta flöde.**
+Återöppna frågan först om objekt/dag ökar till hundratals.
+
+Snabbstart vid framtida felsökning:
+```
+# Kolla Qdrant-läge
+curl -s http://localhost:6333/collections/vigil_ufo | python3 -c "import sys,json; print(json.load(sys.stdin)['result']['points_count'])"
+
+# Kolla pipeline-state
+sqlite3 data/vigil.db "SELECT state, count(*) FROM vigil_items GROUP BY state ORDER BY count(*) DESC;"
+
+# Re-indexera (kör i bakgrunden, från clio-vigil-mappen)
+nohup ../.venv/bin/python indexer.py --run --domain ufo --max 100 >> ~/logs/reindex_DATUM.log 2>&1 &
+```
+
+---
+
+## Re-indexering — RSS/Google News-objekt med ofullständig text (TODO)
+
+826 objekt i `uap_classified` (källa: rss + google_news) saknar fulltext och indexerades
+med bara rubrik + beskrivning som fallback (genomfört 2026-07-20).
+
+När RSS-scraping förbättras (fulltext från artikelsidor), re-indexera så här:
+
+Steg 1 — hitta objekt indexerade utan transkript:
+  sqlite3 data/vigil.db "SELECT id, title, source_type FROM vigil_items WHERE state='indexed' AND source_type IN ('rss','google_news') AND transcript_path IS NULL;"
+
+Steg 2 — radera gamla Qdrant-punkter (annars dubbletter):
+  Använd payload-filter på item_id (punkterna har uuid som ID, inte item_id):
+  client.delete(collection_name="vigil_ufo", points_selector=FilterSelector(filter=Filter(must=[FieldCondition(key="item_id", match=MatchValue(value=ITEM_ID))])))
+
+Steg 3 — återställ state för att trigga om-indexering:
+  sqlite3 data/vigil.db "UPDATE vigil_items SET state='uap_classified' WHERE id IN (...);"
+
+Steg 4 — kör indexer med lämpligt --max.
+
+OBS: delete måste ske via payload-filter, inte punkt-ID.
+
+---
+
+---
+
+## Watchdog (installerad 2026-07-20)
+
+Script: `~/19.0/clio-tools/clio-vigil/vigil_watchdog.py`
+Timer: `clio-vigil-watchdog.timer` — kör var 10:e minut via systemd
+State: `~/logs/vigil_watchdog_state.json` (räknare per tjänst, nollställs dagligen)
+
+Bevakar: `clio-vigil.service`, `clio-vigil-uap.service`, `clio-vigil-download.service`
+Vid `failed`: startar om max 3 ggr/dag, mailar `fredrik@arvas.se` vid varje händelse.
+Efter 3 misslyckanden: mailar "ger upp — manuell åtgärd krävs", stoppar omstarter för dagen.
+
+Logg: `~/logs/vigil_watchdog.log`
+
+---
+
+## Odoo-vyer (uppdaterat 2026-07-20)
+
+Alla tre menyval i Clio Vigil använder nu `clio.media.article` som modell:
+
+| Meny | Filter |
+|---|---|
+| **Kö** | `data_source IN [vigil_ufo, vigil_ai]` + `vigil_item_id.state IN [queued, downloaded, transcribing, transcribed]` |
+| **Klara objekt** | `data_source IN [vigil_ufo, vigil_ai]` + `vigil_item_id.state IN [indexed, notified, uap_classified, captioned]` |
+| **Alla objekt** | `data_source IN [vigil_ufo, vigil_ai]`, grupperat på `vigil_state` som förval |
+
+`clio.vigil.item`-vyerna (list/form/kanban/graph) är kvar för Pipeline-adminsidan.
+
+`vigil_state` är ett `related`-fält på `clio.media.article` (via `vigil_item_id.state`) definierat i `clio_vigil/models/clio_media_article_ext.py`. Möjliggör group_by i Odoo.
+
+Vyer: `list, kanban, graph, pivot, form` på alla tre.
+
+---
+
+## Cockpit — dubbel statuskälla
+
+Cockpiten (`clio.vigil.pipeline`) visar två separata statusar:
+
+| Fält | Källa | Uppdateras av |
+|---|---|---|
+| `heartbeat_last_run` | `clio.tool.heartbeat` | `write_heartbeat()` i slutet av timer-körning |
+| `last_completed` | `.vigil_status`-fil på disk | trigger_runner.py (knapp-klick) + nu även main.py (timer) |
+
+Fr.o.m. 2026-07-20 skriver `main.py` `.vigil_status` i slutet av varje körning med `triggered_by=systemd.timer`.
+Status-filen: `~/19.0/clio-tools/clio-vigil/data/.vigil_status` (monterad som `/mnt/clio-tools/clio-vigil/data/.vigil_status` i Docker).

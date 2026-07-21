@@ -7,12 +7,14 @@ Embeddings: Ollama bge-m3 (1024 dim, cosine) — körs lokalt på EliteDesk GPU.
 Ingen extern API-nyckel behövs.
 
 Flöde:
-  1. Hämta objekt med state=transcribed/captioned
+  1. Hämta objekt med state=transcribed/captioned/uap_classified
   2. Läs transkript-JSON (segments med start/end/text) eller .txt
   3. Chunka i tidsfönster (~300 sekunder, 10% överlapp) eller ord
-  4. Embed varje chunk med Ollama bge-m3
+  4. Embed högst MAX_CHUNKS_PER_RUN nya chunks med Ollama bge-m3 (resten nästa körning
+     via indexed_chunks-offset -- långa poddar hänger inte längre en hel körning)
   5. Upsert till Qdrant-collection för domänen
-  6. Uppdatera state → indexed
+  6. Klart → state=indexed. Fel (t.ex. Ollama-timeout) → state=crashed +
+     error_message, blockerar inte resten av kön.
 
 Körning:
   python indexer.py --run [--domain ufo] [--max 20]
@@ -52,6 +54,16 @@ CHUNK_OVERLAP_SEC = 30
 # Ordfönster per chunk — text (webb/rss)
 CHUNK_WORDS         = 500
 CHUNK_WORDS_OVERLAP = 100
+
+# Max antal NYA chunks som embeddas per item och körning. Långa poddar (100+ chunks)
+# skulle annars hänga en hel körning i väntan på Ollama — resten tas nästa körning
+# via indexed_chunks-offset.
+MAX_CHUNKS_PER_RUN = 24
+
+# Antal texter per Ollama-anrop. Litet av flit: sparar indexed_chunks-progress
+# EFTER varje lyckad delbatch (se index_item), så en trög/timeoutad batch bara
+# kostar EMBED_BATCH_SIZE chunks nästa gång i stället för hela körningens arbete.
+EMBED_BATCH_SIZE = 3
 
 
 # ---------------------------------------------------------------------------
@@ -174,39 +186,43 @@ def chunk_text(text: str,
 # Embeddings via Ollama
 # ---------------------------------------------------------------------------
 
-def _embed_texts(texts: list[str]) -> list[list[float]]:
+def _embed_batch(texts: list[str]) -> list[list[float]]:
     """
-    Embeddar en lista med texter via Ollama (bge-m3 lokalt).
-    Skickar max 32 texter per request.
+    Embeddar EN batch texter (max EMBED_BATCH_SIZE) via Ollama i ett enda anrop.
+    Höjer undantag vid fel/timeout -- anroparen (index_item) ansvarar för att
+    spara redan gjord progress innan den propagerar vidare.
     """
-    BATCH = 32
-    all_vectors: list[list[float]] = []
-
-    for i in range(0, len(texts), BATCH):
-        batch = texts[i : i + BATCH]
-        resp = httpx.post(
-            f"{OLLAMA_HOST}/api/embed",
-            json={"model": EMBEDDING_MODEL, "input": batch},
-            timeout=300.0,
+    resp = httpx.post(
+        f"{OLLAMA_HOST}/api/embed",
+        json={"model": EMBEDDING_MODEL, "input": texts},
+        timeout=300.0,
+    )
+    resp.raise_for_status()
+    data       = resp.json()
+    embeddings = data.get("embeddings", [])
+    if len(embeddings) != len(texts):
+        raise ValueError(
+            f"Ollama returnerade {len(embeddings)} vektorer för {len(texts)} texter"
         )
-        resp.raise_for_status()
-        data       = resp.json()
-        embeddings = data.get("embeddings", [])
-        if len(embeddings) != len(batch):
-            raise ValueError(
-                f"Ollama returnerade {len(embeddings)} vektorer för {len(batch)} texter"
-            )
-        all_vectors.extend(embeddings)
-
-    return all_vectors
+    return embeddings
 
 
 # ---------------------------------------------------------------------------
 # Indexering
 # ---------------------------------------------------------------------------
 
-def index_item(conn, item_id: int) -> bool:
-    """Indexerar ett transkriberat objekt i Qdrant. Returnerar True om det lyckades."""
+def index_item(conn, item_id: int) -> str:
+    """
+    Indexerar (eller fortsätter indexera) ett transkriberat objekt i Qdrant.
+
+    Embeddar högst MAX_CHUNKS_PER_RUN nya chunks per anrop -- långa poddar med
+    många chunks fortsätter automatiskt över flera körningar via indexed_chunks-
+    offset i stället för att hänga hela körningen. Fel (t.ex. Ollama-timeout)
+    får propagera till anroparen, som ansvarar för att markera objektet 'crashed'.
+
+    Returnerar "indexed" (klar), "partial" (fortsätter nästa körning) eller
+    "skipped" (inget att indexera).
+    """
     from qdrant_client.models import PointStruct
 
     item = conn.execute(
@@ -215,23 +231,23 @@ def index_item(conn, item_id: int) -> bool:
 
     if not item:
         logger.error("Item %d hittades inte", item_id)
-        return False
-
-    if not item["transcript_path"]:
-        logger.warning("Item %d saknar transcript_path", item_id)
-        return False
-
-    transcript_path = Path(item["transcript_path"])
-    if not transcript_path.exists():
-        logger.error("Transkript saknas på disk: %s", transcript_path)
-        return False
+        return "skipped"
 
     source_type = item["source_type"] or "rss"
 
-    if source_type in ("web", "pdf"):
+    if not item["transcript_path"] or not Path(item["transcript_path"]).exists():
+        fallback_parts = [p for p in [item["title"], item["description"]] if p]
+        if not fallback_parts:
+            logger.warning("Item %d saknar både transkript och text -- hoppas över", item_id)
+            return "skipped"
+        logger.info("Item %d saknar transkript -- indexerar rubrik+beskrivning", item_id)
+        chunks = chunk_text(" ".join(fallback_parts))
+    elif source_type in ("web", "pdf"):
+        transcript_path = Path(item["transcript_path"])
         text   = transcript_path.read_text(encoding="utf-8")
         chunks = chunk_text(text)
     else:
+        transcript_path = Path(item["transcript_path"])
         try:
             segments = json.loads(transcript_path.read_text(encoding="utf-8"))
             chunks   = chunk_segments(segments)
@@ -241,11 +257,21 @@ def index_item(conn, item_id: int) -> bool:
 
     if not chunks:
         logger.warning("Item %d gav inga chunks", item_id)
-        return False
+        return "skipped"
+
+    # Redan embeddade chunks från en tidigare (avbruten) körning på samma item.
+    already = item["indexed_chunks"] or 0
+    if already >= len(chunks):
+        # Chunkningen gav färre chunks än tidigare (t.ex. omtranskriberat) -- börja om.
+        already = 0
+
+    pending = chunks[already:]
+    window  = pending[:MAX_CHUNKS_PER_RUN]
 
     domain = item["domain"]
     col    = collection_name(domain)
     ensure_collection(domain)
+    client = _get_client()
 
     base_meta = {
         "item_id":         item_id,
@@ -257,36 +283,49 @@ def index_item(conn, item_id: int) -> bool:
         "title":           item["title"] or "",
     }
 
-    texts = [c["text"] for c in chunks]
-    try:
-        vectors = _embed_texts(texts)
-    except Exception as exc:
-        logger.error("Embedding-fel för item %d: %s", item_id, exc)
-        return False
+    progress = already
 
-    points = [
-        PointStruct(
-            id=str(uuid.uuid4()),
-            vector=vector,
-            payload={
-                **base_meta,
-                "segment_start": c["segment_start"],
-                "segment_end":   c["segment_end"],
-                "text":          c["text"],
-            },
-        )
-        for c, vector in zip(chunks, vectors)
-    ]
+    # En delbatch i taget: upsert + spara indexed_chunks direkt efter varje lyckad
+    # Ollama-anrop. Om ett senare anrop kraschar/timear ut går tidigare delbatcher
+    # inte förlorade -- nästa körning fortsätter från senast sparade progress.
+    for i in range(0, len(window), EMBED_BATCH_SIZE):
+        sub_chunks = window[i : i + EMBED_BATCH_SIZE]
+        texts      = [c["text"] for c in sub_chunks]
+        vectors    = _embed_batch(texts)
 
-    client = _get_client()
-    client.upsert(collection_name=col, points=points)
+        points = [
+            PointStruct(
+                id=str(uuid.uuid4()),
+                vector=vector,
+                payload={
+                    **base_meta,
+                    "segment_start": c["segment_start"],
+                    "segment_end":   c["segment_end"],
+                    "text":          c["text"],
+                },
+            )
+            for c, vector in zip(sub_chunks, vectors)
+        ]
+        client.upsert(collection_name=col, points=points)
 
-    transition(conn, item_id, "indexed",
-               chroma_collection=col,
-               indexed_at=_now())
+        progress += len(sub_chunks)
+        conn.execute("UPDATE vigil_items SET indexed_chunks = ? WHERE id = ?",
+                     (progress, item_id))
+        conn.commit()
 
-    logger.info("Item %d indexerad: %d chunks → %s", item_id, len(points), col)
-    return True
+    if progress >= len(chunks):
+        transition(conn, item_id, "indexed",
+                   chroma_collection=col,
+                   indexed_at=_now(),
+                   error_message=None,
+                   indexed_chunks=progress)
+        logger.info("Item %d indexerad klart: %d/%d chunks → %s",
+                     item_id, progress, len(chunks), col)
+        return "indexed"
+
+    logger.info("Item %d delvis indexerad: %d/%d chunks (fortsätter nästa körning) → %s",
+                 item_id, progress, len(chunks), col)
+    return "partial"
 
 
 # ---------------------------------------------------------------------------
@@ -294,10 +333,17 @@ def index_item(conn, item_id: int) -> bool:
 # ---------------------------------------------------------------------------
 
 def run_indexer(conn, domain: Optional[str] = None, max_items: int = 20) -> dict:
-    """Indexerar alla transcribed/captioned-objekt. Returnerar räknare."""
+    """
+    Indexerar alla transcribed/captioned/uap_classified-objekt. Returnerar räknare.
+
+    Objekt som kraschar (t.ex. Ollama-timeout, trasig transkript) markeras 'crashed'
+    med felmeddelande och hoppas över i framtida körningar -- de blockerar inte
+    resten av kön. 'partial' betyder att objektet är en lång post som fortsätter
+    från sin chunk-offset nästa körning.
+    """
     query = """
         SELECT id FROM vigil_items
-        WHERE state IN ('transcribed', 'captioned')
+        WHERE state IN ('transcribed', 'captioned', 'uap_classified')
           {}
         ORDER BY priority_score DESC
         LIMIT ?
@@ -306,10 +352,19 @@ def run_indexer(conn, domain: Optional[str] = None, max_items: int = 20) -> dict
     params = (domain, max_items) if domain else (max_items,)
     rows   = conn.execute(query, params).fetchall()
 
-    counts = {"indexed": 0, "failed": 0}
+    counts = {"indexed": 0, "partial": 0, "crashed": 0, "skipped": 0, "failed": 0}
     for row in rows:
-        ok = index_item(conn, row["id"])
-        counts["indexed" if ok else "failed"] += 1
+        item_id = row["id"]
+        try:
+            status = index_item(conn, item_id)
+            counts[status] = counts.get(status, 0) + 1
+            if status == "skipped":
+                counts["failed"] += 1
+        except Exception as exc:
+            logger.exception("Item %d kraschade under indexering", item_id)
+            transition(conn, item_id, "crashed", error_message=str(exc)[:2000])
+            counts["crashed"] += 1
+            counts["failed"] += 1
 
     return counts
 
@@ -361,12 +416,18 @@ def _main():
             print(f"  ✓ vigil_{d}")
 
     elif args.item:
-        ok = index_item(conn, args.item)
-        print("✓ Indexerad" if ok else "✗ Misslyckades")
+        try:
+            status = index_item(conn, args.item)
+            labels = {"indexed": "✓ Indexerad", "partial": "… Delvis (fortsätter nästa körning)", "skipped": "✗ Överhoppad"}
+            print(labels.get(status, status))
+        except Exception as exc:
+            transition(conn, args.item, "crashed", error_message=str(exc)[:2000])
+            print(f"✗ Kraschade: {exc}")
 
     elif args.run:
         counts = run_indexer(conn, domain=args.domain, max_items=args.max)
-        print(f"\n✓ Indexering: {counts['indexed']} indexerade, {counts['failed']} misslyckade")
+        print(f"\n✓ Indexering: {counts['indexed']} klara, {counts['partial']} delvis (fortsätter), "
+              f"{counts['crashed']} kraschade, {counts['skipped']} överhoppade")
 
     else:
         parser.print_help()
