@@ -5,6 +5,7 @@ Laddar ned audio för köade bevakningsobjekt till persistent lagring.
 
 Flöde:
   queued (med audio) → download_audio() → downloaded (audio_path satt)
+  queued (bild-URL)  → ocr_image()      → transcribed (direkt, utan whisper)
 
 Ordning: nyaste published_at först (senast publicerat = mest relevant).
 Text-only RSS (ingen enclosure_url) hoppas över — hanteras av transcriber.
@@ -16,6 +17,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
+from ocr import is_image_file, ocr_image, write_image_transcript
 from orchestrator import init_db, transition
 
 logger = logging.getLogger(__name__)
@@ -138,6 +140,24 @@ def download_item(conn, item_id: int) -> bool:
 
     size_mb = output_path.stat().st_size / 1_048_576
     logger.info(f"[dl] Klar: {output_path.name} ({size_mb:.1f} MB)")
+
+    # Kontrollera om filen är en bild — OCR:a direkt istället för whisper
+    if is_image_file(output_path):
+        logger.info(f"[dl] Bildfil detekterad ({output_path.name}) — OCR:ar med Claude Vision")
+        title = item["title"] or ""
+        ocr_text = ocr_image(output_path, item_id, title=title)
+        if ocr_text:
+            json_path, _ = write_image_transcript(item_id, ocr_text)
+            transition(conn, item_id, "transcribed",
+                       audio_path=str(output_path),
+                       transcript_path=str(json_path))
+            logger.info(f"[dl] OCR klar → transcribed: item {item_id}")
+        else:
+            logger.warning(f"[dl] OCR misslyckades för item {item_id} — filtrerar bort")
+            output_path.unlink(missing_ok=True)
+            transition(conn, item_id, "filtered_out")
+        return bool(ocr_text)
+
     transition(conn, item_id, "downloaded", audio_path=str(output_path))
     return True
 
@@ -167,7 +187,7 @@ def run_downloader(conn, domain: Optional[str] = None, max_items: int = 1) -> di
                   AND json_extract(raw_metadata, '$.enclosure_url') IS NOT NULL
                   AND json_extract(raw_metadata, '$.enclosure_url') != '')
           )
-        ORDER BY published_at DESC NULLS LAST
+        ORDER BY priority_score DESC, published_at DESC NULLS LAST
         LIMIT ?
         """,
         params,

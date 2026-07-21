@@ -315,6 +315,25 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Odoo-sync (kraschsäker — misslyckas tyst)
+# ---------------------------------------------------------------------------
+
+def _odoo_sync_item(conn, item_id: int) -> None:
+    """Synkar ett enskilt item till Odoo efter transkription. Misslyckas tyst."""
+    try:
+        from odoo_writer import get_odoo_env, sync_item
+        env = get_odoo_env()
+        if env is None:
+            return
+        row = conn.execute("SELECT * FROM vigil_items WHERE id = ?", (item_id,)).fetchone()
+        if row:
+            sync_item(env, row)
+            logger.info("Odoo-sync: item %d uppdaterad", item_id)
+    except Exception as exc:
+        logger.warning("Odoo-sync misslyckades för item %d: %s", item_id, exc)
+
+
+# ---------------------------------------------------------------------------
 # Köprocessor
 # ---------------------------------------------------------------------------
 
@@ -345,6 +364,7 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
 
         if ok:
             counts["completed"] += 1
+            _odoo_sync_item(conn, item_id)
         else:
             state_row = conn.execute(
                 "SELECT state FROM vigil_items WHERE id = ?", (item_id,)

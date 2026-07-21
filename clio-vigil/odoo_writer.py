@@ -31,10 +31,13 @@ SYNC_STATES = [
     "filtered_in",
     "filtered_out",
     "queued",
+    "downloaded",
+    "uap_classified",
     "transcribing",
     "transcribed",
     "indexed",
     "notified",
+    "crashed",
 ]
 
 
@@ -84,8 +87,29 @@ def _dt(s) -> str | bool:
         return False
 
 
+def _read_transcript(row) -> str:
+    """Laserna transkriptfilen och returnerar sammanfogad text, eller tom strang."""
+    path = row["transcript_path"] if "transcript_path" in row.keys() else None
+    if not path:
+        return ""
+    try:
+        import json as _json
+        from pathlib import Path as _Path
+        p = _Path(path)
+        if not p.exists():
+            return ""
+        segments = _json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(segments, list) or not segments:
+            return ""
+        return "\n".join(s.get("text", "").strip() for s in segments if s.get("text"))
+    except Exception as exc:
+        _logger.debug("_read_transcript: kunde inte lasa %s: %s", path, exc)
+        return ""
+
+
 def _item_to_vals(row) -> dict:
-    """Konverterar en SQLite-rad (sqlite3.Row) till Odoo-fältvärden."""
+    """Konverterar en SQLite-rad (sqlite3.Row) till Odoo-faltvarden."""
+    transcript = _read_transcript(row)
     return {
         "url":              row["url"],
         "title":            (row["title"] or "")[:500],
@@ -101,9 +125,13 @@ def _item_to_vals(row) -> dict:
         "summary":             row["summary"] or False,
         "created_at":          _dt(row["created_at"]),
         "notified_at":         _dt(row["notified_at"]),
+        "audio_path":          row["audio_path"] if "audio_path" in row.keys() else False,
+        "transcript_snippet":  transcript[:1000] if transcript else False,
         # Sprint C
         "archive_downloaded":  bool(row["archive_downloaded"]) if "archive_downloaded" in row.keys() else False,
         "archive_path":        row["archive_path"] if "archive_path" in row.keys() else False,
+        # Sprint E: kraschisolering
+        "error_message":       row["error_message"] if "error_message" in row.keys() else False,
     }
 
 
@@ -398,6 +426,7 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
             vigil_recs = VigilItem.search_read([("url", "=", url)], ["id"], limit=1)
             vigil_id = vigil_recs[0]["id"] if vigil_recs else False
 
+            transcript = _read_transcript(row)
             vals = {
                 "url":         url,
                 "title":       (row["title"] or "")[:500],
@@ -405,11 +434,13 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
                 "media_type":  _media_type_from_row(row),
                 "published":   _dt(row["published_at"]),
                 "first_seen":  _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
-                "data_source": f"vigil_{row['domain']}",
+                "data_source": "vigil_%s" % row["domain"],
                 "vigil_item_id": vigil_id,
             }
             if row["summary"]:
                 vals["body_snippet"] = row["summary"]
+            if transcript:
+                vals["body"] = transcript
 
             existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
             if existing:
