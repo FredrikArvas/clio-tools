@@ -173,15 +173,47 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
 def send_digest(subject: str, plain: str, html: str,
                 to_addr: Optional[str] = None,
                 dry_run: bool = False) -> bool:
-    """Skickar digest-mail via clio_core.mail. Returnerar True vid lyckat sändning."""
+    """Skickar digest-mail via clio-agent-mail/smtp_client. Returnerar True vid lyckat sändning."""
+    import importlib.util, os, configparser
+    from pathlib import Path
+    from dotenv import load_dotenv
+
     to = to_addr or DIGEST_TO
     if dry_run:
         logger.info(f"[DRY-RUN] Skulle skicka till {to}: {subject}")
         print(f"\n{'='*60}\n[Till: {to}]\n{plain}\n{'='*60}")
         return True
 
-    from clio_core import mail
-    return mail.send(to, subject, plain, html)
+    mail_dir = Path(__file__).parent.parent / "clio-agent-mail"
+    try:
+        load_dotenv(mail_dir.parent / ".env")
+        load_dotenv(mail_dir / ".env", override=True)
+
+        spec = importlib.util.spec_from_file_location("smtp_client", mail_dir / "smtp_client.py")
+        smtp_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(smtp_mod)
+
+        config = configparser.ConfigParser(interpolation=None)
+        config.read(str(mail_dir / "clio.config"), encoding="utf-8")
+        for k in config.get("mail", "accounts").split(","):
+            k = k.strip()
+            v = os.environ.get(f"IMAP_PASSWORD_{k.upper()}")
+            if v:
+                config.set("mail", f"imap_password_{k}", v)
+
+        smtp_mod.send_email(
+            config=config,
+            from_account_key="clio",
+            to_addr=to,
+            subject=subject,
+            body=plain,
+            html_body=html,
+        )
+        logger.info("Digest skickat till %s: %s", to, subject)
+        return True
+    except Exception as exc:
+        logger.error("Digest-sändning misslyckades: %s", exc)
+        return False
 
 
 # ---------------------------------------------------------------------------
