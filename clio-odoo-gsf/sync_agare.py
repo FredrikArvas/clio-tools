@@ -59,7 +59,7 @@ def _parse_andel_pct(andel: str) -> int:
     Accepterar: "1/4", "1/2", "25%", "25", "0.25"
     Returnerar: 0-100 (int), 0 vid ogiltigt värde.
     """
-    s = andel.strip().rstrip("%")
+    s = andel.strip().rstrip("%").replace(",", ".")
     if not s:
         return 0
     try:
