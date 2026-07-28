@@ -52,6 +52,16 @@ def _get_country_se(env) -> int:
     return _to_int(hits[0]["id"]) if hits else None
 
 
+def _parse_date(val) -> str | None:
+    """Extraherar YYYY-MM-DD ur strängar som '2012-10-09 (Lagfart)'."""
+    s = _clean(val)
+    if not s:
+        return None
+    import re
+    m = re.search(r"\d{4}-\d{2}-\d{2}", s)
+    return m.group(0) if m else None
+
+
 def _build_property_vals(row: dict, country_id: int) -> dict:
     beteckning = _clean(row.get("Fastighetsbeteckning", ""))
     bebyggd = _clean(row.get("Bebyggd", "")).lower()
@@ -71,6 +81,9 @@ def _build_property_vals(row: dict, country_id: int) -> dict:
             vals["size"] = str(round(float(str(areal_raw).replace(",", ".")), 4))
         except ValueError:
             pass
+    acquired = _parse_date(row.get("Inskrivningsdatum"))
+    if acquired:
+        vals["acquired_date"] = acquired
     if country_id:
         vals["country_id"] = country_id
     return vals
