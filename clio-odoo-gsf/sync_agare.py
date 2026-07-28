@@ -1,11 +1,15 @@
 """
-sync_agare.py - Importerar/uppdaterar GSF-agare fran Excel till Odoo res.partner.
+sync_agare.py - Importerar/uppdaterar GSF-agare fran Excel till Odoo.
+
+Skapar/uppdaterar:
+  - res.partner          (agare, upsert-nyckel: ref = "gsf-{Unikt ID}")
+  - property.property    (fastighet, upsert-nyckel: code = fastighetsbeteckning)
+  - property.stakeholder (agare <-> fastighet med andel i %)
 
 Korning:
-    python sync_agare.py <xlsx-fil>               # live
-    python sync_agare.py <xlsx-fil> --dry-run     # ingen skrivning
+    python sync_agare.py <xlsx-fil>           # live
+    python sync_agare.py <xlsx-fil> --dry-run # ingen skrivning
 
-Upsert-nyckel: ref = "gsf-{Unikt ID}"
 Kraver .env med ODOO_URL, ODOO_DB, ODOO_USER, ODOO_PASSWORD.
 """
 
@@ -22,7 +26,17 @@ from clio_odoo import connect
 
 GSF_TAG = "GSF:Agare"
 REF_PREFIX = "gsf-"
+PARTNER_STATUS = "legal_owner"
 
+ODOO_URLS = {
+    "hem": "http://192.168.1.189:8069",
+    "jobbet": "http://100.107.127.104:8069",
+}
+
+
+# ---------------------------------------------------------------------------
+# Hjälpfunktioner
+# ---------------------------------------------------------------------------
 
 def _clean(val) -> str:
     if val is None:
@@ -35,22 +49,43 @@ def _first_line(val) -> str:
     return _clean(val).split("\n")[0].strip()
 
 
-def _fastigheter_note(row) -> str:
-    fastigheter = _clean(row.get("Fastigheter", ""))
-    andelar = _clean(row.get("\u00c4garandel", ""))
-    if not fastigheter:
-        return ""
-    lines = fastigheter.split("\n")
-    andel_lines = andelar.split("\n") if andelar else []
-    parts = []
-    for i, f in enumerate(lines):
-        andel = andel_lines[i] if i < len(andel_lines) else ""
-        parts.append(f"{f} ({andel})" if andel else f)
-    return "GSF fastigheter: " + ", ".join(parts)
-
-
 def _to_int(val) -> int:
     return val.id if hasattr(val, "id") else int(val)
+
+
+def _parse_andel_pct(andel: str) -> int:
+    """Omvandla ägarandel-sträng till heltalsprocent.
+
+    Accepterar: "1/4", "1/2", "25%", "25", "0.25"
+    Returnerar: 0-100 (int), 0 vid ogiltigt värde.
+    """
+    s = andel.strip().rstrip("%")
+    if not s:
+        return 0
+    try:
+        if "/" in s:
+            num, den = s.split("/", 1)
+            return round(float(num) / float(den) * 100)
+        val = float(s)
+        # Värden <= 1 tolkas som decimalandel (0.25 → 25)
+        return round(val * 100) if val <= 1 else round(val)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+
+def _parse_fastigheter(row: dict) -> list[tuple[str, int]]:
+    """Returnerar lista av (fastighetsbeteckning, andel_pct) från raden."""
+    fastigheter_raw = _clean(row.get("Fastigheter", ""))
+    andelar_raw = _clean(row.get("Ägarandel", ""))
+    if not fastigheter_raw:
+        return []
+    fast_lines = [f.strip() for f in fastigheter_raw.split("\n") if f.strip()]
+    andel_lines = [a.strip() for a in andelar_raw.split("\n")] if andelar_raw else []
+    result = []
+    for i, beteckning in enumerate(fast_lines):
+        andel_str = andel_lines[i] if i < len(andel_lines) else ""
+        result.append((beteckning, _parse_andel_pct(andel_str)))
+    return result
 
 
 def _get_or_create_tag(env, tag_name: str) -> int:
@@ -67,14 +102,11 @@ def _get_country_se(env) -> int:
     return _to_int(hits[0]["id"]) if hits else None
 
 
-def _build_vals(row: dict, country_id: int, tag_id: int) -> dict:
+def _build_partner_vals(row: dict, country_id: int, tag_id: int) -> dict:
     ref = f"{REF_PREFIX}{row['Unikt ID']}"
     typ = _clean(row.get("Typ", ""))
     is_company = typ != "Fysisk person"
-
     street2 = _clean(row.get("c/o", ""))
-    note = _fastigheter_note(row)
-
     vals: dict = {
         "ref": ref,
         "name": _clean(row.get("Namn", "")),
@@ -83,9 +115,7 @@ def _build_vals(row: dict, country_id: int, tag_id: int) -> dict:
         "zip": _first_line(row.get("Postnr", "")),
         "city": _clean(row.get("Postort", "")),
         "email": _clean(row.get("E-post", "")),
-        "mobile": _clean(row.get("Mobilnr", "")),
-        "phone": _clean(row.get("Telefonnr", "")),
-        "comment": note,
+        "phone": _clean(row.get("Mobilnr", "")) or _clean(row.get("Telefonnr", "")),
         "category_id": [(4, tag_id)],
     }
     if street2:
@@ -94,6 +124,59 @@ def _build_vals(row: dict, country_id: int, tag_id: int) -> dict:
         vals["country_id"] = country_id
     return vals
 
+
+# ---------------------------------------------------------------------------
+# Odoo upsert-hjälpredor
+# ---------------------------------------------------------------------------
+
+def _upsert_partner(Partner, row: dict, country_id: int, tag_id: int) -> int:
+    ref = f"{REF_PREFIX}{row['Unikt ID']}"
+    vals = _build_partner_vals(row, country_id, tag_id)
+    hits = Partner.search_read([("ref", "=", ref)], ["id"])
+    if hits:
+        Partner.write([hits[0]["id"]], vals)
+        return _to_int(hits[0]["id"]), "updated"
+    pid = Partner.create(vals)
+    return _to_int(pid), "created"
+
+
+def _upsert_property(Property, beteckning: str) -> tuple[int, str]:
+    """Hämta eller skapa property.property med given fastighetsbeteckning (code)."""
+    hits = Property.search_read([("code", "=", beteckning)], ["id"])
+    if hits:
+        return _to_int(hits[0]["id"]), "existing"
+    pid = Property.create({
+        "name": beteckning,
+        "code": beteckning,
+        "state": "ok",
+    })
+    return _to_int(pid), "created"
+
+
+def _upsert_stakeholder(Stakeholder, property_id: int, partner_id: int, pct: int) -> str:
+    """Hämta eller skapa property.stakeholder; uppdatera andel vid ändring."""
+    hits = Stakeholder.search_read(
+        [("property_id", "=", property_id), ("partner_id", "=", partner_id)],
+        ["id", "percentage"],
+    )
+    if hits:
+        existing_pct = hits[0].get("percentage") or 0
+        if existing_pct != pct:
+            Stakeholder.write([hits[0]["id"]], {"percentage": pct})
+            return "updated"
+        return "unchanged"
+    Stakeholder.create({
+        "property_id": property_id,
+        "partner_id": partner_id,
+        "percentage": pct,
+        "partner_status": PARTNER_STATUS,
+    })
+    return "created"
+
+
+# ---------------------------------------------------------------------------
+# Excel-läsning
+# ---------------------------------------------------------------------------
 
 def _read_xlsx(path: str) -> list[dict]:
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
@@ -106,11 +189,9 @@ def _read_xlsx(path: str) -> list[dict]:
     return [dict(zip(headers, row)) for row in rows[1:]]
 
 
-ODOO_URLS = {
-    "hem": "http://192.168.1.189:8069",
-    "jobbet": "http://100.107.127.104:8069",
-}
-
+# ---------------------------------------------------------------------------
+# Huvudrutin
+# ---------------------------------------------------------------------------
 
 def _ask_location() -> str:
     print("Var sitter du? [hem / jobbet]: ", end="", flush=True)
@@ -118,61 +199,91 @@ def _ask_location() -> str:
     return ODOO_URLS.get(val, ODOO_URLS["hem"])
 
 
-def run(xlsx_path: str, dry_run: bool = False) -> None:
+def run(xlsx_path: str, dry_run: bool = False, url: str = None, db: str = None) -> None:
     print(f"Laser: {xlsx_path}")
     rows = _read_xlsx(xlsx_path)
     print(f"  {len(rows)} rader hittade")
 
     if not dry_run:
-        url = _ask_location()
-        env = connect(url=url)
+        if not url:
+            url = _ask_location()
+        env = connect(url=url, db=db)
         Partner = env["res.partner"]
+        Property = env["property.property"]
+        Stakeholder = env["property.stakeholder"]
         tag_id = _get_or_create_tag(env, GSF_TAG)
         country_id = _get_country_se(env)
         print(f"  Tag '{GSF_TAG}' id={tag_id}, land SE id={country_id}")
     else:
-        Partner = None
-        tag_id = 0
-        country_id = 0
         print("  [DRY-RUN] ingen anslutning till Odoo")
 
-    created = updated = skipped = errors = 0
+    p_created = p_updated = p_skipped = p_errors = 0
+    prop_created = prop_existing = 0
+    sh_created = sh_updated = sh_unchanged = 0
 
     for row in rows:
         uid = row.get("Unikt ID")
         if not uid:
-            skipped += 1
+            p_skipped += 1
             continue
 
-        ref = f"{REF_PREFIX}{uid}"
-        vals = _build_vals(row, country_id, tag_id)
+        fastigheter = _parse_fastigheter(row)
 
         if dry_run:
-            print(f"  [DRY] {ref} | {vals['name']} | {vals.get('email','')}")
-            created += 1
+            ref = f"{REF_PREFIX}{uid}"
+            name = _clean(row.get("Namn", ""))
+            print(f"  [DRY] {ref} | {name} | fastigheter: {fastigheter}")
+            p_created += 1
             continue
 
+        # --- res.partner ---
         try:
-            hits = Partner.search_read([("ref", "=", ref)], ["id", "name"])
-            if hits:
-                Partner.write([hits[0]["id"]], vals)
-                updated += 1
+            partner_id, action = _upsert_partner(Partner, row, country_id, tag_id)
+            if action == "created":
+                p_created += 1
             else:
-                Partner.create(vals)
-                created += 1
+                p_updated += 1
         except Exception as e:
-            print(f"  FEL {ref}: {e}")
-            errors += 1
+            ref = f"{REF_PREFIX}{uid}"
+            print(f"  FEL partner {ref}: {e}")
+            p_errors += 1
+            continue
 
-    print(f"\nKlart: {created} skapade | {updated} uppdaterade | {skipped} hoppade over | {errors} fel")
+        # --- property.property + property.stakeholder ---
+        for beteckning, pct in fastigheter:
+            try:
+                prop_id, prop_action = _upsert_property(Property, beteckning)
+                if prop_action == "created":
+                    prop_created += 1
+                else:
+                    prop_existing += 1
+
+                sh_action = _upsert_stakeholder(Stakeholder, prop_id, partner_id, pct)
+                if sh_action == "created":
+                    sh_created += 1
+                elif sh_action == "updated":
+                    sh_updated += 1
+                else:
+                    sh_unchanged += 1
+            except Exception as e:
+                print(f"  FEL fastighet '{beteckning}' for {REF_PREFIX}{uid}: {e}")
+                p_errors += 1
+
+    print(f"""
+Partners  : {p_created} skapade | {p_updated} uppdaterade | {p_skipped} hoppade over | {p_errors} fel
+Fastigheter: {prop_created} skapade | {prop_existing} befintliga
+Stakeholders: {sh_created} skapade | {sh_updated} uppdaterade | {sh_unchanged} oforändrade
+""")
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Synka GSF-agare till Odoo")
+    parser = argparse.ArgumentParser(description="Synka GSF-agare och fastigheter till Odoo")
     parser.add_argument("xlsx", help="Sokvaeg till AegareDetaljerad.xlsx")
     parser.add_argument("--dry-run", action="store_true", help="Skriv inget till Odoo")
+    parser.add_argument("--url", help="Odoo-URL, t.ex. http://localhost:8079")
+    parser.add_argument("--db", help="Databasnamn, t.ex. gsf_t2")
     args = parser.parse_args(argv)
-    run(args.xlsx, dry_run=args.dry_run)
+    run(args.xlsx, dry_run=args.dry_run, url=args.url, db=args.db)
 
 
 if __name__ == "__main__":
