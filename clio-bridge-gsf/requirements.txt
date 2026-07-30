@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+anthropic
+claude-agent-sdk
+httpx
+python-dotenv
+aiosqlite
+pydantic

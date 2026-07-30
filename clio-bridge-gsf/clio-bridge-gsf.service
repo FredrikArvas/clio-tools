@@ -1,0 +1,17 @@
+[Unit]
+Description=Clio Bridge for gsf_jubileum (Anthropic proxy)
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=clioadmin
+WorkingDirectory=/home/clioadmin/19.0/clio-tools/clio-bridge-gsf
+EnvironmentFile=/home/clioadmin/19.0/clio-tools/clio-bridge-gsf/.env
+ExecStart=/home/clioadmin/19.0/clio-tools/clio-bridge-gsf/venv/bin/uvicorn app:app --host 172.19.0.1 --port 8090
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
