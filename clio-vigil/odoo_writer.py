@@ -35,6 +35,7 @@ SYNC_STATES = [
     "uap_classified",
     "transcribing",
     "transcribed",
+    "summarized",
     "indexed",
     "notified",
     "crashed",
@@ -114,7 +115,7 @@ def _item_to_vals(row) -> dict:
         "url":              row["url"],
         "title":            (row["title"] or "")[:500],
         "domain":           row["domain"] or "",
-        "source_type":      ("web" if row["source_type"] == "pdf" else row["source_type"]) or "web",
+        "source_type":      ("web" if row["source_type"] == "pdf" else "rss" if row["source_type"] == "podcast" else row["source_type"]) or "web",
         "source_name":      (row["source_name"] or "")[:200],
         "source_maturity":  row["source_maturity"] or "tidig",
         "published_at":     _dt(row["published_at"]),
@@ -458,6 +459,50 @@ def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
 # ---------------------------------------------------------------------------
 # Leveransposter
 # ---------------------------------------------------------------------------
+
+def sync_single_item(odoo_env, conn, item_id: int) -> bool:
+    """Synkar ett enskilt vigil_item till clio.media.article (3-4 HTTP-anrop)."""
+    if odoo_env is None:
+        return False
+    try:
+        row = conn.execute('SELECT * FROM vigil_items WHERE id = ?', (item_id,)).fetchone()
+        if not row:
+            return False
+        url = row['url'] if hasattr(row, '__getitem__') else None
+        if not url:
+            return False
+
+        Article   = odoo_env['clio.media.article']
+        VigilItem = odoo_env['clio.vigil.item']
+
+        vigil_recs = VigilItem.search_read([('url', '=', url)], ['id'], limit=1)
+        vigil_id   = vigil_recs[0]['id'] if vigil_recs else False
+
+        vals = {
+            'url':           url,
+            'title':         (row['title'] or '')[:500],
+            'source':        (row['source_name'] or '')[:200],
+            'media_type':    _media_type_from_row(row),
+            'published':     _dt(row['published_at']),
+            'first_seen':    _dt(row['published_at']) or _dt(row['created_at']) or _utcnow_str(),
+            'data_source':   'vigil_%s' % row['domain'],
+            'vigil_item_id': vigil_id,
+        }
+        if row['summary']:
+            vals['body_snippet'] = row['summary']
+
+        existing = Article.search_read([('url', '=', url)], ['id'], limit=1)
+        if existing:
+            Article.write([existing[0]['id']], vals)
+        else:
+            Article.create(vals)
+
+        _logger.debug('sync_single_item: item %d synkad till Odoo', item_id)
+        return True
+    except Exception as exc:
+        _logger.warning('sync_single_item: fel for item %d: %s', item_id, exc)
+        return False
+
 
 def write_deliveries(odoo_env, deliveries: list[dict]) -> int:
     """
