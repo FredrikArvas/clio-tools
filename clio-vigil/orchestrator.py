@@ -41,6 +41,7 @@ STATES = [
     "downloaded",     # Audio nedladdad, redo för Whisper
     "transcribing",
     "transcribed",
+    "summarized",
     "captioned",      # Sprint B: YouTube auto-captions (hoppar över Whisper)
     "indexed",
     "notified",
@@ -394,10 +395,27 @@ def get_next_queued(conn: sqlite3.Connection, domain: Optional[str] = None):
 def get_next_for_transcription(conn: sqlite3.Connection, domain: Optional[str] = None):
     """
     Hämtar nästa objekt för transkription.
-    Prioritetsordning: downloaded (audio klar) > queued text-only (ingen audio).
+    Prioritetsordning: transcribing (resume) > downloaded (audio klar) > queued text-only.
     """
     domain_clause = "AND domain = ?" if domain else ""
     params = (domain,) if domain else ()
+
+    # 0. Återuppta strandade transcribing-items (avbrutna av SIGTERM el. krasch)
+    row = conn.execute(
+        f"""SELECT * FROM vigil_items
+              WHERE state = 'transcribing'
+              AND whisper_segment > 0
+              AND transcript_path IS NULL
+              {domain_clause}
+              ORDER BY priority_score DESC LIMIT 1""",
+        params,
+    ).fetchone()
+    if row:
+        logger.info(
+            f"Återupptar strandat transcribing-item {row['id']} "
+            f"från segment {row['whisper_segment']}"
+        )
+        return row
 
     # 1. Föredra items där audio redan är nedladdat
     row = conn.execute(

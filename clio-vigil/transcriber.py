@@ -23,6 +23,7 @@ Körning (separat från pipeline — GPU-intensiv):
 import json
 import logging
 import re
+import signal
 import sys
 from pathlib import Path
 from typing import Optional
@@ -36,6 +37,19 @@ from orchestrator import (
 )
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# SIGTERM-hantering — ren avslutning med bevarat delresultat
+# ---------------------------------------------------------------------------
+
+_shutdown_requested: bool = False
+
+
+def _handle_sigterm(signum, frame):
+    global _shutdown_requested
+    logger.info("SIGTERM mottagen — avslutar transkription rent vid nästa segment")
+    _shutdown_requested = True
+
 
 DATA_DIR       = Path(__file__).parent / "data"
 AUDIO_DIR      = DATA_DIR / "audio"
@@ -260,6 +274,21 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         if seg_idx < resume_from:
             continue  # hoppa över redan sparade segment
 
+        if _shutdown_requested:
+            # Flush det vi hunnit med och lämna state=transcribing för återupptagning
+            if new_segments:
+                _flush_segments(transcript_json, existing_segments + new_segments)
+                conn.execute(
+                    "UPDATE vigil_items SET whisper_segment = ? WHERE id = ?",
+                    (seg_idx, item_id),
+                )
+                conn.commit()
+            logger.info(
+                f"SIGTERM: item {item_id} avbruten vid segment {seg_idx} "
+                f"— {len(existing_segments) + len(new_segments)} segment sparade"
+            )
+            return False
+
         new_segments.append({
             "start": round(seg.start, 2),
             "end":   round(seg.end, 2),
@@ -346,9 +375,17 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
     # Importeras här för att undvika cirkulär import
     from main import load_domain_config
 
+    global _shutdown_requested
+    _shutdown_requested = False
+    signal.signal(signal.SIGTERM, _handle_sigterm)
+
     counts = {"completed": 0, "preempted": 0, "failed": 0}
 
     for _ in range(max_items):
+        if _shutdown_requested:
+            logger.info("SIGTERM: avbryter kön — återupptas vid nästa körning")
+            break
+
         item = get_next_for_transcription(conn, domain)
         if not item:
             logger.info("Transkriptionskön är tom")
