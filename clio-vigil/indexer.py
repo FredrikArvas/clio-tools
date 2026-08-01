@@ -256,8 +256,15 @@ def index_item(conn, item_id: int) -> str:
             chunks = chunk_text(text)
 
     if not chunks:
-        logger.warning("Item %d gav inga chunks", item_id)
-        return "skipped"
+        # Fallback: segmentlista var tom (t.ex. RSS-textartikel med tom JSON)
+        # Försök indexera description + summary istället
+        fallback_parts = [fb for fb in [item["description"], item["summary"]] if fb]
+        if fallback_parts:
+            logger.info("Item %d: inga segment -- indexerar description/summary", item_id)
+            chunks = chunk_text(" ".join(fallback_parts))
+        if not chunks:
+            logger.warning("Item %d gav inga chunks", item_id)
+            return "skipped"
 
     # Redan embeddade chunks från en tidigare (avbruten) körning på samma item.
     already = item["indexed_chunks"] or 0
@@ -343,7 +350,7 @@ def run_indexer(conn, domain: Optional[str] = None, max_items: int = 20) -> dict
     """
     query = """
         SELECT id FROM vigil_items
-        WHERE state IN ('transcribed', 'captioned', 'uap_classified')
+        WHERE state IN ('transcribed', 'captioned', 'summarized', 'uap_classified')
           {}
         ORDER BY priority_score DESC
         LIMIT ?
