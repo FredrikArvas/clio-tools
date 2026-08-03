@@ -191,6 +191,7 @@ def write_sources(odoo_env, sources: list[dict]) -> int:
                 "maturity":                s.get("maturity", "tidig"),
                 "weight":                  float(s.get("weight", 1.0)),
                 "active":                  bool(s.get("active", True)),
+                "language":                s.get("language", "en"),
                 "notes":                   s.get("notes", "") or "",
                 "archive_enabled":         bool(s.get("archive", False)),
                 "auth_env":                s.get("auth_env") or "",
@@ -233,7 +234,7 @@ def read_sources(odoo_env, domain: str) -> list[dict]:
         [("domain", "=", domain), ("active", "=", True)],
         [
             "name", "source_type", "url", "channel_id",
-            "google_news_query", "lang", "country",
+            "google_news_query", "lang", "country", "language",
             "maturity", "weight", "transcription_threshold",
             "auth_env", "archive_enabled",
         ],
@@ -249,6 +250,7 @@ def read_sources(odoo_env, domain: str) -> list[dict]:
             "active":      True,
             "domain":      domain,
         }
+        s["language"] = r.get("language") or "en"
         if r["transcription_threshold"]:
             s["transcription_threshold"] = r["transcription_threshold"]
         if r["auth_env"]:

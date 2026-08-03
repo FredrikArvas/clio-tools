@@ -76,6 +76,7 @@ def collect_rss(conn, domain_config: dict) -> dict:
         name = source.get("name", url)
         maturity = source.get("maturity", "tidig")
         weight = source.get("weight", 1.0)
+        language = source.get("language", "en")
 
         # HTTP Basic Auth via env-variabel: AUTH_ENV=USER:PASSWORD (base64 ej nödvändigt)
         auth_env = source.get("auth_env")
@@ -153,6 +154,7 @@ def collect_rss(conn, domain_config: dict) -> dict:
                     source_name=name,
                     source_maturity=maturity,
                     source_weight=weight,
+                    language=language,
                     title=title,
                     description=description,
                     published_at=published_at,

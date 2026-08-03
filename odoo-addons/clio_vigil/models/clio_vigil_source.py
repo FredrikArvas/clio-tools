@@ -31,13 +31,20 @@ class ClioVigilSource(models.Model):
         index     = True,
     )
     source_type = fields.Selection(
-        selection = [("rss", "RSS"), ("youtube", "YouTube"), ("web", "Webb")],
+        selection = [("rss", "RSS"), ("youtube", "YouTube"), ("web", "Webb"),
+                     ("google_news", "Google News")],
         string    = "Typ",
         required  = True,
     )
+    language = fields.Selection(
+        selection = [("en", "Engelska"), ("sv", "Svenska")],
+        string    = "Språk",
+        required  = True,
+        default   = "en",
+        help      = "Transkriptionsspråk — styr val av AI-modell (Parakeet för engelska, kb-whisper för svenska).",
+    )
     url = fields.Char(
         string   = "URL",
-        required = True,
         index    = True,
         help     = "Feed-URL (RSS), kanal-handle (YouTube) eller startsida (webb).",
     )
@@ -62,14 +69,28 @@ class ClioVigilSource(models.Model):
     )
     notes = fields.Text(string="Anteckningar")
 
+    # ── Källspecifika fält ───────────────────────────────────────────────────
+    channel_id = fields.Char(
+        string = "YouTube Channel ID",
+        help   = "t.ex. UCxxxxxxxxxxxxxxxxxxxxxxxx — hämtas automatiskt från kanal-URL.",
+    )
+    google_news_query = fields.Char(
+        string = "Google News-sökterm",
+        help   = "Fritextsökning som matas till Google News RSS.",
+    )
+    auth_env = fields.Char(
+        string = "Auth-env-nyckel",
+        help   = "Miljövariabel med USER:PASSWORD för autentiserade RSS-flöden.",
+    )
+    transcription_threshold = fields.Float(
+        string  = "Transkribtionströskel",
+        default = 0.0,
+        help    = "Override av domänstandard — 0.0 = använd domänens värde.",
+    )
+
     # ── Sprint C: Arkivering ─────────────────────────────────────────────────
     archive_enabled = fields.Boolean(
         string  = "Arkivera lokalt",
         default = False,
         help    = "Om aktiverad laddar --archive-sources ned hela källarkivet.",
-    )
-
-    _url_uniq = models.Constraint(
-        "UNIQUE(url)",
-        "Käll-URL måste vara unik.",
     )
