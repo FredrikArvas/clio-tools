@@ -13,6 +13,9 @@
                decoration-info="domain == 'ai'"
                decoration-warning="domain == 'ufo'"/>
         <field name="source_type" string="Typ" widget="badge"/>
+        <field name="language" string="Språk" widget="badge"
+               decoration-success="language == 'en'"
+               decoration-info="language == 'sv'"/>
         <field name="maturity" string="Mognad" widget="badge"
                decoration-success="maturity == 'akademisk'"
                decoration-info="maturity == 'etablerad'"
@@ -39,9 +42,17 @@
             <group string="Klassificering">
               <field name="domain"      string="Domän"/>
               <field name="source_type" string="Typ"/>
+              <field name="language"    string="Språk"/>
               <field name="maturity"    string="Mognad"/>
               <field name="weight"      string="Prioritetsvikt"/>
             </group>
+          </group>
+          <group string="Källspecifikt">
+            <field name="channel_id"              string="YouTube Channel ID" attrs="{'invisible': [('source_type','!=','youtube')]}"/>
+            <field name="google_news_query"        string="Google News-sökterm" attrs="{'invisible': [('source_type','!=','google_news')]}"/>
+            <field name="auth_env"                 string="Auth-env-nyckel"/>
+            <field name="transcription_threshold"  string="Transkribtionströskel"/>
+            <field name="archive_enabled"          string="Arkivera lokalt"/>
           </group>
           <group string="Anteckningar">
             <field name="notes" string="" nolabel="1" widget="text"/>
@@ -66,6 +77,9 @@
         <filter name="ufo" string="UFO/UAP" domain="[('domain','=','ufo')]"/>
         <filter name="ai"  string="AI"      domain="[('domain','=','ai')]"/>
         <separator/>
+        <filter name="lang_en" string="Engelska" domain="[('language','=','en')]"/>
+        <filter name="lang_sv" string="Svenska"  domain="[('language','=','sv')]"/>
+        <separator/>
         <filter name="rss"     string="RSS"     domain="[('source_type','=','rss')]"/>
         <filter name="youtube" string="YouTube" domain="[('source_type','=','youtube')]"/>
         <separator/>
@@ -73,9 +87,10 @@
                 domain="[('maturity','in',['etablerad','akademisk'])]"/>
 
         <group>
-          <filter name="group_domain"  string="Domän"  context="{'group_by': 'domain'}"/>
-          <filter name="group_type"    string="Typ"    context="{'group_by': 'source_type'}"/>
-          <filter name="group_maturity" string="Mognad" context="{'group_by': 'maturity'}"/>
+          <filter name="group_domain"   string="Domän"   context="{'group_by': 'domain'}"/>
+          <filter name="group_type"     string="Typ"     context="{'group_by': 'source_type'}"/>
+          <filter name="group_language" string="Språk"   context="{'group_by': 'language'}"/>
+          <filter name="group_maturity" string="Mognad"  context="{'group_by': 'maturity'}"/>
         </group>
       </search>
     </field>
@@ -91,6 +106,7 @@
         <field name="name"/>
         <field name="domain"/>
         <field name="source_type"/>
+        <field name="language"/>
         <field name="maturity"/>
         <field name="weight"/>
         <field name="active"/>
@@ -100,6 +116,7 @@
             <div class="fw-bold fs-6"><field name="name"/></div>
             <div class="mt-1">
               <field name="source_type" widget="badge"/>
+              <field name="language"    widget="badge" class="ms-1"/>
               <field name="maturity"    widget="badge" class="ms-1"/>
             </div>
             <div class="text-muted small mt-1">
@@ -119,7 +136,7 @@
     <field name="arch" type="xml">
       <graph string="Källor per domän" type="bar">
         <field name="domain"   type="row"/>
-        <field name="maturity" type="col"/>
+        <field name="language" type="col"/>
       </graph>
     </field>
   </record>

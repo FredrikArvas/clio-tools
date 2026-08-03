@@ -1,21 +1,22 @@
 """
 clio-vigil — transcriber.py
 ============================
-Laddar ner och transkriberar bevakningsobjekt med faster-whisper.
+Transkriberar bevakningsobjekt med rätt backend per språk:
+  - Engelska  → nvidia/parakeet-tdt-1.1b (NeMo, CUDA) — snabbt, hög kvalitet
+  - Svenska   → KBLab/kb-whisper-medium  (faster-whisper, CUDA int8)
+
+Modeller cachas per process (laddas en gång, återanvänds för alla items).
 
 Flöde:
   1. Hämta nästa objekt ur kön (state=queued), sorterat på priority_score
   2. Ladda ned audio via yt-dlp (youtube) eller requests (rss/podcast)
-  3. Transkribera med faster-whisper, segmentvis
-  4. Preemptiv paus: kontrollera var 50:e segment om högre prio väntar
+  3. Transkribera med rätt backend baserat på item.language
+  4. Preemptiv paus: kontrollera var 50:e segment om högre prio väntar (Whisper)
+     Parakeet: hela filen i ett anrop — avbrutna items körs om från början
   5. Spara transkript (JSON med tidsstämplar + läsbar txt)
   6. Uppdatera vigil_items: state=transcribed, transcript_path
 
-Preemptiv paus:
-  orchestrator.preempt_current(conn, current_id, reason, segment)
-  Jobbet återupptas från whisper_segment vid nästa körning.
-
-Körning (separat från pipeline — GPU-intensiv):
+Körning:
   python transcriber.py --run [--domain ufo] [--max 5]
   python transcriber.py --item 42
 """
@@ -24,7 +25,9 @@ import json
 import logging
 import re
 import signal
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -51,12 +54,12 @@ def _handle_sigterm(signum, frame):
     _shutdown_requested = True
 
 
-DATA_DIR       = Path(__file__).parent / "data"
-AUDIO_DIR      = DATA_DIR / "audio"
+DATA_DIR        = Path(__file__).parent / "data"
+AUDIO_DIR       = DATA_DIR / "audio"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
 
 # ---------------------------------------------------------------------------
-# Transkriptionsprofiler
+# Transkriptionsprofiler (fallback när item.language saknas)
 # ---------------------------------------------------------------------------
 
 TRANSCRIPTION_PROFILES = {
@@ -74,6 +77,25 @@ TRANSCRIPTION_PROFILES = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# Modellcache — laddas en gång per process
+# ---------------------------------------------------------------------------
+
+_MODEL_CACHE: dict = {}
+
+
+def _get_whisper(model_size: str):
+    """Returnerar cachad faster-whisper-modell (CUDA, int8)."""
+    try:
+        from faster_whisper import WhisperModel
+    except ImportError:
+        raise ImportError("faster-whisper saknas — kör: pip install faster-whisper")
+    key = f"whisper:{model_size}"
+    if key not in _MODEL_CACHE:
+        logger.info("Laddar whisper-modell: %s (cuda/int8)", model_size)
+        _MODEL_CACHE[key] = WhisperModel(model_size, device="cuda", compute_type="int8")
+    return _MODEL_CACHE[key]
+
 
 # ---------------------------------------------------------------------------
 # Audio-nedladdning
@@ -86,7 +108,6 @@ def _download_youtube(url: str, output_path: Path) -> bool:
     except ImportError:
         raise ImportError("yt-dlp saknas — kör: pip install yt-dlp")
 
-    # yt-dlp lägger till extension — ge sökväg utan .mp3
     output_template = str(output_path.with_suffix(""))
     ydl_opts = {
         "format": "bestaudio/best",
@@ -121,20 +142,15 @@ def _download_url(url: str, output_path: Path) -> bool:
 
 
 def _make_slug(text: str, max_len: int = 20) -> str:
-    """Normaliserar text till URL-säkert slug, t.ex. 'Från UFO till UAP' → 'fran-ufo-till-uap'."""
     text = text.lower()
-    # Svenska tecken → ascii
     text = text.replace("å", "a").replace("ä", "a").replace("ö", "o")
     text = text.replace("é", "e").replace("ü", "u").replace("ñ", "n")
-    # Allt som inte är a-z/0-9 → bindestreck
     text = re.sub(r"[^a-z0-9]+", "-", text)
     text = text.strip("-")
-    # Trunkera och ta bort avslutande bindestreck
     return text[:max_len].rstrip("-")
 
 
 def _audio_filename(item: dict) -> str:
-    """Bygger läsbart filnamn: {source_slug}_{id}_{date}.mp3"""
     source = item.get("source_name") or "okand"
     slug   = _make_slug(source)
     date   = (item.get("published_at") or "")[:10].replace("-", "")
@@ -144,29 +160,20 @@ def _audio_filename(item: dict) -> str:
 
 
 def download_audio(item: dict) -> Optional[Path]:
-    """
-    Laddar ned audio för ett bevakningsobjekt.
-    Returnerar sökväg till nedladdad fil, eller None vid fel.
-    """
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     item_id     = item["id"]
     source_type = item["source_type"]
     url         = item["url"]
-
     output_path = AUDIO_DIR / _audio_filename(item)
 
     if source_type == "youtube":
         logger.info(f"Laddar ned YouTube-audio: {url[:70]}")
         ok = _download_youtube(url, output_path)
-
     elif source_type == "rss":
-        # Försök med sparad enclosure-URL (satt av rss_collector om tillgänglig),
-        # annars fall tillbaka på item-URL (kan vara artikel, inte ljud)
         raw = json.loads(item["raw_metadata"] or "{}")
         audio_url = raw.get("enclosure_url") or url
         logger.info(f"Laddar ned RSS-audio: {audio_url[:70]}")
         ok = _download_url(audio_url, output_path)
-
     else:
         logger.warning(f"Okänd source_type '{source_type}' för item {item_id} — hoppar över")
         return None
@@ -181,14 +188,121 @@ def download_audio(item: dict) -> Optional[Path]:
 
 
 # ---------------------------------------------------------------------------
-# Transkription
+# Parakeet-backend (engelska, NeMo, CUDA)
+# ---------------------------------------------------------------------------
+
+def _mp3_to_wav(mp3_path: Path, wav_path: Path) -> bool:
+    """Konverterar MP3 → WAV 16 kHz mono för Parakeet."""
+    result = subprocess.run(
+        ["ffmpeg", "-y", "-i", str(mp3_path), "-ar", "16000", "-ac", "1", str(wav_path)],
+        capture_output=True,
+    )
+    return wav_path.exists() and wav_path.stat().st_size > 0
+
+
+def _words_to_segments(words: list[dict], gap_threshold: float = 1.0,
+                       max_seg_duration: float = 15.0) -> list[dict]:
+    """
+    Grupperar ord till segment (max ~15 s eller vid talpaus > 1 s).
+    Varje word-dict förväntas ha 'start', 'end', 'word'.
+    """
+    if not words:
+        return []
+    segments = []
+    current_words = []
+    seg_start = words[0]["start"]
+
+    for w in words:
+        if current_words:
+            gap = w["start"] - current_words[-1]["end"]
+            duration = w["end"] - seg_start
+            if gap > gap_threshold or duration > max_seg_duration:
+                text = " ".join(cw["word"] for cw in current_words).strip()
+                if text:
+                    segments.append({"start": round(seg_start, 2),
+                                     "end": round(current_words[-1]["end"], 2),
+                                     "text": text})
+                seg_start = w["start"]
+                current_words = []
+        current_words.append(w)
+
+    if current_words:
+        text = " ".join(cw["word"] for cw in current_words).strip()
+        if text:
+            segments.append({"start": round(seg_start, 2),
+                             "end": round(current_words[-1]["end"], 2),
+                             "text": text})
+    return segments
+
+
+# ---------------------------------------------------------------------------
+# Whisper-backend (svenska, faster-whisper, CUDA)
+# ---------------------------------------------------------------------------
+
+def _transcribe_whisper_stream(audio_path: Path, model_size: str, language: str,
+                               item_id: int, conn, item: dict,
+                               existing_segments: list, resume_from: int) -> tuple[list, bool]:
+    """
+    Transkriberar med faster-whisper (streaming, segmentvis med preemptiv paus).
+    Returnerar (all_segments, preempted).
+    """
+    model = _get_whisper(model_size)
+    raw_segs, _ = model.transcribe(str(audio_path), beam_size=5, language=language)
+
+    new_segments: list[dict] = []
+    preempted = False
+    TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+    transcript_json = TRANSCRIPTS_DIR / f"vigil_{item_id}.json"
+
+    for seg_idx, seg in enumerate(raw_segs):
+        if seg_idx < resume_from:
+            continue
+
+        if _shutdown_requested:
+            if new_segments:
+                _flush_segments(transcript_json, existing_segments + new_segments)
+                conn.execute(
+                    "UPDATE vigil_items SET whisper_segment = ? WHERE id = ?",
+                    (seg_idx, item_id),
+                )
+                conn.commit()
+            logger.info(
+                f"SIGTERM: item {item_id} avbruten vid segment {seg_idx} "
+                f"— {len(existing_segments) + len(new_segments)} segment sparade"
+            )
+            return [], False  # Signalera SIGTERM via tom lista
+
+        new_segments.append({
+            "start": round(seg.start, 2),
+            "end":   round(seg.end, 2),
+            "text":  seg.text.strip(),
+        })
+
+        if len(new_segments) % 50 == 0:
+            _flush_segments(transcript_json, existing_segments + new_segments)
+            conn.execute(
+                "UPDATE vigil_items SET whisper_segment = ? WHERE id = ?",
+                (seg_idx + 1, item_id),
+            )
+            conn.commit()
+
+            preempter_id = _should_preempt(conn, item_id, item["priority_score"])
+            if preempter_id:
+                logger.info(f"Preempteras av item {preempter_id} vid segment {seg_idx + 1}")
+                preempt_current(conn, item_id,
+                                reason=f"preempted_by_item_{preempter_id}",
+                                segment=seg_idx + 1)
+                preempted = True
+                break
+
+    return existing_segments + new_segments, preempted
+
+
+# ---------------------------------------------------------------------------
+# Transkription — routing
 # ---------------------------------------------------------------------------
 
 def _should_preempt(conn, current_id: int, current_priority: float) -> Optional[int]:
-    """
-    Kontrollerar om ett väntande jobb har högre prioritet.
-    Returnerar item_id för preempteraren, eller None.
-    """
     row = conn.execute(
         """SELECT id FROM vigil_items
            WHERE state = 'queued' AND id != ? AND priority_score > ?
@@ -200,15 +314,10 @@ def _should_preempt(conn, current_id: int, current_priority: float) -> Optional[
 
 def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     """
-    Transkriberar ett bevakningsobjekt med faster-whisper.
-    Stödjer återupptagning från whisper_segment vid preemptiv paus.
+    Transkriberar ett bevakningsobjekt.
+    Routar till Parakeet (engelska) eller kb-whisper (svenska) baserat på item.language.
     Returnerar True om transkriptionen slutfördes helt.
     """
-    try:
-        from faster_whisper import WhisperModel
-    except ImportError:
-        raise ImportError("faster-whisper saknas — kör: pip install faster-whisper")
-
     item = conn.execute(
         "SELECT * FROM vigil_items WHERE id = ?", (item_id,)
     ).fetchone()
@@ -216,14 +325,16 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         logger.error(f"Item {item_id} hittades inte i databasen")
         return False
 
-    # Profil och modell
-    profile_name = domain_config.get("transcription_profile", "default")
-    profile      = TRANSCRIPTION_PROFILES.get(profile_name, TRANSCRIPTION_PROFILES["default"])
-    model_size   = item["whisper_model"] or domain_config.get("whisper_model", "medium")
-    language     = profile["language"]
-    resume_from  = item["whisper_segment"] or 0
+    # Bestäm språk: item.language > domänprofil > default
+    item_language = item["language"] if item["language"] else None
+    if not item_language:
+        profile_name  = domain_config.get("transcription_profile", "default")
+        profile       = TRANSCRIPTION_PROFILES.get(profile_name, TRANSCRIPTION_PROFILES["default"])
+        item_language = profile["language"]
 
-    # Sätt tillstånd → transcribing
+    model_size  = item["whisper_model"] or domain_config.get("whisper_model", "kb-whisper-medium")
+    resume_from = item["whisper_segment"] or 0
+
     transition(conn, item_id, "transcribing")
     conn.execute(
         """UPDATE transcription_queue SET started_at = datetime('now')
@@ -236,7 +347,6 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     transcript_json = TRANSCRIPTS_DIR / f"vigil_{item_id}.json"
     transcript_txt  = TRANSCRIPTS_DIR / f"vigil_{item_id}.txt"
 
-    # Använd redan nedladdad fil om möjligt, annars ladda ned
     existing_path = item["audio_path"] if item["audio_path"] else None
     if existing_path and Path(existing_path).exists():
         logger.info(f"Använder befintlig audio: {existing_path}")
@@ -245,11 +355,18 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     else:
         audio_path = download_audio(dict(item))
         _delete_after = True
+
     if not audio_path:
         transition(conn, item_id, "queued")
         return False
 
-    # Ladda in befintliga segment om vi återupptar
+    # ── faster-whisper (engelska + svenska, CUDA) ────────────────────────────────────
+    if item_language == "en":
+        model_size = "large-v3-turbo"
+    logger.info(
+        f"Transkriberar [{model_size}/{item_language}] item {item_id}: "
+        f"{(item['title'] or '—')[:55]}"
+    )
     existing_segments: list[dict] = []
     if resume_from > 0 and transcript_json.exists():
         try:
@@ -259,63 +376,17 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
             existing_segments = []
             resume_from = 0
 
-    logger.info(
-        f"Transkriberar [{model_size}/{language}] item {item_id}: "
-        f"{(item['title'] or '—')[:55]}"
-    )
-
-    model = WhisperModel(model_size, device="cpu", compute_type="int8")
-    raw_segs, _ = model.transcribe(str(audio_path), beam_size=5, language=language)
-
-    new_segments: list[dict] = []
-    preempted = False
-
-    for seg_idx, seg in enumerate(raw_segs):
-        if seg_idx < resume_from:
-            continue  # hoppa över redan sparade segment
-
-        if _shutdown_requested:
-            # Flush det vi hunnit med och lämna state=transcribing för återupptagning
-            if new_segments:
-                _flush_segments(transcript_json, existing_segments + new_segments)
-                conn.execute(
-                    "UPDATE vigil_items SET whisper_segment = ? WHERE id = ?",
-                    (seg_idx, item_id),
-                )
-                conn.commit()
-            logger.info(
-                f"SIGTERM: item {item_id} avbruten vid segment {seg_idx} "
-                f"— {len(existing_segments) + len(new_segments)} segment sparade"
-            )
-            return False
-
-        new_segments.append({
-            "start": round(seg.start, 2),
-            "end":   round(seg.end, 2),
-            "text":  seg.text.strip(),
-        })
-
-        # Spara progress + preemptiv kontroll var 50:e segment
-        if len(new_segments) % 50 == 0:
-            _flush_segments(transcript_json, existing_segments + new_segments)
-            conn.execute(
-                "UPDATE vigil_items SET whisper_segment = ? WHERE id = ?",
-                (seg_idx + 1, item_id),
-            )
-            conn.commit()
-
-            preempter_id = _should_preempt(conn, item_id, item["priority_score"])
-            if preempter_id:
-                logger.info(
-                    f"Preempteras av item {preempter_id} vid segment {seg_idx + 1}"
-                )
-                preempt_current(
-                    conn, item_id,
-                    reason=f"preempted_by_item_{preempter_id}",
-                    segment=seg_idx + 1,
-                )
-                preempted = True
-                break
+    try:
+        all_segments, preempted = _transcribe_whisper_stream(
+            audio_path, model_size, item_language,
+            item_id, conn, dict(item), existing_segments, resume_from,
+        )
+    except Exception as e:
+        logger.error(f"Whisper-fel för item {item_id}: {e}")
+        transition(conn, item_id, "failed")
+        if _delete_after:
+            _cleanup_audio(audio_path)
+        return False
 
     if _delete_after:
         _cleanup_audio(audio_path)
@@ -323,14 +394,15 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
     if preempted:
         return False
 
-    # Klar — skriv färdigt transkript
-    all_segments = existing_segments + new_segments
+    if not all_segments:
+        # SIGTERM under whisper — item är kvar i transcribing för återupptagning
+        return False
+
     _flush_segments(transcript_json, all_segments)
     transcript_txt.write_text(
         "\n".join(f"[{_fmt_ts(s['start'])}] {s['text']}" for s in all_segments),
         encoding="utf-8",
     )
-
     transition(conn, item_id, "transcribed", transcript_path=str(transcript_json))
     conn.execute(
         """UPDATE transcription_queue SET completed_at = datetime('now')
@@ -338,8 +410,7 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         (item_id,),
     )
     conn.commit()
-
-    logger.info(f"Klar: {len(all_segments)} segment → {transcript_json.name}")
+    logger.info(f"Klar [{model_size}]: {len(all_segments)} segment → {transcript_json.name}")
     return True
 
 
@@ -348,7 +419,6 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 def _odoo_sync_item(conn, item_id: int) -> None:
-    """Synkar ett enskilt item till Odoo efter transkription. Misslyckas tyst."""
     try:
         from odoo_writer import get_odoo_env, sync_item
         env = get_odoo_env()
@@ -372,7 +442,6 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
     Processar transkriptionskön tills den är tom eller max_items nåtts.
     Returnerar räknare: {completed, preempted, failed}.
     """
-    # Importeras här för att undvika cirkulär import
     from main import load_domain_config
 
     global _shutdown_requested
@@ -395,7 +464,7 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
         try:
             domain_config = load_domain_config(item["domain"])
         except FileNotFoundError:
-            domain_config = {"transcription_profile": "default", "whisper_model": "medium"}
+            domain_config = {"transcription_profile": "default", "whisper_model": "kb-whisper-medium"}
 
         ok = transcribe_item(conn, item_id, domain_config)
 
@@ -408,7 +477,7 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
             ).fetchone()
             if state_row and state_row["state"] == "queued":
                 counts["preempted"] += 1
-                continue  # Jobbyte — starta om loopen med ny prioritetsordning
+                continue
             else:
                 transition(conn, item_id, "failed")
                 logger.warning(f"Item {item_id} markerad som failed — fortsätter med nästa")
@@ -453,20 +522,16 @@ def _main():
     parser = argparse.ArgumentParser(
         description="clio-vigil transcriber — kör transkriptionskö"
     )
-    parser.add_argument("--run", action="store_true",
-                        help="Kör kön tills tom")
-    parser.add_argument("--item", type=int,
-                        help="Transkribera specifikt item-ID")
-    parser.add_argument("--domain", type=str,
-                        help="Begränsa till domän")
-    parser.add_argument("--max", type=int, default=10,
-                        help="Max antal objekt (default: 10)")
+    parser.add_argument("--run", action="store_true", help="Kör kön tills tom")
+    parser.add_argument("--item", type=int, help="Transkribera specifikt item-ID")
+    parser.add_argument("--domain", type=str, help="Begränsa till domän")
+    parser.add_argument("--max", type=int, default=10, help="Max antal objekt (default: 10)")
     args = parser.parse_args()
 
     conn = init_db()
 
     if args.item:
-        from main import load_domain_config, get_all_domains
+        from main import load_domain_config
         item = conn.execute(
             "SELECT * FROM vigil_items WHERE id = ?", (args.item,)
         ).fetchone()
@@ -476,14 +541,14 @@ def _main():
         try:
             domain_config = load_domain_config(item["domain"])
         except FileNotFoundError:
-            domain_config = {"transcription_profile": "default", "whisper_model": "medium"}
+            domain_config = {"transcription_profile": "default", "whisper_model": "kb-whisper-medium"}
         ok = transcribe_item(conn, args.item, domain_config)
-        print("✓ Klar" if ok else "✗ Misslyckades eller preempterad")
+        print("OK Klar" if ok else "MISS Misslyckades eller preempterad")
 
     elif args.run:
         counts = run_transcription_queue(conn, domain=args.domain, max_items=args.max)
         print(
-            f"\n✓ Transkription klar: "
+            f"\nTranskription klar: "
             f"{counts['completed']} klara, "
             f"{counts['preempted']} preempterade, "
             f"{counts['failed']} misslyckade"

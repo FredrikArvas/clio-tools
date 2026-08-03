@@ -134,6 +134,7 @@ def collect_google_news(conn, domain_config: dict) -> dict:
                     source_name=source_name,
                     source_maturity="etablerad",
                     source_weight=weight,
+                    language=lang,
                     title=title,
                     description=title,
                     published_at=published_at,

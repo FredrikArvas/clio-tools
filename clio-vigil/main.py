@@ -559,7 +559,7 @@ def _interactive_menu():
                 print(f"\n✓ {counts['completed']} klara, {counts['preempted']} preempterade, {counts['failed']} misslyckade")
             elif flag == "--summarize":
                 from summarizer import run_summarizer
-                counts = run_summarizer(conn)
+                counts = run_summarizer(conn, odoo_env=_odoo_env)
                 print(f"\n✓ {counts['done']} klara, {counts['failed']} misslyckade")
             elif flag == "--index":
                 from indexer import run_indexer
@@ -632,6 +632,21 @@ def main():
 
     args = parser.parse_args()
     _started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    # Exklusivt processlås — förhindrar parallella körningar (timer + manuell batch)
+    import fcntl as _fcntl
+    _summarize_only = args.summarize and not any([
+        args.run, args.transcribe, args.index, args.classify_uap,
+        args.digest, args.full, args.download, args.caption_check,
+    ])
+    _lock_path = '/tmp/clio-vigil-summarize.lock' if _summarize_only else '/tmp/clio-vigil.lock'
+    _lock_fh = open(_lock_path, 'w')
+    try:
+        _fcntl.flock(_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+    except BlockingIOError:
+        _who = 'summering' if _summarize_only else 'clio-vigil'
+        logger.info('En annan %s-process kör redan — avslutar.', _who)
+        sys.exit(0)
 
     any_action = any([
         args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
@@ -792,7 +807,7 @@ def main():
     if args.summarize or args.full:
         _odoo_pull("före summering")
         from summarizer import run_summarizer
-        counts = run_summarizer(conn, domain=args.domain, max_items=args.max)
+        counts = run_summarizer(conn, domain=args.domain, max_items=args.max, odoo_env=_odoo_env)
         logger.info(f"Summering: {counts['done']} klara, {counts['failed']} misslyckade")
         _odoo_sync("efter summering")
 

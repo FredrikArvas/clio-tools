@@ -115,7 +115,8 @@ CREATE TABLE IF NOT EXISTS vigil_sources (
     weight          REAL DEFAULT 1.0,        -- multiplikator för prioritetstal
     active          INTEGER DEFAULT 1,       -- 0 = pausad
     added_at        TEXT DEFAULT (datetime('now')),
-    notes           TEXT
+    notes           TEXT,
+    language        TEXT DEFAULT 'en'    -- ISO 639-1: en | sv
 );
 
 -- Kölogg: spårar preemptiva pauser
@@ -178,6 +179,10 @@ CREATE TABLE IF NOT EXISTS pitch_runs (
 # ---------------------------------------------------------------------------
 
 _MIGRATIONS = [
+    # Parakeet/kb-whisper: transkriberingssspråk per källa och item
+    "ALTER TABLE vigil_sources ADD COLUMN language TEXT DEFAULT 'en'",
+    "ALTER TABLE vigil_items ADD COLUMN language TEXT DEFAULT 'en'",
+
     # Sprint C: lägg till arkiveringsfält om de saknas
     "ALTER TABLE vigil_items ADD COLUMN archive_downloaded INTEGER DEFAULT 0",
     "ALTER TABLE vigil_items ADD COLUMN archive_path TEXT",
@@ -258,10 +263,10 @@ def upsert_item(conn: sqlite3.Connection, url: str, domain: str,
             """
             INSERT INTO vigil_items (url, domain, source_type,
                 source_name, source_maturity, title, description,
-                published_at, duration_seconds, source_weight, raw_metadata)
+                published_at, duration_seconds, source_weight, raw_metadata, language)
             VALUES (:url, :domain, :source_type,
                 :source_name, :source_maturity, :title, :description,
-                :published_at, :duration_seconds, :source_weight, :raw_metadata)
+                :published_at, :duration_seconds, :source_weight, :raw_metadata, :language)
             """,
             {
                 "url": url,
@@ -275,6 +280,7 @@ def upsert_item(conn: sqlite3.Connection, url: str, domain: str,
                 "duration_seconds": fields.get("duration_seconds"),
                 "source_weight": fields.get("source_weight", 1.0),
                 "raw_metadata": fields.get("raw_metadata"),
+                "language": fields.get("language", "en"),
             }
         )
         conn.commit()

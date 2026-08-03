@@ -83,6 +83,7 @@ def collect_youtube(conn, domain_config: dict,
         name = channel.get("name", channel_id)
         maturity = channel.get("maturity", "tidig")
         weight = channel.get("weight", 1.0)
+        language = channel.get("language", "en")
         channel_url = _build_channel_url(channel_id)
 
         logger.info(f"YouTube: hämtar {name} ({channel_url})")
@@ -121,6 +122,7 @@ def collect_youtube(conn, domain_config: dict,
                     source_name=name,
                     source_maturity=maturity,
                     source_weight=weight,
+                    language=language,
                     title=title,
                     description=filter_text,
                     published_at=upload_date,
