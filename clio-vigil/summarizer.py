@@ -21,7 +21,7 @@ Flöde:
   3. priority_score >= CLAUDE_THRESHOLD → Claude API (djupanalys, trunkerat)
      priority_score <  CLAUDE_THRESHOLD → Ollama chunk-loop (full längd)
   4. Spara summary i vigil_items.summary
-  5. (Ändrar INTE state)
+  5. Sätter state = summarized
 
 Körning:
   python summarizer.py --run [--domain ufo] [--max 20]
@@ -311,6 +311,7 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         (summary, item_id),
     )
     conn.commit()
+    transition(conn, item_id, "summarized")
 
     logger.info(f"Item {item_id} [{engine}] (prio={priority:.2f}): {summary[:80]}…")
     return summary
