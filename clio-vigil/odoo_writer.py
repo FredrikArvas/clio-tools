@@ -38,7 +38,7 @@ SYNC_STATES = [
     "summarized",
     "indexed",
     "notified",
-    "crashed",
+    "failed",
 ]
 
 
