@@ -58,7 +58,7 @@ def _fetch_digest_items(conn, domain: Optional[str] = None,
         WHERE state = 'indexed'
           AND summary IS NOT NULL AND summary != ''
           AND published_at IS NOT NULL
-          AND published_at >= date('now', '-60 days')
+          AND published_at >= date('now', '-30 days')
           {}
         ORDER BY priority_score DESC
         LIMIT ?
