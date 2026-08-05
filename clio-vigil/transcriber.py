@@ -472,12 +472,21 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
             counts["completed"] += 1
             _odoo_sync_item(conn, item_id)
         else:
+            # SIGTERM mottaget — bryt utan att markera som failed; item stannar i
+            # transcribing med whisper_segment satt → återupptas av steg 0 nästa körning
+            if _shutdown_requested:
+                logger.info(f"SIGTERM: item {item_id} sparas i transcribing — återupptas nästa körning")
+                break
             state_row = conn.execute(
                 "SELECT state FROM vigil_items WHERE id = ?", (item_id,)
             ).fetchone()
             if state_row and state_row["state"] == "queued":
                 counts["preempted"] += 1
                 continue
+            elif state_row and state_row["state"] == "transcribing":
+                # Avbröts utan SIGTERM (t.ex. krasch) — lämna i transcribing för återupptagning
+                logger.info(f"Item {item_id} stannar i transcribing — återupptas nästa körning")
+                counts["failed"] += 1
             else:
                 transition(conn, item_id, "failed")
                 logger.warning(f"Item {item_id} markerad som failed — fortsätter med nästa")
