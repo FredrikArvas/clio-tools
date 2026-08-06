@@ -6,6 +6,7 @@ Laddar ned audio för köade bevakningsobjekt till persistent lagring.
 Flöde:
   queued (med audio) → download_audio() → downloaded (audio_path satt)
   queued (bild-URL)  → ocr_image()      → transcribed (direkt, utan whisper)
+  queued (Spotify)   → spotify_handler  → transcribed (direkt, utan audio)
 
 Ordning: nyaste published_at först (senast publicerat = mest relevant).
 Text-only RSS (ingen enclosure_url) hoppas över — hanteras av transcriber.
@@ -19,6 +20,18 @@ from typing import Optional
 
 from ocr import is_image_file, ocr_image, write_image_transcript
 from orchestrator import init_db, transition
+
+# [SPOTIFY] Lazy import — misslyckande om filen saknas ger tydligt felmeddelande
+try:
+    from spotify_handler import is_spotify_episode, try_spotify_transcript
+    _SPOTIFY_AVAILABLE = True
+except ImportError as _e:
+    _SPOTIFY_AVAILABLE = False
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        "spotify_handler.py saknas eller har importfel (%s) — "
+        "open.spotify.com-items hoppas över", _e
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +111,7 @@ def _has_audio(item) -> bool:
 def download_item(conn, item_id: int) -> bool:
     """
     Laddar ned audio för ett enskilt item.
-    Returnerar True om lyckad nedladdning.
+    Returnerar True om lyckad nedladdning (eller direkt transkription).
     """
     item = conn.execute(
         "SELECT * FROM vigil_items WHERE id = ?", (item_id,)
@@ -106,6 +119,11 @@ def download_item(conn, item_id: int) -> bool:
     if not item:
         logger.error(f"Item {item_id} finns inte")
         return False
+
+    # [SPOTIFY] Spotify-avsnitt hämtar transkript direkt — hoppar över audio-flödet
+    if _SPOTIFY_AVAILABLE and is_spotify_episode(item["url"]):
+        logger.info(f"[dl] Spotify-avsnitt → spotify_handler: item {item_id}")
+        return try_spotify_transcript(conn, item_id)
 
     if not _has_audio(item):
         logger.info(f"Item {item_id} saknar audio — hoppas över")
@@ -169,6 +187,7 @@ def download_item(conn, item_id: int) -> bool:
 def run_downloader(conn, domain: Optional[str] = None, max_items: int = 1) -> dict:
     """
     Laddar ned audio för köade items, nyaste published_at först.
+    Inkluderar Spotify-avsnitt (open.spotify.com/episode/) som inte har enclosure_url.
     Returnerar räknare: {downloaded, skipped, failed}.
     """
     counts = {"downloaded": 0, "skipped": 0, "failed": 0}
@@ -186,6 +205,7 @@ def run_downloader(conn, domain: Optional[str] = None, max_items: int = 1) -> di
               OR (source_type = 'rss'
                   AND json_extract(raw_metadata, '$.enclosure_url') IS NOT NULL
                   AND json_extract(raw_metadata, '$.enclosure_url') != '')
+              OR url LIKE '%open.spotify.com/episode/%'
           )
         ORDER BY priority_score DESC, published_at DESC NULLS LAST
         LIMIT ?
