@@ -919,6 +919,35 @@ def main():
     except Exception as _se:
         logger.warning("Kunde inte skriva vigil_status: %s", _se)
 
+    # ── Smart självomstart ──────────────────────────────────────────────────
+    # Om vi kör ett pipeline-steg med transkription under systemd och det finns
+    # pending arbete → trigga ny körning direkt (hoppar 30-min timer-pausen).
+    _restart_eligible = (
+        any([args.transcribe, args.run, args.full])
+        and bool(os.environ.get("INVOCATION_ID"))  # Körs under systemd (ej manuellt)
+    )
+    if _restart_eligible:
+        try:
+            _pending = conn.execute(
+                "SELECT COUNT(*) FROM vigil_items "
+                "WHERE state IN ('queued', 'downloaded', 'transcribing')"
+            ).fetchone()[0]
+            if _pending > 0:
+                import subprocess as _subp
+                logger.info(
+                    "Pending arbete: %d objekt — triggar omedelbar omstart (hoppar timer-paus)",
+                    _pending,
+                )
+                _subp.run(
+                    ["sudo", "systemctl", "start", "clio-vigil.service"],
+                    check=False, capture_output=True,
+                )
+            else:
+                logger.info("Ingen pending kö — timer-paus på 30 min gäller")
+        except Exception as _re:
+            logger.warning("Självomstart misslyckades: %s", _re)
+    # ────────────────────────────────────────────────────────────────────────
+
     conn.close()
 
 
