@@ -2,8 +2,9 @@
 clio-vigil — transcriber.py
 ============================
 Transkriberar bevakningsobjekt med rätt backend per språk:
-  - Engelska  → nvidia/parakeet-tdt-1.1b (NeMo, CUDA) — snabbt, hög kvalitet
+  - Engelska  → large-v3-turbo (faster-whisper, CUDA) — snabbt, hög kvalitet
   - Svenska   → KBLab/kb-whisper-medium  (faster-whisper, CUDA int8)
+  - Övriga    → large-v3-turbo med language=None (auto-detect)
 
 Modeller cachas per process (laddas en gång, återanvänds för alla items).
 
@@ -11,10 +12,13 @@ Flöde:
   1. Hämta nästa objekt ur kön (state=queued), sorterat på priority_score
   2. Ladda ned audio via yt-dlp (youtube) eller requests (rss/podcast)
   3. Transkribera med rätt backend baserat på item.language
-  4. Preemptiv paus: kontrollera var 50:e segment om högre prio väntar (Whisper)
-     Parakeet: hela filen i ett anrop — avbrutna items körs om från början
-  5. Spara transkript (JSON med tidsstämplar + läsbar txt)
-  6. Uppdatera vigil_items: state=transcribed, transcript_path
+     — Svenska källor: language="sv" (kb-whisper), ingen auto-detect
+     — Övriga: language=None → whisper auto-detekterar från första 30s
+  4. Om detekterat språk avviker från item.language (≥85% konfidensgrad):
+     uppdatera vigil_items.language i SQLite (Odoo-sync sker vid nästa steg)
+  5. Preemptiv paus: kontrollera var 50:e segment om högre prio väntar
+  6. Spara transkript (JSON med tidsstämplar + läsbar txt)
+  7. Uppdatera vigil_items: state=transcribed, transcript_path
 
 Körning:
   python transcriber.py --run [--domain ufo] [--max 5]
@@ -57,6 +61,10 @@ def _handle_sigterm(signum, frame):
 DATA_DIR        = Path(__file__).parent / "data"
 AUDIO_DIR       = DATA_DIR / "audio"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
+
+# Minsta konfidensgrad för att auto-korrigera item.language efter transkription.
+# Under denna tröskel behålls källans förväntade språk oförändrat.
+LANG_DETECT_MIN_PROB: float = 0.85
 
 # ---------------------------------------------------------------------------
 # Transkriptionsprofiler (fallback när item.language saknas)
@@ -239,15 +247,27 @@ def _words_to_segments(words: list[dict], gap_threshold: float = 1.0,
 # Whisper-backend (svenska, faster-whisper, CUDA)
 # ---------------------------------------------------------------------------
 
-def _transcribe_whisper_stream(audio_path: Path, model_size: str, language: str,
-                               item_id: int, conn, item: dict,
-                               existing_segments: list, resume_from: int) -> tuple[list, bool]:
+def _transcribe_whisper_stream(
+    audio_path: Path,
+    model_size: str,
+    language: Optional[str],
+    item_id: int,
+    conn,
+    item: dict,
+    existing_segments: list,
+    resume_from: int,
+) -> tuple[list, bool, str, float]:
     """
     Transkriberar med faster-whisper (streaming, segmentvis med preemptiv paus).
-    Returnerar (all_segments, preempted).
+
+    language=None aktiverar automatisk språkdetektering från de första 30 sekunderna.
+    info.language och info.language_probability är tillgängliga direkt (innan generator
+    konsumeras) eftersom whisper kodar och analyserar ljud vid anropet.
+
+    Returnerar (all_segments, preempted, detected_language, detected_probability).
     """
     model = _get_whisper(model_size)
-    raw_segs, _ = model.transcribe(str(audio_path), beam_size=5, language=language)
+    raw_segs, info = model.transcribe(str(audio_path), beam_size=5, language=language)
 
     new_segments: list[dict] = []
     preempted = False
@@ -295,7 +315,7 @@ def _transcribe_whisper_stream(audio_path: Path, model_size: str, language: str,
                 preempted = True
                 break
 
-    return existing_segments + new_segments, preempted
+    return existing_segments + new_segments, preempted, info.language, info.language_probability
 
 
 # ---------------------------------------------------------------------------
@@ -325,12 +345,16 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         logger.error(f"Item {item_id} hittades inte i databasen")
         return False
 
-    # Bestäm språk: item.language > domänprofil > default
+    # Bestäm förväntade språk: item.language > domänprofil > default
     item_language = item["language"] if item["language"] else None
     if not item_language:
         profile_name  = domain_config.get("transcription_profile", "default")
         profile       = TRANSCRIPTION_PROFILES.get(profile_name, TRANSCRIPTION_PROFILES["default"])
         item_language = profile["language"]
+
+    # Svenska: använd dedikerad kb-whisper med language="sv" (ingen auto-detect behövs)
+    # Övriga: skicka language=None → whisper auto-detekterar från första 30s av ljudet
+    use_language = "sv" if item_language == "sv" else None
 
     model_size  = item["whisper_model"] or domain_config.get("whisper_model", "kb-whisper-medium")
     resume_from = item["whisper_segment"] or 0
@@ -360,12 +384,14 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         transition(conn, item_id, "queued")
         return False
 
-    # ── faster-whisper (engelska + svenska, CUDA) ────────────────────────────────────
-    if item_language == "en":
+    # ── Modellval ─────────────────────────────────────────────────────────────
+    # kb-whisper-medium: svenska (dedikerad, bättre kvalitet för sv)
+    # large-v3-turbo: engelska, portugisiska, flerspråkig, okänt (multilingual)
+    if item_language != "sv":
         model_size = "large-v3-turbo"
     logger.info(
-        f"Transkriberar [{model_size}/{item_language}] item {item_id}: "
-        f"{(item['title'] or '—')[:55]}"
+        f"Transkriberar [{model_size}/lang={'auto' if use_language is None else item_language}]"
+        f" item {item_id}: {(item['title'] or '—')[:55]}"
     )
     existing_segments: list[dict] = []
     if resume_from > 0 and transcript_json.exists():
@@ -377,8 +403,8 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
             resume_from = 0
 
     try:
-        all_segments, preempted = _transcribe_whisper_stream(
-            audio_path, model_size, item_language,
+        all_segments, preempted, detected_lang, detected_prob = _transcribe_whisper_stream(
+            audio_path, model_size, use_language,
             item_id, conn, dict(item), existing_segments, resume_from,
         )
     except Exception as e:
@@ -387,6 +413,30 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         if _delete_after:
             _cleanup_audio(audio_path)
         return False
+
+    # ── Språkkorrigering: uppdatera item om detekterat språk avviker ─────────
+    # Gäller bara icke-svenska items (swedish kör med language="sv", inget behövs)
+    if (
+        use_language is None          # auto-detect kördes
+        and detected_lang             # whisper returnerade ett språk
+        and detected_lang != item_language
+        and detected_prob >= LANG_DETECT_MIN_PROB
+    ):
+        logger.info(
+            f"Språkkorrigering item {item_id}: "
+            f"{item_language} → {detected_lang} ({detected_prob:.0%} konfidensgrad) "
+            f"— uppdaterar vigil_items.language"
+        )
+        conn.execute(
+            "UPDATE vigil_items SET language = ? WHERE id = ?",
+            (detected_lang, item_id),
+        )
+        conn.commit()
+        item_language = detected_lang   # använd korrigerat språk i resten av körningen
+    elif use_language is None:
+        logger.debug(
+            f"Språk bekräftat item {item_id}: {detected_lang} ({detected_prob:.0%})"
+        )
 
     if _delete_after:
         _cleanup_audio(audio_path)
