@@ -939,7 +939,7 @@ def main():
                     _pending,
                 )
                 _subp.run(
-                    ["sudo", "systemctl", "start", "clio-vigil.service"],
+                    ["sudo", "systemctl", "start", "--no-block", "clio-vigil.service"],
                     check=False, capture_output=True,
                 )
             else:
