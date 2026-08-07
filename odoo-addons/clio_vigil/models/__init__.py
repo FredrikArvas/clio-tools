@@ -1,4 +1,5 @@
 from . import clio_vigil_source
+from . import clio_podcast_tags
 from . import clio_vigil_item
 from . import clio_vigil_subscriber
 from . import clio_vigil_keyword

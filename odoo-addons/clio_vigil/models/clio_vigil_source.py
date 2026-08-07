@@ -37,11 +37,17 @@ class ClioVigilSource(models.Model):
         required  = True,
     )
     language = fields.Selection(
-        selection = [("en", "Engelska"), ("sv", "Svenska")],
+        selection = [
+            ("en",    "Engelska"),
+            ("sv",    "Svenska"),
+            ("pt",    "Portugisiska"),
+            ("multi", "Flerspråkig"),
+        ],
         string    = "Språk",
         required  = True,
         default   = "en",
-        help      = "Transkriptionsspråk — styr val av AI-modell (Parakeet för engelska, kb-whisper för svenska).",
+        help      = "Transkriptionsspråk — styr val av AI-modell. "
+                    "Flerspråkig = auto-detect per avsnitt.",
     )
     url = fields.Char(
         string   = "URL",
