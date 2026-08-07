@@ -208,7 +208,20 @@ sources:
       - "non-human intelligence"
       - "Pentagon UAP report"
       - "UFO whistleblower"
+      - "Politico UAP disclosure"
+      - "Politico UFO military"
+      - "Politico Pentagon UAP"
 
 # Transkription
 max_priority_duration_minutes: 90   # Objekt över denna längd får reducerat prioritetstal
 whisper_model: medium               # tiny | base | small | medium | large-v3
+
+    - url: https://feed.podbean.com/multiverse5dpodcast/feed.xml
+      name: Multiverse 5D Podcast
+      maturity: tidig
+      weight: 0.7
+      # Hög volym (999+ avsnitt), blandat EN/PT, hög bruskvot.
+      # Fokus: vittnesmål och kontaktupplevelser — filtret i ufo.yaml keywords
+      # fångar contact experience, encounter, consciousness m.fl.
+      # PT-avsnitt filtreras ut naturligt (inga matchande keywords).
+      language: en
