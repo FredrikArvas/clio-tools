@@ -7,7 +7,7 @@ python-dotenv>=1.0.0    # Läser .env
 questionary>=2.0.0      # Piltangentmenyer (TUI-standard för alla runners)
 
 # ── clio-library / clio-research ─────────────────────────────────────────────
-notion-client>=2.0.0    # Notion API-klient
+notion-client>=3.1.0    # Notion API-klient
 thefuzz>=0.19.0         # Fuzzy-matchning av boktitlar
 python-Levenshtein>=0.27.3  # Snabbar upp thefuzz
 openpyxl>=3.1.0         # Excel-generering och -läsning (build_library_excel)
