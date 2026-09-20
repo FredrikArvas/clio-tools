@@ -48,7 +48,7 @@ from clio_core.utils import sanitize_filename, t
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-__version__ = "2.0.1"
+__version__ = "2.3.0"
 
 VISION_SUFFIX    = "_VISION"
 SUPPORTED_FORMATS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
@@ -97,7 +97,12 @@ log = logging.getLogger(__name__)
 
 # ── Claude Vision API ─────────────────────────────────────────────────────────
 
-def analyze_with_claude(image_file: Path, api_key: str, model: str = CLAUDE_MODEL) -> tuple:
+def analyze_with_claude(
+    image_file: Path,
+    api_key: str,
+    model: str = CLAUDE_MODEL,
+    location_hint: str | None = None,
+) -> tuple:
     try:
         import urllib.request, urllib.error
 
@@ -111,6 +116,10 @@ def analyze_with_claude(image_file: Path, api_key: str, model: str = CLAUDE_MODE
         }
         media_type = media_types.get(image_file.suffix.lower(), "image/jpeg")
 
+        user_text = "Analyze this image and return structured metadata in JSON format."
+        if location_hint:
+            user_text += f" GPS coordinates indicate the location is: {location_hint}."
+
         payload = json.dumps({
             "model": model,
             "max_tokens": MAX_TOKENS,
@@ -121,7 +130,7 @@ def analyze_with_claude(image_file: Path, api_key: str, model: str = CLAUDE_MODE
                     {"type": "image", "source": {
                         "type": "base64", "media_type": media_type, "data": image_b64
                     }},
-                    {"type": "text", "text": "Analyze this image and return structured metadata in JSON format."}
+                    {"type": "text", "text": user_text}
                 ]
             }]
         }).encode("utf-8")
@@ -284,6 +293,105 @@ def analyze_with_ollama(image_file: Path, model: str = OLLAMA_MODEL) -> tuple:
         return False, {}, f"Ollama error: {e}"
     except Exception as e:
         return False, {}, f"Ollama error: {e}"
+
+# ── GPS extraction + clio.location lookup ────────────────────────────────────
+
+def get_gps_coords(image_file: Path):
+    """Extract (lat, lon) from image EXIF using PIL. Returns None if not found."""
+    try:
+        from PIL import Image as _Image
+        from PIL.ExifTags import TAGS, GPSTAGS
+
+        img = _Image.open(image_file)
+        exif = img._getexif()
+        if not exif:
+            return None
+        gps = {}
+        for tag_id, val in exif.items():
+            if TAGS.get(tag_id) == "GPSInfo":
+                for k, v in val.items():
+                    gps[GPSTAGS.get(k, k)] = v
+        if "GPSLatitude" not in gps or "GPSLongitude" not in gps:
+            return None
+
+        def _to_deg(vals, ref):
+            d, m, s = [
+                float(x.numerator) / float(x.denominator) if hasattr(x, "numerator") else float(x)
+                for x in vals
+            ]
+            v = d + m / 60 + s / 3600
+            return -v if ref in ("S", "W") else v
+
+        lat = _to_deg(gps["GPSLatitude"], gps.get("GPSLatitudeRef", "N"))
+        lon = _to_deg(gps["GPSLongitude"], gps.get("GPSLongitudeRef", "E"))
+        return lat, lon
+    except Exception:
+        return None
+
+
+# Shared xmlrpc connection cache (one per process)
+_odoo_conn = {"uid": None, "models": None}
+
+
+def _odoo_connect():
+    """Return (uid, models) xmlrpc handles, cached. Returns (None, None) on failure."""
+    if _odoo_conn["uid"]:
+        return _odoo_conn["uid"], _odoo_conn["models"]
+    try:
+        import xmlrpc.client
+        url = os.environ.get("ODOO_URL", "").rstrip("/")
+        db = os.environ.get("ODOO_DB", "aiab")
+        user = os.environ.get("ODOO_USER", "")
+        pw = os.environ.get("ODOO_PASSWORD", "")
+        if not (url and user and pw):
+            return None, None
+        common = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/common")
+        uid = common.authenticate(db, user, pw, {})
+        if not uid:
+            return None, None
+        models = xmlrpc.client.ServerProxy(f"{url}/xmlrpc/2/object")
+        _odoo_conn["uid"] = uid
+        _odoo_conn["models"] = models
+        _odoo_conn["db"] = db
+        _odoo_conn["pw"] = pw
+        return uid, models
+    except Exception as e:
+        log.debug(f"Odoo connect failed: {e}")
+        return None, None
+
+
+def find_nearest_location(lat: float, lon: float) -> str | None:
+    """Return location name from clio.location/find_nearest, fallback to reverse_geocoder."""
+    # 1. Try Odoo clio.location
+    try:
+        uid, models = _odoo_connect()
+        if uid and models:
+            db = _odoo_conn["db"]
+            pw = _odoo_conn["pw"]
+            result = models.execute_kw(
+                db, uid, pw,
+                "clio.location", "find_nearest",
+                [lat, lon],
+            )
+            if result and isinstance(result, str):
+                return result
+            if result and isinstance(result, dict) and result.get("name"):
+                return result["name"]
+    except Exception as e:
+        log.debug(f"clio.location lookup failed: {e}")
+
+    # 2. Fallback: reverse_geocoder
+    try:
+        import reverse_geocoder as rg
+        hits = rg.search((lat, lon), verbose=False)
+        if hits:
+            h = hits[0]
+            return f"{h.get('name', '')}, {h.get('admin1', '')}, {h.get('cc', '')}"
+    except Exception:
+        pass
+
+    return None
+
 
 # ── DigiKam XMP metadata ──────────────────────────────────────────────────────
 
@@ -465,6 +573,8 @@ def build_md(image_file: Path, data: dict, digikam: dict, analysis_date: str, da
 
     if md.get("location"):
         lines.append(f"- **Location:** {md['location']}")
+    if md.get("gps"):
+        lines.append(f"- **GPS:** {md['gps']}")
     if md.get("date"):
         lines.append(f"- **Date:** {md['date']}")
     if people:
@@ -743,17 +853,41 @@ def main(argv=None):
             if digikam["people"]:
                 log.info(f"  DigiKam faces: {', '.join(digikam['people'])}")
 
+            # GPS → clio.location lookup
+            gps_coords = get_gps_coords(image)
+            gps_location = None
+            if gps_coords:
+                lat, lon = gps_coords
+                gps_location = find_nearest_location(lat, lon)
+                if gps_location:
+                    log.info(f"  GPS: {lat:.5f},{lon:.5f} → {gps_location}")
+                else:
+                    log.info(f"  GPS: {lat:.5f},{lon:.5f} (ingen träff i clio.location)")
+
             # Analyze (always from analyze_target, write back to original image)
             if engine == "haiku":
-                ok, data, message = analyze_with_claude(analyze_target, api_key, model=CLAUDE_HAIKU)
+                ok, data, message = analyze_with_claude(
+                    analyze_target, api_key, model=CLAUDE_HAIKU, location_hint=gps_location
+                )
             elif engine == "claude":
-                ok, data, message = analyze_with_claude(analyze_target, api_key)
+                ok, data, message = analyze_with_claude(
+                    analyze_target, api_key, location_hint=gps_location
+                )
             else:
                 ok, data, message = analyze_with_ollama(analyze_target)
 
             elapsed = time.time() - start
 
             if ok:
+                # Ensure GPS location is reflected in masterdata
+                if gps_location:
+                    data.setdefault("masterdata", {})
+                    if not data["masterdata"].get("location"):
+                        data["masterdata"]["location"] = gps_location
+                if gps_coords:
+                    data.setdefault("masterdata", {})
+                    data["masterdata"]["gps"] = f"{gps_coords[0]:.6f},{gps_coords[1]:.6f}"
+
                 # Merge DigiKam data
                 if digikam["people"]:
                     data.setdefault("masterdata", {})
