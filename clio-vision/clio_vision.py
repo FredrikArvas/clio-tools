@@ -885,7 +885,7 @@ def main(argv=None):
             print(f"  3. Ollama         (inte igång – starta med: {_ollama_cmd} serve)")
         else:
             print("  3. Ollama         (ej installerat – ladda ner: https://ollama.com/download)")
-        default_engine = "1" if api_key else ("3" if ollama_available else "1")
+        default_engine = "3" if ollama_available else "1"
         engine_choice = input(t("vision_engine_input", default=default_engine)).strip() or default_engine
 
     if engine_choice == "3":
