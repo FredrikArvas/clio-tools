@@ -15,16 +15,21 @@ clio_geo_backfill.py    Nominatim-berikening av befintliga clio.location-poster 
 clio_geo_map.py         Genererar Leaflet HTML-karta över alla kända platser
 ```
 
-## GPS-flöde (v2.3.0)
+## GPS-flöde (v2.4.0)
 
 1. `get_gps_coords(image_file)` — extraherar lat/lon ur PIL EXIF
-2. `find_nearest_location(lat, lon)` — anropar `clio.location/find_nearest` via xmlrpc mot Odoo (db: aiab)
-3. Fallback: `reverse_geocoder` om Odoo inte svarar
-4. Platshint skickas till Claude i user-meddelandet: *"GPS coordinates indicate the location is: ..."*
-5. `masterdata.location` sätts från GPS om Claude lämnar fältet tomt
-6. `masterdata.gps` läggs alltid till med koordinaterna
+2. `resolve_location(lat, lon)` — returnerar `{name, city, country}`:
+   a. Anropar `clio.location/find_nearest` via xmlrpc (haversine, radius_m per post)
+   b. Om träff: hämtar city/country från posten via `search_read`
+   c. Om ingen träff: kallar Nominatim (`_nominatim_reverse`), väntar 2s (OSM rate limit)
+   d. Skapar ny `clio.location`-post i Odoo med Nominatim-data
+   e. Fallback: `reverse_geocoder`-paket (offline)
+3. Platshint skickas till Claude: *"GPS coordinates indicate the location is: ..."*
+4. `masterdata.location` sätts från GPS om Claude lämnar fältet tomt
+5. `masterdata.gps` läggs alltid till med koordinaterna
+6. `write_vision_metadata` skriver IPTC + XMP-fält: platsnamn, stad, land
 
-Xmlrpc-anslutning cachas i `_odoo_conn` — en uppkoppling per session.
+Xmlrpc-anslutning cachas i `_odoo_conn`. Country-id cachas i `_country_id_cache`.
 
 ## clio.location — Odoo-modellen
 
@@ -88,5 +93,6 @@ Miljövariabler (`.env` i clio-tools-roten):
 
 | Version | Datum      | Förändring |
 |---------|------------|------------|
+| 2.4.0   | 2026-09-21 | Nominatim auto-skapar clio.location; IPTC stad/land-fält i write-back |
 | 2.3.0   | 2026-09-20 | GPS-lookup via clio.location + Odoo xmlrpc-fallback |
 | 2.0.1   | 2026-09-20 | DigiKam XMP-integration, bildnedskalning, date-checks |

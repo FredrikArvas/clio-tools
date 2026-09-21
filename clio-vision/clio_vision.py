@@ -48,7 +48,7 @@ from clio_core.utils import sanitize_filename, t
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 
 VISION_SUFFIX    = "_VISION"
 SUPPORTED_FORMATS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
@@ -331,6 +331,7 @@ def get_gps_coords(image_file: Path):
 
 # Shared xmlrpc connection cache (one per process)
 _odoo_conn = {"uid": None, "models": None}
+_country_id_cache: dict = {}
 
 
 def _odoo_connect():
@@ -360,37 +361,168 @@ def _odoo_connect():
         return None, None
 
 
-def find_nearest_location(lat: float, lon: float) -> str | None:
-    """Return location name from clio.location/find_nearest, fallback to reverse_geocoder."""
-    # 1. Try Odoo clio.location
+def _nominatim_reverse(lat: float, lon: float) -> dict:
+    """Reverse-geocode via Nominatim using stdlib only. Returns address dict or {}."""
+    import urllib.request as _urlreq
+    import urllib.parse as _urlparse
+    import urllib.error as _urlerr
+
+    params = _urlparse.urlencode({"lat": lat, "lon": lon, "format": "json",
+                                   "zoom": 18, "addressdetails": 1})
+    url = f"https://nominatim.openstreetmap.org/reverse?{params}"
+    req = _urlreq.Request(url, headers={
+        "User-Agent": f"clio-vision/{__version__} (clio@arvas.international)",
+        "Accept-Language": "sv,en;q=0.5",
+    })
+    for attempt in range(2):
+        try:
+            with _urlreq.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data.get("address", {})
+        except _urlerr.HTTPError as e:
+            if e.code == 429:
+                log.warning(f"Nominatim rate limit — väntar 60s (försök {attempt + 1}/2)")
+                time.sleep(60)
+            else:
+                log.debug(f"Nominatim HTTP {e.code}: {e}")
+                return {}
+        except Exception as e:
+            log.debug(f"Nominatim failed: {e}")
+            return {}
+    return {}
+
+
+def _city_from_addr(addr: dict) -> str | None:
+    return (addr.get("city") or addr.get("town") or addr.get("village")
+            or addr.get("municipality") or addr.get("county") or None)
+
+
+def _lookup_country_id(country_code: str) -> int | None:
+    """Return Odoo res.country id for an ISO 2-letter code, using module-level cache."""
+    if not country_code:
+        return None
+    code = country_code.upper()
+    if code in _country_id_cache:
+        return _country_id_cache[code]
+    uid, models = _odoo_connect()
+    if not (uid and models):
+        return None
     try:
-        uid, models = _odoo_connect()
-        if uid and models:
-            db = _odoo_conn["db"]
-            pw = _odoo_conn["pw"]
-            result = models.execute_kw(
-                db, uid, pw,
-                "clio.location", "find_nearest",
-                [lat, lon],
-            )
-            if result and isinstance(result, str):
-                return result
-            if result and isinstance(result, dict) and result.get("name"):
-                return result["name"]
+        db, pw = _odoo_conn["db"], _odoo_conn["pw"]
+        ids = models.execute_kw(db, uid, pw, "res.country", "search",
+                                [[["code", "=", code]]])
+        result = ids[0] if ids else None
+        _country_id_cache[code] = result
+        return result
     except Exception as e:
-        log.debug(f"clio.location lookup failed: {e}")
+        log.debug(f"country_id lookup failed: {e}")
+        return None
 
-    # 2. Fallback: reverse_geocoder
+
+def _fetch_location_details(location_name: str) -> tuple:
+    """Return (city, country_name) from the clio.location record matching name."""
+    uid, models = _odoo_connect()
+    if not (uid and models):
+        return None, None
     try:
-        import reverse_geocoder as rg
-        hits = rg.search((lat, lon), verbose=False)
-        if hits:
-            h = hits[0]
-            return f"{h.get('name', '')}, {h.get('admin1', '')}, {h.get('cc', '')}"
-    except Exception:
-        pass
+        db, pw = _odoo_conn["db"], _odoo_conn["pw"]
+        rows = models.execute_kw(
+            db, uid, pw,
+            "clio.location", "search_read",
+            [[["name", "=", location_name]]],
+            {"fields": ["city", "country_id"], "limit": 1},
+        )
+        if rows:
+            r = rows[0]
+            city = r.get("city") or None
+            country = r["country_id"][1] if r.get("country_id") else None
+            return city, country
+    except Exception as e:
+        log.debug(f"location details lookup failed: {e}")
+    return None, None
 
-    return None
+
+def resolve_location(lat: float, lon: float) -> dict | None:
+    """
+    Resolve GPS coordinates to {name, city, country}.
+    If no clio.location record found within radius, creates one via Nominatim.
+    Returns None only if all resolution methods fail.
+    """
+    uid, models = _odoo_connect()
+
+    # 1. Try Odoo clio.location.find_nearest
+    if uid and models:
+        try:
+            db, pw = _odoo_conn["db"], _odoo_conn["pw"]
+            result = models.execute_kw(db, uid, pw, "clio.location", "find_nearest", [lat, lon])
+            if result and isinstance(result, (str, dict)):
+                name = result if isinstance(result, str) else result.get("name")
+                if name:
+                    city, country = _fetch_location_details(name)
+                    return {"name": name, "city": city, "country": country}
+        except Exception as e:
+            log.debug(f"clio.location lookup failed: {e}")
+
+    # 2. Nominatim reverse-geocode
+    addr = _nominatim_reverse(lat, lon)
+    time.sleep(2.0)  # OSM rate limit: max 1 req/s
+
+    if not addr:
+        # 3. Pure offline fallback: reverse_geocoder
+        try:
+            import reverse_geocoder as rg
+            hits = rg.search((lat, lon), verbose=False)
+            if hits:
+                h = hits[0]
+                place = ", ".join(p for p in [h.get("name"), h.get("admin1")] if p)
+                return {"name": place or None, "city": h.get("name"),
+                        "country": h.get("cc", "").upper() or None}
+        except Exception:
+            pass
+        return None
+
+    road = addr.get("road", "")
+    number = addr.get("house_number", "")
+    city = _city_from_addr(addr)
+    country = addr.get("country") or None
+    country_code = addr.get("country_code", "")
+
+    street_part = f"{road} {number}".strip() if road else ""
+    if street_part and city:
+        place_name = f"{street_part}, {city}"
+    elif city:
+        place_name = city
+    elif street_part:
+        place_name = street_part
+    else:
+        place_name = f"{lat:.4f},{lon:.4f}"
+
+    # 3. Create new clio.location record in Odoo
+    if uid and models:
+        try:
+            db, pw = _odoo_conn["db"], _odoo_conn["pw"]
+            vals: dict = {"name": place_name, "lat": lat, "lon": lon, "radius_m": 100}
+            if city:
+                vals["city"] = city
+            if road:
+                vals["street"] = road
+            if number:
+                vals["street_number"] = number
+            if addr.get("postcode"):
+                vals["zip"] = addr["postcode"]
+            country_id = _lookup_country_id(country_code)
+            if country_id:
+                vals["country_id"] = country_id
+            models.execute_kw(db, uid, pw, "clio.location", "create", [vals])
+            log.info(f"  Ny clio.location skapad: {place_name}")
+        except Exception as e:
+            log.warning(f"  Kunde inte skapa clio.location: {e}")
+
+    return {"name": place_name, "city": city, "country": country}
+
+
+# Keep old name as alias for external callers
+find_nearest_location = lambda lat, lon: (resolve_location(lat, lon) or {}).get("name")
 
 
 # ── DigiKam XMP metadata ──────────────────────────────────────────────────────
@@ -481,14 +613,16 @@ def check_dates(image_file: Path, meta: dict) -> list:
     return warnings
 
 
-def write_vision_metadata(image_file: Path, data: dict):
-    """Writes vision analysis results back to image XMP metadata.
+def write_vision_metadata(image_file: Path, data: dict, location_data: dict | None = None):
+    """Writes vision analysis results back to image XMP/IPTC metadata.
 
     DigiKam läser sedan dessa vid nästa 'Read metadata from files':
-      - XMP:Subject         → nyckelord/taggar
-      - XMP:Description     → bildtext/caption
-      - XMP:Location        → plats
-      - XMP:PersonInImage   → personer utan ansiktsregion (IPTC Ext)
+      - XMP:Subject                        → nyckelord/taggar
+      - XMP:Description                    → bildtext/caption
+      - XMP-iptcCore:Location + IPTC:Sub-location          → platsnamn
+      - XMP-photoshop:City + IPTC:City                     → stad
+      - XMP-photoshop:Country + IPTC:Country-PrimaryLocationName → land
+      - XMP-iptcExt:PersonInImage          → personer utan ansiktsregion
     """
     try:
         import exiftool
@@ -506,9 +640,25 @@ def write_vision_metadata(image_file: Path, data: dict):
             if isinstance(tag, str) and tag.strip():
                 params.append(f"-XMP:Subject+={tag.strip()}")
 
-        # Plats
-        if md.get("location") and isinstance(md["location"], str):
-            params.append(f"-XMP:Location={md['location']}")
+        # Plats — GPS-löst data prioriteras, annars Claude-gissning utan stad/land
+        if location_data:
+            loc_name = location_data.get("name")
+            loc_city = location_data.get("city")
+            loc_country = location_data.get("country")
+        else:
+            loc_name = md.get("location")
+            loc_city = None
+            loc_country = None
+
+        if loc_name and isinstance(loc_name, str):
+            params.append(f"-XMP-iptcCore:Location={loc_name}")
+            params.append(f"-IPTC:Sub-location={loc_name}")
+        if loc_city and isinstance(loc_city, str):
+            params.append(f"-XMP-photoshop:City={loc_city}")
+            params.append(f"-IPTC:City={loc_city}")
+        if loc_country and isinstance(loc_country, str):
+            params.append(f"-XMP-photoshop:Country={loc_country}")
+            params.append(f"-IPTC:Country-PrimaryLocationName={loc_country}")
 
         # Beskrivning
         if data.get("description") and isinstance(data["description"], str):
@@ -853,16 +1003,17 @@ def main(argv=None):
             if digikam["people"]:
                 log.info(f"  DigiKam faces: {', '.join(digikam['people'])}")
 
-            # GPS → clio.location lookup
+            # GPS → location resolution (Odoo clio.location + Nominatim auto-create)
             gps_coords = get_gps_coords(image)
-            gps_location = None
+            location_data = None
             if gps_coords:
                 lat, lon = gps_coords
-                gps_location = find_nearest_location(lat, lon)
-                if gps_location:
-                    log.info(f"  GPS: {lat:.5f},{lon:.5f} → {gps_location}")
+                location_data = resolve_location(lat, lon)
+                if location_data:
+                    log.info(f"  GPS: {lat:.5f},{lon:.5f} → {location_data['name']}")
                 else:
-                    log.info(f"  GPS: {lat:.5f},{lon:.5f} (ingen träff i clio.location)")
+                    log.info(f"  GPS: {lat:.5f},{lon:.5f} (ingen plats kunde bestämmas)")
+            gps_location = location_data["name"] if location_data else None
 
             # Analyze (always from analyze_target, write back to original image)
             if engine == "haiku":
@@ -907,7 +1058,7 @@ def main(argv=None):
                 vision_file.write_text(md_text, encoding="utf-8")
 
                 if write_back:
-                    write_vision_metadata(image, data)
+                    write_vision_metadata(image, data, location_data=location_data)
 
                 size_kb = vision_file.stat().st_size / 1024
                 log.info(f"  OK -> {vision_file.name} ({size_kb:.0f} KB, {elapsed:.0f}s)")
