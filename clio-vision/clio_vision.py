@@ -501,7 +501,11 @@ def resolve_location(lat: float, lon: float) -> dict | None:
     if uid and models:
         try:
             db, pw = _odoo_conn["db"], _odoo_conn["pw"]
-            vals: dict = {"name": place_name, "lat": lat, "lon": lon, "radius_m": 100}
+            vals: dict = {
+                "name": place_name,
+                "display_name_geo": place_name,
+                "lat": lat, "lon": lon, "radius_m": 100,
+            }
             if city:
                 vals["city"] = city
             if road:
