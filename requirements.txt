@@ -32,7 +32,7 @@ python-docx>=0.8.11     # Läser .docx-filer (importeras som docx)
 
 # ── clio-docs + clio-vision (OCR-stöd) ───────────────────────────────────────
 Pillow>=10.0.0          # Bildbehandling (används av ocrmypdf och pytesseract)
-pytesseract>=0.3.10     # Python-wrapper för Tesseract OCR
+pytesseract>=0.3.13     # Python-wrapper för Tesseract OCR
 
 # ── clio-fetch ────────────────────────────────────────────────────────────────
 requests                # HTTP-klient för live URL-hämtning
