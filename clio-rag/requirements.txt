@@ -1,6 +1,6 @@
 pymupdf>=1.23
 qdrant-client>=1.9
-openai>=1.0
+openai>=3.16.2
 anthropic>=0.25
 notion-client>=2.0
 python-dotenv
