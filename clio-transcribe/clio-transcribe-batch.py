@@ -49,7 +49,7 @@ WHISPER_MODELS = {
         "large":  "large",
     },
 }
-WHISPER_SIZE = "medium"  # Change to "large" on GPU machine
+WHISPER_SIZE = "large"
 
 # Language name mapping
 LANGUAGE_MAP = {
