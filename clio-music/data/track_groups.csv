@@ -1,0 +1,13 @@
+# Låt-grupptillhörighet
+# Format: filnamnsmönster;grupp  (matchar filnamn som BÖRJAR med mönstret)
+# Låtar utan rad här visas för alla inloggade.
+# Användare i gruppen "Alla" ser alltid alla låtar.
+001;RIM1
+002;RIM1
+003;RIM1
+004;RIM2
+005;RIM2
+006;RIM2
+007;RIM2
+008;RIM2
+009;RIM2

@@ -1,0 +1,18 @@
+# Användardata och loggar
+data/users.csv
+data/plays.jsonl
+
+# Ljudfiler
+music/
+
+# PHP sessions
+/tmp/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
