@@ -2,6 +2,8 @@
 
 PHP-baserad musikspelare för meditationskurser (Miranon Media / Roger Gottardsson).
 Deployad på EliteDeskGPU, tillgänglig via https://audio.arvas.international
+Repo: FredrikArvas/clio-tools → branch 19.0 → /clio-music/
+Lokal sökväg: C:\Users\fredr\git\clio-tools\clio-music\
 
 ## Stack
 - PHP 8.3-FPM + nginx (port 8091 på servern)
