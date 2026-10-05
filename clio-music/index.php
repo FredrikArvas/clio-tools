@@ -93,15 +93,26 @@ foreach ($groups as $base => $chans) {
     $tgroup = track_group($main_fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
     $u = fn($fn) => $fn ? $music_url . '/' . rawurlencode($fn) : null;
+    // msc är master i JS-spelaren (driver progress/ended).
+    // Om _msc saknas: använd primary-filen som msc och nolla ur dess kanal för att undvika dubbelspelning.
+    $ch_msc = $chans['_msc'] ?? null;
+    $ch_bin = $chans['_bin'] ?? null;
+    $ch_vce = $chans['_vce'] ?? null;
+    $ch_env = $chans['_env'] ?? null;
+    if (!$ch_msc) {
+        if ($ch_vce === $main_fn) $ch_vce = null;
+        elseif ($ch_env === $main_fn) $ch_env = null;
+        elseif ($ch_bin === $main_fn) $ch_bin = null;
+    }
     $tracks[] = [
         'file'   => $music_url . '/' . rawurlencode($main_fn),
         'title'  => clean_filename($base),
         'artist' => '',
         'album'  => '',
-        'msc'    => $u($chans['_msc'] ?? null),
-        'bin'    => $u($chans['_bin'] ?? null),
-        'vce'    => $u($chans['_vce'] ?? null),
-        'env'    => $u($chans['_env'] ?? null),
+        'msc'    => $u($ch_msc ?? $main_fn),
+        'bin'    => $u($ch_bin),
+        'vce'    => $u($ch_vce),
+        'env'    => $u($ch_env),
     ];
 }
 
@@ -245,10 +256,12 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
   </section>
 </div>
 
+<footer class="app-version">v<?= APP_VERSION ?></footer>
+
 <script>
 const TRACKS  = <?= $tracks_json ?>;
 const CM_USER = <?= json_encode($user['username']) ?>;
 </script>
-<script src="player.js"></script>
+<script src="player.js?v=<?= APP_VERSION ?>"></script>
 </body>
 </html>
