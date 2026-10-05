@@ -1,7 +1,7 @@
 :root {
-  --bg:        #111317;
-  --surface:   #1c1f26;
-  --surface2:  #252932;
+  --bg:        #0d1a2e;
+  --surface:   #162035;
+  --surface2:  #1e2a40;
   --border:    #2e3340;
   --accent:    #4e9eff;
   --accent2:   #7ec8e3;
@@ -376,4 +376,12 @@ ul {
   .btn-play { width: 68px; height: 68px; }
   .track-item { padding: 14px 16px; }
   .header h1 { font-size: 1.1rem; }
+}
+
+.app-version {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text);
+  padding: 8px 0 4px;
+  opacity: 0.3;
 }

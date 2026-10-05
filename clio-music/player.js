@@ -72,23 +72,35 @@ function initAudio() {
     applySettings();
 }
 
-// ── Settings ──────────────────────────────────────────────────────────────────
-const STORAGE_KEY  = 'cm_settings_' + (window.CM_USER || 'default');
-const CH_DEFAULTS  = { msc: 0.8, bin: 0.5, vce: 0.9, env: 0.4 };
+// ── Settings (per användare × per spår, serverside) ───────────────────────────
+const CH_DEFAULTS = { msc: 0.8, bin: 0.5, vce: 0.9, env: 0.4 };
+let serverProfiles = {};
 
-function loadSettings() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-    catch { return {}; }
+const profilesLoaded = fetch('api/load_profiles.php')
+    .then(r => r.json())
+    .then(data => { serverProfiles = data; })
+    .catch(() => {});
+
+function loadSettings(index) {
+    const key = TRACKS[index]?.file ?? '';
+    return serverProfiles[key] ?? {};
 }
 
 function saveSettings() {
+    if (current < 0) return;
     const s = {
         balance: parseFloat(slBalance.value),
         bass:    parseFloat(slBass.value),
         treble:  parseFloat(slTreble.value),
     };
     CH_IDS.forEach(ch => s[ch] = parseFloat(sliders[ch].value));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    const key = TRACKS[current].file;
+    serverProfiles[key] = s;
+    fetch('api/save_profile.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ track: key, settings: s }),
+    }).catch(() => {});
 }
 
 function applySettings() {
@@ -99,13 +111,17 @@ function applySettings() {
     trebleNode.gain.value = parseFloat(slTreble.value);
 }
 
-function initSettings() {
-    const s = loadSettings();
+function setSliders(s) {
     CH_IDS.forEach(ch => { sliders[ch].value = s[ch] ?? CH_DEFAULTS[ch]; });
     slBalance.value = s.balance ?? 0;
     slBass.value    = s.bass    ?? 0;
     slTreble.value  = s.treble  ?? 0;
     updateLabels();
+    if (ctx) applySettings();
+}
+
+function initSettings() {
+    setSliders({});
 }
 
 function updateLabels() {
@@ -136,9 +152,9 @@ function seekAll(time) {
 
 // Korrigerar drift mot msc-kanalen var ~250 ms (via timeupdate)
 function syncSecondary() {
-    if (!audios.msc.src) return;
+    if (!audios.msc.hasAttribute('src')) return;
     ['bin', 'vce', 'env'].forEach(ch => {
-        if (!audios[ch].src || audios[ch].paused) return;
+        if (!audios[ch].hasAttribute('src') || audios[ch].paused) return;
         if (Math.abs(audios[ch].currentTime - audios.msc.currentTime) > 0.3) {
             audios[ch].currentTime = audios.msc.currentTime;
         }
@@ -153,15 +169,20 @@ function fmt(s) {
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
 
-function load(index, autoplay) {
+async function load(index, autoplay) {
     if (!TRACKS.length) return;
+    if (current >= 0) saveSettings();
+    await profilesLoaded;
     index   = ((index % TRACKS.length) + TRACKS.length) % TRACKS.length;
     current = index;
     const t = TRACKS[index];
 
+    setSliders(loadSettings(index));
+
     // Sätt src för alla kanaler, visa/dölj slider-rader
     CH_IDS.forEach(ch => {
-        audios[ch].src = t[ch] || '';
+        if (t[ch]) audios[ch].src = t[ch];
+        else audios[ch].removeAttribute('src');
         if (rows[ch]) rows[ch].style.display = t[ch] ? '' : 'none';
     });
 
