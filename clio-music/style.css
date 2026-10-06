@@ -268,14 +268,18 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
   line-height: 1;
+  opacity: 0.45;
 }
-.btn-mode:hover { border-color: var(--accent); color: var(--text); }
+.btn-mode:hover { border-color: var(--accent); color: var(--text); opacity: 0.8; }
 .btn-mode.active {
   border-color: var(--accent);
-  background: var(--active-bg);
-  color: var(--accent2);
+  border-width: 2px;
+  background: var(--accent);
+  color: #fff;
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(78, 158, 255, 0.5);
 }
 
 .btn-settings-toggle {
