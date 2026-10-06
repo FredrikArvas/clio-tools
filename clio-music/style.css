@@ -246,8 +246,36 @@ ul {
 /* ── Settings ── */
 .player-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 8px;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-mode {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 1.1rem;
+  width: 36px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1;
+}
+.btn-mode:hover { border-color: var(--accent); color: var(--text); }
+.btn-mode.active {
+  border-color: var(--accent);
+  background: var(--active-bg);
+  color: var(--accent2);
 }
 
 .btn-settings-toggle {

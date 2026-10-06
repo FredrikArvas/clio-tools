@@ -36,6 +36,12 @@ const lblBal    = document.getElementById('lbl-balance');
 const lblBass   = document.getElementById('lbl-bass');
 const lblTreb   = document.getElementById('lbl-treble');
 
+const btnRepeatOne = document.getElementById('btn-repeat-one');
+const btnRepeatAll = document.getElementById('btn-repeat-all');
+const btnShuffle   = document.getElementById('btn-shuffle');
+const slSpeed      = document.getElementById('s-speed');
+const lblSpeed     = document.getElementById('lbl-speed');
+
 // ── Web Audio API ─────────────────────────────────────────────────────────────
 let ctx;
 const gainNodes = {};
@@ -78,7 +84,7 @@ let serverProfiles = {};
 
 const profilesLoaded = fetch('api/load_profiles.php')
     .then(r => r.json())
-    .then(data => { serverProfiles = data; })
+    .then(data => { serverProfiles = data; loadGlobalSettings(); })
     .catch(() => {});
 
 function loadSettings(index) {
@@ -139,6 +145,59 @@ function updateLabels() {
     el.addEventListener('change', saveSettings);
 });
 
+// ── Uppspelningsläge & hastighet (globala, sparas i _settings) ────────────────
+let playMode = 'none';
+
+function updateModeButtons() {
+    btnRepeatOne.classList.toggle('active', playMode === 'repeat-one');
+    btnRepeatAll.classList.toggle('active', playMode === 'repeat-all');
+    btnShuffle.classList.toggle('active',   playMode === 'shuffle');
+}
+
+function updateSpeedLabel() {
+    const r = parseFloat(slSpeed.value);
+    lblSpeed.textContent = r === 1 ? '1×' : r.toFixed(2).replace(/\.?0+$/, '') + '×';
+}
+
+function applyPlaybackRate() {
+    const rate = parseFloat(slSpeed.value);
+    CH_IDS.forEach(ch => { audios[ch].playbackRate = rate; });
+}
+
+function loadGlobalSettings() {
+    const s = serverProfiles['_settings'] ?? {};
+    playMode      = s.playMode ?? 'none';
+    slSpeed.value = s.playbackRate ?? 1;
+    updateModeButtons();
+    updateSpeedLabel();
+    applyPlaybackRate();
+}
+
+function saveGlobalSettings() {
+    const s = { playMode, playbackRate: parseFloat(slSpeed.value) };
+    serverProfiles['_settings'] = s;
+    fetch('api/save_profile.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ track: '_settings', settings: s }),
+    }).catch(() => {});
+}
+
+[
+    [btnRepeatOne, 'repeat-one'],
+    [btnRepeatAll, 'repeat-all'],
+    [btnShuffle,   'shuffle'],
+].forEach(([btn, mode]) => {
+    btn.addEventListener('click', () => {
+        playMode = (playMode === mode) ? 'none' : mode;
+        updateModeButtons();
+        saveGlobalSettings();
+    });
+});
+
+slSpeed.addEventListener('input',  () => { updateSpeedLabel(); applyPlaybackRate(); });
+slSpeed.addEventListener('change', saveGlobalSettings);
+
 // ── Kanalsynk ─────────────────────────────────────────────────────────────────
 function playAll() {
     CH_IDS.forEach(ch => { if (audios[ch].src) audios[ch].play().catch(() => {}); });
@@ -178,6 +237,7 @@ async function load(index, autoplay) {
     const t = TRACKS[index];
 
     setSliders(loadSettings(index));
+    applyPlaybackRate();
 
     // Sätt src för alla kanaler, visa/dölj slider-rader
     CH_IDS.forEach(ch => {
@@ -218,7 +278,17 @@ btnNext.addEventListener('click', () => load(current + 1, !audios.msc.paused));
 // msc är master för UI-tillstånd
 audios.msc.addEventListener('play',  () => { btnPlay.innerHTML = '&#9646;&#9646;'; });
 audios.msc.addEventListener('pause', () => { btnPlay.innerHTML = '&#9654;'; });
-audios.msc.addEventListener('ended', () => { pauseAll(); load(current + 1, true); });
+audios.msc.addEventListener('ended', () => {
+    if (playMode === 'repeat-one') {
+        seekAll(0); playAll();
+    } else if (playMode === 'repeat-all') {
+        load((current + 1) % TRACKS.length, true);
+    } else if (playMode === 'shuffle') {
+        load(Math.floor(Math.random() * TRACKS.length), true);
+    } else {
+        pauseAll();
+    }
+});
 
 audios.msc.addEventListener('timeupdate', () => {
     if (!audios.msc.duration) return;
@@ -278,3 +348,5 @@ audios.msc.addEventListener('ended', () => { clearTimeout(logTimer); loggedTrack
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 initSettings();
+updateModeButtons();
+updateSpeedLabel();
