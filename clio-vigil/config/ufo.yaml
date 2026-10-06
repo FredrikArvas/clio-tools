@@ -149,6 +149,56 @@ sources:
       maturity: etablerad
       weight: 1.1
 
+    - url: https://feed.podbean.com/multiverse5dpodcast/feed.xml
+      name: Multiverse 5D Podcast
+      maturity: tidig
+      weight: 0.7
+      # Hög volym (999+ avsnitt), blandat EN/PT, hög bruskvot.
+      # Fokus: vittnesmål och kontaktupplevelser — filtret i ufo.yaml keywords
+      # fångar contact experience, encounter, consciousness m.fl.
+      # PT-avsnitt filtreras ut naturligt (inga matchande keywords).
+      language: en
+
+    # ICER-talare — tillagda 2026-09-28
+    - url: https://podcastufo.com/feed/podcast/
+      name: Podcast UFO
+      maturity: etablerad
+      weight: 1.2
+      # Don Schmitt gäst (ep 640, dec 2024), Roswell-fokus
+
+    - url: https://www.spreaker.com/show/2069421/episodes/feed
+      name: A Different Perspective (Kevin Randle)
+      maturity: etablerad
+      weight: 1.1
+      # Don Schmitt återkommande gäst, UAP-forskning
+
+    - url: https://anchor.fm/s/439cad18/podcast/rss
+      name: The Files of the Disclosure Agency (Victor Viggiani)
+      maturity: etablerad
+      weight: 1.1
+      # Victor Viggianis eget program, ledande globala UAP-experter
+
+
+    # ICER-talare tillägg 2026-09-28 (batch 2)
+    - url: https://anchor.fm/s/e3a2d760/podcast/rss
+      name: UAP Files Podcast
+      maturity: etablerad
+      weight: 1.2
+      # Eamonn Ansbro gäst S2E6 (2024); military/pilot/scientist-intervjuer
+
+    - url: https://www.spreaker.com/show/1302044/episodes/feed
+      name: FADE to Black (Jimmy Church)
+      maturity: etablerad
+      weight: 1.1
+      # Don Schmitt gäst sep 2024; UFO/UAP/paranormal
+
+    - url: https://www.spreaker.com/show/1657874/episodes/feed
+      name: Spaced Out Radio
+      maturity: tidig
+      weight: 0.9
+      # Victor Viggiani återkommande gäst; bred UAP/paranormal-täckning
+
+
   # YouTube-kanaler — @handle-format (robustare än kanal-ID)
   youtube_channels:
     - channel_id: "@theblackvault"
@@ -188,6 +238,19 @@ sources:
       maturity: tidig
       weight: 0.8
 
+    - channel_id: "@MarksCosmicAdventures"
+      name: Mark's Cosmic Adventures
+      maturity: tidig
+      weight: 0.9
+      # Eamonn Ansbro gäst aug 2024
+
+    - channel_id: "UCXTDaA1BcxCr52NC37Nvesg"
+      name: Giorgio Piacenza
+      maturity: tidig
+      weight: 0.8
+      # ICER-talare, kontaktforskning och integrativ UAP-teori
+
+
   # Webb-crawling (Release 2)
   # - url: https://www.archiveoftheunknown.com
   #   name: Archive for the Unknown (Norrköping)
@@ -216,12 +279,3 @@ sources:
 max_priority_duration_minutes: 90   # Objekt över denna längd får reducerat prioritetstal
 whisper_model: medium               # tiny | base | small | medium | large-v3
 
-    - url: https://feed.podbean.com/multiverse5dpodcast/feed.xml
-      name: Multiverse 5D Podcast
-      maturity: tidig
-      weight: 0.7
-      # Hög volym (999+ avsnitt), blandat EN/PT, hög bruskvot.
-      # Fokus: vittnesmål och kontaktupplevelser — filtret i ufo.yaml keywords
-      # fångar contact experience, encounter, consciousness m.fl.
-      # PT-avsnitt filtreras ut naturligt (inga matchande keywords).
-      language: en
