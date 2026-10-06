@@ -179,6 +179,11 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
     </div>
 
     <div class="player-footer">
+      <div class="mode-buttons">
+        <button class="btn-mode" id="btn-repeat-one" title="Repetera låt">🔂</button>
+        <button class="btn-mode" id="btn-repeat-all" title="Spela lista i loop">🔁</button>
+        <button class="btn-mode" id="btn-shuffle"    title="Slumpa">🔀</button>
+      </div>
       <button class="btn-settings-toggle" id="btn-settings" title="Ljudinställningar">&#9881; Ljud</button>
     </div>
 
@@ -224,6 +229,15 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
         <label>Diskant</label>
         <input type="range" id="s-treble" min="-12" max="12" step="0.5" value="0">
         <span class="setting-val" id="lbl-treble">0.0 dB</span>
+      </div>
+
+      <div class="settings-divider"></div>
+      <div class="settings-section-title">Uppspelning</div>
+
+      <div class="setting-row">
+        <label>Hastighet</label>
+        <input type="range" id="s-speed" min="0.5" max="2" step="0.05" value="1">
+        <span class="setting-val" id="lbl-speed">1×</span>
       </div>
 
       <p class="settings-note">Sparas automatiskt. Övriga kanaler spelas i ren stereo utan EQ.</p>
