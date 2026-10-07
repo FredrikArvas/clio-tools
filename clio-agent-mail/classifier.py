@@ -131,11 +131,24 @@ def classify(mail_item, whitelist: set, config) -> Classification:
     account_key = _resolve_account_key(account, config)
     sender_email = extract_sender_email(mail_item.sender)
 
-    # ── info@ → FAQ-flöde (före behörighetscheck) ────────────────────────────
+    # ── info@ → moderationsflöde (Fredrik godkänner alla svar) ────────────────
+    sender_lower_early = extract_sender_email(mail_item.sender).lower()
     if info_account and account == info_account:
+        if any(pat in sender_lower_early for pat in _IGNORE_PATTERNS):
+            return Classification(
+                action=ACTION_IGNORE,
+                reason="Bounce/system-mail på info@ — ignoreras",
+                account_key="info",
+            )
+        if sender_lower_early in _get_own_addresses(config):
+            return Classification(
+                action=ACTION_IGNORE,
+                reason="Eget konto på info@ — ignoreras för att förhindra svarsloop",
+                account_key="info",
+            )
         return Classification(
-            action=ACTION_FAQ_CHECK,
-            reason=t("mail_reason_faq"),
+            action=ACTION_SEND_FOR_APPROVAL,
+            reason="info@ — alla svar modereras av Fredrik",
             account_key="info",
         )
 
