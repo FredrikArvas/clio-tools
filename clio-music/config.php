@@ -2,4 +2,4 @@
 $music_dir   = __DIR__ . '/music';
 $music_url   = 'music';
 $site_title  = 'Musik';
-define('APP_VERSION', '1.2.3');
+define('APP_VERSION', '1.3.0');

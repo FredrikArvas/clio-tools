@@ -5,6 +5,8 @@ require_login();
 
 $user = current_user();
 
+// ── ID3-läsare ────────────────────────────────────────────────────────────────
+
 function read_id3v1(string $path): array {
     $meta = [];
     $size = @filesize($path);
@@ -22,6 +24,74 @@ function read_id3v1(string $path): array {
     if ($artist) $meta['artist'] = $artist;
     if ($album)  $meta['album']  = $album;
     return $meta;
+}
+
+function read_id3v2(string $path): array {
+    $meta = [];
+    $fp = @fopen($path, 'rb');
+    if (!$fp) return $meta;
+    $hdr = fread($fp, 10);
+    if (strlen($hdr) < 10 || substr($hdr, 0, 3) !== 'ID3') { fclose($fp); return $meta; }
+    $ver   = ord($hdr[3]);
+    $flags = ord($hdr[5]);
+    $total = (ord($hdr[6]) << 21) | (ord($hdr[7]) << 14) | (ord($hdr[8]) << 7) | ord($hdr[9]);
+    if ($flags & 0x40) {
+        $sz   = fread($fp, 4);
+        $skip = ($ver === 4)
+            ? ((ord($sz[0]) << 21) | (ord($sz[1]) << 14) | (ord($sz[2]) << 7) | ord($sz[3]))
+            : unpack('N', $sz)[1];
+        fseek($fp, $skip - 4, SEEK_CUR);
+    }
+    $id_len = ($ver === 2) ? 3 : 4;
+    $end    = 10 + $total;
+    $want   = ($ver === 2)
+        ? ['TT2' => 'title', 'TP1' => 'artist', 'TAL' => 'album']
+        : ['TIT2' => 'title', 'TPE1' => 'artist', 'TALB' => 'album'];
+    while (count($meta) < 3 && ftell($fp) < $end - $id_len - 3) {
+        $fid = fread($fp, $id_len);
+        if ($fid === false || ltrim($fid, "\x00") === '') break;
+        if ($ver === 2) {
+            $sz  = fread($fp, 3);
+            $fsz = (ord($sz[0]) << 16) | (ord($sz[1]) << 8) | ord($sz[2]);
+        } elseif ($ver === 4) {
+            $sz  = fread($fp, 4);
+            $fsz = (ord($sz[0]) << 21) | (ord($sz[1]) << 14) | (ord($sz[2]) << 7) | ord($sz[3]);
+            fread($fp, 2);
+        } else {
+            $sz  = fread($fp, 4);
+            $fsz = unpack('N', $sz)[1];
+            fread($fp, 2);
+        }
+        if ($fsz <= 0 || $fsz > 100000) break;
+        $data = fread($fp, $fsz);
+        if (!isset($want[$fid]) || strlen($data) < 2) continue;
+        $enc  = ord($data[0]);
+        $text = substr($data, 1);
+        switch ($enc) {
+            case 0:
+                $text = mb_convert_encoding(rtrim($text, "\x00"), 'UTF-8', 'ISO-8859-1');
+                break;
+            case 1:
+                $bom = substr($text, 0, 2);
+                $cs  = $bom === "\xfe\xff" ? 'UTF-16BE' : 'UTF-16LE';
+                $text = mb_convert_encoding(substr($text, 2), 'UTF-8', $cs);
+                break;
+            case 2:
+                $text = mb_convert_encoding($text, 'UTF-8', 'UTF-16BE');
+                break;
+            default:
+                $text = rtrim($text, "\x00");
+        }
+        $text = trim($text);
+        if ($text !== '') $meta[$want[$fid]] = $text;
+    }
+    fclose($fp);
+    return $meta;
+}
+
+function read_metadata(string $path): array {
+    $m = read_id3v2($path);
+    return $m ?: read_id3v1($path);
 }
 
 function clean_filename(string $name): string {
@@ -59,9 +129,6 @@ function user_can_see(string $track_group, array $user): bool {
 $track_group_map = load_track_groups();
 
 // ── Skanna och gruppera filer per kanal ───────────────────────────────────────
-// Kanalernas suffix: _msc=musik, _bin=binauralt, _vce=röst, _env=miljö
-// Filer utan suffix behandlas som fristående musikspår (bakåtkompatibilitet).
-
 const CH_SUFFIXES = ['_msc', '_bin', '_vce', '_env'];
 
 $all_files = is_dir($music_dir)
@@ -69,8 +136,8 @@ $all_files = is_dir($music_dir)
     : [];
 sort($all_files);
 
-$groups     = [];   // [base => ['_msc'=>filename, ...]]
-$standalone = [];   // filer utan igenkänt suffix
+$groups     = [];
+$standalone = [];
 
 foreach ($all_files as $f) {
     $fn = basename($f);
@@ -86,15 +153,13 @@ foreach ($all_files as $f) {
 
 $tracks = [];
 
-// Grupperade spår (4-kanals meditationer)
 foreach ($groups as $base => $chans) {
     $main_fn = $chans['_msc'] ?? $chans['_vce'] ?? $chans['_env'] ?? $chans['_bin'] ?? null;
     if (!$main_fn) continue;
     $tgroup = track_group($main_fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
+    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . ($chans['_msc'] ?? $main_fn));
     $u = fn($fn) => $fn ? $music_url . '/' . rawurlencode($fn) : null;
-    // msc är master i JS-spelaren (driver progress/ended).
-    // Om _msc saknas: använd primary-filen som msc och nolla ur dess kanal för att undvika dubbelspelning.
     $ch_msc = $chans['_msc'] ?? null;
     $ch_bin = $chans['_bin'] ?? null;
     $ch_vce = $chans['_vce'] ?? null;
@@ -106,9 +171,9 @@ foreach ($groups as $base => $chans) {
     }
     $tracks[] = [
         'file'   => $music_url . '/' . rawurlencode($main_fn),
-        'title'  => clean_filename($base),
-        'artist' => '',
-        'album'  => '',
+        'title'  => $meta['title']  ?? clean_filename($base),
+        'artist' => $meta['artist'] ?? '',
+        'album'  => $meta['album']  ?? '',
         'msc'    => $u($ch_msc ?? $main_fn),
         'bin'    => $u($ch_bin),
         'vce'    => $u($ch_vce),
@@ -116,15 +181,14 @@ foreach ($groups as $base => $chans) {
     ];
 }
 
-// Fristående filer (bakåtkompatibilitet)
 foreach ($standalone as $file) {
     $fn = basename($file);
     $tgroup = track_group($fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
-    $meta = read_id3v1($file);
+    $meta = read_metadata($file);
     $tracks[] = [
         'file'   => $music_url . '/' . rawurlencode($fn),
-        'title'  => $meta['title'] ?? clean_filename($fn),
+        'title'  => $meta['title']  ?? clean_filename($fn),
         'artist' => $meta['artist'] ?? '',
         'album'  => $meta['album']  ?? '',
         'msc'    => $music_url . '/' . rawurlencode($fn),
@@ -245,29 +309,89 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
   </main>
 
   <section class="playlist" id="playlist">
+
+    <div class="playlist-tabs">
+      <button class="tab-btn active" id="tab-lib">Bibliotek</button>
+      <button class="tab-btn" id="tab-queue">Kö <span class="queue-badge" id="queue-badge">0</span></button>
+      <button class="tab-btn" id="tab-pl">Spellistor</button>
+    </div>
+
+    <div id="view-lib">
     <?php if (empty($tracks)): ?>
     <div class="empty">Inga MP3-filer hittades i <code>/music/</code>.</div>
     <?php else: ?>
     <ul id="track-list">
-      <?php foreach ($tracks as $i => $t): ?>
-      <li class="track-item" data-index="<?= $i ?>">
-        <span class="track-num"><?= $i + 1 ?></span>
-        <div class="track-info">
-          <span class="t-title"><?= htmlspecialchars($t['title']) ?></span>
-          <?php if ($t['artist']): ?>
-          <span class="t-artist"><?= htmlspecialchars($t['artist']) ?></span>
-          <?php endif ?>
-          <span class="t-channels">
-            <?php foreach (['msc'=>'♪','bin'=>'≋','vce'=>'◎','env'=>'〜'] as $ch => $icon): ?>
-              <?php if ($t[$ch]): ?><span title="<?= ['msc'=>'Musik','bin'=>'Binauralt','vce'=>'Röst','env'=>'Miljö'][$ch] ?>"><?= $icon ?></span><?php endif ?>
-            <?php endforeach ?>
-          </span>
+      <?php
+      // Gruppera spår efter album i ursprunglig ordning
+      $album_order  = [];
+      $album_groups = [];
+      foreach ($tracks as $i => $t) {
+          $al = $t['album'];
+          if (!array_key_exists($al, $album_groups)) {
+              $album_order[]     = $al;
+              $album_groups[$al] = [];
+          }
+          $album_groups[$al][] = $i;
+      }
+      foreach ($album_order as $al):
+          $indices = $album_groups[$al];
+          if ($al !== ''):
+      ?>
+      <li class="album-section" data-album="<?= htmlspecialchars($al, ENT_QUOTES) ?>">
+        <div class="album-header">
+          <button class="album-toggle" title="Visa/dölj">▾</button>
+          <span class="album-name"><?= htmlspecialchars($al) ?></span>
+          <span class="album-count"><?= count($indices) ?></span>
+          <button class="btn-play-album" data-album="<?= htmlspecialchars($al, ENT_QUOTES) ?>" title="Spela hela albumet">▶</button>
         </div>
+        <ul class="album-tracks">
+      <?php endif ?>
+      <?php foreach ($indices as $i): $t = $tracks[$i]; ?>
+          <li class="track-item" data-index="<?= $i ?>">
+            <span class="track-num"><?= $i + 1 ?></span>
+            <div class="track-info">
+              <span class="t-title"><?= htmlspecialchars($t['title']) ?></span>
+              <?php if ($t['artist']): ?>
+              <span class="t-artist"><?= htmlspecialchars($t['artist']) ?></span>
+              <?php endif ?>
+              <span class="t-channels">
+                <?php foreach (['msc'=>'♪','bin'=>'≋','vce'=>'◎','env'=>'〜'] as $ch => $icon): ?>
+                  <?php if ($t[$ch]): ?><span title="<?= ['msc'=>'Musik','bin'=>'Binauralt','vce'=>'Röst','env'=>'Miljö'][$ch] ?>"><?= $icon ?></span><?php endif ?>
+                <?php endforeach ?>
+              </span>
+            </div>
+            <button class="btn-add-pl" data-index="<?= $i ?>" title="Spara i spellista">☰</button>
+            <button class="btn-add-queue" data-index="<?= $i ?>" title="Lägg till i kö">+</button>
+          </li>
+      <?php endforeach ?>
+      <?php if ($al !== ''): ?>
+        </ul>
       </li>
+      <?php endif ?>
       <?php endforeach ?>
     </ul>
     <?php endif ?>
+    </div>
+
+    <div id="view-queue" hidden>
+      <ul id="queue-list"></ul>
+      <p class="queue-empty-msg" id="queue-empty-msg">Kön är tom — lägg till spår med <strong>+</strong> i biblioteket.</p>
+    </div>
+
+    <div id="view-pl" hidden>
+      <div class="pl-toolbar">
+        <input type="text" id="pl-new-name" class="pl-new-input" placeholder="Ny spellista…" maxlength="80">
+        <button class="btn-create-pl" id="btn-create-pl">Skapa</button>
+      </div>
+      <ul id="pl-list"></ul>
+      <p class="queue-empty-msg" id="pl-empty-msg">Inga spellistor ännu — lägg till spår med ☰.</p>
+    </div>
+
   </section>
+
+  <div id="pl-dropdown" class="pl-dropdown" hidden>
+    <ul id="pl-dropdown-list"></ul>
+  </div>
 </div>
 
 <footer class="app-version">v<?= APP_VERSION ?></footer>

@@ -1,13 +1,20 @@
 # Låt-grupptillhörighet
-# Format: filnamnsmönster;grupp  (matchar filnamn som BÖRJAR med mönstret)
-# Låtar utan rad här visas för alla inloggade.
-# Användare i gruppen "Alla" ser alltid alla låtar.
-001;RIM1
-002;RIM1
-003;RIM1
-004;RIM2
-005;RIM2
-006;RIM2
-007;RIM2
-008;RIM2
-009;RIM2
+# Format: filnamn.mp3;grupp  (sparat av admin-gränssnittet)
+# Låtar utan rad visas för alla inloggade.
+001_mediation_bin.mp3;RIM1
+001_mediation_env.mp3;RIM1
+001_mediation_msc.mp3;RIM1
+001_mediation_vce.mp3;RIM1
+01_piano_melodi.mp3;RIM2
+02_ambient_pad.mp3;RIM2
+03_gitarr_picking.mp3;RIM2
+04_vals_flojt.mp3;RIM2
+Aim for the Stars_Suno-version.mp3;Ulrikas_35_årslåt
+InstrumentalPiano1.mp3;Ljudvägg
+Layered Sound Wall.mp3;Ljudvägg
+Lullabyrint der Träume.mp3;Ljudvägg
+Motivo Calido.mp3;Ljudvägg
+Varmt Minne.mp3;Ljudvägg
+Varmt Piano.mp3;Ljudvägg
+Waltz of the Tenor.mp3;Ljudvägg
+Windwave Calm.mp3;Ljudvägg
