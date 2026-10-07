@@ -1,87 +1,62 @@
-# clio_music — CLAUDE.md
+# CLAUDE.md — clio_music
 
-PHP-baserad musikspelare för meditationskurser (Miranon Media / Roger Gottardsson).
-Deployad på EliteDeskGPU, tillgänglig via https://audio.arvas.international
-Repo: FredrikArvas/clio-tools → branch 19.0 → /clio-music/
-Lokal sökväg: C:\Users\fredr\git\clio-tools\clio-music\
+Kontext för LLM-assistenter som arbetar med detta projekt.
 
-## Stack
-- PHP 8.3-FPM + nginx (port 8091 på servern)
-- Vanilla JS + Web Audio API
-- Inga ramverk, inga npm-beroenden
+## Vad projektet är
 
-## Filstruktur
+PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson). Inloggningsskyddad, inga ramverk, inga npm-beroenden. Körs på EliteDesk GPU bakom Cloudflare på https://audio.arvas.international.
+
+## Regler och konventioner
+
+- **Inga ramverk.** Vanilla JS + Web Audio API på klientsidan. PHP utan Composer.
+- **Inga hårdkodade URL:er.** Använd `$music_url` från config.php.
+- **APP_VERSION** i config.php ska bumpa vid varje deploy — används för Cloudflare cache-bust på player.js.
+- **data/-mappen är känslig.** users.csv, plays.jsonl, profiles/ och playlists/ är git-ignorerade och innehåller riktiga användardata.
+- **Bcrypt** för lösenord, aldrig klartext. admin/hash_tool.php finns för att generera hash — ta bort efter användning.
+- **Inga XSS-risker.** Allt som skrivs ut via PHP ska passera `htmlspecialchars()`. JS-sidan har `escHtml()`.
+- **Inga SQL-injektioner** — projektet har ingen databas, men validera alltid filnamn med `basename()` vid filoperationer.
+
+## Arkitektur
+
+### Autentisering (auth.php)
+- Session-baserad, bcrypt-lösenord
+- `current_user()` returnerar `{username, display, admin, groups}`
+- Grupper styr vilka spår användaren ser (`user_can_see()` i index.php)
+- Gruppen `Alla` ger tillgång till allt
+
+### Spårmodell
+Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
+
+### Klientside-state
+- `TRACKS[]` — injiceras från PHP som JSON i index.php, läses av player.js
+- `current` — index i TRACKS för aktuellt spår
+- `queue[]` — `{idx, id}` — kön, sparas server-side via `_settings`-nyckeln i profiles
+- `playlists{}` — namngivna spellistor, laddas från `api/load_playlists.php`
+
+### Serverside-persistens
+- `data/profiles/{username}.json` — objekt med filens URL som nyckel → ljudinställningar. `_settings`-nyckeln lagrar globala inställningar (playMode, hastighet, kö).
+- `data/playlists/{username}.json` — objekt med spellistenamn som nyckel → array av fil-URL:er.
+- Båda skrivs med `LOCK_EX` för att undvika race conditions.
+
+### Tab-system (player.js)
+Tre flikar: `lib` (bibliotek), `queue` (kö), `pl` (spellistor). Byt med `switchTab(tab)`.
+
+### Album-sektioner
+Spår grupperas per albumtagg i PHP (`$album_groups`). JS hanterar toggle via `.collapsed`-klassen. Kollapsade album sparas i `localStorage` under nyckeln `clio_collapsed_albums`.
+
+## Filrättigheter på servern
 ```
-index.php          Spellista + 4-kanals spelare
-auth.php           Session, bcrypt-login, grupper
-config.php         $music_dir, $music_url, $site_title
-login.php          Inloggningsformulär
-logout.php         session_destroy
-player.js          Web Audio API mixer (4 kanaler)
-style.css          Mörkt tema, CSS-variabler
-help.php           Hjälpsida (admindel dold för vanliga användare)
-
-api/
-  log_play.php     POST-endpoint för spelningslogg → data/plays.jsonl
-
-admin/
-  index.php        Dashboard: spelningar per låt/användare
-  groups.php       Hantera användare↔grupper och låtar↔grupper
-  hash_tool.php    Generera bcrypt-hash (ta bort efter användning)
-
-data/
-  users.csv        Användare (git-ignorerad)
-  plays.jsonl      Spelningslogg, append-only (git-ignorerad)
-  track_groups.csv Låt-grupptillhörighet (prefixmatchning)
-  .htaccess        Deny from all
-
-music/             MP3-filer (git-ignorerade)
-```
-
-## 4-kanals ljudmodell
-Varje meditation kan ha upp till fyra filer med samma basnamn:
-
-| Suffix | Kanal     | Web Audio-kedja                  |
-|--------|-----------|----------------------------------|
-| `_msc` | Musik     | Gain → Pan → Bas → Diskant → ut  |
-| `_bin` | Binauralt | Gain → ut (stereo bevaras)       |
-| `_vce` | Röst      | Gain → ut                        |
-| `_env` | Miljö     | Gain → ut                        |
-
-Exempel: `001_djup-avslappning_msc.mp3`, `001_djup-avslappning_bin.mp3`
-
-Filer utan suffix visas som fristående musikspår (bakåtkompatibelt).
-`_bin`/`_vce`/`_env`-filer filtreras bort från spellistan.
-
-## Användarhantering
-`data/users.csv` — semicolonseparerat, **inte** komma (namn kan innehålla komma).
-Format: `användarnamn;bcrypt_hash;Visningsnamn;aktiv;admin;Grupp1|Grupp2`
-
-Generera hash: öppna `admin/hash_tool.php` i webbläsaren (ta bort efteråt).
-
-## Grupper
-- Grupper definieras implicit ur users.csv + track_groups.csv
-- Användare i gruppen **Alla** ser alltid alla låtar
-- Admin-flagga (kolumn 5) ger åtkomst till admin/ och all musik
-- GUI: `admin/groups.php` — kryssrutor för användare, radioknappar för låtar
-
-## Deploy
-```bash
-# Uppdatera PHP/JS/CSS-filer
-scp -r auth.php config.php index.php login.php logout.php help.php \
-    player.js style.css api admin \
-    clioadmin@100.107.127.104:/var/www/clio_music/
-
-# Uppdatera datafiler
-scp data/track_groups.csv clioadmin@100.107.127.104:/var/www/clio_music/data/
-
-# Ladda upp musik
-scp music/*.mp3 clioadmin@100.107.127.104:/var/www/clio_music/music/
+data/profiles/   → clioadmin:www-data, chmod 775
+data/playlists/  → clioadmin:www-data, chmod 775
 ```
 
-## Spelningslogg
-`data/plays.jsonl` — en JSON-rad per spelning:
-```json
-{"user":"roger","track":"music/001_meditation_msc.mp3","ts":1728000000}
-```
-Spelning räknas efter 5 sekunders sammanhängande uppspelning.
+## Deploy-server
+- Host: `clioadmin@100.107.127.104` (EliteDesk GPU, Tailscale-IP)
+- Webbrot: `/var/www/clio_music/`
+- PHP 8.3-FPM, nginx port 8091, Cloudflare framför
+- Musikfiler i `/var/www/clio_music/music/`
+
+## Öppna punkter (från NCC)
+- Validering av payload-storlek i save_profile.php (DoS-skydd)
+- Eventuellt: omslagsbilder per album
+- Eventuellt: genrer/taggar-filtrering

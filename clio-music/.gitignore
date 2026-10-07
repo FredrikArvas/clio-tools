@@ -1,6 +1,8 @@
 # Användardata och loggar
 data/users.csv
 data/plays.jsonl
+data/profiles/
+data/playlists/
 
 # Ljudfiler
 music/
