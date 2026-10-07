@@ -205,7 +205,7 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($site_title) ?></title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
 </head>
 <body>
 <div class="app">
