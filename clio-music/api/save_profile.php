@@ -1,8 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/auth.php';
-require_login();
 
 header('Content-Type: application/json');
+
+if (!is_logged_in()) { echo '{"ok":true}'; exit; }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

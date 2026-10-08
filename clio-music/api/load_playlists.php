@@ -1,6 +1,7 @@
 <?php
 require_once '../auth.php';
-require_login();
+header('Content-Type: application/json');
+if (!is_logged_in()) { echo '{}'; exit; }
 $user = current_user()['username'];
 header('Content-Type: application/json');
 $file = __DIR__ . '/../data/playlists/' . basename($user) . '.json';

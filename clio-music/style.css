@@ -49,9 +49,16 @@ html, body {
 }
 
 .now-playing {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-bottom: 20px;
   min-height: 52px;
+}
+.now-playing-text {
+  text-align: center;
+  min-width: 0;
 }
 .track-title {
   font-size: 1.2rem;
@@ -242,6 +249,8 @@ ul {
   border-radius: 4px;
 }
 .btn-logout:hover { color: var(--text); border-color: var(--accent); }
+.btn-logout.btn-login { border-color: var(--accent); color: var(--accent); }
+.btn-logout.btn-login:hover { background: var(--accent); color: #fff; }
 
 /* ── Settings ── */
 .player-footer {
@@ -395,6 +404,17 @@ ul {
   margin-top: 4px;
 }
 .login-form button:hover { background: var(--accent2); }
+.login-guest-link {
+  text-align: center;
+  margin-top: 16px;
+}
+.login-guest-link a {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.login-guest-link a:hover { color: var(--accent); }
+
 .login-error {
   color: #f87171;
   font-size: 0.88rem;
@@ -635,6 +655,50 @@ ul {
   transition: border-color 0.15s, color 0.15s;
 }
 .btn-add-pl:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* ── Gilla-knappar ── */
+.btn-like,
+.btn-like-header {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--muted);
+  padding: 3px 5px;
+  border-radius: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.btn-like:hover,
+.btn-like-header:hover { color: #e0366f; }
+.btn-like.liked,
+.btn-like-header.liked { color: #e0366f; }
+
+.btn-like-header { font-size: 1.4rem; padding: 4px 6px; }
+
+/* ── Biblioteksverktygsfält ── */
+.lib-toolbar {
+  padding: 6px 12px 2px;
+  display: flex;
+  gap: 8px;
+}
+.btn-filter-liked {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-filter-liked:hover { border-color: #e0366f; color: #e0366f; }
+.btn-filter-liked.active {
+  border-color: #e0366f;
+  color: #e0366f;
+  background: rgba(224, 54, 111, 0.1);
+}
 
 /* ── Spellistor-tab ── */
 .pl-toolbar {

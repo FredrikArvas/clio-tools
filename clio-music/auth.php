@@ -16,6 +16,24 @@ function current_user(): array {
     return $_SESSION['cm_user'] ?? [];
 }
 
+function guest_user(): array {
+    return [
+        'username' => '__guest__',
+        'display'  => 'Gäst',
+        'admin'    => false,
+        'groups'   => ['Gäst'],
+        'is_guest' => true,
+    ];
+}
+
+function is_guest(array $user): bool {
+    return !empty($user['is_guest']);
+}
+
+function current_user_or_guest(): array {
+    return is_logged_in() ? current_user() : guest_user();
+}
+
 function load_users(): array {
     $path = __DIR__ . '/data/users.csv';
     if (!file_exists($path)) return [];

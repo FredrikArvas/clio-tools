@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
            autocomplete="current-password" required>
     <button type="submit">Logga in</button>
   </form>
+  <p class="login-guest-link"><a href="index.php">Fortsätt utan konto →</a></p>
 </div>
 </body>
 </html>

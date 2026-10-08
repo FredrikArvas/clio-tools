@@ -1,9 +1,8 @@
 <?php
 require_once 'auth.php';
 require_once 'config.php';
-require_login();
 
-$user = current_user();
+$user = current_user_or_guest();
 
 // ── ID3-läsare ────────────────────────────────────────────────────────────────
 
@@ -122,6 +121,7 @@ function track_group(string $filename, array $map): string {
 function user_can_see(string $track_group, array $user): bool {
     if ($user['admin']) return true;
     if (in_array('Alla', $user['groups'])) return true;
+    if (is_guest($user)) return in_array($track_group, $user['groups']);
     if ($track_group === '') return true;
     return in_array($track_group, $user['groups']);
 }
@@ -212,17 +212,25 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
   <header class="header">
     <h1><?= htmlspecialchars($site_title) ?></h1>
     <div class="header-user">
+      <?php if (!is_guest($user)): ?>
       <span><?= htmlspecialchars($user['display']) ?></span>
       <?php if (!empty($user['admin'])): ?><a href="admin/" style="font-size:0.82rem">Admin</a><?php endif ?>
       <a href="help.php" style="font-size:0.82rem">Hjälp</a>
       <a href="logout.php" class="btn-logout">Logga ut</a>
+      <?php else: ?>
+      <a href="mailto:info@arvas.international" style="font-size:0.82rem">Skapa konto</a>
+      <a href="login.php" class="btn-logout btn-login">Logga in</a>
+      <?php endif ?>
     </div>
   </header>
 
   <main class="player-area">
     <div class="now-playing" id="now-playing">
-      <div class="track-title" id="track-title">Välj en låt</div>
-      <div class="track-artist" id="track-artist"></div>
+      <div class="now-playing-text">
+        <div class="track-title" id="track-title">Välj en låt</div>
+        <div class="track-artist" id="track-artist"></div>
+      </div>
+      <?php if (!is_guest($user)): ?><button class="btn-like-header" id="btn-like-header" title="Gilla" hidden>♡</button><?php endif ?>
     </div>
 
     <audio id="audio-msc" preload="none"></audio>
@@ -320,6 +328,9 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
     <?php if (empty($tracks)): ?>
     <div class="empty">Inga MP3-filer hittades i <code>/music/</code>.</div>
     <?php else: ?>
+    <div class="lib-toolbar">
+      <button class="btn-filter-liked" id="btn-filter-liked">♡ Gillade</button>
+    </div>
     <ul id="track-list">
       <?php
       // Gruppera spår efter album i ursprunglig ordning
@@ -347,7 +358,7 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
         <ul class="album-tracks">
       <?php endif ?>
       <?php foreach ($indices as $i): $t = $tracks[$i]; ?>
-          <li class="track-item" data-index="<?= $i ?>">
+          <li class="track-item" data-index="<?= $i ?>" data-file="<?= htmlspecialchars($t['msc'] ?? '', ENT_QUOTES) ?>">
             <span class="track-num"><?= $i + 1 ?></span>
             <div class="track-info">
               <span class="t-title"><?= htmlspecialchars($t['title']) ?></span>
@@ -360,6 +371,7 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
                 <?php endforeach ?>
               </span>
             </div>
+            <?php if (!is_guest($user)): ?><button class="btn-like" data-index="<?= $i ?>" title="Gilla">♡</button><?php endif ?>
             <button class="btn-add-pl" data-index="<?= $i ?>" title="Spara i spellista">☰</button>
             <button class="btn-add-queue" data-index="<?= $i ?>" title="Lägg till i kö">+</button>
           </li>
