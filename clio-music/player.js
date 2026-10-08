@@ -15,7 +15,10 @@ const timeCur = document.getElementById('time-cur');
 const timeDur = document.getElementById('time-dur');
 const titleEl = document.getElementById('track-title');
 const artistEl= document.getElementById('track-artist');
-const libListEl = document.getElementById('track-list');
+const libListEl    = document.getElementById('track-list');
+const btnLyrics    = document.getElementById('btn-lyrics');
+const lyricsPanel  = document.getElementById('lyrics-panel');
+const lyricsLinesEl = document.getElementById('lyrics-lines');
 
 const CH_IDS = ['msc', 'bin', 'vce', 'env'];
 
@@ -411,6 +414,7 @@ async function load(index, autoplay) {
 
     titleEl.textContent  = t.title;
     artistEl.textContent = t.artist || (t.album ? '♪ ' + t.album : '');
+    loadLyrics(t.lyrics ?? null);
     seek.value = 0;
     timeCur.textContent = '0:00';
     timeDur.textContent = '0:00';
@@ -519,6 +523,7 @@ audios.msc.addEventListener('timeupdate', () => {
     seek.value = (audios.msc.currentTime / audios.msc.duration) * 100;
     timeCur.textContent = fmt(audios.msc.currentTime);
     syncSecondary();
+    if (!lyricsPanel.hidden) updateLyricsLine(audios.msc.currentTime);
 });
 audios.msc.addEventListener('loadedmetadata', () => {
     timeDur.textContent = fmt(audios.msc.duration);
@@ -842,6 +847,81 @@ document.getElementById('btn-like-header')?.addEventListener('click', () => {
 document.getElementById('btn-filter-liked')?.addEventListener('click', () => {
     filterLiked = !filterLiked;
     applyLikedFilter();
+});
+
+// ── Lyrics ────────────────────────────────────────────────────────────────────
+let lyricsData      = [];
+let lyricsActiveIdx = -1;
+let lyricsVisible   = false;
+try { lyricsVisible = localStorage.getItem('clio_lyrics_visible') === '1'; } catch (_) {}
+
+function parseLRC(text) {
+    const lines = [];
+    for (const raw of text.split('\n')) {
+        const m = raw.match(/^\[(\d+):(\d+(?:\.\d+)?)\](.*)/);
+        if (!m) continue;
+        const time = parseInt(m[1], 10) * 60 + parseFloat(m[2]);
+        // Strip any remaining [tag] blocks (e.g. [end:mm:ss.xxx]) before text
+        const lineText = m[3].replace(/\[[^\]]*\]/g, '').trim();
+        lines.push({ time, text: lineText });
+    }
+    return lines.sort((a, b) => a.time - b.time);
+}
+
+function renderLyricsLines() {
+    lyricsLinesEl.innerHTML = '';
+    lyricsData.forEach((line, i) => {
+        const li = document.createElement('li');
+        li.textContent = line.text;
+        li.dataset.idx = i;
+        if (!line.text) li.className = 'lyric-spacer';
+        lyricsLinesEl.appendChild(li);
+    });
+}
+
+async function loadLyrics(url) {
+    lyricsData      = [];
+    lyricsActiveIdx = -1;
+    lyricsLinesEl.innerHTML = '';
+    if (!url) {
+        btnLyrics.hidden = true;
+        lyricsPanel.hidden = true;
+        return;
+    }
+    try {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error();
+        lyricsData = parseLRC(await r.text());
+    } catch (_) {
+        btnLyrics.hidden = true;
+        lyricsPanel.hidden = true;
+        return;
+    }
+    renderLyricsLines();
+    btnLyrics.hidden = false;
+    lyricsPanel.hidden = !lyricsVisible;
+    btnLyrics.classList.toggle('active', lyricsVisible);
+}
+
+function updateLyricsLine(currentTime) {
+    if (!lyricsData.length) return;
+    let idx = 0;
+    for (let i = lyricsData.length - 1; i >= 0; i--) {
+        if (currentTime >= lyricsData[i].time) { idx = i; break; }
+    }
+    if (idx === lyricsActiveIdx) return;
+    lyricsActiveIdx = idx;
+    const items = lyricsLinesEl.querySelectorAll('li');
+    items.forEach((el, i) => el.classList.toggle('active', i === idx));
+    const activeEl = items[idx];
+    if (activeEl) activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+btnLyrics.addEventListener('click', () => {
+    lyricsVisible = !lyricsVisible;
+    lyricsPanel.hidden = !lyricsVisible;
+    btnLyrics.classList.toggle('active', lyricsVisible);
+    try { localStorage.setItem('clio_lyrics_visible', lyricsVisible ? '1' : '0'); } catch (_) {}
 });
 
 // ── Google Analytics ──────────────────────────────────────────────────────────

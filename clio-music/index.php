@@ -127,6 +127,7 @@ function user_can_see(string $track_group, array $user): bool {
 }
 
 $track_group_map = load_track_groups();
+$lyrics_dir      = __DIR__ . '/lyrics';
 
 // ── Skanna och gruppera filer per kanal ───────────────────────────────────────
 const CH_SUFFIXES = ['_msc', '_bin', '_vce', '_env'];
@@ -169,6 +170,7 @@ foreach ($groups as $base => $chans) {
         elseif ($ch_env === $main_fn) $ch_env = null;
         elseif ($ch_bin === $main_fn) $ch_bin = null;
     }
+    $lrc_file = $base . '.lrc';
     $tracks[] = [
         'file'   => $music_url . '/' . rawurlencode($main_fn),
         'title'  => $meta['title']  ?? clean_filename($base),
@@ -178,6 +180,8 @@ foreach ($groups as $base => $chans) {
         'bin'    => $u($ch_bin),
         'vce'    => $u($ch_vce),
         'env'    => $u($ch_env),
+        'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
+                    ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
     ];
 }
 
@@ -186,6 +190,8 @@ foreach ($standalone as $file) {
     $tgroup = track_group($fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
     $meta = read_metadata($file);
+    $fn_base  = preg_replace('/\.mp3$/i', '', $fn);
+    $lrc_file = $fn_base . '.lrc';
     $tracks[] = [
         'file'   => $music_url . '/' . rawurlencode($fn),
         'title'  => $meta['title']  ?? clean_filename($fn),
@@ -195,6 +201,8 @@ foreach ($standalone as $file) {
         'bin'    => null,
         'vce'    => null,
         'env'    => null,
+        'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
+                    ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
     ];
 }
 
@@ -278,7 +286,10 @@ gtag('config', 'G-MJR1MCM13R');
         <button class="btn-mode" id="btn-repeat-all" title="Spela lista i loop">🔁</button>
         <button class="btn-mode" id="btn-shuffle"    title="Slumpa">🔀</button>
       </div>
-      <button class="btn-settings-toggle" id="btn-settings" title="Ljudinställningar">&#9881; Ljud</button>
+      <div class="footer-right">
+        <button class="btn-settings-toggle" id="btn-lyrics" title="Visa/dölj text" hidden>&#9835; Text</button>
+        <button class="btn-settings-toggle" id="btn-settings" title="Ljudinställningar">&#9881; Ljud</button>
+      </div>
     </div>
 
     <div class="settings-panel" id="settings-panel">
@@ -337,6 +348,10 @@ gtag('config', 'G-MJR1MCM13R');
       <p class="settings-note">Sparas automatiskt. Övriga kanaler spelas i ren stereo utan EQ.</p>
     </div>
   </main>
+
+  <div id="lyrics-panel" class="lyrics-panel" hidden>
+    <ol id="lyrics-lines" class="lyrics-lines"></ol>
+  </div>
 
   <section class="playlist" id="playlist">
 
