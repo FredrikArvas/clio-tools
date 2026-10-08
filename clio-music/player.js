@@ -476,12 +476,30 @@ function togglePlay() {
 }
 
 btnPlay.addEventListener('click', togglePlay);
-btnPrev.addEventListener('click', () => advancePrev());
-btnNext.addEventListener('click', () => advanceNext(!audios.msc.paused, true));
+btnPrev.addEventListener('click', () => {
+    if (current >= 0 && !audios.msc.paused) gaEvent('music_skip', {
+        track_title: TRACKS[current]?.title, skip_direction: 'prev',
+        skip_at_sec: Math.round(audios.msc.currentTime),
+    });
+    advancePrev();
+});
+btnNext.addEventListener('click', () => {
+    if (current >= 0 && !audios.msc.paused) gaEvent('music_skip', {
+        track_title: TRACKS[current]?.title, skip_direction: 'next',
+        skip_at_sec: Math.round(audios.msc.currentTime),
+    });
+    advanceNext(!audios.msc.paused, true);
+});
 
 audios.msc.addEventListener('play',  () => { btnPlay.innerHTML = '&#9646;&#9646;'; });
 audios.msc.addEventListener('pause', () => { btnPlay.innerHTML = '&#9654;'; });
 audios.msc.addEventListener('ended', () => {
+    const t = TRACKS[current];
+    if (t) gaEvent('music_complete', {
+        track_title:  t.title,
+        track_artist: t.artist || undefined,
+        track_album:  t.album  || undefined,
+    });
     if (playMode === 'repeat-one') {
         seekAll(0); playAll();
     } else if (playMode === 'shuffle') {
@@ -560,6 +578,12 @@ function logPlay(file) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ track: file }),
     }).catch(() => {});
+    const t = TRACKS[current];
+    if (t) gaEvent('music_play', {
+        track_title:  t.title,
+        track_artist: t.artist || undefined,
+        track_album:  t.album  || undefined,
+    });
 }
 
 audios.msc.addEventListener('playing', () => {
@@ -819,6 +843,16 @@ document.getElementById('btn-filter-liked')?.addEventListener('click', () => {
     filterLiked = !filterLiked;
     applyLikedFilter();
 });
+
+// ── Google Analytics ──────────────────────────────────────────────────────────
+function gaEvent(name, params) {
+    if (typeof gtag !== 'function') return;
+    gtag('event', name, { user_type: CM_USER_TYPE, ...params });
+}
+
+if (typeof gtag === 'function') {
+    gtag('set', { user_properties: { user_type: CM_USER_TYPE } });
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 initSettings();

@@ -206,6 +206,28 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($site_title) ?></title>
 <link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500,
+});
+(function() {
+    try {
+        if (localStorage.getItem('clio_consent') === 'granted')
+            gtag('consent', 'update', { analytics_storage: 'granted' });
+    } catch (_) {}
+})();
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MJR1MCM13R"></script>
+<script>
+gtag('js', new Date());
+gtag('config', 'G-MJR1MCM13R');
+</script>
 </head>
 <body>
 <div class="app">
@@ -409,9 +431,29 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 <footer class="app-version">v<?= APP_VERSION ?></footer>
 
 <script>
-const TRACKS  = <?= $tracks_json ?>;
-const CM_USER = <?= json_encode($user['username']) ?>;
+const TRACKS       = <?= $tracks_json ?>;
+const CM_USER      = <?= json_encode($user['username']) ?>;
+const CM_USER_TYPE = <?= json_encode(is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered')) ?>;
 </script>
 <script src="player.js?v=<?= APP_VERSION ?>"></script>
+
+<div id="consent-banner" class="consent-banner">
+  <p>Vi använder Google Analytics för att förbättra tjänsten. Inga personuppgifter skickas.</p>
+  <div class="consent-btns">
+    <button onclick="clioConsent(true)">Acceptera</button>
+    <button onclick="clioConsent(false)">Avvisa</button>
+  </div>
+</div>
+<script>
+function clioConsent(granted) {
+    try { localStorage.setItem('clio_consent', granted ? 'granted' : 'denied'); } catch (_) {}
+    gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
+    document.getElementById('consent-banner').style.display = 'none';
+}
+(function() {
+    try { if (localStorage.getItem('clio_consent')) document.getElementById('consent-banner').style.display = 'none'; }
+    catch (_) {}
+})();
+</script>
 </body>
 </html>
