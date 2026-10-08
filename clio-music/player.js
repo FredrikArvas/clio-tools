@@ -81,7 +81,7 @@ let serverProfiles = {};
 
 const profilesLoaded = fetch('api/load_profiles.php')
     .then(r => r.json())
-    .then(data => { serverProfiles = data; loadGlobalSettings(); })
+    .then(data => { serverProfiles = data; loadGlobalSettings(); updateAllLikeButtons(); })
     .catch(() => {});
 
 function loadSettings(index) {
@@ -91,13 +91,14 @@ function loadSettings(index) {
 
 function saveSettings() {
     if (current < 0) return;
+    const key = TRACKS[current].file;
     const s = {
+        ...(serverProfiles[key] ?? {}),
         balance: parseFloat(slBalance.value),
         bass:    parseFloat(slBass.value),
         treble:  parseFloat(slTreble.value),
     };
     CH_IDS.forEach(ch => s[ch] = parseFloat(sliders[ch].value));
-    const key = TRACKS[current].file;
     serverProfiles[key] = s;
     fetch('api/save_profile.php', {
         method: 'POST',
@@ -397,6 +398,7 @@ async function load(index, autoplay) {
     index   = ((index % TRACKS.length) + TRACKS.length) % TRACKS.length;
     current = index;
     const t = TRACKS[index];
+    updateHeaderLike();
 
     setSliders(loadSettings(index));
     applyPlaybackRate();
@@ -524,6 +526,9 @@ if (libListEl) {
 
         const albumHeader = e.target.closest('.album-header');
         if (albumHeader) { toggleAlbumSection(albumHeader.closest('.album-section')); return; }
+
+        const likeBtn = e.target.closest('.btn-like');
+        if (likeBtn) { toggleLike(parseInt(likeBtn.dataset.index)); return; }
 
         const addQueueBtn = e.target.closest('.btn-add-queue');
         if (addQueueBtn) { addToQueue(parseInt(addQueueBtn.dataset.index)); return; }
@@ -748,6 +753,71 @@ document.addEventListener('click', e => {
     const dd = document.getElementById('pl-dropdown');
     if (!dd || dd.hidden) return;
     if (!dd.contains(e.target) && !e.target.closest('.btn-add-pl')) dd.hidden = true;
+});
+
+// ── Gilla ─────────────────────────────────────────────────────────────────────
+let filterLiked = false;
+
+function toggleLike(index) {
+    const url = TRACKS[index]?.file;
+    if (!url) return;
+    const prof = { ...(serverProfiles[url] ?? {}) };
+    prof.liked = !prof.liked;
+    serverProfiles[url] = prof;
+    fetch('api/save_profile.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ track: url, settings: prof }),
+    }).catch(() => {});
+    updateLikeUI(index);
+    if (filterLiked) applyLikedFilter();
+}
+
+function updateLikeUI(index) {
+    const url   = TRACKS[index]?.file;
+    const liked = serverProfiles[url]?.liked ?? false;
+    document.querySelectorAll(`.btn-like[data-index="${index}"]`).forEach(btn => {
+        btn.classList.toggle('liked', liked);
+        btn.title = liked ? 'Ta bort gilla' : 'Gilla';
+    });
+    if (index === current) updateHeaderLike();
+}
+
+function updateHeaderLike() {
+    const btn = document.getElementById('btn-like-header');
+    if (!btn || current < 0) return;
+    btn.hidden = false;
+    const url   = TRACKS[current]?.file;
+    const liked = serverProfiles[url]?.liked ?? false;
+    btn.classList.toggle('liked', liked);
+    btn.title = liked ? 'Ta bort gilla' : 'Gilla';
+}
+
+function updateAllLikeButtons() {
+    TRACKS.forEach((_, i) => updateLikeUI(i));
+}
+
+function applyLikedFilter() {
+    document.querySelectorAll('.track-item').forEach(li => {
+        if (!filterLiked) { li.hidden = false; return; }
+        const url = TRACKS[parseInt(li.dataset.index)]?.file;
+        li.hidden = !(serverProfiles[url]?.liked ?? false);
+    });
+    document.querySelectorAll('.album-section').forEach(sec => {
+        if (!filterLiked) { sec.hidden = false; return; }
+        sec.hidden = ![...sec.querySelectorAll('.track-item')].some(li => !li.hidden);
+    });
+    const filterBtn = document.getElementById('btn-filter-liked');
+    if (filterBtn) filterBtn.classList.toggle('active', filterLiked);
+}
+
+document.getElementById('btn-like-header')?.addEventListener('click', () => {
+    if (current >= 0) toggleLike(current);
+});
+
+document.getElementById('btn-filter-liked')?.addEventListener('click', () => {
+    filterLiked = !filterLiked;
+    applyLikedFilter();
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 <?php
 require_once '../auth.php';
-require_login();
+header('Content-Type: application/json');
+if (!is_logged_in()) { echo '{"ok":true}'; exit; }
 $user = current_user()['username'];
 header('Content-Type: application/json');
 

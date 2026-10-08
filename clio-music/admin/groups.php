@@ -49,7 +49,7 @@ function read_track_groups(): array {
 }
 
 function all_groups(array $users, array $tg_map): array {
-    $groups = [];
+    $groups = [GUEST_GROUP];
     foreach ($users as $u) {
         foreach ($u['groups'] as $g) {
             if (!in_array($g, $groups)) $groups[] = $g;

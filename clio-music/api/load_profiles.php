@@ -1,9 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/auth.php';
-require_login();
 
 header('Content-Type: application/json');
 
+if (!is_logged_in()) { echo '{}'; exit; }
 $user = current_user();
 $file = dirname(__DIR__) . '/data/profiles/' . $user['username'] . '.json';
 
