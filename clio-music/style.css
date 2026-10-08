@@ -291,6 +291,11 @@ ul {
   box-shadow: 0 0 8px rgba(78, 158, 255, 0.5);
 }
 
+.footer-right {
+  display: flex;
+  gap: 6px;
+}
+
 .btn-settings-toggle {
   background: none;
   border: 1px solid var(--border);
@@ -301,6 +306,7 @@ ul {
   cursor: pointer;
 }
 .btn-settings-toggle:hover { border-color: var(--accent); color: var(--text); }
+.btn-settings-toggle.active { border-color: var(--accent); color: var(--accent); }
 
 .settings-panel {
   display: none;
@@ -781,6 +787,41 @@ ul {
   border-top: 1px solid var(--border);
   color: var(--accent2);
   font-size: 0.82rem;
+}
+
+/* ── Lyrics-panel ── */
+.lyrics-panel {
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  scroll-behavior: smooth;
+}
+
+.lyrics-lines {
+  list-style: none;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.lyrics-lines li {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 4px 0;
+  transition: color 0.25s, font-size 0.2s;
+  line-height: 1.5;
+}
+
+.lyrics-lines li.active {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.lyric-spacer {
+  height: 10px;
+  pointer-events: none;
 }
 
 /* ── Cookie-samtycke ── */
