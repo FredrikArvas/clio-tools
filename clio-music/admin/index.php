@@ -67,6 +67,34 @@ sort($all_groups);
 
 $group_filter = $_GET['group'] ?? '';
 
+// ── Grupfilter — behåll bara spel från användare i vald grupp ────────────
+if ($group_filter !== '') {
+    $allowed_users = array_keys(array_filter($all_users, function($u) use ($group_filter) {
+        return in_array($group_filter, $u['groups']);
+    }));
+    foreach (array_keys($plays) as $track) {
+        foreach (array_keys($plays[$track]) as $u) {
+            if (!in_array($u, $allowed_users)) {
+                unset($plays[$track][$u]);
+                unset($last_play[$track][$u]);
+            }
+        }
+        $totals[$track] = array_sum($plays[$track]);
+        if ($totals[$track] === 0) {
+            unset($totals[$track]);
+            unset($plays[$track]);
+            unset($last_play[$track]);
+        }
+    }
+    foreach (array_keys($user_totals) as $u) {
+        if (!in_array($u, $allowed_users)) unset($user_totals[$u]);
+    }
+    arsort($totals);
+    arsort($user_totals);
+}
+
+$total_plays = array_sum($totals);
+
 function load_track_groups(): array {
     $path = dirname(__DIR__) . '/data/track_groups.csv';
     $map  = [];
@@ -101,7 +129,6 @@ function fmt_ts(int $ts): string {
     return date('Y-m-d H:i', $ts);
 }
 
-$total_plays = array_sum($totals);
 $view = $_GET['view'] ?? 'tracks'; // tracks | users
 ?><!DOCTYPE html>
 <html lang="sv">

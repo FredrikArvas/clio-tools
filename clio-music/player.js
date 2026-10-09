@@ -400,6 +400,8 @@ async function load(index, autoplay) {
     await profilesLoaded;
     index   = ((index % TRACKS.length) + TRACKS.length) % TRACKS.length;
     current = index;
+    clearTimeout(logTimer);
+    loggedTrack = null;
     const t = TRACKS[index];
     updateHeaderLike();
 
@@ -418,6 +420,7 @@ async function load(index, autoplay) {
     seek.value = 0;
     timeCur.textContent = '0:00';
     timeDur.textContent = '0:00';
+    updateMediaSession(t);
 
     // Highlight in library
     document.querySelectorAll('.track-item').forEach(li =>
@@ -495,8 +498,8 @@ btnNext.addEventListener('click', () => {
     advanceNext(!audios.msc.paused, true);
 });
 
-audios.msc.addEventListener('play',  () => { btnPlay.innerHTML = '&#9646;&#9646;'; });
-audios.msc.addEventListener('pause', () => { btnPlay.innerHTML = '&#9654;'; });
+audios.msc.addEventListener('play',  () => { btnPlay.innerHTML = '&#9646;&#9646;'; acquireWakeLock(); });
+audios.msc.addEventListener('pause', () => { btnPlay.innerHTML = '&#9654;'; releaseWakeLock(); });
 audios.msc.addEventListener('ended', () => {
     const t = TRACKS[current];
     if (t) gaEvent('music_complete', {
@@ -569,6 +572,61 @@ if (libListEl) {
 
 document.getElementById('btn-settings').addEventListener('click', () => {
     document.getElementById('settings-panel').classList.toggle('open');
+});
+
+// ── Media Session — låsskärm + hörlurar ──────────────────────────────────────
+function updateMediaSession(t) {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title:  t.title  || '',
+        artist: t.artist || '',
+        album:  t.album  || '',
+    });
+}
+
+function initMediaSessionHandlers() {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.setActionHandler('play',          () => { initAudio(); if (ctx?.state === 'suspended') ctx.resume(); playAll(); });
+    navigator.mediaSession.setActionHandler('pause',         () => pauseAll());
+    navigator.mediaSession.setActionHandler('previoustrack', () => advancePrev());
+    navigator.mediaSession.setActionHandler('nexttrack',     () => advanceNext(true, true));
+    navigator.mediaSession.setActionHandler('seekto', e => {
+        if (!isNaN(e.seekTime)) seekAll(e.seekTime);
+    });
+}
+initMediaSessionHandlers();
+
+audios.msc.addEventListener('play',  () => {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+});
+audios.msc.addEventListener('pause', () => {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+});
+audios.msc.addEventListener('timeupdate', () => {
+    if (!('mediaSession' in navigator) || !audios.msc.duration) return;
+    try {
+        navigator.mediaSession.setPositionState({
+            duration:     audios.msc.duration,
+            playbackRate: audios.msc.playbackRate,
+            position:     audios.msc.currentTime,
+        });
+    } catch (_) {}
+});
+
+// ── Wake Lock — håll skärmen vaken under uppspelning ─────────────────────────
+let wakeLock = null;
+async function acquireWakeLock() {
+    if (!('wakeLock' in navigator) || wakeLock) return;
+    try { wakeLock = await navigator.wakeLock.request('screen'); }
+    catch (_) {}
+}
+function releaseWakeLock() {
+    if (!wakeLock) return;
+    wakeLock.release().catch(() => {});
+    wakeLock = null;
+}
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !audios.msc.paused) acquireWakeLock();
 });
 
 // ── Spelningslogg ─────────────────────────────────────────────────────────────
