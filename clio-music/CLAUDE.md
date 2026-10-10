@@ -20,9 +20,11 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 
 ### Autentisering (auth.php)
 - Session-baserad, bcrypt-lösenord
-- `current_user()` returnerar `{username, display, admin, groups}`
+- `current_user()` returnerar `{username, display, admin, groups}` för inloggade
+- `current_user_or_guest()` returnerar inloggad användare eller gäst-objekt `{username: '__guest__', groups: ['Gäst']}`
 - Grupper styr vilka spår användaren ser (`user_can_see()` i index.php)
 - Gruppen `Alla` ger tillgång till allt
+- **API-endpoints som ska vara tillgängliga för gäster** ska använda `current_user_or_guest()`, inte `require_login()`
 
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
@@ -56,7 +58,21 @@ data/playlists/  → clioadmin:www-data, chmod 775
 - PHP 8.3-FPM, nginx port 8091, Cloudflare framför
 - Musikfiler i `/var/www/clio_music/music/`
 
+### Spelningslogg (api/log_play.php + admin/index.php)
+- Loggar till `data/plays.jsonl` efter 5 s uppspelning (kräver `audios.msc` playing-event)
+- Gäster loggas under `__guest__`
+- `loggedTrack` nollställs vid varje `load()` — omval av samma spår räknas som ny lyssnig
+- Admin-dashboarden filtrerar per lyssnargrupp (GET `?group=X`)
+
+### Bakgrundsuppspelning (player.js)
+- **Web Audio API initieras lazy** — startas först när användaren rör balance/bas/diskant-reglagen
+- Före lazy-init används `audios[ch].volume` (native HTML), som iOS/Android kan spela i bakgrunden
+- Efter lazy-init hanteras volymen av gain-noder; `ctx.onstatechange` försöker auto-resumera vid upplåsning
+- **Media Session API** registrerat: låsskärmskontroller, spårtitel/artist, seek-position
+- **Wake Lock API** håller skärmen tänd under uppspelning (släpps vid paus)
+
 ## Öppna punkter (från NCC)
 - Validering av payload-storlek i save_profile.php (DoS-skydd)
+- `_msc`-suffix syns i spårnamnet i admin-dashboarden (track_label() strippar ej kanal-suffix)
 - Eventuellt: omslagsbilder per album
 - Eventuellt: genrer/taggar-filtrering
