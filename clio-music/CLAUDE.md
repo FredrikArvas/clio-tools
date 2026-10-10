@@ -71,6 +71,13 @@ data/playlists/  → clioadmin:www-data, chmod 775
 - **Media Session API** registrerat: låsskärmskontroller, spårtitel/artist, seek-position
 - **Wake Lock API** håller skärmen tänd under uppspelning (släpps vid paus)
 
+### Lyrics (player.js + index.php)
+- LRC-filer i `lyrics/`-mappen, namngivna `{spårnamn_utan_suffix}.lrc`
+- Visas i `#lyrics-panel`; aktuell rad highlightas och auto-scrollas via `updateLyricsLine(currentTime)`
+- **Klick på rad** anropar `seekAll(line.time)` — hoppar direkt till den tidpunkten
+- **Sökfält** (`#lyrics-search`) filtrerar rader i realtid; auto-scroll pausas under sökning
+- Sökning och scroll-state nollställs vid `loadLyrics()` (nytt spår)
+
 ## Öppna punkter (från NCC)
 - Validering av payload-storlek i save_profile.php (DoS-skydd)
 - `_msc`-suffix syns i spårnamnet i admin-dashboarden (track_label() strippar ej kanal-suffix)
