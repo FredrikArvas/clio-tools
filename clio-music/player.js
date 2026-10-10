@@ -54,8 +54,9 @@ function initAudio() {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
 
     CH_IDS.forEach(ch => {
-        const src   = ctx.createMediaElementSource(audios[ch]);
+        const src     = ctx.createMediaElementSource(audios[ch]);
         gainNodes[ch] = ctx.createGain();
+        gainNodes[ch].gain.value = audios[ch].volume; // sync from native volume
 
         if (ch === 'msc') {
             panNode    = ctx.createStereoPanner();
@@ -74,6 +75,10 @@ function initAudio() {
             src.connect(gainNodes[ch]).connect(ctx.destination);
         }
     });
+
+    ctx.onstatechange = () => {
+        if (ctx.state === 'suspended' && !audios.msc.paused) ctx.resume().catch(() => {});
+    };
 
     applySettings();
 }
@@ -111,11 +116,16 @@ function saveSettings() {
 }
 
 function applySettings() {
-    if (!ctx) return;
-    CH_IDS.forEach(ch => { gainNodes[ch].gain.value = parseFloat(sliders[ch].value); });
-    panNode.pan.value     = parseFloat(slBalance.value);
-    bassNode.gain.value   = parseFloat(slBass.value);
-    trebleNode.gain.value = parseFloat(slTreble.value);
+    CH_IDS.forEach(ch => {
+        const val = parseFloat(sliders[ch].value);
+        if (ctx) gainNodes[ch].gain.value = val;
+        else     audios[ch].volume = val;
+    });
+    if (ctx) {
+        panNode.pan.value     = parseFloat(slBalance.value);
+        bassNode.gain.value   = parseFloat(slBass.value);
+        trebleNode.gain.value = parseFloat(slTreble.value);
+    }
 }
 
 function setSliders(s) {
@@ -124,7 +134,7 @@ function setSliders(s) {
     slBass.value    = s.bass    ?? 0;
     slTreble.value  = s.treble  ?? 0;
     updateLabels();
-    if (ctx) applySettings();
+    applySettings();
 }
 
 function initSettings() { setSliders({}); }
@@ -139,8 +149,17 @@ function updateLabels() {
     lblTreb.textContent = (parseFloat(slTreble.value) >= 0 ? '+' : '') + parseFloat(slTreble.value).toFixed(1) + ' dB';
 }
 
-[...CH_IDS.map(ch => sliders[ch]), slBalance, slBass, slTreble].forEach(el => {
-    el.addEventListener('input',  () => { updateLabels(); if (ctx) applySettings(); });
+CH_IDS.forEach(ch => {
+    sliders[ch].addEventListener('input',  () => { updateLabels(); applySettings(); });
+    sliders[ch].addEventListener('change', saveSettings);
+});
+[slBalance, slBass, slTreble].forEach(el => {
+    el.addEventListener('input', () => {
+        initAudio();
+        if (ctx.state === 'suspended') ctx.resume();
+        updateLabels();
+        applySettings();
+    });
     el.addEventListener('change', saveSettings);
 });
 
@@ -430,8 +449,7 @@ async function load(index, autoplay) {
     renderQueue();
 
     if (autoplay) {
-        initAudio();
-        if (ctx.state === 'suspended') ctx.resume();
+        if (ctx?.state === 'suspended') ctx.resume();
         playAll();
     }
     btnPlay.innerHTML = autoplay ? '&#9646;&#9646;' : '&#9654;';
@@ -477,8 +495,7 @@ function advancePrev() {
 function togglePlay() {
     if (!TRACKS.length) return;
     if (current < 0) { load(0, true); return; }
-    initAudio();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx?.state === 'suspended') ctx.resume();
     if (audios.msc.paused) playAll(); else pauseAll();
 }
 
@@ -586,7 +603,7 @@ function updateMediaSession(t) {
 
 function initMediaSessionHandlers() {
     if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.setActionHandler('play',          () => { initAudio(); if (ctx?.state === 'suspended') ctx.resume(); playAll(); });
+    navigator.mediaSession.setActionHandler('play',          () => { if (ctx?.state === 'suspended') ctx.resume(); playAll(); });
     navigator.mediaSession.setActionHandler('pause',         () => pauseAll());
     navigator.mediaSession.setActionHandler('previoustrack', () => advancePrev());
     navigator.mediaSession.setActionHandler('nexttrack',     () => advanceNext(true, true));
@@ -626,7 +643,10 @@ function releaseWakeLock() {
     wakeLock = null;
 }
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && !audios.msc.paused) acquireWakeLock();
+    if (document.visibilityState === 'visible') {
+        if (!audios.msc.paused) acquireWakeLock();
+        if (ctx?.state === 'suspended') ctx.resume().catch(() => {});
+    }
 });
 
 // ── Spelningslogg ─────────────────────────────────────────────────────────────

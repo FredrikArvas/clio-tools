@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__DIR__) . '/auth.php';
-require_login();
 
 header('Content-Type: application/json');
 
@@ -19,7 +18,7 @@ if ($track === '') {
     exit;
 }
 
-$user = current_user();
+$user = current_user_or_guest();
 $entry = json_encode([
     'user'  => $user['username'],
     'track' => $track,
