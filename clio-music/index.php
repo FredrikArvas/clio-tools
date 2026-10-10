@@ -350,6 +350,9 @@ gtag('config', 'G-MJR1MCM13R');
   </main>
 
   <div id="lyrics-panel" class="lyrics-panel" hidden>
+    <div class="lyrics-search-wrap">
+      <input id="lyrics-search" class="lyrics-search" type="search" placeholder="Sök i text…" autocomplete="off">
+    </div>
     <ol id="lyrics-lines" class="lyrics-lines"></ol>
   </div>
 
