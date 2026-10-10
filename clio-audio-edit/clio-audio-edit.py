@@ -180,7 +180,10 @@ def _after_menu(audio_path, annotated_path, parse_cut_list, apply_cuts, save_cut
             f"{_YEL}2{_NRM}  Välj en ny fil",
             f"{_GRY}0{_NRM}  Avsluta",
         ])
-        val = input("Välj: ").strip()
+        try:
+            val = input("Välj: ").strip()
+        except EOFError:
+            sys.exit(0)
 
         if val == "0":
             print("\n[OK]  Hej då.")
@@ -279,9 +282,6 @@ def _restart_from_folder(args):
     for audio_path in audio_files:
         if audio_path.exists():
             _process_file(audio_path, args, folder)
-        _after_menu(audio_path, annotated_path, parse_cut_list, apply_cuts, save_cutlog,
-                    args, audio_files, folder)
-        return
 
 
 # ---------------------------------------------------------------------------

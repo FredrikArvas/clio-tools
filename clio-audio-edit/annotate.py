@@ -7,6 +7,8 @@ import os
 import sys
 from pathlib import Path
 
+MODEL_SONNET = "claude-sonnet-4-6"
+
 
 def annotate_with_claude(transcript_text: str, profile_name: str) -> str:
     """
@@ -36,7 +38,7 @@ Skriv klippmarkeringar på en separat rad direkt under segmentet.
 """
 
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=MODEL_SONNET,
         max_tokens=8192,
         system=profile["system_prompt"],
         messages=[{"role": "user", "content": user_message}],
