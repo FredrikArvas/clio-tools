@@ -145,7 +145,7 @@ def detect_language(audio_path: Path) -> tuple[str, float]:
     """
     from faster_whisper import WhisperModel
     print(f"\n[INFO] Detekterar språk i {_BLD}{audio_path.name}{_NRM}  {_GRY}(tiny-modell){_NRM}")
-    model = WhisperModel("tiny", device="cpu", compute_type="int8")
+    model = WhisperModel("tiny", device="cuda", compute_type="float16")
     _, info = model.transcribe(str(audio_path), language=None, beam_size=1)
     lang, conf = info.language, info.language_probability
     label = f"{_GRN}svenska → KB-Whisper{_NRM}" if lang == "sv" else f"{_CYN}{lang} → Whisper {_FALLBACK_MODEL}{_NRM}"
@@ -177,7 +177,7 @@ def transcribe(audio_path: Path, model_size: str = "medium", language: str = "sv
     print()
 
     def _run():
-        model = WhisperModel(model_id, device="cpu", compute_type="int8")
+        model = WhisperModel(model_id, device="cuda", compute_type="float16")
         raw_segs, _ = model.transcribe(str(audio_path), beam_size=5, language=language)
         return [
             {"start": seg.start, "end": seg.end, "text": seg.text.strip()}
