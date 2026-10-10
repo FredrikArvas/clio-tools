@@ -805,12 +805,37 @@ ul {
   text-align: center;
 }
 
+.lyrics-search-wrap {
+  padding: 6px 24px 2px;
+}
+
+.lyrics-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.lyrics-search:focus {
+  border-color: var(--accent);
+}
+
 .lyrics-lines li {
   font-size: 0.9rem;
   color: var(--muted);
   padding: 4px 0;
   transition: color 0.25s, font-size 0.2s;
   line-height: 1.5;
+  cursor: pointer;
+}
+
+.lyrics-lines li:hover:not(.lyric-spacer) {
+  color: var(--text);
 }
 
 .lyrics-lines li.active {

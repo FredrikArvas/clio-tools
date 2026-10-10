@@ -19,6 +19,7 @@ const libListEl    = document.getElementById('track-list');
 const btnLyrics    = document.getElementById('btn-lyrics');
 const lyricsPanel  = document.getElementById('lyrics-panel');
 const lyricsLinesEl = document.getElementById('lyrics-lines');
+const lyricsSearchEl = document.getElementById('lyrics-search');
 
 const CH_IDS = ['msc', 'bin', 'vce', 'env'];
 
@@ -928,9 +929,10 @@ document.getElementById('btn-filter-liked')?.addEventListener('click', () => {
 });
 
 // ── Lyrics ────────────────────────────────────────────────────────────────────
-let lyricsData      = [];
-let lyricsActiveIdx = -1;
-let lyricsVisible   = false;
+let lyricsData        = [];
+let lyricsActiveIdx   = -1;
+let lyricsVisible     = false;
+let lyricsSearchQuery = '';
 try { lyricsVisible = localStorage.getItem('clio_lyrics_visible') === '1'; } catch (_) {}
 
 function parseLRC(text) {
@@ -948,18 +950,26 @@ function parseLRC(text) {
 
 function renderLyricsLines() {
     lyricsLinesEl.innerHTML = '';
+    const q = lyricsSearchQuery.toLowerCase();
     lyricsData.forEach((line, i) => {
+        if (q && !line.text.toLowerCase().includes(q)) return;
         const li = document.createElement('li');
         li.textContent = line.text;
         li.dataset.idx = i;
-        if (!line.text) li.className = 'lyric-spacer';
+        if (!line.text) {
+            li.className = 'lyric-spacer';
+        } else {
+            li.addEventListener('click', () => { seekAll(line.time); });
+        }
         lyricsLinesEl.appendChild(li);
     });
 }
 
 async function loadLyrics(url) {
-    lyricsData      = [];
-    lyricsActiveIdx = -1;
+    lyricsData        = [];
+    lyricsActiveIdx   = -1;
+    lyricsSearchQuery = '';
+    lyricsSearchEl.value = '';
     lyricsLinesEl.innerHTML = '';
     if (!url) {
         btnLyrics.hidden = true;
@@ -982,7 +992,7 @@ async function loadLyrics(url) {
 }
 
 function updateLyricsLine(currentTime) {
-    if (!lyricsData.length) return;
+    if (!lyricsData.length || lyricsSearchQuery) return;
     let idx = 0;
     for (let i = lyricsData.length - 1; i >= 0; i--) {
         if (currentTime >= lyricsData[i].time) { idx = i; break; }
@@ -990,8 +1000,8 @@ function updateLyricsLine(currentTime) {
     if (idx === lyricsActiveIdx) return;
     lyricsActiveIdx = idx;
     const items = lyricsLinesEl.querySelectorAll('li');
-    items.forEach((el, i) => el.classList.toggle('active', i === idx));
-    const activeEl = items[idx];
+    items.forEach((el, i) => el.classList.toggle('active', parseInt(el.dataset.idx, 10) === idx));
+    const activeEl = lyricsLinesEl.querySelector(`li[data-idx="${idx}"]`);
     if (activeEl) activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
@@ -1000,6 +1010,12 @@ btnLyrics.addEventListener('click', () => {
     lyricsPanel.hidden = !lyricsVisible;
     btnLyrics.classList.toggle('active', lyricsVisible);
     try { localStorage.setItem('clio_lyrics_visible', lyricsVisible ? '1' : '0'); } catch (_) {}
+});
+
+lyricsSearchEl.addEventListener('input', () => {
+    lyricsSearchQuery = lyricsSearchEl.value.trim();
+    lyricsActiveIdx   = -1;
+    renderLyricsLines();
 });
 
 // ── Google Analytics ──────────────────────────────────────────────────────────
