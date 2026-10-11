@@ -75,10 +75,10 @@ kbd  { background:var(--surface2); border:1px solid var(--border); border-radius
 
     <h2>Lägga till användare</h2>
     <ol>
-      <li>Öppna <code>admin/hash_tool.php</code> och generera ett bcrypt-hash för lösenordet.</li>
-      <li>Redigera <code>data/users.csv</code> via SFTP och lägg till en rad:<br>
+      <li>Generera ett bcrypt-hash på servern (hash-verktyget i webbläsaren är borttaget av säkerhetsskäl). Kör via SSH och skriv lösenordet när det efterfrågas, så hamnar det inte i kommandohistoriken:<br>
+          <code>php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_BCRYPT, ["cost" =&gt; 12]), "\n";'</code></li>
+      <li>Redigera <code>data/users.csv</code> via SSH/SFTP och lägg till en rad:<br>
           <code>användarnamn;[hash];Visningsnamn;1;0;Grupp1|Grupp2</code></li>
-      <li>Ta bort <code>hash_tool.php</code> igen när du är klar.</li>
     </ol>
     <div class="note">Kolumnerna: användarnamn ; bcrypt-hash ; visningsnamn ; aktiv (1/0) ; admin (1/0) ; grupper (pipe-separerade)</div>
 
