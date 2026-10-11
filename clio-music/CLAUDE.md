@@ -33,7 +33,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - `stream.php` validerar filnamnet (ett segment, rätt ändelse), kontrollerar behörigheten och svarar med `X-Accel-Redirect: /_protected/{music|lyrics}/<fil>`. nginx levererar filen (Range/seek) från `internal`-locations som bara aliasar `music/` resp. `lyrics/`.
 - Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer), `Cache-Control: private, no-store`.
 - Test: `tests/security_smoke.sh` körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`). Inloggade tester använder en tillfällig sessionsfil för `__smoketest__`, så `users.csv` rörs inte.
-- nginx-konfigen ligger i `/etc/nginx/sites-available/clio_music` (inte i repot). `/tests/` är spärrad i nginx.
+- nginx-konfigen ligger i `/etc/nginx/sites-available/clio_music`; källan finns i repot (`deploy/nginx_clio_music.conf`, se S5). `/tests/` är spärrad i nginx.
 
 ### Säkerhetsbas: session, login, CSRF, audit (v1.5.1)
 - **`auth.php`** startar sessionen via `start_session()`: HttpOnly, SameSite=Lax, Secure bakom HTTPS (Cloudflare), `use_strict_mode`. Absolut timeout 12 h; inaktivitetsgräns = php.ini `session.gc_maxlifetime` (1440 s, styrs av Debians cron-städning). `login_user()` byter sessions-id, `logout_user()` tömmer och förstör. Okända användarnamn verifieras mot `DUMMY_PASSWORD_HASH` (jämn svarstid).
@@ -67,6 +67,14 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - **`json_store.php`**: `json_file_update()` (flock-skyddat läs-ändra-skriv, `abort` skriver inte över trasig JSON) och `json_file_read()`. Används av `login_throttle.php`, `rate_limit.php` och save_profile/save_playlist.
 - **`rate_limit.php`**: `rate_limit_hit($bucket, $key, $max, $window)` → 0 eller Retry-After-sekunder. `log_play` räknar gäster per IP (10/min) och inloggade per användare (60/min) *före* validering → 429.
 - `player.js`: `apiPost()` ersätter fetch-anropen; 400/403/413/429 ger bara `console.warn`, 401 (gäst) är tyst.
+
+### nginx-härdning och CSP (v1.5.4, S5)
+- **nginx-konfigen finns nu i repot:** `deploy/nginx_clio_music.conf` (= `/etc/nginx/sites-available/clio_music`) plus snippets `deploy/clio_music_security_headers.conf` och `deploy/clio_music_csp.conf` (installeras i `/etc/nginx/snippets/`). Ändra i repot, validera i staging med `sudo nginx -t -c <staging>/nginx_test_main.conf` (kopia av nginx.conf som inkluderar kandidatfilen), deploya, ladda om.
+- Rubriker (`always`, server-nivå): nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options DENY, CSP. **nginx-arv:** en location med egen `add_header` ärver inga rubriker från servernivån; lägg i så fall de två include-raderna även där. Cloudflare sätter inga av dem.
+- `server_tokens off`, `fastcgi_hide_header X-Powered-By`, `client_max_body_size` 256k (server) / 64k (`/api/`), `limit_req` zon `clio_music_api` (120/min, burst 20) nycklad på `$clio_music_client_ip`.
+- **CSP** är strikt för skript: `script-src 'self' https://www.googletagmanager.com`. **Inga inline-skript och inga `on*`-attribut** i PHP-vyerna. `consent.js` har GA-consent och bannerlogik; `index.php` skriver TRACKS/CM_USER/CM_USER_TYPE/CM_CSRF i `<script type="application/json" id="cm-data">` som `player.js` läser med `JSON.parse`. Stilar får `'unsafe-inline'` (medvetet undantag).
+- CSP körs som **Report-Only** tills Fredrik testat i webbläsaren; `deploy_enforce.sh` byter bara rubriknamnet (uppdatera då även snippeten i repot).
+- `data/.htaccess` är verkningslös i nginx (Apache-syntax); nginx-blocket `location /data/ { deny all; }` är det som skyddar.
 
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).

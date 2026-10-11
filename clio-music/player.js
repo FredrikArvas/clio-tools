@@ -1,5 +1,10 @@
 'use strict';
 
+// ── Data från servern ─────────────────────────────────────────────────────────
+// index.php skriver spår, användare och CSRF-token i ett <script type="application/json">-block
+// (ingen inline-kod, så CSP kan förbjuda det). Namnen är desamma som när de var globala konstanter.
+const { TRACKS, CM_USER, CM_USER_TYPE, CM_CSRF } = JSON.parse(document.getElementById('cm-data').textContent);
+
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const audios = {
     msc: document.getElementById('audio-msc'),

@@ -154,7 +154,6 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
     ];
 }
 
-$tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 ?><!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -162,28 +161,8 @@ $tracks_json = json_encode($tracks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($site_title) ?></title>
 <link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    wait_for_update: 500,
-});
-(function() {
-    try {
-        if (localStorage.getItem('clio_consent') === 'granted')
-            gtag('consent', 'update', { analytics_storage: 'granted' });
-    } catch (_) {}
-})();
-</script>
+<script src="consent.js?v=<?= APP_VERSION ?>"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJR1MCM13R"></script>
-<script>
-gtag('js', new Date());
-gtag('config', 'G-MJR1MCM13R');
-</script>
 </head>
 <body>
 <div class="app">
@@ -396,31 +375,22 @@ gtag('config', 'G-MJR1MCM13R');
 
 <footer class="app-version">v<?= APP_VERSION ?></footer>
 
-<script>
-const TRACKS       = <?= $tracks_json ?>;
-const CM_USER      = <?= json_encode($user['username']) ?>;
-const CM_USER_TYPE = <?= json_encode(is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered')) ?>;
-const CM_CSRF      = <?= json_encode(csrf_token()) ?>;
-</script>
+<?php /* Data till player.js som JSON-block: webbläsaren kör det inte, så CSP behöver inga inline-skript.
+        JSON_HEX_TAG gör att "</script>" aldrig kan förekomma i datan. */ ?>
+<script type="application/json" id="cm-data"><?= json_encode([
+    'TRACKS'       => $tracks,
+    'CM_USER'      => $user['username'],
+    'CM_USER_TYPE' => is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered'),
+    'CM_CSRF'      => csrf_token(),
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script src="player.js?v=<?= APP_VERSION ?>"></script>
 
 <div id="consent-banner" class="consent-banner">
   <p>Vi använder Google Analytics för att förbättra tjänsten. Inga personuppgifter skickas.</p>
   <div class="consent-btns">
-    <button onclick="clioConsent(true)">Acceptera</button>
-    <button onclick="clioConsent(false)">Avvisa</button>
+    <button id="consent-accept" type="button">Acceptera</button>
+    <button id="consent-deny" type="button">Avvisa</button>
   </div>
 </div>
-<script>
-function clioConsent(granted) {
-    try { localStorage.setItem('clio_consent', granted ? 'granted' : 'denied'); } catch (_) {}
-    gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
-    document.getElementById('consent-banner').style.display = 'none';
-}
-(function() {
-    try { if (localStorage.getItem('clio_consent')) document.getElementById('consent-banner').style.display = 'none'; }
-    catch (_) {}
-})();
-</script>
 </body>
 </html>
