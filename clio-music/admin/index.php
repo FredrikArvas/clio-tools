@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/auth.php';
 require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/access.php';
 require_login();
 
 $user = current_user();
@@ -94,18 +95,6 @@ if ($group_filter !== '') {
 }
 
 $total_plays = array_sum($totals);
-
-function load_track_groups(): array {
-    $path = dirname(__DIR__) . '/data/track_groups.csv';
-    $map  = [];
-    if (!file_exists($path)) return $map;
-    foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
-        $parts = explode(';', $line, 2);
-        if (count($parts) === 2) $map[trim($parts[0])] = trim($parts[1]);
-    }
-    return $map;
-}
 
 function track_group_label(string $track, array $map): string {
     $filename = preg_replace('#^music/#', '', $track);

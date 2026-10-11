@@ -26,6 +26,15 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - Gruppen `Alla` ger tillgång till allt
 - **API-endpoints som ska vara tillgängliga för gäster** ska använda `current_user_or_guest()`, inte `require_login()`
 
+### Skyddad medialeverans (access.php + stream.php, v1.5.0)
+- **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`). Duplicera den aldrig.
+- Kanalfiler (`_bin/_vce/_env`) och `.lrc` ärver gruppen från huvudspåret (`_msc ?? _vce ?? _env ?? _bin`).
+- nginx skickar `^~ /music/` och `^~ /lyrics/` till `stream.php` via FastCGI. **URL:erna är oförändrade** (`music/<fil>`), eftersom profiler, spellistor, kö och `plays.jsonl` nycklas på URL:en.
+- `stream.php` validerar filnamnet (ett segment, rätt ändelse), kontrollerar behörigheten och svarar med `X-Accel-Redirect: /_protected/{music|lyrics}/<fil>`. nginx levererar filen (Range/seek) från `internal`-locations som bara aliasar `music/` resp. `lyrics/`.
+- Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer), `Cache-Control: private, no-store`.
+- Test: `tests/security_smoke.sh` körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`). Inloggade tester använder en tillfällig sessionsfil för `__smoketest__`, så `users.csv` rörs inte.
+- nginx-konfigen ligger i `/etc/nginx/sites-available/clio_music` (inte i repot). `/tests/` är spärrad i nginx.
+
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
 
