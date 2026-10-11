@@ -82,7 +82,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 ### Spelningslogg (api/log_play.php + admin/index.php)
 - Loggar till `data/plays.jsonl` efter 5 s uppspelning (kräver `audios.msc` playing-event).
 - Gäster loggas under `__guest__`. `loggedTrack` nollställs vid varje `load()`, så omval av samma spår räknas som ny lyssning.
-- Admin-dashboarden läser **bara aktuell `plays.jsonl`**. Äldre statistik ligger i roterade filer (se Loggrotation).
+- Admin-dashboarden räknar **över all tid**: `read_play_log_lines()` i admin/index.php läser roterade filer (`plays.jsonl.N`, `plays.jsonl.N.gz`) plus aktuell `plays.jsonl`.
 - Admin-dashboarden filtrerar per lyssnargrupp (GET `?group=X`).
 
 ### Serverside-persistens
@@ -121,7 +121,7 @@ Verifierat med `ls -l` före och efter S6. Skript: `~/staging/clio_music_S6/appl
 - `/etc/logrotate.d/clio_music` (källa: `deploy/logrotate_clio_music`): veckovis, `rotate 12`, `compress`, `delaycompress`, `copytruncate`, `missingok`, `notifempty`, `su www-data www-data`. Gäller `data/plays.jsonl` och `data/audit.jsonl`.
 - Roterade filer hamnar i `data/` som `plays.jsonl.1`, `plays.jsonl.2.gz` osv. Mönstren `data/plays.jsonl*` och `data/audit.jsonl*` är git-ignorerade.
 - `copytruncate` eftersom PHP håller filen öppen med O_APPEND. Rader som skrivs mellan kopia och trunkering kan gå förlorade.
-- **Admin-dashboarden räknar bara aktuell `plays.jsonl`.** Äldre statistik ligger i roterade filer. Om statistiken ska fortsätta räkna över rotation är en öppen fråga till Fredrik. Admin/index.php ändras inte i S6.
+- Admin-dashboarden räknar över rotation (beslut Fredrik 2026-10-11, v1.6.1): roterade filer läses med `gzfile()`/`file()`.
 - Kontroll: `sudo logrotate -d /etc/logrotate.d/clio_music` (torrkörning).
 
 ## Deploy
@@ -153,7 +153,7 @@ Rollback: `rollback.sh` i samma katalog återställer från backupen. Skripten v
 - `track_label()` i admin/index.php strippar inte kanal-suffixet `_msc`. Spårnamnet syns därför med suffix i admin-dashboarden.
 - Automatisk omhashning av lösenord uteblir: `password_rehash_needed` loggas men hashen byts inte.
 - Cloudflare-cache bör purgas för `frida_session_edited.*`.
-- Statistik över loggrotation: ska admin-dashboarden räkna över roterade filer? Beslut hos Fredrik.
+- Användaradmin (skapa/inaktivera användare, sätta lösenord) i admin-gränssnittet — egen sprint, beslutad 2026-10-11. Tills dess: `sudo -u www-data nano data/users.csv` (filen är 640).
 - `help_admin.php` beskriver att `users.csv` redigeras via SSH/SFTP. Efter S6 kräver det sudo. Texten är inte ändrad (PHP-fil utanför S6).
 - White-label/teman (se Fredriks plan).
 - Eventuellt: omslagsbilder per album.
