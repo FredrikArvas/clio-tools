@@ -1,47 +1,62 @@
 # CLAUDE.md — clio_music
 
-Kontext för LLM-assistenter som arbetar med detta projekt.
+Kontext för LLM-assistenter som arbetar med detta projekt. Säkerhetsmodellen i korthet finns i SECURITY.md.
 
 ## Vad projektet är
 
-PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson). Inloggningsskyddad, inga ramverk, inga npm-beroenden. Körs på EliteDesk GPU bakom Cloudflare på https://audio.arvas.international.
+PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson). Inloggningsskyddad, inga ramverk, inga npm-beroenden. Körs på EliteDesk GPU bakom Cloudflare på https://audio.arvas.international. Version: `APP_VERSION` i `config.php` (1.6.0 efter säkerhetssaneringen S1–S6).
 
 ## Regler och konventioner
 
 - **Inga ramverk.** Vanilla JS + Web Audio API på klientsidan. PHP utan Composer.
 - **Inga hårdkodade URL:er.** Använd `$music_url` från config.php.
-- **APP_VERSION** i config.php ska bumpa vid varje deploy — används för Cloudflare cache-bust på player.js.
-- **data/-mappen är känslig.** users.csv, plays.jsonl, profiles/ och playlists/ är git-ignorerade och innehåller riktiga användardata.
-- **Bcrypt** för lösenord, aldrig klartext. Hash genereras via SSH (se help_admin.php); `admin/hash_tool.php` är borttaget (S4).
+- **APP_VERSION** i config.php ska bumpas vid varje deploy. Den används för cache-bust (`?v=APP_VERSION`) på style.css, consent.js och player.js.
+- **data/-mappen är känslig.** users.csv, plays.jsonl, audit.jsonl, profiles/ och playlists/ är git-ignorerade och innehåller riktiga användardata.
+- **Bcrypt** för lösenord, aldrig klartext. Hash genereras via SSH (se SECURITY.md). `admin/hash_tool.php` är borttaget (S4).
 - **Inga XSS-risker.** Allt som skrivs ut via PHP ska passera `htmlspecialchars()`. JS-sidan har `escHtml()`.
-- **Inga SQL-injektioner** — projektet har ingen databas, men validera alltid filnamn med `basename()` vid filoperationer.
+- **Inga SQL-injektioner.** Projektet har ingen databas, men validera alltid filnamn med `basename()` vid filoperationer.
+- **Inga inline-skript och inga `on*`-attribut** i PHP-vyerna (CSP är enforcing). Data till JS skrivs i `<script type="application/json">`-block.
+- **Servern saknar `mbstring`.** Använd inte `mb_*`-funktioner i ny kod.
+- **Inga tysta undantag.** Fel loggas eller returneras explicit.
 
 ## Arkitektur
 
-### Autentisering (auth.php)
-- Session-baserad, bcrypt-lösenord
-- `current_user()` returnerar `{username, display, admin, groups}` för inloggade
-- `current_user_or_guest()` returnerar inloggad användare eller gäst-objekt `{username: '__guest__', groups: ['Gäst']}`
-- Grupper styr vilka spår användaren ser (`user_can_see()` i index.php)
-- Gruppen `Alla` ger tillgång till allt
-- **API-endpoints som ska vara tillgängliga för gäster** ska använda `current_user_or_guest()`, inte `require_login()`
+### Autentisering och sessioner (auth.php, S2)
+- Session-baserad, bcrypt-lösenord. `current_user()` returnerar `{username, display, admin, groups}` för inloggade. `current_user_or_guest()` returnerar inloggad användare eller gäst-objekt `{username: '__guest__', groups: ['Gäst']}` (GUEST_GROUP i config.php).
+- `start_session()`: HttpOnly, SameSite=Lax, Secure bakom HTTPS (`request_is_https()`), `use_strict_mode`. Absolut timeout `SESSION_ABSOLUTE_TIMEOUT` = 12 h. Inaktivitetsgräns `SESSION_IDLE_TIMEOUT` = `session.gc_maxlifetime` (1440 s, styrs av Debians cron-städning).
+- `login_user()` byter sessions-id. `logout_user()` tömmer och förstör sessionen.
+- Okända användarnamn verifieras mot `DUMMY_PASSWORD_HASH` (jämn svarstid).
+- `require_login()` redirectar till /login.php, även från admin/. API-endpoints som ska vara tillgängliga för gäster använder `current_user_or_guest()`, inte `require_login()`.
+- Grupper styr vilka spår användaren ser. Gruppen `Alla` ger tillgång till allt.
 
-### Skyddad medialeverans (access.php + stream.php, v1.5.0)
-- **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`). Duplicera den aldrig.
+### Inloggningsspärr och klient-IP (S2)
+- **`login_throttle.php`**: räknare per användarnamn (5 fria försök) och per IP (20 fria). Exponentiell spärr 30 s → 15 min. Lagras i `data/login_attempts/`, flock-skyddat. Kontrolleras före lösenordet.
+- **`client_ip.php`**: `client_ip()` och `request_is_https()`. Proxy-headers (CF-Connecting-IP, X-Forwarded-Proto) litas bara på när REMOTE_ADDR är loopback (cloudflared-tunneln).
+- nginx har dessutom `limit_req` på POST /login.php (10/min, burst 5).
+
+### CSRF och audit (S2)
+- **`csrf.php`**: `csrf_token()`, `csrf_field()`, `csrf_verify()`, `csrf_require()`, `logout_button($action)`. Formulär: `<?= csrf_field() ?>` och `csrf_require()` först i POST-hanteringen. Logout är POST med CSRF.
+- `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
+- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort. Events: `login_ok`, `login_failed`, `login_blocked`, `logout`, `session_expired`, `csrf_rejected`, `password_rehash_needed`, `admin_groups_saved`, `admin_groups_rejected`.
+
+### Skyddad medialeverans (access.php + stream.php, S1)
+- **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`, `track_file_url`, `list_visible_tracks`, `visible_track_urls`). Duplicera den aldrig.
 - Kanalfiler (`_bin/_vce/_env`) och `.lrc` ärver gruppen från huvudspåret (`_msc ?? _vce ?? _env ?? _bin`).
 - nginx skickar `^~ /music/` och `^~ /lyrics/` till `stream.php` via FastCGI. **URL:erna är oförändrade** (`music/<fil>`), eftersom profiler, spellistor, kö och `plays.jsonl` nycklas på URL:en.
 - `stream.php` validerar filnamnet (ett segment, rätt ändelse), kontrollerar behörigheten och svarar med `X-Accel-Redirect: /_protected/{music|lyrics}/<fil>`. nginx levererar filen (Range/seek) från `internal`-locations som bara aliasar `music/` resp. `lyrics/`.
 - Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer), `Cache-Control: private, no-store`.
-- Test: `tests/security_smoke.sh` körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`). Inloggade tester använder en tillfällig sessionsfil för `__smoketest__`, så `users.csv` rörs inte.
-- nginx-konfigen ligger i `/etc/nginx/sites-available/clio_music`; källan finns i repot (`deploy/nginx_clio_music.conf`, se S5). `/tests/` är spärrad i nginx.
 
-### Säkerhetsbas: session, login, CSRF, audit (v1.5.1)
-- **`auth.php`** startar sessionen via `start_session()`: HttpOnly, SameSite=Lax, Secure bakom HTTPS (Cloudflare), `use_strict_mode`. Absolut timeout 12 h; inaktivitetsgräns = php.ini `session.gc_maxlifetime` (1440 s, styrs av Debians cron-städning). `login_user()` byter sessions-id, `logout_user()` tömmer och förstör. Okända användarnamn verifieras mot `DUMMY_PASSWORD_HASH` (jämn svarstid).
-- **`client_ip.php`**: `client_ip()` och `request_is_https()`. Proxy-headers (CF-Connecting-IP, X-Forwarded-Proto) litas bara på när REMOTE_ADDR är loopback (cloudflared-tunneln).
-- **`login_throttle.php`**: räknare per användarnamn (5 fria) och IP (20 fria) i `data/login_attempts/`, exponentiell spärr 30 s → 15 min, flock-skyddad. nginx har dessutom `limit_req` på POST /login.php (10/min, burst 5).
-- **`csrf.php`**: `csrf_token()`, `csrf_field()`, `csrf_verify()`, `csrf_require()`, `logout_button($action)`. Formulär: `<?= csrf_field() ?>` + `csrf_require()` först i POST-hanteringen.
-- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort.
-- **`api/_bootstrap.php`** — kontrakt för alla JSON-API:er:
+### nginx och säkerhetsrubriker (S5)
+- Konfigen finns i repot: `deploy/nginx_clio_music.conf` (= `/etc/nginx/sites-available/clio_music`), snippets `deploy/clio_music_security_headers.conf` och `deploy/clio_music_csp.conf` (= `/etc/nginx/snippets/`). Ändra i repot, validera i staging, deploya, ladda om.
+- nginx lyssnar **bara på 127.0.0.1:8091**. All publik trafik kommer via cloudflared. Ingen direktväg förbi Cloudflare.
+- `location /data/ { deny all; }` skyddar data/. data/.htaccess är borttagen ur repot: den är Apache-syntax och verkningslös under nginx. `location /tests/ { deny all; }` skyddar tests/.
+- Rubriker (`always`, server-nivå): nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options DENY, CSP. **nginx-arv:** en location med egen `add_header` ärver inga rubriker från servernivån. Lägg då in de två include-raderna där också.
+- **CSP är enforcing** sedan 2026-10-11: `script-src 'self' https://www.googletagmanager.com`. Stilar får `'unsafe-inline'` (medvetet undantag). `deploy_enforce.sh` byter bara rubriknamnet från Report-Only till enforcing.
+- `server_tokens off`, `fastcgi_hide_header X-Powered-By`, `client_max_body_size` 256k (server) och 64k (`/api/`). `limit_req` zon `clio_music_api` (120/min, burst 20) på `/api/`.
+- Åtkomstloggar: `/var/log/nginx/access.log` och `error.log`.
+
+### API-kontrakt och validering (S3)
+- **`api/_bootstrap.php`**, kontrakt för alla JSON-API:er:
   ```php
   require_once __DIR__ . '/_bootstrap.php';
   ['user' => $user, 'body' => $body] = api_bootstrap(['method' => 'POST', 'allow_guest' => false, 'max_bytes' => 16384]);
@@ -49,87 +64,97 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
   api_respond(['ok' => true]);   // eller api_error(400, 'invalid track');
   ```
   Garanterar metod (405), inloggning (401), för POST: CSRF via `X-CSRF-Token` (403), `application/json` (415), storlek (413), giltig JSON-array (400). Sessionen är stängd efteråt (skrivskyddad).
-- `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
-- **Servern saknar `mbstring`** — använd inte `mb_*`-funktioner i ny kod.
+- Gäster får 401 på save_*, tomt svar på load_*. `load_*` returnerar sparade filer som de är. En trasig fil loggas och ger tomt svar.
+- **Delad spårregel:** `index.php` och API:erna använder samma lista från `access.php` (`list_visible_tracks()`, `visible_track_urls()`). API:erna validerar mot de spår *just den användaren* får se.
+- **`api/_validation.php`** (ren funktionsfil, testas med `php tests/api_validation_test.php`): vitlista per profilnyckel (`msc/bin/vce/env` 0–1, `balance` −1..1, `bass/treble` −12..12, `liked` bool; `_settings`: `playMode`, `playbackRate` 0.5–2, `queue`, `queueCursor`). Okända nycklar kastas, värden utanför intervall ger 400. Kö och spellistor filtreras mot kända spår (avvisas inte).
+- Gränser är konstanter i config.php: `MAX_REQUEST_BYTES`, `MAX_LOG_PLAY_BYTES`, `MAX_PROFILE_TRACKS`, `MAX_QUEUE_LENGTH`, `MAX_PLAYLISTS_PER_USER`, `MAX_TRACKS_PER_PLAYLIST`, `MAX_PLAYLIST_NAME_LENGTH`, `MAX_TRACK_URL_LENGTH`.
+- **`rate_limit.php`**: `rate_limit_hit($bucket, $key, $max, $window)` → 0 eller Retry-After-sekunder (`RATE_LIMIT_DIR` = `data/rate_limits/`). `log_play` räknar gäster per IP (`LOG_PLAY_GUEST_MAX_PER_MINUTE` = 10) och inloggade per användare (`LOG_PLAY_USER_MAX_PER_MINUTE` = 60) *före* validering, och svarar 429.
+- **`json_store.php`**: `json_file_update()` (flock-skyddat läs-ändra-skriv; `abort` skriver inte över trasig JSON) och `json_file_read()`. Används av login_throttle, rate_limit, save_profile och save_playlist.
+- `player.js`: `apiPost()` ersätter fetch-anropen. 400/403/413/429 ger bara `console.warn`. 401 (gäst) är tyst.
 
-### Admin: grupper (v1.5.2, S4)
-- **`admin/groups_store.php`** (data) och **`admin/groups.php`** (vy + formulärhantering) är åtskilda. Lagret har inga bieffekter och testas med `php tests/groups_store_test.php` mot fixture-filer (rör aldrig riktiga `users.csv`).
-- Gruppnamn valideras mot `GROUP_NAME_PATTERN` i `config.php` (vitlista, 1–40 tecken; `D`-flaggan stoppar avslutande radbrytning). Filnamn måste finnas i `music/` och vara CSV-säkra. Formulärets användare, grupper och filer valideras mot kända mängder; okända nycklar avvisar hela begäran (400, inget skrivs). Dolda fält (`groups_list[]`) finns inte längre.
-- Spårgrupp avgörs av `track_group()` i `access.php` (samma regel som `stream.php`). Nya filnamnsrader läggs först i `track_groups.csv` så att de vinner över prefixregler; prefixregler och kommentarer bevaras.
-- Skrivning: flock på `<fil>.lock`, tempfil i samma katalog + `rename`, rättigheter bevaras. Rader som inte ändras skrivs tillbaka byte för byte; bara grupp-kolumnen i `users.csv` ändras. Sparning som lämnar ingen aktiv admin avvisas.
-- Alla formulär har `csrf_field()`; POST kräver `csrf_require()` efter adminkontrollen (icke-admin → 403). Sparningar och avvisningar loggas som `admin_groups_saved` / `admin_groups_rejected` (utan hashar).
-- `admin/hash_tool.php` är borttaget. Generera hash via SSH: `php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_BCRYPT, ["cost" => 12]), "\n";'`.
-
-### API-validering och hastighetsgränser (v1.5.3, S3)
-- **Delad spårregel:** `list_visible_tracks()`, `track_file_url()` och `visible_track_urls()` i `access.php`. `index.php` bygger TRACKS från samma lista; API:erna validerar mot de spår *just den användaren* får se (URL-formatet `music/<rawurlencode(huvudfil)>` är oförändrat eftersom profiler, spellistor och `plays.jsonl` nycklas på det).
-- **`api/_validation.php`** (ren funktionsfil, testas med `php tests/api_validation_test.php`): vitlista per profilnyckel (`msc/bin/vce/env` 0–1, `balance` −1..1, `bass/treble` −12..12, `liked` bool; `_settings`: `playMode`, `playbackRate` 0.5–2, `queue`, `queueCursor`). Okända nycklar kastas, värden utanför intervall → 400. Kö och spellistor filtreras mot kända spår (avvisas inte). Alla gränser är konstanter i `config.php` (`MAX_*`, `LOG_PLAY_*`).
-- Alla fem endpoints använder `api_bootstrap()`/`api_error()`/`api_respond()`. Gäster får 401 på save_*, tomt svar på load_*. `load_*` returnerar sparade filer som de är (även med gamla nycklar); trasig fil loggas och ger tomt svar.
-- **`json_store.php`**: `json_file_update()` (flock-skyddat läs-ändra-skriv, `abort` skriver inte över trasig JSON) och `json_file_read()`. Används av `login_throttle.php`, `rate_limit.php` och save_profile/save_playlist.
-- **`rate_limit.php`**: `rate_limit_hit($bucket, $key, $max, $window)` → 0 eller Retry-After-sekunder. `log_play` räknar gäster per IP (10/min) och inloggade per användare (60/min) *före* validering → 429.
-- `player.js`: `apiPost()` ersätter fetch-anropen; 400/403/413/429 ger bara `console.warn`, 401 (gäst) är tyst.
-
-### nginx-härdning och CSP (v1.5.4, S5)
-- **nginx-konfigen finns nu i repot:** `deploy/nginx_clio_music.conf` (= `/etc/nginx/sites-available/clio_music`) plus snippets `deploy/clio_music_security_headers.conf` och `deploy/clio_music_csp.conf` (installeras i `/etc/nginx/snippets/`). Ändra i repot, validera i staging med `sudo nginx -t -c <staging>/nginx_test_main.conf` (kopia av nginx.conf som inkluderar kandidatfilen), deploya, ladda om.
-- Rubriker (`always`, server-nivå): nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options DENY, CSP. **nginx-arv:** en location med egen `add_header` ärver inga rubriker från servernivån; lägg i så fall de två include-raderna även där. Cloudflare sätter inga av dem.
-- `server_tokens off`, `fastcgi_hide_header X-Powered-By`, `client_max_body_size` 256k (server) / 64k (`/api/`), `limit_req` zon `clio_music_api` (120/min, burst 20) nycklad på `$clio_music_client_ip`.
-- **CSP** är strikt för skript: `script-src 'self' https://www.googletagmanager.com`. **Inga inline-skript och inga `on*`-attribut** i PHP-vyerna. `consent.js` har GA-consent och bannerlogik; `index.php` skriver TRACKS/CM_USER/CM_USER_TYPE/CM_CSRF i `<script type="application/json" id="cm-data">` som `player.js` läser med `JSON.parse`. Stilar får `'unsafe-inline'` (medvetet undantag).
-- CSP körs som **Report-Only** tills Fredrik testat i webbläsaren; `deploy_enforce.sh` byter bara rubriknamnet (uppdatera då även snippeten i repot).
-- `data/.htaccess` är verkningslös i nginx (Apache-syntax); nginx-blocket `location /data/ { deny all; }` är det som skyddar.
-
-### Spårmodell
-Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
-
-### Klientside-state
-- `TRACKS[]` — injiceras från PHP som JSON i index.php, läses av player.js
-- `current` — index i TRACKS för aktuellt spår
-- `queue[]` — `{idx, id}` — kön, sparas server-side via `_settings`-nyckeln i profiles
-- `playlists{}` — namngivna spellistor, laddas från `api/load_playlists.php`
-
-### Serverside-persistens
-- `data/profiles/{username}.json` — objekt med filens URL som nyckel → ljudinställningar. `_settings`-nyckeln lagrar globala inställningar (playMode, hastighet, kö).
-- `data/playlists/{username}.json` — objekt med spellistenamn som nyckel → array av fil-URL:er.
-- Båda skrivs med `LOCK_EX` för att undvika race conditions.
-
-### Tab-system (player.js)
-Tre flikar: `lib` (bibliotek), `queue` (kö), `pl` (spellistor). Byt med `switchTab(tab)`.
-
-### Album-sektioner
-Spår grupperas per albumtagg i PHP (`$album_groups`). JS hanterar toggle via `.collapsed`-klassen. Kollapsade album sparas i `localStorage` under nyckeln `clio_collapsed_albums`.
-
-## Filrättigheter på servern
-```
-data/profiles/   → clioadmin:www-data, chmod 775
-data/playlists/  → clioadmin:www-data, chmod 775
-```
-
-## Deploy-server
-- Host: `clioadmin@100.107.127.104` (EliteDesk GPU, Tailscale-IP)
-- Webbrot: `/var/www/clio_music/`
-- PHP 8.3-FPM, nginx port 8091, Cloudflare framför
-- Musikfiler i `/var/www/clio_music/music/`
+### Admin: grupper (S4)
+- **`admin/groups_store.php`** (data) och **`admin/groups.php`** (vy och formulärhantering) är åtskilda. Lagret har inga bieffekter och testas med `php tests/groups_store_test.php` mot fixture-filer. Testet rör aldrig riktiga `users.csv` eller `track_groups.csv`.
+- Gruppnamn valideras mot `GROUP_NAME_PATTERN` i config.php (vitlista, 1–40 tecken, `D`-flaggan). Filnamn måste finnas i `music/` och vara CSV-säkra. Formulärets användare, grupper och filer valideras mot kända mängder. Okända nycklar avvisar hela begäran (400, inget skrivs).
+- Spårgrupp avgörs av `track_group()` i `access.php` (samma regel som `stream.php`). Nya filnamnsrader läggs först i `track_groups.csv` så att de vinner över prefixregler. Prefixregler och kommentarer bevaras.
+- Skrivning: flock på `<fil>.lock`, tempfil i samma katalog och `rename`, rättigheter bevaras. Rader som inte ändras skrivs tillbaka byte för byte. I `users.csv` ändras bara grupp-kolumnen. Sparning som lämnar ingen aktiv admin avvisas.
+- Alla formulär har `csrf_field()`. POST kräver `csrf_require()` efter adminkontrollen (icke-admin → 403). Sparningar och avvisningar loggas som `admin_groups_saved` och `admin_groups_rejected` (utan hashar).
 
 ### Spelningslogg (api/log_play.php + admin/index.php)
-- Loggar till `data/plays.jsonl` efter 5 s uppspelning (kräver `audios.msc` playing-event)
-- Gäster loggas under `__guest__`
-- `loggedTrack` nollställs vid varje `load()` — omval av samma spår räknas som ny lyssnig
-- Admin-dashboarden filtrerar per lyssnargrupp (GET `?group=X`)
+- Loggar till `data/plays.jsonl` efter 5 s uppspelning (kräver `audios.msc` playing-event).
+- Gäster loggas under `__guest__`. `loggedTrack` nollställs vid varje `load()`, så omval av samma spår räknas som ny lyssning.
+- Admin-dashboarden läser **bara aktuell `plays.jsonl`**. Äldre statistik ligger i roterade filer (se Loggrotation).
+- Admin-dashboarden filtrerar per lyssnargrupp (GET `?group=X`).
 
-### Bakgrundsuppspelning (player.js)
-- **Web Audio API initieras lazy** — startas först när användaren rör balance/bas/diskant-reglagen
-- Före lazy-init används `audios[ch].volume` (native HTML), som iOS/Android kan spela i bakgrunden
-- Efter lazy-init hanteras volymen av gain-noder; `ctx.onstatechange` försöker auto-resumera vid upplåsning
-- **Media Session API** registrerat: låsskärmskontroller, spårtitel/artist, seek-position
-- **Wake Lock API** håller skärmen tänd under uppspelning (släpps vid paus)
+### Serverside-persistens
+- `data/profiles/{username}.json`: objekt med filens URL som nyckel → ljudinställningar. `_settings`-nyckeln lagrar globala inställningar (playMode, hastighet, kö).
+- `data/playlists/{username}.json`: objekt med spellistenamn som nyckel → array av fil-URL:er.
+- Båda skrivs via `json_file_update()` (flock) och är nyckade på URL.
 
-### Lyrics (player.js + index.php)
-- LRC-filer i `lyrics/`-mappen, namngivna `{spårnamn_utan_suffix}.lrc`
-- Visas i `#lyrics-panel`; aktuell rad highlightas och auto-scrollas via `updateLyricsLine(currentTime)`
-- **Klick på rad** anropar `seekAll(line.time)` — hoppar direkt till den tidpunkten
-- **Sökfält** (`#lyrics-search`) filtrerar rader i realtid; auto-scroll pausas under sökning
-- Sökning och scroll-state nollställs vid `loadLyrics()` (nytt spår)
+### Klientside (player.js)
+- `TRACKS[]` injiceras från PHP som JSON i `<script type="application/json" id="cm-data">` (tillsammans med CM_USER, CM_USER_TYPE, CM_CSRF) och läses med `JSON.parse`.
+- `current`: index i TRACKS för aktuellt spår. `queue[]`: `{idx, id}`, sparas server-side via `_settings`. `playlists{}`: laddas från `api/load_playlists.php`.
+- Tre flikar: `lib` (bibliotek), `queue` (kö), `pl` (spellistor). Byt med `switchTab(tab)`.
+- Album grupperas per albumtagg i PHP (`$album_groups`). Kollapsade album sparas i `localStorage` under `clio_collapsed_albums`.
+- **Bakgrundsuppspelning:** Web Audio API initieras lazy, först när användaren rör balance/bas/diskant-reglagen. Före lazy-init används `audios[ch].volume` (native HTML), som iOS/Android kan spela i bakgrunden. Media Session API (låsskärm, titel, seek) och Wake Lock API (släpps vid paus) är registrerade.
+- **Lyrics:** LRC-filer i `lyrics/`, namngivna `{spårnamn_utan_suffix}.lrc`. Visas i `#lyrics-panel`. Aktuell rad highlightas och auto-scrollas via `updateLyricsLine(currentTime)`. Klick på rad anropar `seekAll(line.time)`. Sökfältet `#lyrics-search` filtrerar i realtid och pausar auto-scroll. Sökning och scroll-state nollställs vid `loadLyrics()`.
 
-## Öppna punkter (från NCC)
-- Validering av payload-storlek i save_profile.php (DoS-skydd)
-- `_msc`-suffix syns i spårnamnet i admin-dashboarden (track_label() strippar ej kanal-suffix)
-- Eventuellt: omslagsbilder per album
-- Eventuellt: genrer/taggar-filtrering
+### Spårmodell
+Spår i `music/` skannas med glob (`scan_music`). Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
+
+## Filrättigheter på servern (S6)
+
+Verifierat med `ls -l` före och efter S6. Skript: `~/staging/clio_music_S6/apply.sh`, rollback: `rollback.sh`.
+
+| Sökväg | Ägare:grupp | Rättighet | Anmärkning |
+|---|---|---|---|
+| `data/` | clioadmin:www-data | 775 | PHP skapar låsfiler och tempfiler här. Ska vara kvar. |
+| `data/users.csv`, `data/track_groups.csv` | www-data:www-data | 640 | Läses och skrivs av PHP (admin). clioadmin kan inte läsa dem utan sudo. |
+| `data/audit.jsonl`, `data/plays.jsonl` | www-data:www-data | 660 | |
+| `data/profiles/`, `data/playlists/` | clioadmin:www-data | 775 | Filerna i dem: 664, ägare www-data. |
+| `data/login_attempts/`, `data/rate_limits/` | www-data | 750 | Skapade av PHP. Lämnas orörda. |
+
+- `data/plays.jsonl.bak_*` flyttades i S6 till `~/backups/clio_music/` (utanför webroten). Inga `.bak`-filer ska ligga i webroten.
+- Admin-sparning av `users.csv` och `track_groups.csv` fungerar eftersom PHP körs som www-data. Manuell redigering görs med `sudoedit` (se SECURITY.md).
+
+## Loggrotation (S6)
+
+- `/etc/logrotate.d/clio_music` (källa: `deploy/logrotate_clio_music`): veckovis, `rotate 12`, `compress`, `delaycompress`, `copytruncate`, `missingok`, `notifempty`, `su www-data www-data`. Gäller `data/plays.jsonl` och `data/audit.jsonl`.
+- Roterade filer hamnar i `data/` som `plays.jsonl.1`, `plays.jsonl.2.gz` osv. Mönstren `data/plays.jsonl*` och `data/audit.jsonl*` är git-ignorerade.
+- `copytruncate` eftersom PHP håller filen öppen med O_APPEND. Rader som skrivs mellan kopia och trunkering kan gå förlorade.
+- **Admin-dashboarden räknar bara aktuell `plays.jsonl`.** Äldre statistik ligger i roterade filer. Om statistiken ska fortsätta räkna över rotation är en öppen fråga till Fredrik. Admin/index.php ändras inte i S6.
+- Kontroll: `sudo logrotate -d /etc/logrotate.d/clio_music` (torrkörning).
+
+## Deploy
+
+Ändringar förbereds i `~/staging/clio_music_<sprint>/` på servern. Deploy-skriptet (`deploy.sh`) i samma katalog gör följande.
+1. Avbryter om backupen redan finns. Annars tar den backup: `sudo cp -a /var/www/clio_music ~/backups/clio_music.bak_<datum>_<sprint>`.
+2. Validerar PHP (`php -l`) och, om nginx ändrats, konfigen (`nginx -t` mot en testkonfig).
+3. Kopierar webroten. Vid nginx-ändring kopieras snippets och konfig. Vid fel återställs konfigen och ingen reload görs.
+4. Laddar om nginx med restart, eftersom listen-adressen kan ändras.
+5. Kör `bash /var/www/clio_music/tests/security_smoke.sh`.
+
+Rollback: `rollback.sh` i samma katalog återställer från backupen. Skripten versioneras inte i repot. Efter deploy kontrolleras uppspelning, sparning av profil och admin-sparning manuellt.
+
+Övrigt:
+- Host: `clioadmin@100.107.127.104` (EliteDesk GPU, Tailscale-IP)
+- Webbrot: `/var/www/clio_music/`. Musikfiler i `/var/www/clio_music/music/`.
+- PHP 8.3-FPM, nginx port 8091, Cloudflare framför.
+
+## Tester
+
+- **`tests/security_smoke.sh`**: körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`) mot 127.0.0.1:8091, förbi Cloudflare. Inloggade tester använder en tillfällig sessionsfil för `__smoketest__` i `/var/lib/php/sessions`, så `users.csv` rörs inte. Testets rader i `audit.jsonl` och `plays.jsonl` rensas efteråt. Läser `track_groups.csv` via `sudo -u www-data` (640).
+- **`php tests/api_validation_test.php`** och **`php tests/groups_store_test.php`**: kan köras från webroten på servern. Ingen av dem skriver till riktiga data.
+- Testprotokollet T1–T12 och fynden 1–13 finns i granskningsrapporten (`Säkerhetsgranskning_OWASP_2026-10-11.md`).
+
+## Öppna punkter
+
+- Favicon saknas (404).
+- Admin-fliken Låtar låter grupp sättas på kanalfiler (`_vce/_bin/_env`) trots att huvudspåret styr åtkomsten.
+- `track_label()` i admin/index.php strippar inte kanal-suffixet `_msc`. Spårnamnet syns därför med suffix i admin-dashboarden.
+- Automatisk omhashning av lösenord uteblir: `password_rehash_needed` loggas men hashen byts inte.
+- Cloudflare-cache bör purgas för `frida_session_edited.*`.
+- Statistik över loggrotation: ska admin-dashboarden räkna över roterade filer? Beslut hos Fredrik.
+- `help_admin.php` beskriver att `users.csv` redigeras via SSH/SFTP. Efter S6 kräver det sudo. Texten är inte ändrad (PHP-fil utanför S6).
+- White-label/teman (se Fredriks plan).
+- Eventuellt: omslagsbilder per album.
+- Eventuellt: genrer/taggar-filtrering.

@@ -1,0 +1,19 @@
+# logrotate för clio_music — installeras som /etc/logrotate.d/clio_music.
+# Veckovis rotation av spelningsloggen och säkerhetsauditen. copytruncate: PHP håller filen öppen
+# med O_APPEND och kan inte byta fil under tiden. Rader som skrivs mellan kopia och trunkering
+# kan förloras; det accepteras för loggar av detta slag.
+# su www-data: rotationen körs som den användare som skriver filerna (data/ är clioadmin:www-data 775).
+# Roterade filer får namnen *.1.gz ... *.12.gz i data/. data/ nås inte via nginx (location /data/ nekas).
+# OBS: admin/index.php läser bara aktuell plays.jsonl. Äldre statistik ligger i roterade filer.
+
+/var/www/clio_music/data/plays.jsonl
+/var/www/clio_music/data/audit.jsonl {
+    weekly
+    rotate 12
+    compress
+    delaycompress
+    copytruncate
+    missingok
+    notifempty
+    su www-data www-data
+}

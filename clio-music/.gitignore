@@ -1,8 +1,18 @@
-# Användardata och loggar
+# Användardata och loggar (ägs av servern, aldrig i git)
 data/users.csv
-data/plays.jsonl
+data/plays.jsonl*
+data/audit.jsonl*
 data/profiles/
 data/playlists/
+data/login_attempts/
+data/rate_limits/
+
+# Runtime-lås och tillfälliga filer från PHP (atomisk skrivning, flock)
+data/*.lock
+data/*.tmp*
+
+# Backuper och kvarlämnade kopior (ska aldrig ligga i webroten)
+*.bak*
 
 # Ljudfiler
 music/
@@ -18,6 +28,3 @@ music/
 # OS
 .DS_Store
 Thumbs.db
-
-# Admin-gränssnittets lås (data/groups_store.php) — runtime, ej i git
-data/*.lock
