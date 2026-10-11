@@ -60,6 +60,14 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - Alla formulär har `csrf_field()`; POST kräver `csrf_require()` efter adminkontrollen (icke-admin → 403). Sparningar och avvisningar loggas som `admin_groups_saved` / `admin_groups_rejected` (utan hashar).
 - `admin/hash_tool.php` är borttaget. Generera hash via SSH: `php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_BCRYPT, ["cost" => 12]), "\n";'`.
 
+### API-validering och hastighetsgränser (v1.5.3, S3)
+- **Delad spårregel:** `list_visible_tracks()`, `track_file_url()` och `visible_track_urls()` i `access.php`. `index.php` bygger TRACKS från samma lista; API:erna validerar mot de spår *just den användaren* får se (URL-formatet `music/<rawurlencode(huvudfil)>` är oförändrat eftersom profiler, spellistor och `plays.jsonl` nycklas på det).
+- **`api/_validation.php`** (ren funktionsfil, testas med `php tests/api_validation_test.php`): vitlista per profilnyckel (`msc/bin/vce/env` 0–1, `balance` −1..1, `bass/treble` −12..12, `liked` bool; `_settings`: `playMode`, `playbackRate` 0.5–2, `queue`, `queueCursor`). Okända nycklar kastas, värden utanför intervall → 400. Kö och spellistor filtreras mot kända spår (avvisas inte). Alla gränser är konstanter i `config.php` (`MAX_*`, `LOG_PLAY_*`).
+- Alla fem endpoints använder `api_bootstrap()`/`api_error()`/`api_respond()`. Gäster får 401 på save_*, tomt svar på load_*. `load_*` returnerar sparade filer som de är (även med gamla nycklar); trasig fil loggas och ger tomt svar.
+- **`json_store.php`**: `json_file_update()` (flock-skyddat läs-ändra-skriv, `abort` skriver inte över trasig JSON) och `json_file_read()`. Används av `login_throttle.php`, `rate_limit.php` och save_profile/save_playlist.
+- **`rate_limit.php`**: `rate_limit_hit($bucket, $key, $max, $window)` → 0 eller Retry-After-sekunder. `log_play` räknar gäster per IP (10/min) och inloggade per användare (60/min) *före* validering → 429.
+- `player.js`: `apiPost()` ersätter fetch-anropen; 400/403/413/429 ger bara `console.warn`, 401 (gäst) är tyst.
+
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
 

@@ -19,6 +19,7 @@
  */
 
 require_once __DIR__ . '/client_ip.php';
+require_once __DIR__ . '/json_store.php';
 
 const LOGIN_ATTEMPTS_DIR       = __DIR__ . '/data/login_attempts';
 const LOGIN_FREE_ATTEMPTS      = 5;      // per användarnamn
@@ -65,32 +66,24 @@ function login_record_failure(string $username): void {
 }
 
 /**
- * Läs-ändra-skriv under exklusivt fil-lås. Utan låset kunde parallella gissningar läsa samma
- * räknarvärde och tillsammans bara räknas som ett fel.
+ * Läs-ändra-skriv under exklusivt fil-lås (json_store.php). Utan låset kunde parallella
+ * gissningar läsa samma räknarvärde och tillsammans bara räknas som ett fel.
  */
 function login_increment_attempts(string $key, int $free_attempts): void {
-    $handle = fopen(login_attempt_file($key), 'c+');
-    if ($handle === false || !flock($handle, LOCK_EX)) {
-        error_log('clio_music: kunde inte låsa räknare för inloggningsförsök');
-        if ($handle) fclose($handle);
-        return;
-    }
-    $attempts = json_decode((string)stream_get_contents($handle), true);
-    if (!is_array($attempts) || time() - (int)($attempts['last_failure'] ?? 0) > LOGIN_RESET_SECONDS) {
-        $attempts = ['failures' => 0, 'locked_until' => 0];
-    }
-    $attempts['failures']++;
-    $attempts['last_failure'] = time();
-    $over_limit = $attempts['failures'] - $free_attempts;
-    if ($over_limit >= 0) {
-        $lock_seconds = min(LOGIN_MAX_LOCK_SECONDS, LOGIN_BASE_LOCK_SECONDS * (2 ** min($over_limit, 10)));
-        $attempts['locked_until'] = time() + $lock_seconds;
-    }
-    ftruncate($handle, 0);
-    rewind($handle);
-    if (fwrite($handle, json_encode($attempts)) === false) error_log('clio_music: kunde inte skriva räknare för inloggningsförsök');
-    flock($handle, LOCK_UN);
-    fclose($handle);
+    $is_saved = json_file_update(login_attempt_file($key), function (array $attempts) use ($free_attempts): array {
+        if (time() - (int)($attempts['last_failure'] ?? 0) > LOGIN_RESET_SECONDS) {
+            $attempts = ['failures' => 0, 'locked_until' => 0];
+        }
+        $attempts['failures']++;
+        $attempts['last_failure'] = time();
+        $over_limit = $attempts['failures'] - $free_attempts;
+        if ($over_limit >= 0) {
+            $lock_seconds = min(LOGIN_MAX_LOCK_SECONDS, LOGIN_BASE_LOCK_SECONDS * (2 ** min($over_limit, 10)));
+            $attempts['locked_until'] = time() + $lock_seconds;
+        }
+        return $attempts;
+    });
+    if (!$is_saved) error_log('clio_music: kunde inte uppdatera räknare för inloggningsförsök');
 }
 
 /** Nollar namnräknaren. IP-räknaren lämnas: en lyckad inloggning ska inte ge fria gissningar mot andra konton. */

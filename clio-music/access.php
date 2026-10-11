@@ -101,3 +101,39 @@ function user_can_access_media(string $filename, array $user, string $music_dir)
     }
     return false;
 }
+
+/** Spårets URL i exakt det format index.php skriver i TRACKS (profiler, spellistor och plays.jsonl nycklas på det). */
+function track_file_url(string $music_url, string $filename): string {
+    return $music_url . '/' . rawurlencode($filename);
+}
+
+/**
+ * Spåren (en post per huvudspår) som användaren får se, i den ordning index.php visar dem:
+ * först flerkanalsspår, sedan fristående. Varje post: ['main_file' => filnamn,
+ * 'base' => kanalspårets bas eller null, 'channel_files' => [suffix => filnamn] eller null].
+ * Delas av index.php (bygger TRACKS) och API:erna (validerar spår), så att regeln aldrig dupliceras.
+ */
+function list_visible_tracks(array $user, string $music_dir): array {
+    $group_map = load_track_groups();
+    $scan      = scan_music($music_dir);
+    $visible   = [];
+    foreach ($scan['channels'] as $base => $channel_files) {
+        $main_file = main_channel_file($channel_files);
+        if ($main_file === null || !user_can_see(track_group($main_file, $group_map), $user)) continue;
+        $visible[] = ['main_file' => $main_file, 'base' => (string)$base, 'channel_files' => $channel_files];
+    }
+    foreach ($scan['standalone'] as $filename) {
+        if (!user_can_see(track_group($filename, $group_map), $user)) continue;
+        $visible[] = ['main_file' => $filename, 'base' => null, 'channel_files' => null];
+    }
+    return $visible;
+}
+
+/** Mängden av `file`-URL:er (nycklar i arrayen) som användaren får se. Okänt eller osynligt spår = inte med. */
+function visible_track_urls(array $user, string $music_dir, string $music_url): array {
+    $urls = [];
+    foreach (list_visible_tracks($user, $music_dir) as $track) {
+        $urls[track_file_url($music_url, $track['main_file'])] = true;
+    }
+    return $urls;
+}
