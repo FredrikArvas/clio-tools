@@ -107,6 +107,72 @@ check "inloggad: Range → 206"                  "206" "${cookie[@]}" -r 0-99 "$
 check "inloggad: spår utan grupp"              "200" "${cookie[@]}" "$(music "$UNGROUPED_TRACK")"
 check "inloggad: annan grupps spår"            "403" "${cookie[@]}" "$(music "$OTHER_GROUP_TRACK")"
 
+echo "== S2: sessionscookie (T7/T10)"
+check_header "cookie HttpOnly"                      '^set-cookie: .*httponly' "$BASE/login.php"
+check_header "cookie SameSite=Lax"                  '^set-cookie: .*samesite=lax' "$BASE/login.php"
+check_header "cookie Secure bakom HTTPS-proxy"      '^set-cookie: .*secure' -H 'X-Forwarded-Proto: https' "$BASE/login.php"
+# use_strict_mode: ett påhittat sessions-id ska ersättas av ett nytt från servern.
+fixated="smokefixation$(openssl rand -hex 8)"
+if curl -s -o /dev/null -D - -b "$COOKIE_NAME=$fixated" "$BASE/login.php" | grep -qi "^set-cookie: $COOKIE_NAME=" \
+   && ! curl -s -o /dev/null -D - -b "$COOKIE_NAME=$fixated" "$BASE/login.php" | grep -qi "^set-cookie: $COOKIE_NAME=$fixated"; then
+    pass=$((pass + 1)); echo "  OK    påhittat sessions-id avvisas (strict mode)"
+else
+    fail=$((fail + 1)); echo "  FEL   påhittat sessions-id accepteras (session fixation)"
+fi
+
+echo "== S2: inloggning (T6) — fiktivt konto, riktiga konton rörs inte"
+test_start=$(date +%s)
+jar=$(mktemp)
+login_token() { curl -s -c "$jar" -b "$jar" "$BASE/login.php" | grep -o 'name="csrf_token" value="[^"]*"' | sed 's/.*value="//;s/"$//'; }
+bf_user="__smoketest_bf_$(openssl rand -hex 4)"
+check "POST login utan CSRF-token"             "403" -X POST -d "username=$bf_user&password=x" "$BASE/login.php"
+token=$(login_token)
+start_ms=$(date +%s%3N)
+check "okänt namn, fel lösenord"               "200" -c "$jar" -b "$jar" --data-urlencode "csrf_token=$token" -d "username=$bf_user&password=fel" "$BASE/login.php"
+elapsed=$(( $(date +%s%3N) - start_ms ))
+if (( elapsed >= 100 )); then
+    pass=$((pass + 1)); echo "  OK    okänt namn kör password_verify (${elapsed} ms)"
+else
+    fail=$((fail + 1)); echo "  FEL   okänt namn svarar för snabbt (${elapsed} ms) — användaruppräkning möjlig"
+fi
+for attempt in 2 3 4 5; do
+    curl -s -o /dev/null -c "$jar" -b "$jar" --data-urlencode "csrf_token=$token" -d "username=$bf_user&password=fel$attempt" "$BASE/login.php"
+done
+check "6:e försöket spärras"                   "429" -c "$jar" -b "$jar" --data-urlencode "csrf_token=$token" -d "username=$bf_user&password=fel6" "$BASE/login.php"
+
+echo "== S2: utloggning"
+check "GET logout loggar inte ut (bara knapp)" "200" "${cookie[@]}" "$BASE/logout.php"
+check "POST logout utan token"                 "403" "${cookie[@]}" -X POST "$BASE/logout.php"
+logout_token=$(curl -s "${cookie[@]}" "$BASE/logout.php" | grep -o 'name="csrf_token" value="[^"]*"' | sed 's/.*value="//;s/"$//')
+check "POST logout med token → redirect"       "302" "${cookie[@]}" --data-urlencode "csrf_token=$logout_token" "$BASE/logout.php"
+if sudo test -f "$SESSION_DIR/sess_$session_id"; then
+    fail=$((fail + 1)); echo "  FEL   sessionsfilen finns kvar efter utloggning"
+else
+    pass=$((pass + 1)); echo "  OK    sessionsfilen raderad vid utloggning"
+fi
+check "gammal cookie efter utloggning"         "403" "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
+
+# Städa bort testets spår: räknarfiler och testets rader i auditloggen.
+for key in "user:$bf_user" "ip:127.0.0.1"; do
+    sudo rm -f "/var/www/clio_music/data/login_attempts/$(printf '%s' "$key" | sha256sum | cut -c1-64).json"
+done
+sudo php -r '
+    [$file, $since] = [$argv[1], (int)$argv[2]];
+    if (!is_file($file)) exit;
+    $handle = fopen($file, "r+"); flock($handle, LOCK_EX);
+    $kept = array_filter(explode("\n", stream_get_contents($handle)), function ($line) use ($since) {
+        $entry = json_decode($line, true);
+        if (!$entry) return $line !== "";
+        $is_test = ($entry["ts"] ?? 0) >= $since
+            && (($entry["ip"] ?? "") === "127.0.0.1" || str_contains($line, "__smoketest"));
+        return !$is_test;
+    });
+    ftruncate($handle, 0); rewind($handle);
+    fwrite($handle, $kept ? implode("\n", $kept) . "\n" : "");
+    flock($handle, LOCK_UN); fclose($handle);
+' /var/www/clio_music/data/audit.jsonl "$test_start"
+rm -f "$jar"
+
 echo
 echo "Resultat: $pass OK, $fail FEL"
 [[ $fail -eq 0 ]]

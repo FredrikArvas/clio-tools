@@ -2,6 +2,7 @@
 require_once 'auth.php';
 require_once 'config.php';
 require_once 'access.php';
+require_once 'csrf.php';
 
 $user = current_user_or_guest();
 
@@ -201,7 +202,7 @@ gtag('config', 'G-MJR1MCM13R');
       <span><?= htmlspecialchars($user['display']) ?></span>
       <?php if (!empty($user['admin'])): ?><a href="admin/" style="font-size:0.82rem">Admin</a><?php endif ?>
       <a href="help.php" style="font-size:0.82rem">Hjälp</a>
-      <a href="logout.php" class="btn-logout">Logga ut</a>
+      <?= logout_button() ?>
       <?php else: ?>
       <a href="mailto:info@arvas.international" style="font-size:0.82rem">Skapa konto</a>
       <a href="login.php" class="btn-logout btn-login">Logga in</a>
@@ -407,6 +408,7 @@ gtag('config', 'G-MJR1MCM13R');
 const TRACKS       = <?= $tracks_json ?>;
 const CM_USER      = <?= json_encode($user['username']) ?>;
 const CM_USER_TYPE = <?= json_encode(is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered')) ?>;
+const CM_CSRF      = <?= json_encode(csrf_token()) ?>;
 </script>
 <script src="player.js?v=<?= APP_VERSION ?>"></script>
 
