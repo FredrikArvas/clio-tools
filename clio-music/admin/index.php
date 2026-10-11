@@ -13,24 +13,49 @@ if (empty($user['admin'])) {
 }
 
 // ── Läs och aggregera spelloggen ──────────────────────────────────────────────
+
+/**
+ * Alla rader i spelloggen, över all tid: roterade filer (plays.jsonl.12.gz … plays.jsonl.2.gz,
+ * plays.jsonl.1 — logrotate med delaycompress) följt av aktuell plays.jsonl.
+ * Ordningen spelar ingen roll för summeringen men gör felsökning begriplig.
+ */
+function read_play_log_lines(string $log_file): array {
+    $rotated = [];
+    foreach (glob($log_file . '.*') ?: [] as $path) {
+        if (preg_match('/\.(\d+)(\.gz)?$/', $path, $match)) $rotated[(int)$match[1]] = $path;
+    }
+    krsort($rotated);   // högst nummer = äldst
+    $lines = [];
+    foreach ([...array_values($rotated), $log_file] as $path) {
+        if (!is_file($path)) continue;
+        $content = str_ends_with($path, '.gz') ? gzfile($path) : file($path);
+        if ($content === false) {
+            error_log('clio_music: kunde inte läsa spellogg ' . basename($path));
+            continue;
+        }
+        $lines = array_merge($lines, $content);
+    }
+    return $lines;
+}
+
 $log_file = dirname(__DIR__) . '/data/plays.jsonl';
 $plays    = [];   // [track][username] = count
 $totals   = [];   // [track] = total count
 $user_totals = []; // [username] = total count
 $last_play   = []; // [track][username] = ts
 
-if (file_exists($log_file)) {
-    foreach (file($log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        $e = json_decode($line, true);
-        if (!$e || empty($e['user']) || empty($e['track'])) continue;
-        $u = $e['user'];
-        $t = $e['track'];
-        $plays[$t][$u] = ($plays[$t][$u] ?? 0) + 1;
-        $totals[$t]     = ($totals[$t] ?? 0) + 1;
-        $user_totals[$u]= ($user_totals[$u] ?? 0) + 1;
-        if (!isset($last_play[$t][$u]) || $e['ts'] > $last_play[$t][$u]) {
-            $last_play[$t][$u] = $e['ts'];
-        }
+foreach (read_play_log_lines($log_file) as $line) {
+    $line = trim($line);
+    if ($line === '') continue;
+    $e = json_decode($line, true);
+    if (!$e || empty($e['user']) || empty($e['track'])) continue;
+    $u = $e['user'];
+    $t = $e['track'];
+    $plays[$t][$u] = ($plays[$t][$u] ?? 0) + 1;
+    $totals[$t]     = ($totals[$t] ?? 0) + 1;
+    $user_totals[$u]= ($user_totals[$u] ?? 0) + 1;
+    if (!isset($last_play[$t][$u]) || $e['ts'] > $last_play[$t][$u]) {
+        $last_play[$t][$u] = $e['ts'];
     }
 }
 
