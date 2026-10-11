@@ -47,10 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($site_title) ?> — Logga in</title>
+<script src="theme.js?v=<?= APP_VERSION ?>"></script>
 <link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
 </head>
 <body class="login-page">
 <div class="login-wrap">
+  <?php if ($logo_url !== ''): ?><img class="login-logo" src="<?= htmlspecialchars($logo_url) ?>" alt="" width="72" height="72"><?php endif ?>
   <h1><?= htmlspecialchars($site_title) ?></h1>
   <?php if ($error): ?>
   <p class="login-error"><?= htmlspecialchars($error) ?></p>

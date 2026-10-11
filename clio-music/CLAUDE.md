@@ -98,6 +98,14 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - **Bakgrundsuppspelning:** Web Audio API initieras lazy, först när användaren rör balance/bas/diskant-reglagen. Före lazy-init används `audios[ch].volume` (native HTML), som iOS/Android kan spela i bakgrunden. Media Session API (låsskärm, titel, seek) och Wake Lock API (släpps vid paus) är registrerade.
 - **Lyrics:** LRC-filer i `lyrics/`, namngivna `{spårnamn_utan_suffix}.lrc`. Visas i `#lyrics-panel`. Aktuell rad highlightas och auto-scrollas via `updateLyricsLine(currentTime)`. Klick på rad anropar `seekAll(line.time)`. Sökfältet `#lyrics-search` filtrerar i realtid och pausar auto-scroll. Sökning och scroll-state nollställs vid `loadLyrics()`.
 
+### Teman (v1.7.0)
+- Ett tema är bara värden på CSS-variabler i `style.css` (`:root, [data-theme="natt"]`, `[data-theme="morgon"]` m.fl.). Layouten ändras aldrig. Sex teman: natt (standard), morgon, skymning, skog, lavendel, kontrast.
+- `theme.js` laddas **synkront i `<head>`** (före style.css) och sätter `data-theme` på `<html>` från `localStorage` (`clio_theme`), så inget blinkar. Samma fil bygger temaväljaren (`#btn-theme` + `#theme-panel`) och validerar valet mot en vitlista. Valet är per enhet, inte sparat på servern än.
+- Ny tema = ett nytt `[data-theme]`-block med alla tio variabler plus `--on-accent`, och en post i `THEMES` i `theme.js`. **Kör `php tests/theme_contrast_test.php`**: den mäter WCAG-kontrasten för alla färgpar som används.
+- Komponenter får inte hårdkoda färger. Text på fylld accent använder `var(--on-accent)`, aldrig `#fff`.
+- Reglagens fyllda del styrs av `--fill`, som `paintRange()` i `player.js` sätter. Ändra du `.value` på ett reglage i kod, anropa `paintRange(el)`.
+- Loggan: `$logo_url` i `config.php` (fil i `assets/`). Tom sträng = ingen logga. Loggan har vit bakgrund och visas därför som rund bricka.
+
 ### Spårmodell
 Spår i `music/` skannas med glob (`scan_music`). Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
 

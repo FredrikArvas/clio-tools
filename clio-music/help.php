@@ -10,7 +10,8 @@ $is_admin = !empty($user['admin']);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hjälp — <?= htmlspecialchars($site_title) ?></title>
-<link rel="stylesheet" href="style.css">
+<script src="theme.js?v=<?= APP_VERSION ?>"></script>
+<link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
 <style>
 .help-wrap { max-width:720px; margin:0 auto; padding:28px 24px 60px; }
 h2 { font-size:1.15rem; color:var(--accent2); margin:32px 0 10px; padding-bottom:6px;
@@ -44,7 +45,10 @@ table.shortcuts td:first-child { color:var(--text); font-weight:500; width:50%; 
 <body>
 <div class="app" style="min-height:100vh">
   <header class="header">
-    <h1><?= htmlspecialchars($site_title) ?> — Hjälp</h1>
+    <div class="brand">
+      <h1><?= htmlspecialchars($site_title) ?> — Hjälp</h1>
+      <?php if (APP_STAGE !== ''): ?><span class="stage-badge"><?= htmlspecialchars(APP_STAGE . ' ' . APP_VERSION) ?></span><?php endif ?>
+    </div>
     <div class="header-user">
       <a href="index.php" style="color:var(--accent);font-size:0.9rem">← Tillbaka</a>
     </div>
@@ -66,10 +70,11 @@ table.shortcuts td:first-child { color:var(--text); font-weight:500; width:50%; 
       <tr><td>&#9664;&#9664;</td><td>Föregående låt</td></tr>
       <tr><td>&#9654;&#9654;</td><td>Nästa låt</td></tr>
       <tr><td>Tidslinjalen</td><td>Klicka eller dra för att spola</td></tr>
-      <tr><td>🔂 Repetera låt</td><td>Loopar det aktuella spåret</td></tr>
-      <tr><td>🔁 Upprepa lista</td><td>Fortsätter från början när listan/kön är slut</td></tr>
-      <tr><td>🔀 Slumpa</td><td>Spelar nästa spår slumpmässigt</td></tr>
+      <tr><td>Repetera</td><td>Spelar det aktuella spåret om och om igen</td></tr>
+      <tr><td>Loop</td><td>Fortsätter från början när listan/kön är slut</td></tr>
+      <tr><td>Slumpa</td><td>Spelar nästa spår slumpmässigt</td></tr>
     </table>
+    <p>Repetera, Loop och Slumpa sitter under tidslinjalen. Det läge som är på visas i accentfärg med en linje under.</p>
 
     <h2>Album-mappar</h2>
     <p>Låtar grupperas automatiskt i kollapsibara album-sektioner utifrån albumtaggen i varje MP3-fil.</p>
@@ -118,6 +123,18 @@ table.shortcuts td:first-child { color:var(--text); font-weight:500; width:50%; 
       <li><strong>Hastighet</strong> — 0.5× till 2.0×, alla kanaler synkroniseras.</li>
     </ul>
     <div class="note">Alla inställningar sparas per spår och per användare på servern. Det binaurala lagret spelas i ren stereo utan EQ så att frekvenserna bevaras exakt.</div>
+
+    <h2>Utseende</h2>
+    <p>Klicka på den runda knappen <kbd>◐</kbd> uppe till höger på startsidan för att välja tema. Det finns sex:</p>
+    <ul>
+      <li><strong>Mörk natt</strong> — djup och fokuserad (standard).</li>
+      <li><strong>Ljus morgon</strong> — ljus och dämpad, för dagtid.</li>
+      <li><strong>Varm skymning</strong> — ombonad och varm, utan blått ljus.</li>
+      <li><strong>Djup skog</strong> — jordnära och lugn.</li>
+      <li><strong>Lavendel</strong> — mjuk och drömsk.</li>
+      <li><strong>Hög kontrast</strong> — skarp och tydlig, för dig som vill ha extra läsbarhet.</li>
+    </ul>
+    <div class="note">Temavalet sparas i webbläsaren på den enhet du använder. Mobilen och datorn väljer du alltså var för sig.</div>
 
     <h2>Låttillgång</h2>
     <p>Låtarna är indelade i grupper. Du ser bara spår som din användare har tillgång till. Kontakta administratören om du saknar ett spår.</p>

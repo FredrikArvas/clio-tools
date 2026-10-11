@@ -1,14 +1,96 @@
-:root {
+/* ── Teman ──
+   Ett tema är bara värden på dessa variabler (theme.js sätter data-theme på <html>).
+   Layouten ändras aldrig. Kontrasten kontrolleras av tests/theme_contrast_test.php.
+   --on-accent = textfärg ovanpå fylld accent. --radius = mjuka hörn. */
+:root,
+[data-theme="natt"] {
+  color-scheme: dark;
   --bg:        #0d1a2e;
   --surface:   #162035;
   --surface2:  #1e2a40;
-  --border:    #2e3340;
-  --accent:    #4e9eff;
-  --accent2:   #7ec8e3;
+  --border:    #34405a;
+  --accent:    #6fb1ff;
+  --accent2:   #8fd0e8;
   --text:      #e2e6ef;
-  --muted:     #7a8299;
+  --muted:     #9aa5bd;
   --active-bg: #1e2d45;
-  --active-border: #4e9eff;
+  --active-border: var(--accent);
+  --on-accent: #0d1a2e;
+}
+[data-theme="morgon"] {
+  color-scheme: light;
+  --bg:        #f4f0e8;
+  --surface:   #fbf9f4;
+  --surface2:  #ebe5d8;
+  --border:    #d6cdbb;
+  --accent:    #2d5c99;
+  --accent2:   #3d6f7d;
+  --text:      #26303f;
+  --muted:     #586274;
+  --active-bg: #e3e9f0;
+  --active-border: var(--accent);
+  --on-accent: #ffffff;
+}
+[data-theme="skymning"] {
+  color-scheme: dark;
+  --bg:        #1f1714;
+  --surface:   #2a1f1a;
+  --surface2:  #362821;
+  --border:    #4d3b30;
+  --accent:    #e8a36a;
+  --accent2:   #e29a88;
+  --text:      #f1e6dc;
+  --muted:     #b5a398;
+  --active-bg: #3a2a21;
+  --active-border: var(--accent);
+  --on-accent: #1f1714;
+}
+[data-theme="skog"] {
+  color-scheme: dark;
+  --bg:        #0f1a16;
+  --surface:   #16241f;
+  --surface2:  #1d2f28;
+  --border:    #2f4a40;
+  --accent:    #6fcf9f;
+  --accent2:   #a3d9a5;
+  --text:      #e0ece6;
+  --muted:     #93aba0;
+  --active-bg: #1f3329;
+  --active-border: var(--accent);
+  --on-accent: #0f1a16;
+}
+[data-theme="lavendel"] {
+  color-scheme: dark;
+  --bg:        #141427;
+  --surface:   #1d1f3a;
+  --surface2:  #262a4a;
+  --border:    #3a3f62;
+  --accent:    #a78bfa;
+  --accent2:   #c8b4ff;
+  --text:      #ecebff;
+  --muted:     #9aa0c4;
+  --active-bg: #2a3060;
+  --active-border: var(--accent);
+  --on-accent: #141427;
+}
+[data-theme="kontrast"] {
+  color-scheme: dark;
+  --bg:        #000000;
+  --surface:   #0a0a0a;
+  --surface2:  #141414;
+  --border:    #8a8a8a;
+  --accent:    #ffd54a;
+  --accent2:   #7fe0ff;
+  --text:      #ffffff;
+  --muted:     #cfcfcf;
+  --active-bg: #1a1a1a;
+  --active-border: var(--accent);
+  --on-accent: #000000;
+}
+:root {
+  --radius: 12px;
+  /* Brödtext på hjälpsidor: mellan --text och --bg, följer temat */
+  --text-muted: color-mix(in srgb, var(--text) 80%, var(--bg));
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,6 +102,8 @@ html, body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 15px;
 }
+
+a { color: var(--accent); }
 
 .app {
   max-width: 640px;
@@ -39,6 +123,13 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--accent2);
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-logo {
+  height: var(--logo-height, 36px);
+  width: auto;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* ── Now playing ── */
@@ -83,10 +174,11 @@ html, body {
   margin-bottom: 16px;
 }
 
+/* Föregående/nästa: rena ikoner utan ram. Play: ring i accent. */
 .btn {
-  background: var(--surface2);
+  background: none;
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 50%;
   width: 48px;
   height: 48px;
@@ -97,17 +189,17 @@ html, body {
   justify-content: center;
   transition: background 0.15s, border-color 0.15s;
 }
-.btn:hover { background: var(--border); border-color: var(--accent); }
+.btn:hover { background: var(--surface2); }
 
 .btn-play {
   width: 64px;
   height: 64px;
   font-size: 1.4rem;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--surface2);
+  border: 2px solid var(--accent);
+  color: var(--text);
 }
-.btn-play:hover { background: var(--accent2); border-color: var(--accent2); }
+.btn-play:hover { background: var(--active-bg); border-color: var(--accent2); }
 
 /* ── Progress ── */
 .progress-wrap {
@@ -132,11 +224,12 @@ html, body {
 .vol-icon { font-size: 1rem; }
 
 /* ── Range inputs ── */
+/* Den fyllda delen följer --fill (procent), som player.js sätter via paintRange(). */
 input[type=range] {
   flex: 1;
   -webkit-appearance: none;
   height: 4px;
-  background: var(--border);
+  background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--border) var(--fill, 0%));
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -147,15 +240,16 @@ input[type=range]::-webkit-slider-thumb {
   height: 16px;
   border-radius: 50%;
   background: var(--accent);
-  border: none;
+  border: 2px solid var(--surface);
 }
 input[type=range]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: var(--accent);
-  border: none;
+  border: 2px solid var(--surface);
 }
+input[type=range]:focus-visible { outline: 2px solid var(--accent2); outline-offset: 4px; }
 
 /* ── Playlist ── */
 .playlist {
@@ -252,7 +346,56 @@ ul {
 .logout-form { display: inline; margin: 0; }
 button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor: pointer; }
 .btn-logout.btn-login { border-color: var(--accent); color: var(--accent); }
-.btn-logout.btn-login:hover { background: var(--accent); color: #fff; }
+.btn-logout.btn-login:hover { background: var(--accent); color: var(--on-accent); }
+
+/* ── Temaväljare ── */
+.header-user { position: relative; }
+.btn-theme {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.btn-theme:hover, .btn-theme[aria-expanded="true"] { border-color: var(--accent); color: var(--text); }
+.theme-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+  width: min(300px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.theme-panel[hidden] { display: none; }
+.theme-panel-title { font-size: 0.85rem; color: var(--text); margin-bottom: 10px; }
+.theme-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.theme-tile {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 6px;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  font-size: 0.78rem;
+}
+.theme-tile[aria-pressed="true"] { border: 2px solid var(--accent); padding: 7px 5px; }
+.theme-tile:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.theme-dots { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; }
+.theme-dots span { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border); }
+.theme-dots span:nth-child(1) { background: var(--surface); }
+.theme-dots span:nth-child(2) { background: var(--surface2); }
+.theme-dots span:nth-child(3) { background: var(--accent); border-color: var(--accent); }
+.theme-desc { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
 
 /* ── Settings ── */
 .player-footer {
@@ -267,31 +410,35 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   gap: 4px;
 }
 
+/* Ikon över etikett, ingen ram. Aktivt läge: accentfärg plus understrykning (inte bara färg). */
 .btn-mode {
   background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: none;
+  border-bottom: 2px solid transparent;
   color: var(--muted);
-  font-size: 1.1rem;
-  width: 36px;
-  height: 30px;
+  font-size: 0.7rem;
+  min-width: 48px;
+  padding: 3px 4px;
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
-  line-height: 1;
-  opacity: 0.45;
+  gap: 2px;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1.1;
 }
-.btn-mode:hover { border-color: var(--accent); color: var(--text); opacity: 0.8; }
-.btn-mode.active {
-  border-color: var(--accent);
-  border-width: 2px;
-  background: var(--accent);
-  color: #fff;
-  opacity: 1;
-  box-shadow: 0 0 8px rgba(78, 158, 255, 0.5);
+.btn-mode svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
+.btn-mode:hover { color: var(--text); }
+.btn-mode:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.btn-mode.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 .footer-right {
   display: flex;
@@ -317,7 +464,7 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   margin-top: 12px;
   padding: 14px;
   background: var(--surface2);
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
 }
 .settings-panel.open { display: flex; }
@@ -378,8 +525,9 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   padding: 32px 24px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
+.login-logo { display: block; height: 72px; width: auto; margin: 0 auto 12px; border-radius: 50%; }
 .login-wrap h1 {
   font-size: 1.3rem;
   color: var(--accent2);
@@ -403,7 +551,7 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
 .login-form input:focus { border-color: var(--accent); }
 .login-form button {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   border-radius: 6px;
   padding: 11px;
@@ -438,12 +586,14 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   .header h1 { font-size: 1.1rem; }
 }
 
-.app-version {
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--text);
-  padding: 8px 0 4px;
-  opacity: 0.3;
+/* Utvecklingsmarkör vid titeln, t.ex. "beta 1.7.0" */
+.stage-badge {
+  font-size: 0.68rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  white-space: nowrap;
 }
 
 /* ── Track-info flex-grow ── */
@@ -496,7 +646,7 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
 
 .queue-badge {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 0.68rem;
   font-weight: 700;
   border-radius: 10px;
@@ -728,7 +878,7 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
 .pl-new-input:focus { border-color: var(--accent); }
 .btn-create-pl {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   border-radius: 6px;
   padding: 6px 14px;
@@ -762,7 +912,7 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   position: absolute;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   z-index: 1000;
   min-width: 160px;
@@ -844,6 +994,8 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   color: var(--text);
   font-size: 1rem;
   font-weight: 600;
+  background: var(--active-bg);
+  border-radius: 8px;
 }
 
 .lyric-spacer {
@@ -879,5 +1031,5 @@ button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor:
   transition: opacity 0.15s;
 }
 .consent-btns button:hover { opacity: 0.85; }
-.consent-btns button:first-child { background: var(--accent); color: #fff; border: none; }
+.consent-btns button:first-child { background: var(--accent); color: var(--on-accent); border: none; }
 .consent-btns button:last-child { background: transparent; border: 1px solid var(--border); color: var(--muted); }

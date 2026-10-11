@@ -160,6 +160,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($site_title) ?></title>
+<script src="theme.js?v=<?= APP_VERSION ?>"></script>
 <link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
 <script src="consent.js?v=<?= APP_VERSION ?>"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJR1MCM13R"></script>
@@ -167,7 +168,11 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 <body>
 <div class="app">
   <header class="header">
-    <h1><?= htmlspecialchars($site_title) ?></h1>
+    <div class="brand">
+      <?php if ($logo_url !== ''): ?><img class="brand-logo" src="<?= htmlspecialchars($logo_url) ?>" alt="" width="36" height="36"><?php endif ?>
+      <h1><?= htmlspecialchars($site_title) ?></h1>
+      <?php if (APP_STAGE !== ''): ?><span class="stage-badge" title="Tjänsten är under utveckling"><?= htmlspecialchars(APP_STAGE . ' ' . APP_VERSION) ?></span><?php endif ?>
+    </div>
     <div class="header-user">
       <?php if (!is_guest($user)): ?>
       <span><?= htmlspecialchars($user['display']) ?></span>
@@ -178,6 +183,11 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
       <a href="mailto:info@arvas.international" style="font-size:0.82rem">Skapa konto</a>
       <a href="login.php" class="btn-logout btn-login">Logga in</a>
       <?php endif ?>
+      <button type="button" class="btn-theme" id="btn-theme" title="Utseende" aria-label="Utseende" aria-expanded="false" aria-controls="theme-panel">&#9680;</button>
+      <div class="theme-panel" id="theme-panel" hidden>
+        <div class="theme-panel-title">Utseende</div>
+        <div class="theme-tiles"></div>
+      </div>
     </div>
   </header>
 
@@ -209,9 +219,9 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 
     <div class="player-footer">
       <div class="mode-buttons">
-        <button class="btn-mode" id="btn-repeat-one" title="Repetera låt">🔂</button>
-        <button class="btn-mode" id="btn-repeat-all" title="Spela lista i loop">🔁</button>
-        <button class="btn-mode" id="btn-shuffle"    title="Slumpa">🔀</button>
+        <button class="btn-mode" id="btn-repeat-one" title="Repetera låt"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></svg>Repetera</button>
+        <button class="btn-mode" id="btn-repeat-all" title="Spela lista i loop"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Loop</button>
+        <button class="btn-mode" id="btn-shuffle"    title="Slumpa"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>Slumpa</button>
       </div>
       <div class="footer-right">
         <button class="btn-settings-toggle" id="btn-lyrics" title="Visa/dölj text" hidden>&#9835; Text</button>
@@ -372,8 +382,6 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
     <ul id="pl-dropdown-list"></ul>
   </div>
 </div>
-
-<footer class="app-version">v<?= APP_VERSION ?></footer>
 
 <?php /* Data till player.js som JSON-block: webbläsaren kör det inte, så CSP behöver inga inline-skript.
         JSON_HEX_TAG gör att "</script>" aldrig kan förekomma i datan. */ ?>
