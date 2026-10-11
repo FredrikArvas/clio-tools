@@ -24,7 +24,7 @@ Kort beskrivning av säkerhetsmodellen efter saneringen S1–S6 (version 1.6.0).
    användarnamn;[hash];Visningsnamn;1;0;Grupp1|Grupp2
    ```
    Kolumnerna: användarnamn, hash, visningsnamn, aktiv (1/0), admin (1/0), grupper (pipe-separerade).
-   Filen ägs av `www-data` och har rättigheterna 640, så `clioadmin` kan inte redigera den utan sudo. Använd `sudoedit /var/www/clio_music/data/users.csv`. Detta är inte verifierat på servern ännu.
+   Filen ägs av `www-data` och har rättigheterna 640, så `clioadmin` redigerar den som webbserverns användare: `sudo -u www-data nano /var/www/clio_music/data/users.csv` (behåller ägare och rättigheter).
 
 ## Grupper
 
