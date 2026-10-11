@@ -195,7 +195,7 @@ PROFILE_TRACK_URL="music/${PRIVATE_CHANNEL/_vce/_msc}"   # huvudfilen i flerkana
 api_session=$(make_session "$TEST_GROUP")
 session_files+=("$SESSION_DIR/sess_$api_session")
 api_cookie=(-b "$COOKIE_NAME=$api_session")
-page_token() { grep -o 'CM_CSRF *= *"[^"]*"' | sed 's/.*= *"//;s/"$//'; }
+page_token() { grep -o '"CM_CSRF":"[^"]*"' | sed 's/.*:"//;s/"$//'; }   # JSON-blocket cm-data i index.php (S5)
 api_token=$(curl -s "${api_cookie[@]}" "$BASE/" | page_token)
 json=(-H 'Content-Type: application/json')
 csrf=(-H "X-CSRF-Token: $api_token")
@@ -275,8 +275,13 @@ else
     pass=$((pass + 1)); echo "  OK    ingen X-Powered-By"
 fi
 # nginx ska avvisa för stora kroppar innan PHP ser dem: 64k för /api/, 256k i övrigt.
-check "api: 70 kB-kropp avvisas av nginx"           "413" -X POST -H 'Content-Type: application/json' --data-binary "$(head -c 70000 /dev/zero | tr '\0' 'a')" "$BASE/api/log_play.php"
-check "login: 300 kB-kropp avvisas av nginx"        "413" -X POST --data-binary "$(head -c 300000 /dev/zero | tr '\0' 'a')" "$BASE/login.php"
+# Kroppen läses från fil: ett enskilt kommandoradsargument får vara högst 128 kB i Linux.
+big_body=$(mktemp)
+head -c 70000 /dev/zero | tr '\0' 'a' > "$big_body"
+check "api: 70 kB-kropp avvisas av nginx"           "413" -X POST -H 'Content-Type: application/json' --data-binary "@$big_body" "$BASE/api/log_play.php"
+head -c 300000 /dev/zero | tr '\0' 'a' > "$big_body"
+check "login: 300 kB-kropp avvisas av nginx"        "413" -X POST --data-binary "@$big_body" "$BASE/login.php"
+rm -f "$big_body"
 if curl -s "$BASE/" | grep -oiE '<script[^>]*>' | grep -qviE 'src=|application/json' || curl -s "$BASE/" | grep -qiE '\son(click|change|load|error)='; then
     fail=$((fail + 1)); echo "  FEL   index.php innehåller inline-skript eller on*-attribut"
 else
