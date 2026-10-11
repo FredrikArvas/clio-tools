@@ -256,6 +256,33 @@ check "gäst: 11:e log_play inom en minut"       "429" -b "$guest_jar" "${guest_
 check_header "429 har Retry-After"               '^retry-after: [0-9]+' -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3"}' "$BASE/api/log_play.php"
 rm -f "$guest_jar"
 
+echo "== S5: säkerhetsrubriker och nginx-gränser (T7)"
+header_urls=("$BASE/" "$BASE/login.php" "$BASE/api/load_profiles.php" "$(music "$GUEST_TRACK")" "$BASE/finns_inte.txt" "$BASE/admin/")
+for url in "${header_urls[@]}"; do
+    short="${url#"$BASE"}"; short="${short:0:40}"
+    check_header "nosniff: $short"                 '^x-content-type-options: nosniff'  "$url"
+    check_header "X-Frame-Options: $short"         '^x-frame-options: deny'            "$url"
+    check_header "Referrer-Policy: $short"         '^referrer-policy: strict-origin-when-cross-origin' "$url"
+    check_header "Permissions-Policy: $short"      '^permissions-policy: .*camera=\(\)' "$url"
+    check_header "CSP med frame-ancestors: $short" "^content-security-policy(-report-only)?: .*frame-ancestors 'none'" "$url"
+done
+check_header "media 206 har nosniff"                '^x-content-type-options: nosniff' -r 0-99 "$(music "$GUEST_TRACK")"
+check_header "media 206 har CSP"                    '^content-security-policy' -r 0-99 "$(music "$GUEST_TRACK")"
+check_header "Server-rubriken saknar versionsnummer" '^server: nginx[[:space:]]*$' "$BASE/login.php"
+if curl -s -o /dev/null -D - "$BASE/login.php" | grep -qi '^x-powered-by'; then
+    fail=$((fail + 1)); echo "  FEL   X-Powered-By läcker PHP-version"
+else
+    pass=$((pass + 1)); echo "  OK    ingen X-Powered-By"
+fi
+# nginx ska avvisa för stora kroppar innan PHP ser dem: 64k för /api/, 256k i övrigt.
+check "api: 70 kB-kropp avvisas av nginx"           "413" -X POST -H 'Content-Type: application/json' --data-binary "$(head -c 70000 /dev/zero | tr '\0' 'a')" "$BASE/api/log_play.php"
+check "login: 300 kB-kropp avvisas av nginx"        "413" -X POST --data-binary "$(head -c 300000 /dev/zero | tr '\0' 'a')" "$BASE/login.php"
+if curl -s "$BASE/" | grep -oiE '<script[^>]*>' | grep -qviE 'src=|application/json' || curl -s "$BASE/" | grep -qiE '\son(click|change|load|error)='; then
+    fail=$((fail + 1)); echo "  FEL   index.php innehåller inline-skript eller on*-attribut"
+else
+    pass=$((pass + 1)); echo "  OK    index.php har inga inline-skript (CSP)"
+fi
+
 # Städa bort testets spår: räknarfiler och testets rader i auditloggen.
 for key in "user:$bf_user" "ip:127.0.0.1"; do
     sudo rm -f "/var/www/clio_music/data/login_attempts/$(printf '%s' "$key" | sha256sum | cut -c1-64).json"
