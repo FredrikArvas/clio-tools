@@ -25,7 +25,8 @@ PRIVATE_LYRICS="demo_jatten_01.lrc"            # spåret har en icke-gästgrupp
 # Spår utan grupp (synligt för alla inloggade, aldrig för gäster) letas upp dynamiskt, eftersom
 # admin kan flytta spår mellan grupper. Finns inget hoppas de kontrollerna över.
 WEBROOT="${WEBROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-UNGROUPED_TRACK=$(cd "$WEBROOT" && php -r 'require "access.php"; $map = load_track_groups();
+# Körs som www-data: data/track_groups.csv är 640 www-data:www-data (S6) och kan inte läsas av clioadmin.
+UNGROUPED_TRACK=$(cd "$WEBROOT" && sudo -u www-data php -r 'require "access.php"; $map = load_track_groups();
     foreach (scan_music("music")["standalone"] as $f) { if (track_group($f, $map) === "") { echo $f; break; } }')
 TEST_GROUP="RIM1"
 
