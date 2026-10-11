@@ -26,6 +26,21 @@ const lyricsPanel  = document.getElementById('lyrics-panel');
 const lyricsLinesEl = document.getElementById('lyrics-lines');
 const lyricsSearchEl = document.getElementById('lyrics-search');
 
+// ── Reglagens fyllda del ──────────────────────────────────────────────────────
+// style.css fyller spåret med accentfärg upp till --fill. Värdet sätts här, så det måste uppdateras
+// både vid användarens drag (input) och när koden ändrar .value (paintRanges).
+function paintRange(el) {
+    const min = parseFloat(el.min) || 0;
+    const max = parseFloat(el.max) || 100;
+    el.style.setProperty('--fill', ((parseFloat(el.value) - min) / (max - min) * 100) + '%');
+}
+function paintRanges() {
+    document.querySelectorAll('input[type=range]').forEach(paintRange);
+}
+document.addEventListener('input', e => {
+    if (e.target.matches('input[type=range]')) paintRange(e.target);
+});
+
 const CH_IDS = ['msc', 'bin', 'vce', 'env'];
 
 const sliders = {};
@@ -152,6 +167,7 @@ function setSliders(s) {
     slTreble.value  = s.treble  ?? 0;
     updateLabels();
     applySettings();
+    paintRanges();
 }
 
 function initSettings() { setSliders({}); }
@@ -203,6 +219,7 @@ function loadGlobalSettings() {
     const s = serverProfiles['_settings'] ?? {};
     playMode      = s.playMode ?? 'none';
     slSpeed.value = s.playbackRate ?? 1;
+    paintRange(slSpeed);
 
     // Restore queue
     if (Array.isArray(s.queue) && s.queue.length) {
@@ -450,6 +467,7 @@ async function load(index, autoplay) {
     artistEl.textContent = t.artist || (t.album ? '♪ ' + t.album : '');
     loadLyrics(t.lyrics ?? null);
     seek.value = 0;
+    paintRange(seek);
     timeCur.textContent = '0:00';
     timeDur.textContent = '0:00';
     updateMediaSession(t);
@@ -554,6 +572,7 @@ audios.msc.addEventListener('ended', () => {
 audios.msc.addEventListener('timeupdate', () => {
     if (!audios.msc.duration) return;
     seek.value = (audios.msc.currentTime / audios.msc.duration) * 100;
+    paintRange(seek);
     timeCur.textContent = fmt(audios.msc.currentTime);
     syncSecondary();
     if (!lyricsPanel.hidden) updateLyricsLine(audios.msc.currentTime);
