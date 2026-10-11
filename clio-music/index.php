@@ -1,6 +1,7 @@
 <?php
 require_once 'auth.php';
 require_once 'config.php';
+require_once 'access.php';
 
 $user = current_user_or_guest();
 
@@ -99,63 +100,18 @@ function clean_filename(string $name): string {
     return strtoupper(substr($name, 0, 1)) . substr($name, 1);
 }
 
-function load_track_groups(): array {
-    $path = __DIR__ . '/data/track_groups.csv';
-    $map  = [];
-    if (!file_exists($path)) return $map;
-    foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
-        $parts = explode(';', $line, 2);
-        if (count($parts) === 2) $map[trim($parts[0])] = trim($parts[1]);
-    }
-    return $map;
-}
-
-function track_group(string $filename, array $map): string {
-    foreach ($map as $prefix => $group) {
-        if (str_starts_with($filename, $prefix)) return $group;
-    }
-    return '';
-}
-
-function user_can_see(string $track_group, array $user): bool {
-    if ($user['admin']) return true;
-    if (in_array('Alla', $user['groups'])) return true;
-    if (is_guest($user)) return in_array($track_group, $user['groups']);
-    if ($track_group === '') return true;
-    return in_array($track_group, $user['groups']);
-}
-
 $track_group_map = load_track_groups();
 $lyrics_dir      = __DIR__ . '/lyrics';
 
-// ── Skanna och gruppera filer per kanal ───────────────────────────────────────
-const CH_SUFFIXES = ['_msc', '_bin', '_vce', '_env'];
-
-$all_files = is_dir($music_dir)
-    ? (glob($music_dir . DIRECTORY_SEPARATOR . '*.mp3') ?: [])
-    : [];
-sort($all_files);
-
-$groups     = [];
-$standalone = [];
-
-foreach ($all_files as $f) {
-    $fn = basename($f);
-    if (preg_match('/^(.+?)(_msc|_bin|_vce|_env)\.mp3$/i', $fn, $m)) {
-        $base = $m[1];
-        $sfx  = strtolower($m[2]);
-        if (!array_key_exists($base, $groups)) $groups[$base] = [];
-        $groups[$base][$sfx] = $fn;
-    } else {
-        $standalone[] = $f;
-    }
-}
+// ── Skanna och gruppera filer per kanal (regeln delas med stream.php via access.php) ──
+$scan       = scan_music($music_dir);
+$groups     = $scan['channels'];
+$standalone = $scan['standalone'];
 
 $tracks = [];
 
 foreach ($groups as $base => $chans) {
-    $main_fn = $chans['_msc'] ?? $chans['_vce'] ?? $chans['_env'] ?? $chans['_bin'] ?? null;
+    $main_fn = main_channel_file($chans);
     if (!$main_fn) continue;
     $tgroup = track_group($main_fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
@@ -185,11 +141,10 @@ foreach ($groups as $base => $chans) {
     ];
 }
 
-foreach ($standalone as $file) {
-    $fn = basename($file);
+foreach ($standalone as $fn) {
     $tgroup = track_group($fn, $track_group_map);
     if (!user_can_see($tgroup, $user)) continue;
-    $meta = read_metadata($file);
+    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . $fn);
     $fn_base  = preg_replace('/\.mp3$/i', '', $fn);
     $lrc_file = $fn_base . '.lrc';
     $tracks[] = [
