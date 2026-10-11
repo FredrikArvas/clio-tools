@@ -1,15 +1,15 @@
 <?php
-require_once dirname(__DIR__) . '/auth.php';
+/**
+ * api/load_profiles.php — användarens sparade inställningar som JSON-objekt.
+ *
+ * Anropas av: player.js vid start. Gäster och användare utan profil får ett tomt svar.
+ * Äldre profiler med okända nycklar läses som de är (vitlistan gäller bara vid sparning).
+ * En trasig profilfil loggas (json_file_read) och ger tomt svar utan att visa sökvägar för klienten.
+ */
+require_once __DIR__ . '/_bootstrap.php';
+require_once dirname(__DIR__) . '/json_store.php';
 
-header('Content-Type: application/json');
+['user' => $user] = api_bootstrap(['method' => 'GET', 'allow_guest' => true]);
+if (is_guest($user)) api_respond([]);
 
-if (!is_logged_in()) { echo '{}'; exit; }
-$user = current_user();
-$file = dirname(__DIR__) . '/data/profiles/' . $user['username'] . '.json';
-
-if (!file_exists($file)) {
-    echo '{}';
-    exit;
-}
-
-echo file_get_contents($file);
+api_respond(json_file_read(dirname(__DIR__) . '/data/profiles/' . basename($user['username']) . '.json'));

@@ -18,6 +18,7 @@ COOKIE_NAME="${COOKIE_NAME:-PHPSESSID}"
 
 GUEST_TRACK="Välkommen till FrUlleBo.mp3"      # grupp Gäst
 GUEST_LYRICS="Välkommen till FrUlleBo.lrc"
+GUEST_TRACK_URL="music/Välkommen%20till%20FrUlleBo.mp3"
 PRIVATE_CHANNEL="001_mediation_vce.mp3"        # grupp RIM1, kanalfil (huvudfil _msc)
 OTHER_GROUP_TRACK="Guldbodapolka 2026.mp3"     # grupp Guldbodalåtar
 UNGROUPED_TRACK="demo_jatten_01.mp3"           # ingen grupp: inloggade ja, gäster nej
@@ -177,6 +178,72 @@ done
 check "giltigt gruppnamn accepteras (skriver inget)" "200" "${admin_cookie[@]}" \
     --data-urlencode "csrf_token=$admin_token" --data-urlencode "new_group_name=Smoke test" -d "add_group=1" "$BASE/admin/groups.php"
 
+echo "== S3: API-validering (T8) — giltiga anrop skriver bara för __smoketest__"
+PROFILE_TRACK_URL="music/${PRIVATE_CHANNEL/_vce/_msc}"   # huvudfilen i flerkanalsspåret
+api_session=$(make_session "$TEST_GROUP")
+session_files+=("$SESSION_DIR/sess_$api_session")
+api_cookie=(-b "$COOKIE_NAME=$api_session")
+page_token() { grep -o 'CM_CSRF *= *"[^"]*"' | sed 's/.*= *"//;s/"$//'; }
+api_token=$(curl -s "${api_cookie[@]}" "$BASE/" | page_token)
+json=(-H 'Content-Type: application/json')
+csrf=(-H "X-CSRF-Token: $api_token")
+valid_profile="{\"track\":\"$PROFILE_TRACK_URL\",\"settings\":{\"msc\":0.55,\"bass\":-2,\"liked\":true,\"okand_nyckel\":1}}"
+check "save_profile utan CSRF-token"            "403" "${api_cookie[@]}" "${json[@]}" -d "$valid_profile" "$BASE/api/save_profile.php"
+check "save_profile: GET"                       "405" "${api_cookie[@]}" "$BASE/api/save_profile.php"
+big_body="{\"track\":\"$PROFILE_TRACK_URL\",\"settings\":{\"x\":\"$(head -c 70000 /dev/zero | tr '\0' 'a')\"}}"
+check "save_profile: för stor kropp"            "413" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" --data-binary "$big_body" "$BASE/api/save_profile.php"
+check "save_profile: ogiltig JSON"              "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{trasig' "$BASE/api/save_profile.php"
+check "save_profile: okänt spår"                "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3","settings":{"msc":0.5}}' "$BASE/api/save_profile.php"
+check "save_profile: andra gruppens spår"       "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"music/$(encode "$OTHER_GROUP_TRACK")\",\"settings\":{\"msc\":0.5}}" "$BASE/api/save_profile.php"
+check "save_profile: volym 9"                   "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"$PROFILE_TRACK_URL\",\"settings\":{\"msc\":9}}" "$BASE/api/save_profile.php"
+check "save_profile: ogiltigt playMode"         "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{"track":"_settings","settings":{"playMode":"turbo"}}' "$BASE/api/save_profile.php"
+check "save_profile: giltigt anrop"             "200" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "$valid_profile" "$BASE/api/save_profile.php"
+check "save_profile: giltiga _settings"         "200" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"_settings\",\"settings\":{\"playMode\":\"shuffle\",\"playbackRate\":1.25,\"queue\":[\"$PROFILE_TRACK_URL\",\"music/finns_inte.mp3\"],\"queueCursor\":0}}" "$BASE/api/save_profile.php"
+profiles=$(curl -s "${api_cookie[@]}" "$BASE/api/load_profiles.php")
+if echo "$profiles" | grep -q '"msc":0.55' && echo "$profiles" | grep -q '"liked":true' && ! echo "$profiles" | grep -q 'okand_nyckel' \
+   && echo "$profiles" | grep -q '"shuffle"' && ! echo "$profiles" | grep -q 'finns_inte'; then
+    pass=$((pass + 1)); echo "  OK    sparad profil laddas; okänd nyckel och okänt köspår kastades"
+else
+    fail=$((fail + 1)); echo "  FEL   sparad profil saknas eller innehåller osanerad data: $profiles"
+fi
+check "save_playlist utan CSRF-token"           "403" "${api_cookie[@]}" "${json[@]}" -d '{"name":"x","tracks":[]}' "$BASE/api/save_playlist.php"
+check "save_playlist: namn med bara kontrolltecken" "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{"name":"\u0001\u0002","tracks":[]}' "$BASE/api/save_playlist.php"
+check "save_playlist: för långt namn"           "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"name\":\"$(head -c 150 /dev/zero | tr '\0' 'n')\",\"tracks\":[]}" "$BASE/api/save_playlist.php"
+check "save_playlist: tracks är inte en lista"  "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{"name":"x","tracks":"nej"}' "$BASE/api/save_playlist.php"
+check "save_playlist: giltigt anrop"            "200" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"name\":\"Smoke\",\"tracks\":[\"$PROFILE_TRACK_URL\",\"music/finns_inte.mp3\"]}" "$BASE/api/save_playlist.php"
+playlists=$(curl -s "${api_cookie[@]}" "$BASE/api/load_playlists.php")
+if echo "$playlists" | grep -q 'Smoke' && echo "$playlists" | grep -q '001_mediation_msc' && ! echo "$playlists" | grep -q 'finns_inte'; then
+    pass=$((pass + 1)); echo "  OK    spellista sparad; okänt spår filtrerades bort"
+else
+    fail=$((fail + 1)); echo "  FEL   spellistan saknas eller innehåller okänt spår: $playlists"
+fi
+check "log_play utan CSRF-token"                "403" "${api_cookie[@]}" "${json[@]}" -d "{\"track\":\"$PROFILE_TRACK_URL\"}" "$BASE/api/log_play.php"
+check "log_play: okänt spår"                    "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3"}' "$BASE/api/log_play.php"
+check "log_play: spår i annan grupp"            "400" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"music/$(encode "$OTHER_GROUP_TRACK")\"}" "$BASE/api/log_play.php"
+check "log_play: för stor kropp"                "413" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"$(head -c 2000 /dev/zero | tr '\0' 'a')\"}" "$BASE/api/log_play.php"
+check "log_play: giltigt anrop"                 "200" "${api_cookie[@]}" "${csrf[@]}" "${json[@]}" -d "{\"track\":\"$PROFILE_TRACK_URL\"}" "$BASE/api/log_play.php"
+if sudo grep -q '"user":"__smoketest__"' /var/www/clio_music/data/plays.jsonl; then
+    pass=$((pass + 1)); echo "  OK    spelningen loggades med användare, spår och tid"
+else
+    fail=$((fail + 1)); echo "  FEL   ingen loggrad för __smoketest__ i plays.jsonl"
+fi
+
+echo "== S3: gäster"
+guest_jar=$(mktemp)
+guest_token=$(curl -s -c "$guest_jar" -b "$guest_jar" "$BASE/" | page_token)
+guest_csrf=(-H "X-CSRF-Token: $guest_token")
+check "gäst: load_profiles ger tomt svar"       "200" -b "$guest_jar" "$BASE/api/load_profiles.php"
+check "gäst: save_profile kräver inloggning"    "401" -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d "{\"track\":\"$GUEST_TRACK_URL\",\"settings\":{}}" "$BASE/api/save_profile.php"
+check "gäst: save_playlist kräver inloggning"   "401" -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d '{"name":"x","tracks":[]}' "$BASE/api/save_playlist.php"
+check "gäst: log_play utan CSRF-token"          "403" -b "$guest_jar" "${json[@]}" -d '{"track":"music/x.mp3"}' "$BASE/api/log_play.php"
+# Okända spår skriver ingenting, men räknas mot gränsen: spam stoppas utan att loggen fylls.
+for attempt in $(seq 1 10); do
+    curl -s -o /dev/null -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3"}' "$BASE/api/log_play.php"
+done
+check "gäst: 11:e log_play inom en minut"       "429" -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3"}' "$BASE/api/log_play.php"
+check_header "429 har Retry-After"               '^retry-after: [0-9]+' -b "$guest_jar" "${guest_csrf[@]}" "${json[@]}" -d '{"track":"music/finns_inte.mp3"}' "$BASE/api/log_play.php"
+rm -f "$guest_jar"
+
 # Städa bort testets spår: räknarfiler och testets rader i auditloggen.
 for key in "user:$bf_user" "ip:127.0.0.1"; do
     sudo rm -f "/var/www/clio_music/data/login_attempts/$(printf '%s' "$key" | sha256sum | cut -c1-64).json"
@@ -197,6 +264,21 @@ sudo php -r '
     flock($handle, LOCK_UN); fclose($handle);
 ' /var/www/clio_music/data/audit.jsonl "$test_start"
 rm -f "$jar"
+# S3: städa bort testets profil, spellista, loggrader och hastighetsräknare.
+sudo rm -f /var/www/clio_music/data/profiles/__smoketest__.json /var/www/clio_music/data/playlists/__smoketest__.json
+for key in "log_play_guest:127.0.0.1" "log_play_user:__smoketest__"; do
+    sudo rm -f "/var/www/clio_music/data/rate_limits/$(printf '%s' "$key" | sha256sum | cut -c1-64).json"
+done
+# plays.jsonl skrivs om på plats under flock (ingen rename: PHP håller LOCK_EX på samma inod).
+sudo php -r '
+    $file = $argv[1];
+    if (!is_file($file)) exit;
+    $handle = fopen($file, "r+"); flock($handle, LOCK_EX);
+    $kept = array_filter(explode("\n", stream_get_contents($handle)), fn($line) => $line !== "" && !str_contains($line, "\"user\":\"__smoketest__\""));
+    ftruncate($handle, 0); rewind($handle);
+    fwrite($handle, $kept ? implode("\n", $kept) . "\n" : "");
+    flock($handle, LOCK_UN); fclose($handle);
+' /var/www/clio_music/data/plays.jsonl
 
 echo
 echo "Resultat: $pass OK, $fail FEL"

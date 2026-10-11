@@ -87,6 +87,18 @@ function initAudio() {
 // Alla POST-anrop till api/ bär CSRF-token (CM_CSRF från index.php); servern avvisar annars.
 const API_HEADERS = { 'Content-Type': 'application/json', 'X-CSRF-Token': CM_CSRF };
 
+// POST till api/. Fel får aldrig krascha spelaren: servern kan svara 400 (avvisat innehåll), 403 (CSRF
+// ur synk), 413 (för stort) eller 429 (för många anrop). 401 är normalt för gäster och loggas inte.
+// Spelaren fortsätter med sin lokala state; sparningen försöks igen vid nästa ändring.
+function apiPost(url, payload) {
+    return fetch(url, { method: 'POST', headers: API_HEADERS, body: JSON.stringify(payload) })
+        .then(response => {
+            if (!response.ok && response.status !== 401) console.warn(`${url}: HTTP ${response.status}`);
+            return response;
+        })
+        .catch(() => {});
+}
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 const CH_DEFAULTS = { msc: 0.8, bin: 0.5, vce: 0.9, env: 0.4 };
 let serverProfiles = {};
@@ -112,11 +124,7 @@ function saveSettings() {
     };
     CH_IDS.forEach(ch => s[ch] = parseFloat(sliders[ch].value));
     serverProfiles[key] = s;
-    fetch('api/save_profile.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ track: key, settings: s }),
-    }).catch(() => {});
+    apiPost('api/save_profile.php', { track: key, settings: s });
 }
 
 function applySettings() {
@@ -218,11 +226,7 @@ function saveGlobalSettings() {
         queueCursor,
     };
     serverProfiles['_settings'] = s;
-    fetch('api/save_profile.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ track: '_settings', settings: s }),
-    }).catch(() => {});
+    apiPost('api/save_profile.php', { track: '_settings', settings: s });
 }
 
 [
@@ -660,11 +664,7 @@ let logTimer    = null;
 function logPlay(file) {
     if (file === loggedTrack) return;
     loggedTrack = file;
-    fetch('api/log_play.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ track: file }),
-    }).catch(() => {});
+    apiPost('api/log_play.php', { track: file });
     const t = TRACKS[current];
     if (t) gaEvent('music_play', {
         track_title:  t.title,
@@ -764,22 +764,14 @@ function renderPlaylists() {
 function savePlPlaylist(name, tracks) {
     playlists[name] = tracks;
     renderPlaylists();
-    fetch('api/save_playlist.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ name, tracks }),
-    }).catch(() => {});
+    apiPost('api/save_playlist.php', { name, tracks });
 }
 
 function deletePlaylist(name) {
     if (!confirm(`Ta bort spellistan "${name}"?`)) return;
     delete playlists[name];
     renderPlaylists();
-    fetch('api/save_playlist.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ name, delete: true }),
-    }).catch(() => {});
+    apiPost('api/save_playlist.php', { name, delete: true });
 }
 
 function playPlaylist(name) {
@@ -875,11 +867,7 @@ function toggleLike(index) {
     const prof = { ...(serverProfiles[url] ?? {}) };
     prof.liked = !prof.liked;
     serverProfiles[url] = prof;
-    fetch('api/save_profile.php', {
-        method: 'POST',
-        headers: API_HEADERS,
-        body: JSON.stringify({ track: url, settings: prof }),
-    }).catch(() => {});
+    apiPost('api/save_profile.php', { track: url, settings: prof });
     updateLikeUI(index);
     if (filterLiked) applyLikedFilter();
 }

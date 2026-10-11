@@ -101,59 +101,51 @@ function clean_filename(string $name): string {
     return strtoupper(substr($name, 0, 1)) . substr($name, 1);
 }
 
-$track_group_map = load_track_groups();
-$lyrics_dir      = __DIR__ . '/lyrics';
+$lyrics_dir = __DIR__ . '/lyrics';
 
-// ── Skanna och gruppera filer per kanal (regeln delas med stream.php via access.php) ──
-$scan       = scan_music($music_dir);
-$groups     = $scan['channels'];
-$standalone = $scan['standalone'];
-
+// ── Synliga spår (regeln delas med stream.php och API:erna via access.php) ──
 $tracks = [];
 
-foreach ($groups as $base => $chans) {
-    $main_fn = main_channel_file($chans);
-    if (!$main_fn) continue;
-    $tgroup = track_group($main_fn, $track_group_map);
-    if (!user_can_see($tgroup, $user)) continue;
-    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . ($chans['_msc'] ?? $main_fn));
-    $u = fn($fn) => $fn ? $music_url . '/' . rawurlencode($fn) : null;
-    $ch_msc = $chans['_msc'] ?? null;
-    $ch_bin = $chans['_bin'] ?? null;
-    $ch_vce = $chans['_vce'] ?? null;
-    $ch_env = $chans['_env'] ?? null;
-    if (!$ch_msc) {
-        if ($ch_vce === $main_fn) $ch_vce = null;
-        elseif ($ch_env === $main_fn) $ch_env = null;
-        elseif ($ch_bin === $main_fn) $ch_bin = null;
+foreach (list_visible_tracks($user, $music_dir) as $entry) {
+    $main_fn = $entry['main_file'];
+    if ($entry['channel_files'] !== null) {
+        $base  = $entry['base'];
+        $chans = $entry['channel_files'];
+        $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . ($chans['_msc'] ?? $main_fn));
+        $u = fn($fn) => $fn ? track_file_url($music_url, $fn) : null;
+        $ch_msc = $chans['_msc'] ?? null;
+        $ch_bin = $chans['_bin'] ?? null;
+        $ch_vce = $chans['_vce'] ?? null;
+        $ch_env = $chans['_env'] ?? null;
+        if (!$ch_msc) {
+            if ($ch_vce === $main_fn) $ch_vce = null;
+            elseif ($ch_env === $main_fn) $ch_env = null;
+            elseif ($ch_bin === $main_fn) $ch_bin = null;
+        }
+        $lrc_file = $base . '.lrc';
+        $tracks[] = [
+            'file'   => track_file_url($music_url, $main_fn),
+            'title'  => $meta['title']  ?? clean_filename($base),
+            'artist' => $meta['artist'] ?? '',
+            'album'  => $meta['album']  ?? '',
+            'msc'    => $u($ch_msc ?? $main_fn),
+            'bin'    => $u($ch_bin),
+            'vce'    => $u($ch_vce),
+            'env'    => $u($ch_env),
+            'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
+                        ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
+        ];
+        continue;
     }
-    $lrc_file = $base . '.lrc';
-    $tracks[] = [
-        'file'   => $music_url . '/' . rawurlencode($main_fn),
-        'title'  => $meta['title']  ?? clean_filename($base),
-        'artist' => $meta['artist'] ?? '',
-        'album'  => $meta['album']  ?? '',
-        'msc'    => $u($ch_msc ?? $main_fn),
-        'bin'    => $u($ch_bin),
-        'vce'    => $u($ch_vce),
-        'env'    => $u($ch_env),
-        'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
-                    ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
-    ];
-}
-
-foreach ($standalone as $fn) {
-    $tgroup = track_group($fn, $track_group_map);
-    if (!user_can_see($tgroup, $user)) continue;
-    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . $fn);
-    $fn_base  = preg_replace('/\.mp3$/i', '', $fn);
+    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . $main_fn);
+    $fn_base  = preg_replace('/\.mp3$/i', '', $main_fn);
     $lrc_file = $fn_base . '.lrc';
     $tracks[] = [
-        'file'   => $music_url . '/' . rawurlencode($fn),
-        'title'  => $meta['title']  ?? clean_filename($fn),
+        'file'   => track_file_url($music_url, $main_fn),
+        'title'  => $meta['title']  ?? clean_filename($main_fn),
         'artist' => $meta['artist'] ?? '',
         'album'  => $meta['album']  ?? '',
-        'msc'    => $music_url . '/' . rawurlencode($fn),
+        'msc'    => track_file_url($music_url, $main_fn),
         'bin'    => null,
         'vce'    => null,
         'env'    => null,

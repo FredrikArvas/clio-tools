@@ -1,9 +1,15 @@
 <?php
-require_once '../auth.php';
-header('Content-Type: application/json');
-if (!is_logged_in()) { echo '{}'; exit; }
-$user = current_user()['username'];
-header('Content-Type: application/json');
-$file = __DIR__ . '/../data/playlists/' . basename($user) . '.json';
-$data = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
-echo json_encode(is_array($data) ? $data : [], JSON_UNESCAPED_UNICODE);
+/**
+ * api/load_playlists.php — användarens spellistor som JSON-objekt {namn: [spår-URL, ...]}.
+ *
+ * Anropas av: player.js vid start. Gäster och användare utan spellistor får ett tomt svar.
+ * Sparade listor returneras som de är; spår som inte längre finns hoppas över av klienten.
+ * En trasig fil loggas (json_file_read) och ger tomt svar utan att visa sökvägar för klienten.
+ */
+require_once __DIR__ . '/_bootstrap.php';
+require_once dirname(__DIR__) . '/json_store.php';
+
+['user' => $user] = api_bootstrap(['method' => 'GET', 'allow_guest' => true]);
+if (is_guest($user)) api_respond([]);
+
+api_respond(json_file_read(dirname(__DIR__) . '/data/playlists/' . basename($user['username']) . '.json'));
