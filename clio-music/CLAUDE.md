@@ -12,7 +12,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - **Inga hårdkodade URL:er.** Använd `$music_url` från config.php.
 - **APP_VERSION** i config.php ska bumpa vid varje deploy — används för Cloudflare cache-bust på player.js.
 - **data/-mappen är känslig.** users.csv, plays.jsonl, profiles/ och playlists/ är git-ignorerade och innehåller riktiga användardata.
-- **Bcrypt** för lösenord, aldrig klartext. admin/hash_tool.php finns för att generera hash — ta bort efter användning.
+- **Bcrypt** för lösenord, aldrig klartext. Hash genereras via SSH (se help_admin.php); `admin/hash_tool.php` är borttaget (S4).
 - **Inga XSS-risker.** Allt som skrivs ut via PHP ska passera `htmlspecialchars()`. JS-sidan har `escHtml()`.
 - **Inga SQL-injektioner** — projektet har ingen databas, men validera alltid filnamn med `basename()` vid filoperationer.
 
@@ -51,6 +51,14 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
   Garanterar metod (405), inloggning (401), för POST: CSRF via `X-CSRF-Token` (403), `application/json` (415), storlek (413), giltig JSON-array (400). Sessionen är stängd efteråt (skrivskyddad).
 - `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
 - **Servern saknar `mbstring`** — använd inte `mb_*`-funktioner i ny kod.
+
+### Admin: grupper (v1.5.2, S4)
+- **`admin/groups_store.php`** (data) och **`admin/groups.php`** (vy + formulärhantering) är åtskilda. Lagret har inga bieffekter och testas med `php tests/groups_store_test.php` mot fixture-filer (rör aldrig riktiga `users.csv`).
+- Gruppnamn valideras mot `GROUP_NAME_PATTERN` i `config.php` (vitlista, 1–40 tecken; `D`-flaggan stoppar avslutande radbrytning). Filnamn måste finnas i `music/` och vara CSV-säkra. Formulärets användare, grupper och filer valideras mot kända mängder; okända nycklar avvisar hela begäran (400, inget skrivs). Dolda fält (`groups_list[]`) finns inte längre.
+- Spårgrupp avgörs av `track_group()` i `access.php` (samma regel som `stream.php`). Nya filnamnsrader läggs först i `track_groups.csv` så att de vinner över prefixregler; prefixregler och kommentarer bevaras.
+- Skrivning: flock på `<fil>.lock`, tempfil i samma katalog + `rename`, rättigheter bevaras. Rader som inte ändras skrivs tillbaka byte för byte; bara grupp-kolumnen i `users.csv` ändras. Sparning som lämnar ingen aktiv admin avvisas.
+- Alla formulär har `csrf_field()`; POST kräver `csrf_require()` efter adminkontrollen (icke-admin → 403). Sparningar och avvisningar loggas som `admin_groups_saved` / `admin_groups_rejected` (utan hashar).
+- `admin/hash_tool.php` är borttaget. Generera hash via SSH: `php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_BCRYPT, ["cost" => 12]), "\n";'`.
 
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).

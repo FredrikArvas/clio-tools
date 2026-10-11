@@ -51,14 +51,15 @@ check_header() {
 }
 
 # Skapar en sessionsfil för __smoketest__ med given grupp och skriver ut sessions-id:t.
+# Andra argumentet (valfritt) är 1 för en admin-session, annars 0.
 make_session() {
-    local group="$1" id
+    local group="$1" is_admin="${2:-0}" id
     id="smoke$(openssl rand -hex 16)"
     php -r '
-        $user = ["username" => "__smoketest__", "display" => "Smoketest", "admin" => 0, "groups" => [$argv[1]]];
+        $user = ["username" => "__smoketest__", "display" => "Smoketest", "admin" => (int)$argv[2], "groups" => [$argv[1]]];
         $now  = time();
         echo "cm_user|" . serialize($user) . "cm_created|" . serialize($now) . "cm_last_seen|" . serialize($now);
-    ' "$group" | sudo tee "$SESSION_DIR/sess_$id" > /dev/null
+    ' "$group" "$is_admin" | sudo tee "$SESSION_DIR/sess_$id" > /dev/null
     sudo chown www-data:www-data "$SESSION_DIR/sess_$id"
     sudo chmod 600 "$SESSION_DIR/sess_$id"
     session_files+=("$SESSION_DIR/sess_$id")
@@ -151,6 +152,30 @@ else
     pass=$((pass + 1)); echo "  OK    sessionsfilen raderad vid utloggning"
 fi
 check "gammal cookie efter utloggning"         "403" "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
+
+echo "== S4: admin-sidor (T5) — bara anrop som avvisas innan något skrivs"
+check "hash_tool.php är borttaget"                "403|404" "$BASE/admin/hash_tool.php"
+user_session=$(make_session "$TEST_GROUP")
+admin_session=$(make_session "$TEST_GROUP" 1)
+# make_session körs i en underskal, så dess egen städlista går förlorad: registrera filerna här.
+session_files+=("$SESSION_DIR/sess_$user_session" "$SESSION_DIR/sess_$admin_session")
+user_cookie=(-b "$COOKIE_NAME=$user_session")
+admin_cookie=(-b "$COOKIE_NAME=$admin_session")
+check "icke-admin: GET groups.php"                 "403" "${user_cookie[@]}" "$BASE/admin/groups.php"
+check "icke-admin: POST groups.php (med token)"    "403" "${user_cookie[@]}" -X POST -d "save_users=1" "$BASE/admin/groups.php"
+check "admin: GET groups.php"                      "200" "${admin_cookie[@]}" "$BASE/admin/groups.php"
+check "admin: GET groups.php?tab=tracks"           "200" "${admin_cookie[@]}" "$BASE/admin/groups.php?tab=tracks"
+check "admin: POST utan CSRF-token (users)"        "403" "${admin_cookie[@]}" -X POST -d "save_users=1" "$BASE/admin/groups.php?tab=users"
+check "admin: POST utan CSRF-token (tracks)"       "403" "${admin_cookie[@]}" -X POST -d "save_tracks=1" "$BASE/admin/groups.php?tab=tracks"
+check "admin: POST med fel CSRF-token"             "403" "${admin_cookie[@]}" -X POST -d "save_users=1&csrf_token=fel" "$BASE/admin/groups.php"
+admin_token=$(curl -s "${admin_cookie[@]}" "$BASE/admin/groups.php" | grep -o 'name="csrf_token" value="[^"]*"' | tail -1 | sed 's/.*value="//;s/"$//')
+# "Lägg till grupp" skriver aldrig något, så ogiltiga namn kan provas säkert mot prod.
+for bad_name in 'a;b' 'a|b' 'a"b' $'a\nb' "$(printf 'x%.0s' $(seq 1 200))"; do
+    check "ogiltigt gruppnamn avvisas: $(printf '%q' "${bad_name:0:12}")" "400" "${admin_cookie[@]}" \
+        --data-urlencode "csrf_token=$admin_token" --data-urlencode "new_group_name=$bad_name" -d "add_group=1" "$BASE/admin/groups.php"
+done
+check "giltigt gruppnamn accepteras (skriver inget)" "200" "${admin_cookie[@]}" \
+    --data-urlencode "csrf_token=$admin_token" --data-urlencode "new_group_name=Smoke test" -d "add_group=1" "$BASE/admin/groups.php"
 
 # Städa bort testets spår: räknarfiler och testets rader i auditloggen.
 for key in "user:$bf_user" "ip:127.0.0.1"; do

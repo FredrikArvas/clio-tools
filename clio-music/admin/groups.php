@@ -1,7 +1,24 @@
 <?php
+/**
+ * admin/groups.php — vy och formulärhantering för användar- och spårgrupper (bara admin).
+ *
+ * Anropas av: webbläsaren (länk från admin/index.php). All läsning/validering/skrivning av
+ * data ligger i admin/groups_store.php; den här filen tolkar bara formuläret, anropar
+ * lagret och ritar sidan.
+ *
+ * Säkerhetsantaganden:
+ * - Icke-admin får 403 före allt annat. Varje POST kräver CSRF-token (csrf_require) innan något
+ *   läses ur formuläret.
+ * - Inget i formuläret litas på: användare, grupper och filer valideras mot kända mängder i
+ *   groups_store.php. Fel ger 400 och ingenting skrivs.
+ * - Varje sparning och varje avvisad sparning loggas i auditloggen (utan hashar).
+ * - All utskrift går genom escape_html() (ENT_QUOTES), även i attribut.
+ */
 require_once dirname(__DIR__) . '/auth.php';
 require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/csrf.php';
+require_once dirname(__DIR__) . '/access.php';
+require_once __DIR__ . '/groups_store.php';
 require_login();
 
 $user = current_user();
@@ -14,165 +31,105 @@ if (empty($user['admin'])) {
 $users_file  = dirname(__DIR__) . '/data/users.csv';
 $tracks_file = dirname(__DIR__) . '/data/track_groups.csv';
 
-// ── Hjälpfunktioner ───────────────────────────────────────────────────────────
+const INVALID_GROUP_MESSAGE = 'Ogiltigt gruppnamn. Använd 1–40 bokstäver, siffror, mellanslag, understreck eller bindestreck.';
 
-function read_users(): array {
-    global $users_file;
-    $out = [];
-    if (!file_exists($users_file)) return $out;
-    foreach (file($users_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
-        $p = str_getcsv($line, ';');
-        if (count($p) < 4) continue;
-        $uname = strtolower(trim($p[0]));
-        $out[$uname] = [
-            'display' => trim($p[2]),
-            'active'  => (int)$p[3],
-            'admin'   => isset($p[4]) ? (int)trim($p[4]) : 0,
-            'groups'  => isset($p[5]) && trim($p[5]) !== ''
-                         ? array_map('trim', explode('|', $p[5]))
-                         : [],
-        ];
-    }
-    return $out;
+// ── Hjälpfunktioner för formulär och svar ─────────────────────────────────────
+
+function escape_html(string $text): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
-function read_track_groups(): array {
-    global $tracks_file;
-    $map = [];
-    if (!file_exists($tracks_file)) return $map;
-    foreach (file($tracks_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
-        $p = explode(';', $line, 2);
-        if (count($p) === 2) $map[trim($p[0])] = trim($p[1]);
-    }
-    return $map;
+function outcome(string $message, int $status = 200): array {
+    return ['message' => $message, 'status' => $status];
 }
 
-function all_groups(array $users, array $tg_map): array {
-    $groups = [GUEST_GROUP];
-    foreach ($users as $u) {
-        foreach ($u['groups'] as $g) {
-            if (!in_array($g, $groups)) $groups[] = $g;
-        }
-    }
-    foreach ($tg_map as $g) {
-        if (!in_array($g, $groups)) $groups[] = $g;
-    }
-    sort($groups);
-    return $groups;
+/** Det nya gruppnamn admin skrivit i rutan (trimmat), eller '' om fältet saknas/inte är text. */
+function posted_new_group_name(): string {
+    $name = $_POST['new_group_name'] ?? '';
+    return is_string($name) ? trim($name) : '';
 }
 
-function scan_tracks(): array {
-    global $music_dir;
-    $files = glob($music_dir . DIRECTORY_SEPARATOR . '*.mp3') ?: [];
-    sort($files);
-    return array_map('basename', $files);
+/** Loggar en avvisad ändring och returnerar svaret till admin (400 = fel i formuläret). */
+function reject_change(string $scope, string $reason, int $status = 400): array {
+    audit_log('admin_groups_rejected', ['scope' => $scope, 'reason' => $reason]);
+    return outcome($reason, $status);
 }
 
-function track_assigned_group(string $filename, array $tg_map): string {
-    // Exact match first, then prefix
-    if (isset($tg_map[$filename])) return $tg_map[$filename];
-    foreach ($tg_map as $prefix => $group) {
-        if (str_starts_with($filename, $prefix)) return $group;
-    }
-    return '';
+// ── POST-hanterare: var och en returnerar outcome() ──────────────────────────
+
+/** "Lägg till grupp" skriver inget: gruppen finns först när någon kryssats i och användarna sparats. */
+function handle_add_group(): array {
+    $name = posted_new_group_name();
+    if ($name === '') return outcome('Ange ett gruppnamn.', 400);
+    if (!is_valid_group_name($name)) return reject_change('users', INVALID_GROUP_MESSAGE);
+    return outcome('Gruppen "' . $name . '" är redo att tilldelas. Kryssa i den nedan och spara.');
 }
 
-function save_user_groups(array $new_groups): string {
-    global $users_file;
-    if (!file_exists($users_file)) return 'Filen users.csv saknas.';
-    $lines = file($users_file, FILE_IGNORE_NEW_LINES);
-    $out   = [];
-    foreach ($lines as $line) {
-        if (str_starts_with(trim($line), '#') || trim($line) === '') {
-            $out[] = $line;
-            continue;
-        }
-        $p = str_getcsv($line, ';');
-        if (count($p) >= 4) {
-            $uname = strtolower(trim($p[0]));
-            while (count($p) < 6) $p[] = '';
-            $p[5] = implode('|', $new_groups[$uname] ?? []);
-        }
-        $out[] = implode(';', $p);
-    }
-    if (file_put_contents($users_file, implode("\n", $out) . "\n") === false)
-        return 'Kunde inte skriva users.csv.';
-    return '';
+function handle_save_users(string $users_file, array $track_map): array {
+    $users    = read_admin_users($users_file);
+    $new_name = posted_new_group_name();
+    if ($new_name !== '' && !is_valid_group_name($new_name)) return reject_change('users', INVALID_GROUP_MESSAGE);
+    $known = collect_known_groups($users, $track_map, $new_name);
+    [$new_groups, $error] = validate_user_group_selection($users, $known, $_POST['ug'] ?? []);
+    if ($error !== '') return reject_change('users', $error);
+    $error = save_user_groups($users_file, $new_groups);
+    if ($error !== '') return reject_change('users', $error, 500);
+    audit_log('admin_groups_saved', ['scope' => 'users', 'changes' => describe_user_group_changes($users, $new_groups)]);
+    return outcome('Användargrupper sparade.');
 }
 
-function save_track_groups(array $assignments): string {
-    global $tracks_file;
-    $lines = [
-        '# Låt-grupptillhörighet',
-        '# Format: filnamn.mp3;grupp  (sparat av admin-gränssnittet)',
-        '# Låtar utan rad visas för alla inloggade.',
-    ];
-    foreach ($assignments as $file => $group) {
-        if ($group !== '') $lines[] = $file . ';' . $group;
-    }
-    if (file_put_contents($tracks_file, implode("\n", $lines) . "\n") === false)
-        return 'Kunde inte skriva track_groups.csv.';
-    return '';
+function handle_save_tracks(string $tracks_file, array $music_files, array $users, array $track_map): array {
+    $known = collect_known_groups($users, $track_map);
+    [$assignments, $error] = validate_track_assignments($_POST['tg'] ?? [], $music_files, $known);
+    if ($error !== '') return reject_change('tracks', $error);
+    $changes = describe_track_group_changes($assignments, $track_map);
+    $error   = save_track_groups($tracks_file, $assignments, $track_map);
+    if ($error !== '') return reject_change('tracks', $error, 500);
+    audit_log('admin_groups_saved', ['scope' => 'tracks', 'changes' => $changes]);
+    return outcome('Låtgrupper sparade.');
 }
 
-// ── POST-hantering ────────────────────────────────────────────────────────────
-$flash = '';
-$tab   = $_GET['tab'] ?? 'users';
+// ── Begäran ───────────────────────────────────────────────────────────────────
+$tab     = ($_GET['tab'] ?? 'users') === 'tracks' ? 'tracks' : 'users';
+$outcome = outcome('');
+$typed_group_name = '';   // visas kvar i rutan "Ny grupp" tills den sparats
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
+    $users_before = read_admin_users($users_file);
+    $track_map    = load_track_groups();
     if (isset($_POST['save_users'])) {
-        $tab       = 'users';
-        $submitted = $_POST['ug'] ?? [];          // [username][group] => '1'
-        $all_u     = read_users();
-        $new_groups = [];
-        foreach (array_keys($all_u) as $uname) {
-            $checked = [];
-            foreach ($_POST['groups_list'] ?? [] as $g) {
-                if (!empty($submitted[$uname][$g])) $checked[] = $g;
-            }
-            $new_groups[$uname] = $checked;
-        }
-        $err   = save_user_groups($new_groups);
-        $flash = $err ?: 'Användargrupper sparade.';
+        $tab     = 'users';
+        $outcome = handle_save_users($users_file, $track_map);
     } elseif (isset($_POST['save_tracks'])) {
-        $tab         = 'tracks';
-        $assignments = [];
-        foreach ($_POST['tg'] ?? [] as $file => $group) {
-            $assignments[basename($file)] = $group;
-        }
-        $err   = save_track_groups($assignments);
-        $flash = $err ?: 'Låtgrupper sparade.';
+        $tab     = 'tracks';
+        $outcome = handle_save_tracks($tracks_file, list_music_files($music_dir), $users_before, $track_map);
     } elseif (isset($_POST['add_group'])) {
-        $tab      = 'users';
-        $new_name = trim($_POST['new_group_name'] ?? '');
-        $flash    = $new_name ? '' : 'Ange ett gruppnamn.';
-        // Groups are implicit — just remind admin to assign users
-        if ($new_name) $flash = "Gruppen \"$new_name\" är redo att tilldelas. Kryssa i den nedan.";
+        $tab     = 'users';
+        $outcome = handle_add_group();
+    } else {
+        $outcome = reject_change('unknown', 'Okänd åtgärd.');
     }
+    http_response_code($outcome['status']);
+    $is_saved_ok = $outcome['status'] === 200 && isset($_POST['save_users']);
+    $typed_group_name = $is_saved_ok ? '' : posted_new_group_name();
 }
 
-// ── Data till vyn ─────────────────────────────────────────────────────────────
-$all_users    = read_users();
-$tg_map       = read_track_groups();
-$groups       = all_groups($all_users, $tg_map);
-$track_groups_noalla = array_values(array_filter($groups, fn($g) => $g !== 'Alla'));
-$tracks       = scan_tracks();
-
-// Pending new group from form
-$pending_new  = trim($_POST['new_group_name'] ?? '');
-if ($pending_new && !in_array($pending_new, $groups)) {
-    $groups[] = $pending_new;
-    sort($groups);
-    if ($pending_new !== 'Alla') $track_groups_noalla[] = $pending_new;
-}
+// ── Data till vyn (läses efter eventuell sparning) ────────────────────────────
+$all_users = read_admin_users($users_file);
+$track_map = load_track_groups();
+$pending_group = is_valid_group_name($typed_group_name) ? $typed_group_name : '';
+$groups        = collect_known_groups($all_users, $track_map, $pending_group);
+$track_groups_without_all = array_values(array_diff($groups, [ALL_USERS_GROUP]));
+$tracks        = list_music_files($music_dir);
+$flash         = $outcome['message'];
+$flash_is_error = $outcome['status'] >= 400;
 ?><!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grupper — <?= htmlspecialchars($site_title) ?></title>
+<title>Grupper — <?= escape_html($site_title) ?></title>
 <style>
 :root {
   --bg:#111317; --surface:#1c1f26; --surface2:#252932;
@@ -249,7 +206,7 @@ tr:hover td { background:var(--surface); }
 </head>
 <body>
 <div class="header">
-  <h1>&#128101; Grupper — <?= htmlspecialchars($site_title) ?></h1>
+  <h1>&#128101; Grupper — <?= escape_html($site_title) ?></h1>
   <div class="header-links">
     <a href="index.php">← Dashboard</a>
     <a href="../index.php">Spelaren</a>
@@ -257,8 +214,8 @@ tr:hover td { background:var(--surface); }
   </div>
 </div>
 
-<?php if ($flash): ?>
-<div class="flash <?= str_contains($flash, 'Kunde') ? 'err' : '' ?>"><?= htmlspecialchars($flash) ?></div>
+<?php if ($flash !== ''): ?>
+<div class="flash <?= $flash_is_error ? 'err' : '' ?>"><?= escape_html($flash) ?></div>
 <?php endif ?>
 
 <div class="tabs">
@@ -271,13 +228,11 @@ tr:hover td { background:var(--surface); }
 <?php if ($tab === 'users'): ?>
 <!-- ── Användar-grupptillhörighet ──────────────────────────────────────────── -->
 <form method="post" action="?tab=users">
-  <?php foreach ($groups as $g): ?>
-  <input type="hidden" name="groups_list[]" value="<?= htmlspecialchars($g) ?>">
-  <?php endforeach ?>
+  <?= csrf_field() ?>
 
   <div class="new-group-row">
     <input type="text" name="new_group_name" placeholder="Ny grupp…"
-           value="<?= htmlspecialchars($pending_new) ?>" maxlength="40">
+           value="<?= escape_html($typed_group_name) ?>" maxlength="40">
     <button type="submit" name="add_group" class="btn-add">+ Lägg till grupp</button>
   </div>
 
@@ -285,24 +240,24 @@ tr:hover td { background:var(--surface); }
     <thead>
       <tr>
         <th>Användare</th>
-        <?php foreach ($groups as $g): ?>
-        <th><?= htmlspecialchars($g) ?></th>
+        <?php foreach ($groups as $group): ?>
+        <th><?= escape_html($group) ?></th>
         <?php endforeach ?>
       </tr>
     </thead>
     <tbody>
-    <?php foreach ($all_users as $uname => $udata): ?>
+    <?php foreach ($all_users as $username => $user_data): ?>
       <tr>
         <td>
-          <strong><?= htmlspecialchars($udata['display']) ?></strong><br>
-          <span style="color:var(--muted);font-size:0.78rem"><?= htmlspecialchars($uname) ?></span>
+          <strong><?= escape_html($user_data['display']) ?></strong><br>
+          <span style="color:var(--muted);font-size:0.78rem"><?= escape_html((string)$username) ?></span>
         </td>
-        <?php foreach ($groups as $g): ?>
+        <?php foreach ($groups as $group): ?>
         <td>
           <label class="cb-label">
-            <input type="checkbox" name="ug[<?= htmlspecialchars($uname) ?>][<?= htmlspecialchars($g) ?>]"
-              value="1" <?= in_array($g, $udata['groups']) ? 'checked' : '' ?>>
-            <?= htmlspecialchars($g) ?>
+            <input type="checkbox" name="ug[<?= escape_html((string)$username) ?>][<?= escape_html($group) ?>]"
+              value="1" <?= in_array($group, $user_data['groups'], true) ? 'checked' : '' ?>>
+            <?= escape_html($group) ?>
           </label>
         </td>
         <?php endforeach ?>
@@ -323,6 +278,7 @@ tr:hover td { background:var(--surface); }
   <div class="no-tracks">Inga MP3-filer hittades i <code>/music/</code>.</div>
 <?php else: ?>
 <form method="post" action="?tab=tracks">
+  <?= csrf_field() ?>
   <table>
     <thead>
       <tr>
@@ -332,23 +288,23 @@ tr:hover td { background:var(--surface); }
       </tr>
     </thead>
     <tbody>
-    <?php foreach ($tracks as $i => $filename): ?>
-      <?php $assigned = track_assigned_group($filename, $tg_map); ?>
+    <?php foreach ($tracks as $index => $filename): ?>
+      <?php $assigned = track_group($filename, $track_map); ?>
       <tr>
-        <td class="track-num"><?= $i + 1 ?></td>
-        <td class="track-name"><?= htmlspecialchars(preg_replace('/\.mp3$/i', '', str_replace(['_','-'], ' ', $filename))) ?></td>
+        <td class="track-num"><?= $index + 1 ?></td>
+        <td class="track-name"><?= escape_html(preg_replace('/\.mp3$/i', '', str_replace(['_', '-'], ' ', $filename))) ?></td>
         <td>
           <div class="radio-wrap">
             <label class="rb-label">
-              <input type="radio" name="tg[<?= htmlspecialchars($filename) ?>]"
+              <input type="radio" name="tg[<?= escape_html($filename) ?>]"
                 value="" <?= $assigned === '' ? 'checked' : '' ?>>
               Alla
             </label>
-            <?php foreach ($track_groups_noalla as $g): ?>
+            <?php foreach ($track_groups_without_all as $group): ?>
             <label class="rb-label">
-              <input type="radio" name="tg[<?= htmlspecialchars($filename) ?>]"
-                value="<?= htmlspecialchars($g) ?>" <?= $assigned === $g ? 'checked' : '' ?>>
-              <?= htmlspecialchars($g) ?>
+              <input type="radio" name="tg[<?= escape_html($filename) ?>]"
+                value="<?= escape_html($group) ?>" <?= $assigned === $group ? 'checked' : '' ?>>
+              <?= escape_html($group) ?>
             </label>
             <?php endforeach ?>
           </div>
