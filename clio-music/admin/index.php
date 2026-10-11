@@ -2,6 +2,7 @@
 require_once dirname(__DIR__) . '/auth.php';
 require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/access.php';
+require_once dirname(__DIR__) . '/csrf.php';
 require_login();
 
 $user = current_user();
@@ -140,6 +141,8 @@ a:hover { text-decoration:underline; }
   display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .header h1 { font-size:1.1rem; color:var(--accent2); }
 .header-links { display:flex; gap:12px; font-size:0.85rem; }
+.logout-form { display:inline; margin:0; }
+.logout-form button { background:none; border:none; padding:0; color:var(--accent); font:inherit; cursor:pointer; }
 
 .stats-row { display:flex; gap:12px; padding:16px 24px; flex-wrap:wrap; }
 .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:8px;
@@ -192,7 +195,7 @@ tr:hover td { background:var(--surface); }
     <a href="groups.php">&#128101; Grupper</a>
     <a href="../help.php">Hjälp</a>
     <a href="../index.php">← Spelaren</a>
-    <a href="../logout.php">Logga ut</a>
+    <?= logout_button('../logout.php') ?>
   </div>
 </div>
 

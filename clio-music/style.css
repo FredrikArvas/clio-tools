@@ -249,6 +249,8 @@ ul {
   border-radius: 4px;
 }
 .btn-logout:hover { color: var(--text); border-color: var(--accent); }
+.logout-form { display: inline; margin: 0; }
+button.btn-logout { background: none; font: inherit; font-size: 0.78rem; cursor: pointer; }
 .btn-logout.btn-login { border-color: var(--accent); color: var(--accent); }
 .btn-logout.btn-login:hover { background: var(--accent); color: #fff; }
 

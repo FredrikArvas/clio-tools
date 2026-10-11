@@ -84,6 +84,9 @@ function initAudio() {
     applySettings();
 }
 
+// Alla POST-anrop till api/ bär CSRF-token (CM_CSRF från index.php); servern avvisar annars.
+const API_HEADERS = { 'Content-Type': 'application/json', 'X-CSRF-Token': CM_CSRF };
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 const CH_DEFAULTS = { msc: 0.8, bin: 0.5, vce: 0.9, env: 0.4 };
 let serverProfiles = {};
@@ -111,7 +114,7 @@ function saveSettings() {
     serverProfiles[key] = s;
     fetch('api/save_profile.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ track: key, settings: s }),
     }).catch(() => {});
 }
@@ -217,7 +220,7 @@ function saveGlobalSettings() {
     serverProfiles['_settings'] = s;
     fetch('api/save_profile.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ track: '_settings', settings: s }),
     }).catch(() => {});
 }
@@ -659,7 +662,7 @@ function logPlay(file) {
     loggedTrack = file;
     fetch('api/log_play.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ track: file }),
     }).catch(() => {});
     const t = TRACKS[current];
@@ -763,7 +766,7 @@ function savePlPlaylist(name, tracks) {
     renderPlaylists();
     fetch('api/save_playlist.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ name, tracks }),
     }).catch(() => {});
 }
@@ -774,7 +777,7 @@ function deletePlaylist(name) {
     renderPlaylists();
     fetch('api/save_playlist.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ name, delete: true }),
     }).catch(() => {});
 }
@@ -874,7 +877,7 @@ function toggleLike(index) {
     serverProfiles[url] = prof;
     fetch('api/save_profile.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: API_HEADERS,
         body: JSON.stringify({ track: url, settings: prof }),
     }).catch(() => {});
     updateLikeUI(index);

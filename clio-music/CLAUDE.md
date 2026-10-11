@@ -35,6 +35,23 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - Test: `tests/security_smoke.sh` körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`). Inloggade tester använder en tillfällig sessionsfil för `__smoketest__`, så `users.csv` rörs inte.
 - nginx-konfigen ligger i `/etc/nginx/sites-available/clio_music` (inte i repot). `/tests/` är spärrad i nginx.
 
+### Säkerhetsbas: session, login, CSRF, audit (v1.5.1)
+- **`auth.php`** startar sessionen via `start_session()`: HttpOnly, SameSite=Lax, Secure bakom HTTPS (Cloudflare), `use_strict_mode`. Absolut timeout 12 h; inaktivitetsgräns = php.ini `session.gc_maxlifetime` (1440 s, styrs av Debians cron-städning). `login_user()` byter sessions-id, `logout_user()` tömmer och förstör. Okända användarnamn verifieras mot `DUMMY_PASSWORD_HASH` (jämn svarstid).
+- **`client_ip.php`**: `client_ip()` och `request_is_https()`. Proxy-headers (CF-Connecting-IP, X-Forwarded-Proto) litas bara på när REMOTE_ADDR är loopback (cloudflared-tunneln).
+- **`login_throttle.php`**: räknare per användarnamn (5 fria) och IP (20 fria) i `data/login_attempts/`, exponentiell spärr 30 s → 15 min, flock-skyddad. nginx har dessutom `limit_req` på POST /login.php (10/min, burst 5).
+- **`csrf.php`**: `csrf_token()`, `csrf_field()`, `csrf_verify()`, `csrf_require()`, `logout_button($action)`. Formulär: `<?= csrf_field() ?>` + `csrf_require()` först i POST-hanteringen.
+- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort.
+- **`api/_bootstrap.php`** — kontrakt för alla JSON-API:er:
+  ```php
+  require_once __DIR__ . '/_bootstrap.php';
+  ['user' => $user, 'body' => $body] = api_bootstrap(['method' => 'POST', 'allow_guest' => false, 'max_bytes' => 16384]);
+  // validera $body själv …
+  api_respond(['ok' => true]);   // eller api_error(400, 'invalid track');
+  ```
+  Garanterar metod (405), inloggning (401), för POST: CSRF via `X-CSRF-Token` (403), `application/json` (415), storlek (413), giltig JSON-array (400). Sessionen är stängd efteråt (skrivskyddad).
+- `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
+- **Servern saknar `mbstring`** — använd inte `mb_*`-funktioner i ny kod.
+
 ### Spårmodell
 Spår i `music/` skannas med glob. Filer med suffix `_msc/_bin/_vce/_env` grupperas till ett flerkanalsspår. Övriga filer renderas som standalone. Metadata läses med intern ID3v1/v2-läsare (inga externa libs).
 
