@@ -21,8 +21,12 @@ GUEST_LYRICS="Välkommen till FrUlleBo.lrc"
 GUEST_TRACK_URL="music/Välkommen%20till%20FrUlleBo.mp3"
 PRIVATE_CHANNEL="001_mediation_vce.mp3"        # grupp RIM1, kanalfil (huvudfil _msc)
 OTHER_GROUP_TRACK="Guldbodapolka 2026.mp3"     # grupp Guldbodalåtar
-UNGROUPED_TRACK="demo_jatten_01.mp3"           # ingen grupp: inloggade ja, gäster nej
-UNGROUPED_LYRICS="demo_jatten_01.lrc"
+PRIVATE_LYRICS="demo_jatten_01.lrc"            # spåret har en icke-gästgrupp
+# Spår utan grupp (synligt för alla inloggade, aldrig för gäster) letas upp dynamiskt, eftersom
+# admin kan flytta spår mellan grupper. Finns inget hoppas de kontrollerna över.
+WEBROOT="${WEBROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+UNGROUPED_TRACK=$(cd "$WEBROOT" && php -r 'require "access.php"; $map = load_track_groups();
+    foreach (scan_music("music")["standalone"] as $f) { if (track_group($f, $map) === "") { echo $f; break; } }')
 TEST_GROUP="RIM1"
 
 pass=0; fail=0; session_files=()
@@ -78,8 +82,12 @@ check "gäst: gästspår"                         "200" "$(music "$GUEST_TRACK")
 check "gäst: gästspår med Range → 206"         "206" -r 0-99 "$(music "$GUEST_TRACK")"
 check "gäst: gästspårets lyrics"               "200" "$(lyrics "$GUEST_LYRICS")"
 check "gäst: privat kanalfil (T2)"             "403" "$(music "$PRIVATE_CHANNEL")"
-check "gäst: spår utan grupp"                  "403" "$(music "$UNGROUPED_TRACK")"
-check "gäst: lyrics till spår utan grupp (T3)" "403" "$(lyrics "$UNGROUPED_LYRICS")"
+if [[ -n "$UNGROUPED_TRACK" ]]; then
+    check "gäst: spår utan grupp"              "403" "$(music "$UNGROUPED_TRACK")"
+else
+    echo "  --    gäst: spår utan grupp (inget sådant spår finns, överhoppat)"
+fi
+check "gäst: lyrics till privat spår (T3)"     "403" "$(lyrics "$PRIVATE_LYRICS")"
 check_header "mp3: Content-Type audio/mpeg"         '^content-type: audio/mpeg' "$(music "$GUEST_TRACK")"
 check_header "mp3: Cache-Control private, no-store" '^cache-control: private, no-store' "$(music "$GUEST_TRACK")"
 if curl -s -o /dev/null -D - "$(music "$GUEST_TRACK")" | grep -qi '^x-accel-redirect'; then
@@ -106,7 +114,11 @@ session_id=$(make_session "$TEST_GROUP")
 cookie=(-b "$COOKIE_NAME=$session_id")
 check "inloggad: egen grupps kanalfil"         "200" "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
 check "inloggad: Range → 206"                  "206" "${cookie[@]}" -r 0-99 "$(music "$PRIVATE_CHANNEL")"
-check "inloggad: spår utan grupp"              "200" "${cookie[@]}" "$(music "$UNGROUPED_TRACK")"
+if [[ -n "$UNGROUPED_TRACK" ]]; then
+    check "inloggad: spår utan grupp"          "200" "${cookie[@]}" "$(music "$UNGROUPED_TRACK")"
+else
+    echo "  --    inloggad: spår utan grupp (inget sådant spår finns, överhoppat)"
+fi
 check "inloggad: annan grupps spår"            "403" "${cookie[@]}" "$(music "$OTHER_GROUP_TRACK")"
 
 echo "== S2: sessionscookie (T7/T10)"
