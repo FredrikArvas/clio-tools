@@ -2,7 +2,7 @@
 $music_dir   = __DIR__ . '/music';
 $music_url   = 'music';
 $site_title  = 'Clio Music';
-define('APP_VERSION', '1.6.1');
+define('APP_VERSION', '1.6.2');
 $lyrics_url = 'lyrics';
 define('GUEST_GROUP',  'Gäst');
 

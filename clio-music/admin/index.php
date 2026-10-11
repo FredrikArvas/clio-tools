@@ -144,7 +144,8 @@ function fmt_ts(int $ts): string {
     return date('Y-m-d H:i', $ts);
 }
 
-$view = $_GET['view'] ?? 'tracks'; // tracks | users
+// Vitlista: värdet skrivs ut i länkar nedan. Tidigare ekades $_GET['view'] rått (HTML-injektion, S7).
+$view = ($_GET['view'] ?? '') === 'users' ? 'users' : 'tracks';
 ?><!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -237,9 +238,9 @@ tr:hover td { background:var(--surface); }
 </div>
 <div class="group-bar">
   <span class="group-label">Grupp:</span>
-  <a class="group-btn <?= $group_filter === '' ? 'active' : '' ?>" href="?view=<?= $view ?>">Alla lyssnare</a>
+  <a class="group-btn <?= $group_filter === '' ? 'active' : '' ?>" href="?view=<?= htmlspecialchars($view, ENT_QUOTES) ?>">Alla lyssnare</a>
   <?php foreach (array_filter($all_groups, fn($g) => $g !== 'Alla lyssnare') as $g): ?>
-  <a class="group-btn <?= $group_filter === $g ? 'active' : '' ?>" href="?view=<?= $view ?>&group=<?= urlencode($g) ?>"><?= htmlspecialchars($g) ?></a>
+  <a class="group-btn <?= $group_filter === $g ? 'active' : '' ?>" href="?view=<?= htmlspecialchars($view, ENT_QUOTES) ?>&group=<?= urlencode($g) ?>"><?= htmlspecialchars($g) ?></a>
   <?php endforeach ?>
 </div>
 

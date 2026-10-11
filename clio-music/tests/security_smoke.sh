@@ -325,6 +325,22 @@ sudo php -r '
     flock($handle, LOCK_UN); fclose($handle);
 ' /var/www/clio_music/data/plays.jsonl
 
+echo "== S7: fynd från slutgranskningen"
+check "tests/*.php körs inte via webben"       "403" "$BASE/tests/groups_store_test.php"
+check "tests/api_validation_test.php"          "403" "$BASE/tests/api_validation_test.php"
+check "api/_bootstrap.php direkt"              "403" "$BASE/api/_bootstrap.php"
+check "api/_validation.php direkt"             "403" "$BASE/api/_validation.php"
+check "admin/groups_store.php direkt"          "403" "$BASE/admin/groups_store.php"
+check "data/ spärrad även för .php"            "403" "$BASE/data/x.php"
+s7_admin=$(make_session "" 1)
+session_files+=("$SESSION_DIR/sess_$s7_admin")
+injected=$(curl -s -b "$COOKIE_NAME=$s7_admin" "$BASE/admin/?view=%22%3E%3Cmeta%20http-equiv%3Drefresh%3E")
+if [[ "$injected" == *'<meta http-equiv=refresh>'* ]]; then
+    fail=$((fail + 1)); echo "  FEL   admin ?view= ekas oescapat (HTML-injektion)"
+else
+    pass=$((pass + 1)); echo "  OK    admin ?view= kan inte injicera HTML"
+fi
+
 echo
 echo "Resultat: $pass OK, $fail FEL"
 [[ $fail -eq 0 ]]
