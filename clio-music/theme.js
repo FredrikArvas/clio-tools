@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 'use strict';
 
 // Temaval. Laddas synkront i <head> så att rätt tema sätts innan sidan målas (ingen blinkning).

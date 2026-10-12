@@ -1,8 +1,10 @@
-# clio_music — Meditationsmusikspelare
+# clio_music — Flerkanalig webbspelare för skyddat ljud
 
-Inloggningsskyddad webbspelare för meditationsljud, byggd för Miranon Media / Roger Gottardsson. Stödjer upp till fyra parallella ljudkanaler per spår (musik, binauralt, röst, miljö) med individuell volymkontroll och EQ.
+Inloggningsskyddad webbspelare för ljud med upp till fyra parallella kanaler per spår (musik, binauralt, röst, miljö), individuell volymkontroll och EQ. Designad för innehållsleverantörer som vill ge användare skyddad tillgång till mediafiler utan att exponera filerna direkt.
 
-**Live:** https://audio.arvas.international (version: `APP_VERSION` i `config.php`)
+**Licens:** AGPL-3.0 — fri att använda och bygga vidare på, men källkoden måste förbli öppen. Kommersiell licens utan öppenhetskrav: [fredrik@arvas.se](mailto:fredrik@arvas.se)
+
+**Live-referensinstallation:** https://audio.arvas.international (version: `APP_VERSION` i `config.php`)
 
 ## Funktioner
 

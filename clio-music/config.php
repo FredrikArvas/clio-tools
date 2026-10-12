@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 $music_dir   = __DIR__ . '/music';
 $music_url   = 'music';
 $site_title  = 'Clio Music';

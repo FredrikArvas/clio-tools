@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 require_once dirname(__DIR__) . '/auth.php';
 require_once dirname(__DIR__) . '/config.php';
 require_once dirname(__DIR__) . '/access.php';
