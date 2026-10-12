@@ -87,7 +87,8 @@ function list_music_files(string $music_dir): array {
     $scan  = scan_music($music_dir);
     $files = $scan['standalone'];
     foreach ($scan['channels'] as $channel_files) {
-        $files = array_merge($files, array_values($channel_files));
+        $main = main_channel_file($channel_files);
+        if ($main !== null) $files[] = $main;
     }
     sort($files);
     return $files;
