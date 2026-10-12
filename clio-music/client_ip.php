@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 /**
  * client_ip.php — vem är klienten egentligen, och kom begäran över HTTPS?
  *

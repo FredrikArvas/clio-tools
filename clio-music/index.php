@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 require_once 'auth.php';
 require_once 'config.php';
 require_once 'access.php';
@@ -392,6 +395,11 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
     'CM_CSRF'      => csrf_token(),
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <script src="player.js?v=<?= APP_VERSION ?>"></script>
+
+<footer class="app-footer">
+  <a href="https://github.com/FredrikArvas/clio-tools/tree/main/clio-music" target="_blank" rel="noopener">Öppen källkod (AGPL-3.0)</a>
+  · <a href="mailto:fredrik@arvas.se">fredrik@arvas.se</a>
+</footer>
 
 <div id="consent-banner" class="consent-banner">
   <p>Vi använder Google Analytics för att förbättra tjänsten. Inga personuppgifter skickas.</p>

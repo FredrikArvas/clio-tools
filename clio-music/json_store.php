@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 /**
  * json_store.php — läs-ändra-skriv av en JSON-fil under exklusivt lås.
  *

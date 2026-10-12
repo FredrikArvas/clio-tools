@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 /**
  * api/save_playlist.php — skapar, ersätter eller tar bort en spellista i användarens fil.
  *

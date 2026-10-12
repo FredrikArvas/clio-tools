@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
 # security_smoke.sh — säkerhetsrökttest för clio_music.
 #
 # Körs PÅ SERVERN (curl mot nginx på 127.0.0.1:8091, förbi Cloudflare):

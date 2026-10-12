@@ -1,4 +1,7 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Arvas International AB <fredrik@arvas.se>
+
 /**
  * tests/api_validation_test.php — enhetstest av api/_validation.php, rate_limit.php, json_store.php
  * och visible_track_urls() i access.php, mot fixture-filer i en tillfällig katalog.
