@@ -397,7 +397,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 <script src="player.js?v=<?= APP_VERSION ?>"></script>
 
 <footer class="app-footer">
-  <a href="https://github.com/FredrikArvas/clio-tools/tree/main/clio-music" target="_blank" rel="noopener">Öppen källkod (AGPL-3.0)</a>
+  <a href="https://github.com/FredrikArvas/clio-tools/tree/19.0/clio-music" target="_blank" rel="noopener">Öppen källkod (AGPL-3.0)</a>
   · <a href="mailto:fredrik@arvas.se">fredrik@arvas.se</a>
 </footer>
 
