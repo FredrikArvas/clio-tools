@@ -13,6 +13,7 @@ $is_admin = !empty($user['admin']);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hjälp — <?= htmlspecialchars($site_title) ?></title>
+<link rel="icon" href="favicon.ico">
 <script src="theme.js?v=<?= APP_VERSION ?>"></script>
 <link rel="stylesheet" href="style.css?v=<?= APP_VERSION ?>">
 <style>
