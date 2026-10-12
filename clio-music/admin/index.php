@@ -140,6 +140,7 @@ function track_label(string $t): string {
     $name = preg_replace('#^music/#', '', $t);
     $name = rawurldecode($name);
     $name = preg_replace('/\.mp3$/i', '', $name);
+    $name = preg_replace('/_(msc|bin|vce|env)$/i', '', $name);
     return str_replace(['_', '-'], ' ', $name);
 }
 
@@ -155,6 +156,7 @@ $view = ($_GET['view'] ?? '') === 'users' ? 'users' : 'tracks';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — <?= htmlspecialchars($site_title) ?></title>
+<link rel="icon" href="../favicon.ico">
 <style>
 :root {
   --bg:#111317; --surface:#1c1f26; --surface2:#252932;

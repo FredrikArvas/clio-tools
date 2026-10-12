@@ -7,7 +7,7 @@
 // Ett tema är bara data-theme på <html>; färgerna bor i style.css. Valet sparas i localStorage.
 (function () {
     const STORAGE_KEY   = 'clio_theme';
-    const DEFAULT_THEME = 'natt';
+    const DEFAULT_THEME = 'morgon';
     const THEMES = [
         { id: 'natt',     name: 'Mörk natt',     desc: 'Djup och fokuserad' },
         { id: 'morgon',   name: 'Ljus morgon',   desc: 'Ljus och dämpad' },

@@ -133,6 +133,7 @@ $flash_is_error = $outcome['status'] >= 400;
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grupper — <?= escape_html($site_title) ?></title>
+<link rel="icon" href="../favicon.ico">
 <style>
 :root {
   --bg:#111317; --surface:#1c1f26; --surface2:#252932;

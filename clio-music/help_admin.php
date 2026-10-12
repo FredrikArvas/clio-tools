@@ -16,6 +16,7 @@ if (empty($user['admin'])) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin-hjälp — <?= htmlspecialchars($site_title) ?></title>
+<link rel="icon" href="favicon.ico">
 <link rel="stylesheet" href="style.css">
 <style>
 .help-wrap { max-width:720px; margin:0 auto; padding:28px 24px 60px; }
@@ -80,7 +81,9 @@ kbd  { background:var(--surface2); border:1px solid var(--border); border-radius
     <ol>
       <li>Generera ett bcrypt-hash på servern (hash-verktyget i webbläsaren är borttaget av säkerhetsskäl). Kör via SSH och skriv lösenordet när det efterfrågas, så hamnar det inte i kommandohistoriken:<br>
           <code>php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_BCRYPT, ["cost" =&gt; 12]), "\n";'</code></li>
-      <li>Redigera <code>data/users.csv</code> via SSH/SFTP och lägg till en rad:<br>
+      <li>Redigera <code>data/users.csv</code> på servern med sudo (filen ägs av www-data):<br>
+          <code>sudo -u www-data nano /var/www/clio_music/data/users.csv</code><br>
+          Lägg till en rad:<br>
           <code>användarnamn;[hash];Visningsnamn;1;0;Grupp1|Grupp2</code></li>
     </ol>
     <div class="note">Kolumnerna: användarnamn ; bcrypt-hash ; visningsnamn ; aktiv (1/0) ; admin (1/0) ; grupper (pipe-separerade)</div>
