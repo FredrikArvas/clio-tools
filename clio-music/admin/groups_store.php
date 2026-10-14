@@ -35,7 +35,7 @@ const USERS_GROUP_COLUMN  = 5;   // users.csv: användarnamn;hash;visningsnamn;a
 const USERS_MIN_COLUMNS   = 4;
 const TRACK_GROUPS_HEADER = [
     '# Låt-grupptillhörighet',
-    '# Format: filnamn.mp3;grupp  (sparat av admin-gränssnittet)',
+    '# Format: filnamn.mp3|filnamn.m4a;grupp  (sparat av admin-gränssnittet)',
     '# Låtar utan rad visas för alla inloggade.',
 ];
 

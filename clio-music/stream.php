@@ -29,8 +29,14 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/access.php';
 
 const MEDIA_TYPES = [
-    'music'  => ['extension' => 'mp3', 'content_type' => 'audio/mpeg'],
-    'lyrics' => ['extension' => 'lrc', 'content_type' => 'text/plain; charset=utf-8'],
+    'music'  => [
+        'extensions'   => ['mp3', 'm4a'],
+        'content_types' => ['mp3' => 'audio/mpeg', 'm4a' => 'audio/mp4'],
+    ],
+    'lyrics' => [
+        'extensions'    => ['lrc'],
+        'content_types' => ['lrc' => 'text/plain; charset=utf-8'],
+    ],
 ];
 
 function stream_fail(int $status): never {
@@ -44,11 +50,12 @@ function parse_media_request(string $request_uri): array {
     $path = strtok($request_uri, '?');
     if (!preg_match('#^/(music|lyrics)/([^/]+)$#', $path, $match)) stream_fail(400);
     [$directory, $filename] = [$match[1], rawurldecode($match[2])];
-    $extension = MEDIA_TYPES[$directory]['extension'];
+    $extensions = MEDIA_TYPES[$directory]['extensions'];
+    $ext_pattern = implode('|', array_map('preg_quote', $extensions, array_fill(0, count($extensions), '/')));
     $is_plain_name = $filename === basename($filename)
         && !str_contains($filename, "\0")
         && !str_starts_with($filename, '.');
-    if (!$is_plain_name || !preg_match('/\.' . $extension . '$/i', $filename)) stream_fail(400);
+    if (!$is_plain_name || !preg_match('/\.(' . $ext_pattern . ')$/i', $filename)) stream_fail(400);
     return [$directory, $filename];
 }
 
@@ -69,7 +76,22 @@ if ($real_directory === false || $real_file === false || dirname($real_file) !==
 
 if (!user_can_access_media($filename, $user, $music_dir)) stream_fail(403);
 
-header('Content-Type: ' . MEDIA_TYPES[$directory]['content_type']);
-header('Cache-Control: private, no-store');
-header('Vary: Cookie');
+$ext         = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+$content_type = MEDIA_TYPES[$directory]['content_types'][$ext] ?? 'application/octet-stream';
+
+// Gäst-tillgängliga filer (grupp = GUEST_GROUP) är publika: Cloudflare och webbläsare får
+// cacha dem i en vecka. Övriga filer cachas bara lokalt i webbläsaren (private) — CDN:en
+// delar dem aldrig. Vary: Cookie behövs inte för publika filer eftersom alla får samma svar.
+$track_group = ($directory === 'music')
+    ? track_group($filename, load_track_groups())
+    : '';
+$is_public = ($track_group === GUEST_GROUP);
+if ($is_public) {
+    header('Cache-Control: public, max-age=604800');
+} else {
+    header('Cache-Control: private, max-age=604800');
+    header('Vary: Cookie');
+}
+
+header('Content-Type: ' . $content_type);
 header('X-Accel-Redirect: /_protected/' . $directory . '/' . rawurlencode($filename));

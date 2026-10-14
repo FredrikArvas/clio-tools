@@ -176,7 +176,7 @@ foreach (['a_msc.mp3', 'a_vce.mp3', 'b.mp3', 'Aim for the Stars.mp3', 'sem;ikolo
     touch($music_dir . '/' . $name);
 }
 $music_files = list_music_files($music_dir);
-check('list_music_files: bara mp3, bara huvudspår (a_vce.mp3 filtreras, a_msc.mp3 behålls)', $music_files === ['Aim for the Stars.mp3', 'a_msc.mp3', 'b.mp3', 'sem;ikolon.mp3']);
+check('list_music_files: bara ljud (mp3/m4a), bara huvudspår (a_vce.mp3 filtreras, a_msc.mp3 behålls)', $music_files === ['Aim for the Stars.mp3', 'a_msc.mp3', 'b.mp3', 'sem;ikolon.mp3']);
 $tracks_lf = "# Låt-grupptillhörighet\n# kommentar\na_msc.mp3;RIM1\nAim;Ljudvägg\nb.mp3;RIM2\n";
 file_put_contents($tracks_path, $tracks_lf);
 $map = parse_fixture_map($tracks_path);

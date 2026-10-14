@@ -296,7 +296,7 @@ tr:hover td { background:var(--surface); }
       <?php $assigned = track_group($filename, $track_map); ?>
       <tr>
         <td class="track-num"><?= $index + 1 ?></td>
-        <td class="track-name"><?= escape_html(preg_replace('/\.mp3$/i', '', str_replace(['_', '-'], ' ', $filename))) ?></td>
+        <td class="track-name"><?= escape_html(preg_replace('/\.(mp3|m4a)$/i', '', str_replace(['_', '-'], ' ', $filename))) ?></td>
         <td>
           <div class="radio-wrap">
             <label class="rb-label">
