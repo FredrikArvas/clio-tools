@@ -18,8 +18,10 @@
 
 const CH_SUFFIXES = ['_msc', '_bin', '_vce', '_env'];
 
-// Samma regex som tidigare låg i index.php. Icke-girig bas: "a_b_msc.mp3" → bas "a_b".
-const CHANNEL_FILE_PATTERN = '/^(.+?)(_msc|_bin|_vce|_env)\.mp3$/i';
+// Stöder mp3 och m4a. Icke-girig bas: "a_b_msc.mp3" → bas "a_b".
+const AUDIO_EXTENSIONS      = ['mp3', 'm4a'];
+const AUDIO_EXT_PATTERN     = '(?:mp3|m4a)';
+const CHANNEL_FILE_PATTERN  = '/^(.+?)(_msc|_bin|_vce|_env)\.(?:mp3|m4a)$/i';
 
 function load_track_groups(): array {
     $path = __DIR__ . '/data/track_groups.csv';
@@ -54,7 +56,11 @@ function user_can_see(string $track_group, array $user): bool {
  * (endast filnamn, inga sökvägar), sorterat.
  */
 function scan_music(string $music_dir): array {
-    $files = is_dir($music_dir) ? (glob($music_dir . DIRECTORY_SEPARATOR . '*.mp3') ?: []) : [];
+    $all = [];
+    foreach (AUDIO_EXTENSIONS as $ext) {
+        $all = array_merge($all, glob($music_dir . DIRECTORY_SEPARATOR . '*.' . $ext) ?: []);
+    }
+    $files = $all;
     sort($files);
     $channels   = [];
     $standalone = [];
@@ -86,7 +92,9 @@ function owning_tracks(string $filename, array $scan): array {
         $base   = preg_replace('/\.lrc$/i', '', $filename);
         $owners = [];
         if (isset($scan['channels'][$base])) $owners[] = main_channel_file($scan['channels'][$base]);
-        if (in_array($base . '.mp3', $scan['standalone'], true)) $owners[] = $base . '.mp3';
+        foreach (AUDIO_EXTENSIONS as $ext) {
+            if (in_array($base . '.' . $ext, $scan['standalone'], true)) $owners[] = $base . '.' . $ext;
+        }
         return array_values(array_filter($owners));
     }
     if (preg_match(CHANNEL_FILE_PATTERN, $filename, $match)) {

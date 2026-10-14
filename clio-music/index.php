@@ -99,7 +99,7 @@ function read_metadata(string $path): array {
 }
 
 function clean_filename(string $name): string {
-    $name = preg_replace('/\.mp3$/i', '', $name);
+    $name = preg_replace('/\.(mp3|m4a)$/i', '', $name);
     $name = str_replace(['_', '-'], ' ', $name);
     return strtoupper(substr($name, 0, 1)) . substr($name, 1);
 }
@@ -141,7 +141,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         continue;
     }
     $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . $main_fn);
-    $fn_base  = preg_replace('/\.mp3$/i', '', $main_fn);
+    $fn_base  = preg_replace('/\.(mp3|m4a)$/i', '', $main_fn);
     $lrc_file = $fn_base . '.lrc';
     $tracks[] = [
         'file'   => track_file_url($music_url, $main_fn),

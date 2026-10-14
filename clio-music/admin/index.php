@@ -139,7 +139,7 @@ $track_group_map = load_track_groups();
 function track_label(string $t): string {
     $name = preg_replace('#^music/#', '', $t);
     $name = rawurldecode($name);
-    $name = preg_replace('/\.mp3$/i', '', $name);
+    $name = preg_replace('/\.(mp3|m4a)$/i', '', $name);
     $name = preg_replace('/_(msc|bin|vce|env)$/i', '', $name);
     return str_replace(['_', '-'], ' ', $name);
 }
