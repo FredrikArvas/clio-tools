@@ -126,10 +126,75 @@ function verify_login(string $username, string $password): ?array {
     $is_valid = password_verify($password, $record['hash'] ?? DUMMY_PASSWORD_HASH);
     if ($record === null || !$is_valid) return null;
     if (password_needs_rehash($record['hash'], PASSWORD_BCRYPT, PASSWORD_HASH_OPTIONS)) {
-        // Själva omhashningen kräver säker skrivning till users.csv (S4:s CSV-hjälpare).
-        audit_log('password_rehash_needed', ['username' => $key]);
+        $new_hash = password_hash($password, PASSWORD_BCRYPT, PASSWORD_HASH_OPTIONS);
+        $saved    = save_user_hash($key, $new_hash);
+        audit_log($saved ? 'password_rehashed' : 'password_rehash_needed', ['username' => $key]);
     }
     return ['username' => $key, 'display' => $record['display'], 'admin' => $record['admin'], 'groups' => $record['groups']];
+}
+
+/**
+ * Byter hash-kolumnen (index 1) för $username i data/users.csv atomiskt.
+ * Alla andra kolumner och rader skrivs tillbaka byte för byte.
+ * Använder samma låsfil som admin/groups_store.php för att undvika konflikter.
+ * Returnerar true vid lyckat resultat, false annars.
+ */
+function save_user_hash(string $username, string $new_hash): bool {
+    if (strpbrk($new_hash, ";\r\n") !== false) {
+        error_log('clio_music: ogiltig teckenuppsättning i ny hash för ' . $username);
+        return false;
+    }
+    $path = __DIR__ . '/data/users.csv';
+    $lock = @fopen($path . '.lock', 'c');
+    if ($lock === false || !flock($lock, LOCK_EX)) {
+        error_log('clio_music: kunde inte ta lås för users.csv (rehash)');
+        if ($lock !== false) fclose($lock);
+        return false;
+    }
+    $success = false;
+    try {
+        $raw = is_file($path) ? file_get_contents($path) : false;
+        if ($raw === false) {
+            error_log('clio_music: users.csv saknas vid rehash av ' . $username);
+            return false;
+        }
+        $lines   = explode("\n", $raw);
+        $matched = false;
+        foreach ($lines as $i => $line) {
+            $has_cr = str_ends_with($line, "\r");
+            $body   = $has_cr ? substr($line, 0, -1) : $line;
+            if (trim($body) === '' || str_starts_with(trim($body), '#')) continue;
+            $fields = explode(';', $body);
+            if (count($fields) < 2 || strtolower(trim($fields[0])) !== $username) continue;
+            $fields[1] = $new_hash;
+            $lines[$i] = implode(';', $fields) . ($has_cr ? "\r" : '');
+            $matched   = true;
+            break;
+        }
+        if (!$matched) {
+            error_log('clio_music: hittade inte användaren "' . $username . '" i users.csv (rehash)');
+            return false;
+        }
+        $content = implode("\n", $lines);
+        $dir     = dirname($path);
+        $tmp     = is_writable($dir) ? tempnam($dir, 'users.tmp') : false;
+        if ($tmp === false) {
+            error_log('clio_music: kunde inte skapa tempfil i data/ för rehash');
+            return false;
+        }
+        $mode    = is_file($path) ? (fileperms($path) & 0777) : 0640;
+        $success = file_put_contents($tmp, $content, LOCK_EX) === strlen($content)
+                && chmod($tmp, $mode)
+                && rename($tmp, $path);
+        if (!$success) {
+            error_log('clio_music: skrivning av users.csv (rehash) misslyckades');
+            if (is_file($tmp)) unlink($tmp);
+        }
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
+    return $success;
 }
 
 /** Gör sessionen inloggad. Nytt sessions-id och ny CSRF-token förhindrar session fixation. */
