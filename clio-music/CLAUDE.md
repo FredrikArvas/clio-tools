@@ -37,7 +37,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 ### CSRF och audit (S2)
 - **`csrf.php`**: `csrf_token()`, `csrf_field()`, `csrf_verify()`, `csrf_require()`, `logout_button($action)`. Formulär: `<?= csrf_field() ?>` och `csrf_require()` först i POST-hanteringen. Logout är POST med CSRF.
 - `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
-- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort. Events: `login_ok`, `login_failed`, `login_blocked`, `logout`, `session_expired`, `csrf_rejected`, `password_rehash_needed`, `admin_groups_saved`, `admin_groups_rejected`.
+- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort. Events: `login_ok`, `login_failed`, `login_blocked`, `logout`, `session_expired`, `csrf_rejected`, `password_rehashed`, `password_rehash_needed` (skrivfel), `admin_groups_saved`, `admin_groups_rejected`.
 
 ### Skyddad medialeverans (access.php + stream.php, S1)
 - **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`, `track_file_url`, `list_visible_tracks`, `visible_track_urls`). Duplicera den aldrig.
@@ -159,7 +159,7 @@ Rollback: `rollback.sh` i samma katalog återställer från backupen. Skripten v
 - Favicon saknas (404).
 - Admin-fliken Låtar låter grupp sättas på kanalfiler (`_vce/_bin/_env`) trots att huvudspåret styr åtkomsten.
 - `track_label()` i admin/index.php strippar inte kanal-suffixet `_msc`. Spårnamnet syns därför med suffix i admin-dashboarden.
-- Automatisk omhashning av lösenord uteblir: `password_rehash_needed` loggas men hashen byts inte.
+- ~~Automatisk omhashning av lösenord uteblir~~ — åtgärdat v1.7.4: `save_user_hash()` i auth.php byter hash-kolumnen atomiskt vid inloggning.
 - Cloudflare-cache bör purgas för `frida_session_edited.*`.
 - Användaradmin (skapa/inaktivera användare, sätta lösenord) i admin-gränssnittet — egen sprint, beslutad 2026-10-11. Tills dess: `sudo -u www-data nano data/users.csv` (filen är 640).
 - `help_admin.php` beskriver att `users.csv` redigeras via SSH/SFTP. Efter S6 kräver det sudo. Texten är inte ändrad (PHP-fil utanför S6).
