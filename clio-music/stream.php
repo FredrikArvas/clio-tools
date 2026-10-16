@@ -21,7 +21,11 @@
  * - Nekad åtkomst ger 403 även för filer som finns. Vi skiljer inte 403/404 för att dölja
  *   existens: den som gissar ett filnamn vet redan namnet, och 404 för okända filer gör
  *   felsökning enklare. Avvägningen är medveten.
- * - Svaren får aldrig cachas av delade cachar (Cloudflare): Cache-Control private, no-store.
+ * - Cachning (v1.8.0): gästspår (grupp GUEST_GROUP) är publika och får cachas av Cloudflare
+ *   (public, max-age=604800). Övriga filer cachas bara i webbläsaren (private, max-age=604800,
+ *   Vary: Cookie) och delas aldrig av CDN:en. Fel och nekade svar: private, no-store.
+ *   Medveten avvägning: flyttas ett gästspår till en annan grupp kan Cloudflare leverera det
+ *   upp till en vecka till — purga då filen i Cloudflare.
  */
 
 require_once __DIR__ . '/auth.php';
