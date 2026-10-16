@@ -44,7 +44,13 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - Kanalfiler (`_bin/_vce/_env`) och `.lrc` ärver gruppen från huvudspåret (`_msc ?? _vce ?? _env ?? _bin`).
 - nginx skickar `^~ /music/` och `^~ /lyrics/` till `stream.php` via FastCGI. **URL:erna är oförändrade** (`music/<fil>`), eftersom profiler, spellistor, kö och `plays.jsonl` nycklas på URL:en.
 - `stream.php` validerar filnamnet (ett segment, rätt ändelse), kontrollerar behörigheten och svarar med `X-Accel-Redirect: /_protected/{music|lyrics}/<fil>`. nginx levererar filen (Range/seek) från `internal`-locations som bara aliasar `music/` resp. `lyrics/`.
-- Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer), `Cache-Control: private, no-store`.
+- Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer). Fel och nekade svar: `Cache-Control: private, no-store`.
+- Cachning (v1.8.0, beslut Fredrik 2026-10-16): gästspår `public, max-age=604800` (Cloudflare får cacha), övriga `private, max-age=604800` + `Vary: Cookie`. Flyttas ett gästspår till annan grupp: purga filen i Cloudflare.
+
+### Spårtyp (v1.9.0)
+- `track_types.php`: `TRACK_TYPES` (meditation, kör) styr etikett, ikon och standardvolym per kanal samt EQ-rubriken. Typen sätts i `data/track_types.csv` (`prefix;typ`, samma prefixmatchning som grupperna via `load_prefix_csv()`/`prefix_lookup()` i access.php). Okänd typ loggas och ger `meditation`.
+- Bara presentation: suffix, ljudkedja, profilnycklar och behörighet är desamma. `kör`: `_msc` = stämma 1 … `_env` = stämma 4.
+- `data/track_types.csv` är www-data 640 på servern; redigera med `sudo -u www-data nano`. Test: `php tests/track_types_test.php`.
 
 ### nginx och säkerhetsrubriker (S5)
 - Konfigen finns i repot: `deploy/nginx_clio_music.conf` (= `/etc/nginx/sites-available/clio_music`), snippets `deploy/clio_music_security_headers.conf` och `deploy/clio_music_csp.conf` (= `/etc/nginx/snippets/`). Ändra i repot, validera i staging, deploya, ladda om.

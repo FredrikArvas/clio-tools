@@ -92,7 +92,10 @@ else
 fi
 check "gäst: lyrics till privat spår (T3)"     "403" "$(lyrics "$PRIVATE_LYRICS")"
 check_header "mp3: Content-Type audio/mpeg"         '^content-type: audio/mpeg' "$(music "$GUEST_TRACK")"
-check_header "mp3: Cache-Control private, no-store" '^cache-control: private, no-store' "$(music "$GUEST_TRACK")"
+# Cachning (v1.8.0): gästspår är publika och får cachas av Cloudflare i en vecka.
+# Nekade svar får aldrig cachas.
+check_header "gästspår: Cache-Control public, max-age=604800" '^cache-control: public, max-age=604800' "$(music "$GUEST_TRACK")"
+check_header "nekat svar (403): Cache-Control private, no-store" '^cache-control: private, no-store' "$(music "$PRIVATE_CHANNEL")"
 if curl -s -o /dev/null -D - "$(music "$GUEST_TRACK")" | grep -qi '^x-accel-redirect'; then
     fail=$((fail + 1)); echo "  FEL   X-Accel-Redirect läcker till klienten"
 else
@@ -117,6 +120,9 @@ session_id=$(make_session "$TEST_GROUP")
 cookie=(-b "$COOKIE_NAME=$session_id")
 check "inloggad: egen grupps kanalfil"         "200" "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
 check "inloggad: Range → 206"                  "206" "${cookie[@]}" -r 0-99 "$(music "$PRIVATE_CHANNEL")"
+# Spår som inte är gästspår cachas bara i webbläsaren, aldrig av delade cachar (Cloudflare).
+check_header "privat spår: Cache-Control private, max-age=604800" '^cache-control: private, max-age=604800' "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
+check_header "privat spår: Vary: Cookie"            '^vary: .*cookie' "${cookie[@]}" "$(music "$PRIVATE_CHANNEL")"
 if [[ -n "$UNGROUPED_TRACK" ]]; then
     check "inloggad: spår utan grupp"          "200" "${cookie[@]}" "$(music "$UNGROUPED_TRACK")"
 else
