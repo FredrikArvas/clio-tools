@@ -5,7 +5,7 @@
 require_once 'auth.php';
 require_once 'config.php';
 require_once 'access.php';
-require_once 'track_types.php';
+require_once 'channels.php';
 require_once 'csrf.php';
 
 $user = current_user_or_guest();
@@ -109,56 +109,28 @@ $lyrics_dir = __DIR__ . '/lyrics';
 
 // ── Synliga spår (regeln delas med stream.php och API:erna via access.php) ──
 $tracks = [];
-$type_map = load_track_types();
 
 foreach (list_visible_tracks($user, $music_dir) as $entry) {
-    $main_fn = $entry['main_file'];
-    $type    = track_type($main_fn, $type_map);
-    if ($entry['channel_files'] !== null) {
-        $base  = $entry['base'];
-        $chans = $entry['channel_files'];
-        $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . ($chans['_msc'] ?? $main_fn));
-        $u = fn($fn) => $fn ? track_file_url($music_url, $fn) : null;
-        $ch_msc = $chans['_msc'] ?? null;
-        $ch_bin = $chans['_bin'] ?? null;
-        $ch_vce = $chans['_vce'] ?? null;
-        $ch_env = $chans['_env'] ?? null;
-        if (!$ch_msc) {
-            if ($ch_vce === $main_fn) $ch_vce = null;
-            elseif ($ch_env === $main_fn) $ch_env = null;
-            elseif ($ch_bin === $main_fn) $ch_bin = null;
-        }
-        $lrc_file = $base . '.lrc';
-        $tracks[] = [
-            'file'   => track_file_url($music_url, $main_fn),
-            'title'  => $meta['title']  ?? clean_filename($base),
-            'artist' => $meta['artist'] ?? '',
-            'album'  => $meta['album']  ?? '',
-            'type'   => $type,
-            'msc'    => $u($ch_msc ?? $main_fn),
-            'bin'    => $u($ch_bin),
-            'vce'    => $u($ch_vce),
-            'env'    => $u($ch_env),
-            'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
-                        ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
-        ];
-        continue;
+    $main_fn  = $entry['main_file'];
+    $chans    = $entry['channel_files'];
+    $base     = $entry['base'] ?? preg_replace('/\.(mp3|m4a)$/i', '', $main_fn);
+    $is_choir = is_choir_track($chans);
+    $meta     = read_metadata($music_dir . DIRECTORY_SEPARATOR . $main_fn);
+    // Kanalerna i platsordning (plats 0 = master). key = profilnyckeln (suffix utan understreck).
+    $channels = [];
+    foreach (channel_slots($chans, $main_fn) as [$suffix, $filename]) {
+        $channels[] = ['key' => ltrim($suffix, '_'), 'url' => track_file_url($music_url, $filename)]
+                    + channel_info($suffix, $is_choir);
     }
-    $meta = read_metadata($music_dir . DIRECTORY_SEPARATOR . $main_fn);
-    $fn_base  = preg_replace('/\.(mp3|m4a)$/i', '', $main_fn);
-    $lrc_file = $fn_base . '.lrc';
+    $lrc_file = $base . '.lrc';
     $tracks[] = [
-        'file'   => track_file_url($music_url, $main_fn),
-        'title'  => $meta['title']  ?? clean_filename($main_fn),
-        'artist' => $meta['artist'] ?? '',
-        'album'  => $meta['album']  ?? '',
-        'type'   => $type,
-        'msc'    => track_file_url($music_url, $main_fn),
-        'bin'    => null,
-        'vce'    => null,
-        'env'    => null,
-        'lyrics' => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
-                    ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
+        'file'     => track_file_url($music_url, $main_fn),
+        'title'    => $meta['title']  ?? clean_filename($base),
+        'artist'   => $meta['artist'] ?? '',
+        'album'    => $meta['album']  ?? '',
+        'channels' => $channels,
+        'lyrics'   => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
+                      ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
     ];
 }
 
@@ -209,10 +181,11 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
       <?php if (!is_guest($user)): ?><button class="btn-like-header" id="btn-like-header" title="Gilla" hidden>♡</button><?php endif ?>
     </div>
 
+    <?php /* Fyra kanalplatser (MAX_CHANNEL_SLOTS): msc = master, s1–s3 = valfria kanaler (channels.php). */ ?>
     <audio id="audio-msc" preload="none"></audio>
-    <audio id="audio-bin" preload="none"></audio>
-    <audio id="audio-vce" preload="none"></audio>
-    <audio id="audio-env" preload="none"></audio>
+    <audio id="audio-s1" preload="none"></audio>
+    <audio id="audio-s2" preload="none"></audio>
+    <audio id="audio-s3" preload="none"></audio>
 
     <div class="controls">
       <button class="btn" id="btn-prev" title="Föregående">&#9664;&#9664;</button>
@@ -242,17 +215,17 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 
       <div class="settings-section-title">Kanaler</div>
 
-      <?php /* Etiketter och standardvärden kommer från spårtypen (track_types.php); player.js byter dem per spår. */ ?>
-      <?php foreach (TRACK_TYPES[DEFAULT_TRACK_TYPE]['channels'] as $ch => $def): ?>
-      <div class="setting-row" id="row-<?= $ch ?>"<?= $ch === 'msc' ? '' : ' style="display:none"' ?>>
-        <label id="name-<?= $ch ?>" for="s-<?= $ch ?>"><?= htmlspecialchars($def['icon'] . ' ' . $def['label']) ?></label>
-        <input type="range" id="s-<?= $ch ?>" min="0" max="1" step="0.01" value="<?= $def['default'] ?>">
-        <span class="setting-val" id="lbl-<?= $ch ?>"><?= round($def['default'] * 100) ?>%</span>
+      <?php /* Etikett, ikon och standardvärde per plats sätts av player.js från spårets kanaler (channels.php). */ ?>
+      <?php foreach (['msc', 's1', 's2', 's3'] as $slot): $def = CHANNELS['_msc']; ?>
+      <div class="setting-row" id="row-<?= $slot ?>"<?= $slot === 'msc' ? '' : ' style="display:none"' ?>>
+        <label id="name-<?= $slot ?>" for="s-<?= $slot ?>"><?= htmlspecialchars($def['icon'] . ' ' . $def['label']) ?></label>
+        <input type="range" id="s-<?= $slot ?>" min="0" max="1" step="0.01" value="<?= $def['default'] ?>">
+        <span class="setting-val" id="lbl-<?= $slot ?>"><?= round($def['default'] * 100) ?>%</span>
       </div>
       <?php endforeach ?>
 
       <div class="settings-divider"></div>
-      <div class="settings-section-title" id="eq-title"><?= htmlspecialchars(TRACK_TYPES[DEFAULT_TRACK_TYPE]['eq_title']) ?></div>
+      <div class="settings-section-title" id="eq-title">Equalizer — <?= htmlspecialchars(CHANNELS['_msc']['label']) ?></div>
 
       <div class="setting-row">
         <label>Balans</label>
@@ -332,7 +305,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         <ul class="album-tracks">
       <?php endif ?>
       <?php foreach ($indices as $i): $t = $tracks[$i]; ?>
-          <li class="track-item" data-index="<?= $i ?>" data-file="<?= htmlspecialchars($t['msc'] ?? '', ENT_QUOTES) ?>">
+          <li class="track-item" data-index="<?= $i ?>" data-file="<?= htmlspecialchars($t['channels'][0]['url'], ENT_QUOTES) ?>">
             <span class="track-num"><?= $i + 1 ?></span>
             <div class="track-info">
               <span class="t-title"><?= htmlspecialchars($t['title']) ?></span>
@@ -340,8 +313,8 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
               <span class="t-artist"><?= htmlspecialchars($t['artist']) ?></span>
               <?php endif ?>
               <span class="t-channels">
-                <?php foreach (TRACK_TYPES[$t['type']]['channels'] as $ch => $def): ?>
-                  <?php if ($t[$ch]): ?><span title="<?= htmlspecialchars($def['label']) ?>"><?= htmlspecialchars($def['list_icon']) ?></span><?php endif ?>
+                <?php foreach ($t['channels'] as $c): ?>
+                  <span title="<?= htmlspecialchars($c['label']) ?>"><?= htmlspecialchars($c['list_icon']) ?></span>
                 <?php endforeach ?>
               </span>
             </div>
@@ -384,7 +357,6 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         JSON_HEX_TAG gör att "</script>" aldrig kan förekomma i datan. */ ?>
 <script type="application/json" id="cm-data"><?= json_encode([
     'TRACKS'       => $tracks,
-    'TRACK_TYPES'  => TRACK_TYPES,
     'CM_USER'      => $user['username'],
     'CM_USER_TYPE' => is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered'),
     'CM_CSRF'      => csrf_token(),

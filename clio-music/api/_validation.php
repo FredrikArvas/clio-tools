@@ -28,8 +28,10 @@ require_once dirname(__DIR__) . '/access.php';
 const GLOBAL_SETTINGS_KEY = '_settings';   // profilnyckel för uppspelningsläge, hastighet och kö
 const PLAY_MODES          = ['none', 'repeat-one', 'repeat-all', 'shuffle'];
 // Intervall per spårinställning; speglar min/max på reglagen i index.php.
+// Volymnycklarna är kanalsuffixen utan understreck (CH_SUFFIXES i access.php).
 const TRACK_SETTING_RANGES = [
     'msc' => [0.0, 1.0], 'bin' => [0.0, 1.0], 'vce' => [0.0, 1.0], 'env' => [0.0, 1.0],
+    'ch2' => [0.0, 1.0], 'ch3' => [0.0, 1.0], 'ch4' => [0.0, 1.0],
     'balance' => [-1.0, 1.0], 'bass' => [-12.0, 12.0], 'treble' => [-12.0, 12.0],
 ];
 const PLAYBACK_RATE_RANGE = [0.5, 2.0];

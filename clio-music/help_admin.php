@@ -98,22 +98,16 @@ kbd  { background:var(--surface2); border:1px solid var(--border); border-radius
     <div class="note">Saknar filen ID3-taggar används filnamnet som titel — understreck och bindestreck ersätts med mellanslag.</div>
 
     <h2>4-kanalsspår</h2>
-    <p>Exportera upp till fyra filer med identisk bas och suffixen <code>_msc</code>, <code>_bin</code>, <code>_vce</code>, <code>_env</code>:</p>
+    <p>Exportera upp till fyra filer med identisk bas. Suffixet styr vad reglaget heter:</p>
     <ul>
-      <li><code>001-Meditation_msc.mp3</code> — musik (master, driver progress och EQ)</li>
-      <li><code>001-Meditation_bin.mp3</code> — binauralt lager (spelas i ren stereo utan EQ)</li>
-      <li><code>001-Meditation_vce.mp3</code> — röst</li>
-      <li><code>001-Meditation_env.mp3</code> — miljöljud</li>
+      <li><code>_msc</code> — master (driver progress och EQ, krävs). Heter <strong>Musik</strong>, eller <strong>Stämma 1</strong> om spåret har någon <code>_ch</code>-fil.</li>
+      <li><code>_bin</code> — Binauralt (spelas i ren stereo utan EQ)</li>
+      <li><code>_vce</code> — Röst</li>
+      <li><code>_env</code> — Miljö</li>
+      <li><code>_ch2</code>, <code>_ch3</code>, <code>_ch4</code> — Stämma 2, 3, 4 (repetitionsspår för kör, startar på 80 %)</li>
     </ul>
+    <p>Suffixen kan blandas, t.ex. <code>_msc</code> + <code>_ch2</code> + <code>_vce</code>. Högst fyra kanaler per spår; finns fler spelas de i ordningen <code>_ch2</code>, <code>_ch3</code>, <code>_ch4</code>, <code>_bin</code>, <code>_vce</code>, <code>_env</code> och resten hoppas över.</p>
     <p>Ladda upp alla filer till <code>music/</code>. Spelaren känner igen gruppen automatiskt utifrån filnamnsbasen. Metadata läses från <code>_msc</code>-filen.</p>
-
-    <h2>Spårtyp (meditation eller kör)</h2>
-    <p>Typen styr vad kanalerna heter i ljudpanelen. Den sätts i <code>data/track_types.csv</code> med samma prefixmatchning som grupperna (<code>prefix;typ</code>). Spår utan rad är <code>meditation</code>.</p>
-    <ul>
-      <li><code>meditation</code> — Musik / Binauralt / Röst / Miljö</li>
-      <li><code>kör</code> — Stämma 1–4: <code>_msc</code> = stämma 1, <code>_bin</code> = 2, <code>_vce</code> = 3, <code>_env</code> = 4. Alla stämmor startar på 80 %. Bas/diskant/balans gäller stämma 1.</li>
-    </ul>
-    <p>Exempel: raden <code>101_kor_;kör</code> gör alla spår som börjar med <code>101_kor_</code> till körspår.</p>
 
     <h2>Serverupplägg och deploy</h2>
     <p>Applikationen körs på EliteDesk GPU (<code>clioadmin@100.107.127.104</code>) med PHP 8.3-FPM + nginx på port 8091, bakom Cloudflare.</p>
