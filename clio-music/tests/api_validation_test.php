@@ -67,7 +67,7 @@ foreach ([['okänt spår', 'music/hittepa.mp3'], ['tomt', ''], ['array', ['x']],
 }
 
 echo "== Spårinställningar\n";
-$valid = ['msc' => 0.8, 'bin' => 0, 'vce' => 1, 'env' => 0.4, 'balance' => -1, 'bass' => -12, 'treble' => 3.5, 'liked' => true];
+$valid = ['msc' => 0.8, 'bin' => 0, 'vce' => 1, 'env' => 0.4, 'ch2' => 0.8, 'ch3' => 0, 'ch4' => 1,'balance' => -1, 'bass' => -12, 'treble' => 3.5, 'liked' => true];
 [$clean, $error] = validate_profile_settings('music/zz_b.mp3', $valid, $known);
 check('giltiga inställningar godtas oförändrade', $error === '' && $clean === $valid);
 [$clean, $error] = validate_profile_settings('music/zz_b.mp3', $valid + ['evil' => 'x', '__proto__' => 1, 'extra' => [1]], $known);

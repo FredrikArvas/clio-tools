@@ -6,7 +6,7 @@ $music_dir   = __DIR__ . '/music';
 $music_url   = 'music';
 $site_title  = 'Clio Music';
 $logo_url    = 'assets/logo.png';   // installationens logga; tom sträng = ingen logga
-define('APP_VERSION', '1.9.0');
+define('APP_VERSION', '1.10.0');
 define('APP_STAGE', 'beta');   // visas som markör vid titeln, t.ex. "beta 1.7.0". Tom sträng = ingen markör.
 $lyrics_url = 'lyrics';
 define('GUEST_GROUP',  'Gäst');

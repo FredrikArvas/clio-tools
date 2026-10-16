@@ -9,19 +9,22 @@
  * admin/index.php (grupp-etikett i statistiken).
  *
  * Säkerhetsantaganden:
- * - Behörighet avgörs alltid på HUVUDSPÅRET. Kanalfiler (_bin/_vce/_env/_msc) och .lrc-filer
+ * - Behörighet avgörs alltid på HUVUDSPÅRET. Kanalfiler (CH_SUFFIXES) och .lrc-filer
  *   ärver huvudspårets grupp, eftersom index.php bara exponerar dem via huvudspåret.
  *   Om index.php och stream.php skulle räkna olika uppstår en lucka — därför delar de
  *   scan_music() och main_channel_file() härifrån.
  * - Spår utan grupp syns för alla inloggade men aldrig för gäster.
  */
 
-const CH_SUFFIXES = ['_msc', '_bin', '_vce', '_env'];
+// Alla kanalsuffix. _msc är master; övriga är valfria (etiketter i channels.php).
+// Ordningen är också reservordningen för huvudfilen när _msc saknas (main_channel_file).
+const CH_SUFFIXES = ['_msc', '_vce', '_env', '_bin', '_ch2', '_ch3', '_ch4'];
 
 // Stöder mp3 och m4a. Icke-girig bas: "a_b_msc.mp3" → bas "a_b".
 const AUDIO_EXTENSIONS      = ['mp3', 'm4a'];
 const AUDIO_EXT_PATTERN     = '(?:mp3|m4a)';
-const CHANNEL_FILE_PATTERN  = '/^(.+?)(_msc|_bin|_vce|_env)\.(?:mp3|m4a)$/i';
+const CHANNEL_SUFFIX_PATTERN = '(_msc|_vce|_env|_bin|_ch2|_ch3|_ch4)';   // samma som CH_SUFFIXES
+const CHANNEL_FILE_PATTERN  = '/^(.+?)' . CHANNEL_SUFFIX_PATTERN . '\.(?:mp3|m4a)$/i';
 
 /**
  * Läser en prefixtabell "prefix;värde" (rader som börjar med # hoppas över).
@@ -89,7 +92,10 @@ function scan_music(string $music_dir): array {
 
 /** Huvudfilen i ett flerkanalsspår: den vars grupp styr hela spåret. */
 function main_channel_file(array $channel_files): ?string {
-    return $channel_files['_msc'] ?? $channel_files['_vce'] ?? $channel_files['_env'] ?? $channel_files['_bin'] ?? null;
+    foreach (CH_SUFFIXES as $suffix) {
+        if (isset($channel_files[$suffix])) return $channel_files[$suffix];
+    }
+    return null;
 }
 
 /**

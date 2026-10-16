@@ -6,14 +6,14 @@
 // ── Data från servern ─────────────────────────────────────────────────────────
 // index.php skriver spår, användare och CSRF-token i ett <script type="application/json">-block
 // (ingen inline-kod, så CSP kan förbjuda det). Namnen är desamma som när de var globala konstanter.
-const { TRACKS, TRACK_TYPES, CM_USER, CM_USER_TYPE, CM_CSRF } = JSON.parse(document.getElementById('cm-data').textContent);
+const { TRACKS, CM_USER, CM_USER_TYPE, CM_CSRF } = JSON.parse(document.getElementById('cm-data').textContent);
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const audios = {
     msc: document.getElementById('audio-msc'),
-    bin: document.getElementById('audio-bin'),
-    vce: document.getElementById('audio-vce'),
-    env: document.getElementById('audio-env'),
+    s1:  document.getElementById('audio-s1'),
+    s2:  document.getElementById('audio-s2'),
+    s3:  document.getElementById('audio-s3'),
 };
 const btnPlay = document.getElementById('btn-play');
 const btnPrev = document.getElementById('btn-prev');
@@ -44,13 +44,15 @@ document.addEventListener('input', e => {
     if (e.target.matches('input[type=range]')) paintRange(e.target);
 });
 
-const CH_IDS = ['msc', 'bin', 'vce', 'env'];
+// Fyra kanalplatser: msc = master (driver förlopp, loggning och EQ), s1–s3 = valfria kanaler.
+// Vilken kanal som ligger på en plats står i TRACKS[i].channels (channels.php): plats n = channels[n].
+const SLOTS = ['msc', 's1', 's2', 's3'];
 
 const sliders = {};
 const lbls    = {};
 const rows    = {};
 const names   = {};
-CH_IDS.forEach(ch => {
+SLOTS.forEach(ch => {
     sliders[ch] = document.getElementById('s-' + ch);
     lbls[ch]    = document.getElementById('lbl-' + ch);
     rows[ch]    = document.getElementById('row-' + ch);
@@ -58,19 +60,21 @@ CH_IDS.forEach(ch => {
 });
 const eqTitleEl = document.getElementById('eq-title');
 
-// Spårtypen (track_types.php) bestämmer kanalernas etikett, ikon och standardvolym.
-// TRACKS[i].type finns alltid i TRACK_TYPES; första typen är reserv om datan ändå skulle sakna den.
-function trackTypeDef(index) {
-    return TRACK_TYPES[TRACKS[index]?.type] ?? Object.values(TRACK_TYPES)[0];
+/** Kanalen ({key, url, label, icon, default}) på en plats i spåret, eller null om platsen är tom. */
+function slotChannel(index, slot) {
+    return TRACKS[index]?.channels[SLOTS.indexOf(slot)] ?? null;
 }
 
-function applyTrackType(index) {
-    const def = trackTypeDef(index);
-    CH_IDS.forEach(ch => {
-        const c = def.channels[ch];
-        if (names[ch]) names[ch].textContent = c.icon + ' ' + c.label;
+/** Sätter ljudkällor, etiketter och synliga reglage för spårets kanaler. */
+function applyTrackChannels(index) {
+    SLOTS.forEach(ch => {
+        const c = slotChannel(index, ch);
+        if (c) audios[ch].src = c.url;
+        else   audios[ch].removeAttribute('src');
+        rows[ch].style.display = c ? '' : 'none';
+        if (c) names[ch].textContent = c.icon + ' ' + c.label;
     });
-    if (eqTitleEl) eqTitleEl.textContent = def.eq_title;
+    eqTitleEl.textContent = 'Equalizer — ' + slotChannel(index, 'msc').label;
 }
 
 const slBalance = document.getElementById('s-balance');
@@ -95,7 +99,7 @@ function initAudio() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-    CH_IDS.forEach(ch => {
+    SLOTS.forEach(ch => {
         const src     = ctx.createMediaElementSource(audios[ch]);
         gainNodes[ch] = ctx.createGain();
         gainNodes[ch].gain.value = audios[ch].volume; // sync from native volume
@@ -162,13 +166,17 @@ function saveSettings() {
         bass:    parseFloat(slBass.value),
         treble:  parseFloat(slTreble.value),
     };
-    CH_IDS.forEach(ch => s[ch] = parseFloat(sliders[ch].value));
+    // Volymen sparas på kanalens nyckel (msc, bin, ch2 …), inte på platsen.
+    SLOTS.forEach(ch => {
+        const c = slotChannel(current, ch);
+        if (c) s[c.key] = parseFloat(sliders[ch].value);
+    });
     serverProfiles[key] = s;
     apiPost('api/save_profile.php', { track: key, settings: s });
 }
 
 function applySettings() {
-    CH_IDS.forEach(ch => {
+    SLOTS.forEach(ch => {
         const val = parseFloat(sliders[ch].value);
         if (ctx) gainNodes[ch].gain.value = val;
         else     audios[ch].volume = val;
@@ -180,8 +188,11 @@ function applySettings() {
     }
 }
 
-function setSliders(s, typeDef = trackTypeDef(current)) {
-    CH_IDS.forEach(ch => { sliders[ch].value = s[ch] ?? typeDef.channels[ch].default; });
+function setSliders(s) {
+    SLOTS.forEach(ch => {
+        const c = slotChannel(current, ch);
+        sliders[ch].value = c ? (s[c.key] ?? c.default) : 0;
+    });
     slBalance.value = s.balance ?? 0;
     slBass.value    = s.bass    ?? 0;
     slTreble.value  = s.treble  ?? 0;
@@ -193,7 +204,7 @@ function setSliders(s, typeDef = trackTypeDef(current)) {
 function initSettings() { setSliders({}); }
 
 function updateLabels() {
-    CH_IDS.forEach(ch => {
+    SLOTS.forEach(ch => {
         lbls[ch].textContent = Math.round(parseFloat(sliders[ch].value) * 100) + '%';
     });
     const bal = parseFloat(slBalance.value);
@@ -202,7 +213,7 @@ function updateLabels() {
     lblTreb.textContent = (parseFloat(slTreble.value) >= 0 ? '+' : '') + parseFloat(slTreble.value).toFixed(1) + ' dB';
 }
 
-CH_IDS.forEach(ch => {
+SLOTS.forEach(ch => {
     sliders[ch].addEventListener('input',  () => { updateLabels(); applySettings(); });
     sliders[ch].addEventListener('change', saveSettings);
 });
@@ -232,7 +243,7 @@ function updateSpeedLabel() {
 
 function applyPlaybackRate() {
     const rate = parseFloat(slSpeed.value);
-    CH_IDS.forEach(ch => { audios[ch].playbackRate = rate; });
+    SLOTS.forEach(ch => { audios[ch].playbackRate = rate; });
 }
 
 function loadGlobalSettings() {
@@ -436,18 +447,18 @@ document.getElementById('tab-pl').addEventListener('click',    () => switchTab('
 
 // ── Kanalsynk ─────────────────────────────────────────────────────────────────
 function playAll() {
-    CH_IDS.forEach(ch => { if (audios[ch].src) audios[ch].play().catch(() => {}); });
+    SLOTS.forEach(ch => { if (audios[ch].src) audios[ch].play().catch(() => {}); });
 }
 function pauseAll() {
-    CH_IDS.forEach(ch => audios[ch].pause());
+    SLOTS.forEach(ch => audios[ch].pause());
 }
 function seekAll(time) {
-    CH_IDS.forEach(ch => { if (audios[ch].src) audios[ch].currentTime = time; });
+    SLOTS.forEach(ch => { if (audios[ch].src) audios[ch].currentTime = time; });
 }
 
 function syncSecondary() {
     if (!audios.msc.hasAttribute('src')) return;
-    ['bin', 'vce', 'env'].forEach(ch => {
+    SLOTS.slice(1).forEach(ch => {
         if (!audios[ch].hasAttribute('src') || audios[ch].paused) return;
         if (Math.abs(audios[ch].currentTime - audios.msc.currentTime) > 0.3) {
             audios[ch].currentTime = audios.msc.currentTime;
@@ -474,15 +485,9 @@ async function load(index, autoplay) {
     const t = TRACKS[index];
     updateHeaderLike();
 
-    applyTrackType(index);
-    setSliders(loadSettings(index), trackTypeDef(index));
+    setSliders(loadSettings(index));
     applyPlaybackRate();
-
-    CH_IDS.forEach(ch => {
-        if (t[ch]) audios[ch].src = t[ch];
-        else audios[ch].removeAttribute('src');
-        if (rows[ch]) rows[ch].style.display = t[ch] ? '' : 'none';
-    });
+    applyTrackChannels(index);
 
     titleEl.textContent  = t.title;
     artistEl.textContent = t.artist || (t.album ? '♪ ' + t.album : '');

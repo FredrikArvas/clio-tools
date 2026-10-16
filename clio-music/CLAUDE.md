@@ -41,16 +41,17 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 
 ### Skyddad medialeverans (access.php + stream.php, S1)
 - **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`, `track_file_url`, `list_visible_tracks`, `visible_track_urls`). Duplicera den aldrig.
-- Kanalfiler (`_bin/_vce/_env`) och `.lrc` ärver gruppen från huvudspåret (`_msc ?? _vce ?? _env ?? _bin`).
+- Kanalfiler och `.lrc` ärver gruppen från huvudspåret (`main_channel_file()`: första suffixet i `CH_SUFFIXES`, normalt `_msc`).
 - nginx skickar `^~ /music/` och `^~ /lyrics/` till `stream.php` via FastCGI. **URL:erna är oförändrade** (`music/<fil>`), eftersom profiler, spellistor, kö och `plays.jsonl` nycklas på URL:en.
 - `stream.php` validerar filnamnet (ett segment, rätt ändelse), kontrollerar behörigheten och svarar med `X-Accel-Redirect: /_protected/{music|lyrics}/<fil>`. nginx levererar filen (Range/seek) från `internal`-locations som bara aliasar `music/` resp. `lyrics/`.
 - Svar: 400 ogiltigt namn, 404 saknas, 403 nekad (även för befintliga filer). Fel och nekade svar: `Cache-Control: private, no-store`.
 - Cachning (v1.8.0, beslut Fredrik 2026-10-16): gästspår `public, max-age=604800` (Cloudflare får cacha), övriga `private, max-age=604800` + `Vary: Cookie`. Flyttas ett gästspår till annan grupp: purga filen i Cloudflare.
 
-### Spårtyp (v1.9.0)
-- `track_types.php`: `TRACK_TYPES` (meditation, kör) styr etikett, ikon och standardvolym per kanal samt EQ-rubriken. Typen sätts i `data/track_types.csv` (`prefix;typ`, samma prefixmatchning som grupperna via `load_prefix_csv()`/`prefix_lookup()` i access.php). Okänd typ loggas och ger `meditation`.
-- Bara presentation: suffix, ljudkedja, profilnycklar och behörighet är desamma. `kör`: `_msc` = stämma 1 … `_env` = stämma 4.
-- `data/track_types.csv` är www-data 640 på servern; redigera med `sudo -u www-data nano`. Test: `php tests/track_types_test.php`.
+### Kanaler och etiketter (v1.10.0)
+- Suffixet styr etiketten. `CH_SUFFIXES` i access.php (behörighet, gruppering): `_msc _vce _env _bin _ch2 _ch3 _ch4`. Presentation och platser i `channels.php` (`CHANNELS`, `channel_slots()`, `is_choir_track()`).
+- Fyra platser (`MAX_CHANNEL_SLOTS`): `msc` = master (förlopp, loggning, EQ), `s1–s3` = valfria kanaler i `CHANNEL_SLOT_ORDER`. Fler kanaler loggas och spelas inte. `_msc` heter "Stämma 1" om spåret har någon `_chN`-fil, annars "Musik".
+- Profilnycklar = suffix utan understreck (`msc`, `bin`, `ch2` …), inte platsen. `TRACKS[i].channels` = `[{key, url, label, icon, list_icon, default}]` i platsordning.
+- Ersätter v1.9.0:s `track_types.php`/`data/track_types.csv` (borttagna). Test: `php tests/channels_test.php`.
 
 ### nginx och säkerhetsrubriker (S5)
 - Konfigen finns i repot: `deploy/nginx_clio_music.conf` (= `/etc/nginx/sites-available/clio_music`), snippets `deploy/clio_music_security_headers.conf` och `deploy/clio_music_csp.conf` (= `/etc/nginx/snippets/`). Ändra i repot, validera i staging, deploya, ladda om.
