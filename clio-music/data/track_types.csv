@@ -1,0 +1,6 @@
+# Spårtyp (styr etiketter, ikoner och standardvolymer i ljudpanelen)
+# Format: prefix;typ  — prefixmatchning på filnamnet, som track_groups.csv. Första träff vinner.
+# Typer: meditation (Musik/Binauralt/Röst/Miljö), kör (Stämma 1–4). Låtar utan rad = meditation.
+# Kanalfilerna heter som vanligt: _msc = stämma 1, _bin = stämma 2, _vce = stämma 3, _env = stämma 4.
+# Exempel:
+# 101_kor_;kör

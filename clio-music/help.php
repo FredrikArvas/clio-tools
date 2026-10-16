@@ -121,7 +121,7 @@ table.shortcuts td:first-child { color:var(--text); font-weight:500; width:50%; 
     <h2>Ljudinställningar</h2>
     <p>Klicka på <kbd>⚙ Ljud</kbd> för att öppna inställningspanelen.</p>
     <ul>
-      <li><strong>Musik / Binauralt / Röst / Miljö</strong> — volym per kanal, 0–100 %. Bara kanalerna som finns i spåret visas.</li>
+      <li><strong>Musik / Binauralt / Röst / Miljö</strong> — volym per kanal, 0–100 %. Bara kanalerna som finns i spåret visas. Repetitionsspår för kör visar i stället <strong>Stämma 1–4</strong>.</li>
       <li><strong>Balans</strong> — vänster (V) / höger (H). C = mitt.</li>
       <li><strong>Bas / Diskant</strong> — ± 12 dB, påverkar musikkanalen.</li>
       <li><strong>Hastighet</strong> — 0.5× till 2.0×, alla kanaler synkroniseras.</li>

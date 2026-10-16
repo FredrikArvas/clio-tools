@@ -107,6 +107,14 @@ kbd  { background:var(--surface2); border:1px solid var(--border); border-radius
     </ul>
     <p>Ladda upp alla filer till <code>music/</code>. Spelaren känner igen gruppen automatiskt utifrån filnamnsbasen. Metadata läses från <code>_msc</code>-filen.</p>
 
+    <h2>Spårtyp (meditation eller kör)</h2>
+    <p>Typen styr vad kanalerna heter i ljudpanelen. Den sätts i <code>data/track_types.csv</code> med samma prefixmatchning som grupperna (<code>prefix;typ</code>). Spår utan rad är <code>meditation</code>.</p>
+    <ul>
+      <li><code>meditation</code> — Musik / Binauralt / Röst / Miljö</li>
+      <li><code>kör</code> — Stämma 1–4: <code>_msc</code> = stämma 1, <code>_bin</code> = 2, <code>_vce</code> = 3, <code>_env</code> = 4. Alla stämmor startar på 80 %. Bas/diskant/balans gäller stämma 1.</li>
+    </ul>
+    <p>Exempel: raden <code>101_kor_;kör</code> gör alla spår som börjar med <code>101_kor_</code> till körspår.</p>
+
     <h2>Serverupplägg och deploy</h2>
     <p>Applikationen körs på EliteDesk GPU (<code>clioadmin@100.107.127.104</code>) med PHP 8.3-FPM + nginx på port 8091, bakom Cloudflare.</p>
     <ul>
