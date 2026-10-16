@@ -23,9 +23,12 @@ const AUDIO_EXTENSIONS      = ['mp3', 'm4a'];
 const AUDIO_EXT_PATTERN     = '(?:mp3|m4a)';
 const CHANNEL_FILE_PATTERN  = '/^(.+?)(_msc|_bin|_vce|_env)\.(?:mp3|m4a)$/i';
 
-function load_track_groups(): array {
-    $path = __DIR__ . '/data/track_groups.csv';
-    $map  = [];
+/**
+ * Läser en prefixtabell "prefix;värde" (rader som börjar med # hoppas över).
+ * Delas av track_groups.csv (behörighet) och track_types.csv (spårtyp, track_types.php).
+ */
+function load_prefix_csv(string $path): array {
+    $map = [];
     if (!file_exists($path)) return $map;
     foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
         if (str_starts_with(trim($line), '#')) continue;
@@ -35,11 +38,20 @@ function load_track_groups(): array {
     return $map;
 }
 
-function track_group(string $filename, array $map): string {
-    foreach ($map as $prefix => $group) {
-        if (str_starts_with($filename, $prefix)) return $group;
+/** Värdet för första prefixet i tabellen som filnamnet börjar med, annars ''. */
+function prefix_lookup(string $filename, array $map): string {
+    foreach ($map as $prefix => $value) {
+        if (str_starts_with($filename, $prefix)) return $value;
     }
     return '';
+}
+
+function load_track_groups(): array {
+    return load_prefix_csv(__DIR__ . '/data/track_groups.csv');
+}
+
+function track_group(string $filename, array $map): string {
+    return prefix_lookup($filename, $map);
 }
 
 function user_can_see(string $track_group, array $user): bool {

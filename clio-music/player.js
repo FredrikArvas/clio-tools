@@ -6,7 +6,7 @@
 // ── Data från servern ─────────────────────────────────────────────────────────
 // index.php skriver spår, användare och CSRF-token i ett <script type="application/json">-block
 // (ingen inline-kod, så CSP kan förbjuda det). Namnen är desamma som när de var globala konstanter.
-const { TRACKS, CM_USER, CM_USER_TYPE, CM_CSRF } = JSON.parse(document.getElementById('cm-data').textContent);
+const { TRACKS, TRACK_TYPES, CM_USER, CM_USER_TYPE, CM_CSRF } = JSON.parse(document.getElementById('cm-data').textContent);
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const audios = {
@@ -49,11 +49,29 @@ const CH_IDS = ['msc', 'bin', 'vce', 'env'];
 const sliders = {};
 const lbls    = {};
 const rows    = {};
+const names   = {};
 CH_IDS.forEach(ch => {
     sliders[ch] = document.getElementById('s-' + ch);
     lbls[ch]    = document.getElementById('lbl-' + ch);
     rows[ch]    = document.getElementById('row-' + ch);
+    names[ch]   = document.getElementById('name-' + ch);
 });
+const eqTitleEl = document.getElementById('eq-title');
+
+// Spårtypen (track_types.php) bestämmer kanalernas etikett, ikon och standardvolym.
+// TRACKS[i].type finns alltid i TRACK_TYPES; första typen är reserv om datan ändå skulle sakna den.
+function trackTypeDef(index) {
+    return TRACK_TYPES[TRACKS[index]?.type] ?? Object.values(TRACK_TYPES)[0];
+}
+
+function applyTrackType(index) {
+    const def = trackTypeDef(index);
+    CH_IDS.forEach(ch => {
+        const c = def.channels[ch];
+        if (names[ch]) names[ch].textContent = c.icon + ' ' + c.label;
+    });
+    if (eqTitleEl) eqTitleEl.textContent = def.eq_title;
+}
 
 const slBalance = document.getElementById('s-balance');
 const slBass    = document.getElementById('s-bass');
@@ -123,7 +141,6 @@ function apiPost(url, payload) {
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────────
-const CH_DEFAULTS = { msc: 0.8, bin: 0.5, vce: 0.9, env: 0.4 };
 let serverProfiles = {};
 
 const profilesLoaded = fetch('api/load_profiles.php')
@@ -163,8 +180,8 @@ function applySettings() {
     }
 }
 
-function setSliders(s) {
-    CH_IDS.forEach(ch => { sliders[ch].value = s[ch] ?? CH_DEFAULTS[ch]; });
+function setSliders(s, typeDef = trackTypeDef(current)) {
+    CH_IDS.forEach(ch => { sliders[ch].value = s[ch] ?? typeDef.channels[ch].default; });
     slBalance.value = s.balance ?? 0;
     slBass.value    = s.bass    ?? 0;
     slTreble.value  = s.treble  ?? 0;
@@ -457,7 +474,8 @@ async function load(index, autoplay) {
     const t = TRACKS[index];
     updateHeaderLike();
 
-    setSliders(loadSettings(index));
+    applyTrackType(index);
+    setSliders(loadSettings(index), trackTypeDef(index));
     applyPlaybackRate();
 
     CH_IDS.forEach(ch => {

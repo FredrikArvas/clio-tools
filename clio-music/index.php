@@ -5,6 +5,7 @@
 require_once 'auth.php';
 require_once 'config.php';
 require_once 'access.php';
+require_once 'track_types.php';
 require_once 'csrf.php';
 
 $user = current_user_or_guest();
@@ -108,9 +109,11 @@ $lyrics_dir = __DIR__ . '/lyrics';
 
 // ── Synliga spår (regeln delas med stream.php och API:erna via access.php) ──
 $tracks = [];
+$type_map = load_track_types();
 
 foreach (list_visible_tracks($user, $music_dir) as $entry) {
     $main_fn = $entry['main_file'];
+    $type    = track_type($main_fn, $type_map);
     if ($entry['channel_files'] !== null) {
         $base  = $entry['base'];
         $chans = $entry['channel_files'];
@@ -131,6 +134,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
             'title'  => $meta['title']  ?? clean_filename($base),
             'artist' => $meta['artist'] ?? '',
             'album'  => $meta['album']  ?? '',
+            'type'   => $type,
             'msc'    => $u($ch_msc ?? $main_fn),
             'bin'    => $u($ch_bin),
             'vce'    => $u($ch_vce),
@@ -148,6 +152,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         'title'  => $meta['title']  ?? clean_filename($main_fn),
         'artist' => $meta['artist'] ?? '',
         'album'  => $meta['album']  ?? '',
+        'type'   => $type,
         'msc'    => track_file_url($music_url, $main_fn),
         'bin'    => null,
         'vce'    => null,
@@ -237,29 +242,17 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
 
       <div class="settings-section-title">Kanaler</div>
 
-      <div class="setting-row" id="row-msc">
-        <label>&#127925; Musik</label>
-        <input type="range" id="s-msc" min="0" max="1" step="0.01" value="0.8">
-        <span class="setting-val" id="lbl-msc">80%</span>
+      <?php /* Etiketter och standardvärden kommer från spårtypen (track_types.php); player.js byter dem per spår. */ ?>
+      <?php foreach (TRACK_TYPES[DEFAULT_TRACK_TYPE]['channels'] as $ch => $def): ?>
+      <div class="setting-row" id="row-<?= $ch ?>"<?= $ch === 'msc' ? '' : ' style="display:none"' ?>>
+        <label id="name-<?= $ch ?>" for="s-<?= $ch ?>"><?= htmlspecialchars($def['icon'] . ' ' . $def['label']) ?></label>
+        <input type="range" id="s-<?= $ch ?>" min="0" max="1" step="0.01" value="<?= $def['default'] ?>">
+        <span class="setting-val" id="lbl-<?= $ch ?>"><?= round($def['default'] * 100) ?>%</span>
       </div>
-      <div class="setting-row" id="row-bin" style="display:none">
-        <label>&#128264; Binauralt</label>
-        <input type="range" id="s-bin" min="0" max="1" step="0.01" value="0.5">
-        <span class="setting-val" id="lbl-bin">50%</span>
-      </div>
-      <div class="setting-row" id="row-vce" style="display:none">
-        <label>&#127897; Röst</label>
-        <input type="range" id="s-vce" min="0" max="1" step="0.01" value="0.9">
-        <span class="setting-val" id="lbl-vce">90%</span>
-      </div>
-      <div class="setting-row" id="row-env" style="display:none">
-        <label>&#127807; Miljö</label>
-        <input type="range" id="s-env" min="0" max="1" step="0.01" value="0.4">
-        <span class="setting-val" id="lbl-env">40%</span>
-      </div>
+      <?php endforeach ?>
 
       <div class="settings-divider"></div>
-      <div class="settings-section-title">Equalizer — musikkanal</div>
+      <div class="settings-section-title" id="eq-title"><?= htmlspecialchars(TRACK_TYPES[DEFAULT_TRACK_TYPE]['eq_title']) ?></div>
 
       <div class="setting-row">
         <label>Balans</label>
@@ -347,8 +340,8 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
               <span class="t-artist"><?= htmlspecialchars($t['artist']) ?></span>
               <?php endif ?>
               <span class="t-channels">
-                <?php foreach (['msc'=>'♪','bin'=>'≋','vce'=>'◎','env'=>'〜'] as $ch => $icon): ?>
-                  <?php if ($t[$ch]): ?><span title="<?= ['msc'=>'Musik','bin'=>'Binauralt','vce'=>'Röst','env'=>'Miljö'][$ch] ?>"><?= $icon ?></span><?php endif ?>
+                <?php foreach (TRACK_TYPES[$t['type']]['channels'] as $ch => $def): ?>
+                  <?php if ($t[$ch]): ?><span title="<?= htmlspecialchars($def['label']) ?>"><?= htmlspecialchars($def['list_icon']) ?></span><?php endif ?>
                 <?php endforeach ?>
               </span>
             </div>
@@ -391,6 +384,7 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         JSON_HEX_TAG gör att "</script>" aldrig kan förekomma i datan. */ ?>
 <script type="application/json" id="cm-data"><?= json_encode([
     'TRACKS'       => $tracks,
+    'TRACK_TYPES'  => TRACK_TYPES,
     'CM_USER'      => $user['username'],
     'CM_USER_TYPE' => is_guest($user) ? 'guest' : (!empty($user['admin']) ? 'admin' : 'registered'),
     'CM_CSRF'      => csrf_token(),
