@@ -108,7 +108,8 @@ function clean_filename(string $name): string {
 $lyrics_dir = __DIR__ . '/lyrics';
 
 // ── Synliga spår (regeln delas med stream.php och API:erna via access.php) ──
-$tracks = [];
+$tracks    = [];
+$group_map = load_track_groups();
 
 foreach (list_visible_tracks($user, $music_dir) as $entry) {
     $main_fn  = $entry['main_file'];
@@ -128,6 +129,8 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
         'title'    => $meta['title']  ?? clean_filename($base),
         'artist'   => $meta['artist'] ?? '',
         'album'    => $meta['album']  ?? '',
+        // Rubrik i listan: albumtaggen, annars behörighetsgruppen (channels.php: track_section).
+        'section'  => track_section($meta['album'] ?? '', track_group($main_fn, $group_map)),
         'channels' => $channels,
         'lyrics'   => file_exists($lyrics_dir . DIRECTORY_SEPARATOR . $lrc_file)
                       ? ($lyrics_url . '/' . rawurlencode($lrc_file)) : null,
@@ -280,11 +283,11 @@ foreach (list_visible_tracks($user, $music_dir) as $entry) {
     </div>
     <ul id="track-list">
       <?php
-      // Gruppera spår efter album i ursprunglig ordning
+      // Gruppera spår efter rubrik (album, annars behörighetsgrupp) i ursprunglig ordning
       $album_order  = [];
       $album_groups = [];
       foreach ($tracks as $i => $t) {
-          $al = $t['album'];
+          $al = $t['section'];
           if (!array_key_exists($al, $album_groups)) {
               $album_order[]     = $al;
               $album_groups[$al] = [];

@@ -113,7 +113,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - `TRACKS[]` injiceras från PHP som JSON i `<script type="application/json" id="cm-data">` (tillsammans med CM_USER, CM_USER_TYPE, CM_CSRF) och läses med `JSON.parse`.
 - `current`: index i TRACKS för aktuellt spår. `queue[]`: `{idx, id}`, sparas server-side via `_settings`. `playlists{}`: laddas från `api/load_playlists.php`.
 - Tre flikar: `lib` (bibliotek), `queue` (kö), `pl` (spellistor). Byt med `switchTab(tab)`.
-- Album grupperas per albumtagg i PHP (`$album_groups`). Kollapsade album sparas i `localStorage` under `clio_collapsed_albums`.
+- Album grupperas per albumtagg i PHP (`$album_groups`). Saknar spåret albumtagg grupperas det under sin behörighetsgrupp (v1.11.1, `track_section()` i channels.php, `_` visas som mellanslag); spår i `UPLOAD_GROUP` under "Nyuppladdat (bara admin)", spår utan både album och grupp utan rubrik. Rubriken ligger i `TRACKS[i].section`; `album` är fortfarande bara taggen (artistraden, låsskärmen). Kollapsade album sparas i `localStorage` under `clio_collapsed_albums`.
 - **Bakgrundsuppspelning:** Web Audio API initieras lazy, först när användaren rör balance/bas/diskant-reglagen. Före lazy-init används `audios[ch].volume` (native HTML), som iOS/Android kan spela i bakgrunden. Media Session API (låsskärm, titel, seek) och Wake Lock API (släpps vid paus) är registrerade.
 - **Lyrics:** LRC-filer i `lyrics/`, namngivna `{spårnamn_utan_suffix}.lrc`. Visas i `#lyrics-panel`. Aktuell rad highlightas och auto-scrollas via `updateLyricsLine(currentTime)`. Klick på rad anropar `seekAll(line.time)`. Sökfältet `#lyrics-search` filtrerar i realtid och pausar auto-scroll. Sökning och scroll-state nollställs vid `loadLyrics()`.
 
