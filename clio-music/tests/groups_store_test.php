@@ -227,6 +227,42 @@ $fresh_path = $dir . '/fresh_track_groups.csv';
 check('skapar fil', save_track_groups($fresh_path, ['b.mp3' => 'RIM1'], []) === '');
 check('rubrik + rad', file_get_contents($fresh_path) === implode("\n", TRACK_GROUPS_HEADER) . "\nb.mp3;RIM1\n");
 
+echo "== UPLOAD_GROUP (nyuppladdade spår)\n";
+file_put_contents($users_path, $users_lf);
+$users = read_admin_users($users_path);
+$known = collect_known_groups($users, []);
+check('UPLOAD_GROUP är alltid en känd grupp', in_array(UPLOAD_GROUP, $known, true));
+check('UPLOAD_GROUP kan inte tilldelas användare (finns inte i användarlistan)', !in_array(UPLOAD_GROUP, user_assignable_groups($known), true));
+check('övriga grupper kan tilldelas användare', in_array(GUEST_GROUP, user_assignable_groups($known), true));
+$submitted = unchanged_selection($users);
+$submitted['ulrika'][UPLOAD_GROUP] = '1';
+[, $error] = validate_user_group_selection($users, $known, $submitted);
+check('ug med UPLOAD_GROUP avvisas', $error !== '');
+check('save_user_groups avvisar UPLOAD_GROUP direkt', save_user_groups($users_path, ['ulrika' => ['RIM1', UPLOAD_GROUP]]) !== '');
+check('users.csv oförändrad', file_get_contents($users_path) === $users_lf);
+
+$upload_tracks = "# Låt-grupptillhörighet\nAim;Ljudvägg\nb.mp3;RIM2\n";
+file_put_contents($tracks_path, $upload_tracks);
+$map   = parse_fixture_map($tracks_path);
+$known = collect_known_groups(['x' => ['groups' => ['RIM1', 'RIM2', 'Ljudvägg']]], $map);
+[$assignments, $error] = validate_track_assignments(['a_msc.mp3' => UPLOAD_GROUP], $music_files, $known);
+check('spår kan flyttas till UPLOAD_GROUP i Låtar-fliken', $error === '' && $assignments === ['a_msc.mp3' => UPLOAD_GROUP]);
+// Samma steg som admin/upload.php: grupprad först, sedan återställning om flytten misslyckas.
+check('uppladdning: grupprad skrivs', save_track_groups($tracks_path, ['Aim for the Stars.mp3' => UPLOAD_GROUP], $map) === '');
+$map = parse_fixture_map($tracks_path);
+check('uppladdning: raden vinner över prefixregeln', track_group('Aim for the Stars.mp3', $map) === UPLOAD_GROUP);
+check('uppladdning: övriga rader orörda', track_group('b.mp3', $map) === 'RIM2' && ($map['Aim'] ?? '') === 'Ljudvägg');
+check('återställning till prefixgruppen', save_track_groups($tracks_path, ['Aim for the Stars.mp3' => 'Ljudvägg'], $map) === '');
+check('återställning: filen som före uppladdningen', file_get_contents($tracks_path) === $upload_tracks);
+$map = parse_fixture_map($tracks_path);
+save_track_groups($tracks_path, ['ny.mp3' => UPLOAD_GROUP], $map);
+$map = parse_fixture_map($tracks_path);
+check('spår kan flyttas från UPLOAD_GROUP till en annan grupp', save_track_groups($tracks_path, ['ny.mp3' => 'RIM1'], $map) === ''
+    && track_group('ny.mp3', parse_fixture_map($tracks_path)) === 'RIM1');
+$map = parse_fixture_map($tracks_path);
+save_track_groups($tracks_path, ['ny.mp3' => ''], $map);
+check('återställning till ingen grupp tar bort raden', !str_contains(file_get_contents($tracks_path), 'ny.mp3'));
+
 echo "== Filhantering\n";
 $leftovers = array_filter(scandir($dir), fn($entry) => str_contains($entry, '.tmp'));
 check('inga tempfiler blir kvar', $leftovers === []);

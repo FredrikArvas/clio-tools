@@ -199,6 +199,59 @@ done
 check "giltigt gruppnamn accepteras (skriver inget)" "200" "${admin_cookie[@]}" \
     --data-urlencode "csrf_token=$admin_token" --data-urlencode "new_group_name=Smoke test" -d "add_group=1" "$BASE/admin/groups.php"
 
+echo "== Uppladdning (admin/upload.php) — testfilen och dess grupprad tas bort efteråt"
+UPLOAD_NAME="__smoketest_upload_$(openssl rand -hex 6).mp3"
+upload_tmp=$(mktemp -d)
+# Liten giltig mp3 (ID3-tagg + en MPEG-ramsynk) och en fil med fel ändelse; inga binärer i repot.
+printf 'ID3\x04\x00\x00\x00\x00\x00\x00\xff\xfb\x90\x64' > "$upload_tmp/ok.mp3"
+head -c 64 /dev/zero >> "$upload_tmp/ok.mp3"
+printf 'hej\n' > "$upload_tmp/fel.txt"
+# Tar bort filen i music/ och raden i track_groups.csv (som www-data, filen är 640). Körs även vid avbrott.
+cleanup_upload() {
+    sudo rm -f "$WEBROOT/music/$UPLOAD_NAME"
+    (cd "$WEBROOT" && sudo -u www-data php -r 'require "admin/groups_store.php";
+        $error = save_track_groups("data/track_groups.csv", [$argv[1] => ""], load_track_groups());
+        if ($error !== "") { fwrite(STDERR, "kunde inte ta bort grupprad: $error\n"); exit(1); }' "$UPLOAD_NAME")
+    sudo rm -f "$WEBROOT/data/rate_limits/$(printf '%s' "upload:__smoketest__" | sha256sum | cut -c1-64).json"
+    rm -rf "$upload_tmp"
+}
+trap 'cleanup_upload; cleanup' EXIT
+upload_token=$(curl -s "${admin_cookie[@]}" "$BASE/admin/?view=upload" | grep -o '"csrf":"[^"]*"' | sed 's/.*:"//;s/"$//')
+upload_csrf=(-H "X-CSRF-Token: $upload_token")
+upload_ok=(-F "file=@$upload_tmp/ok.mp3;filename=$UPLOAD_NAME")
+check "admin/upload_validation.php direkt"         "403" "$BASE/admin/upload_validation.php"
+check "upload: ej inloggad"                        "401" "${upload_csrf[@]}" "${upload_ok[@]}" "$BASE/admin/upload.php"
+check "upload: icke-admin"                         "403" "${user_cookie[@]}" "${upload_csrf[@]}" "${upload_ok[@]}" "$BASE/admin/upload.php"
+check "upload: admin utan CSRF-token"              "403" "${admin_cookie[@]}" "${upload_ok[@]}" "$BASE/admin/upload.php"
+check "upload: admin med fel CSRF-token"           "403" "${admin_cookie[@]}" -H "X-CSRF-Token: fel" "${upload_ok[@]}" "$BASE/admin/upload.php"
+check "upload: GET"                                "405" "${admin_cookie[@]}" "$BASE/admin/upload.php"
+check "upload: fel ändelse"                        "400|415" "${admin_cookie[@]}" "${upload_csrf[@]}" -F "file=@$upload_tmp/fel.txt;filename=__smoketest__.txt" "$BASE/admin/upload.php"
+check "upload: mp3-namn med textinnehåll"          "415" "${admin_cookie[@]}" "${upload_csrf[@]}" -F "file=@$upload_tmp/fel.txt;filename=__smoketest__.mp3" "$BASE/admin/upload.php"
+check "upload: lyckad (liten mp3)"                 "200" "${admin_cookie[@]}" "${upload_csrf[@]}" "${upload_ok[@]}" "$BASE/admin/upload.php"
+if sudo test -f "$WEBROOT/music/$UPLOAD_NAME"; then
+    pass=$((pass + 1)); echo "  OK    uppladdad fil finns i music/"
+else
+    fail=$((fail + 1)); echo "  FEL   uppladdad fil saknas i music/"
+fi
+uploaded_group=$(cd "$WEBROOT" && sudo -u www-data php -r 'require "access.php"; echo track_group($argv[1], load_track_groups());' "$UPLOAD_NAME")
+if [[ "$uploaded_group" == "uploaded" ]]; then
+    pass=$((pass + 1)); echo "  OK    grupprad 'uploaded' finns"
+else
+    fail=$((fail + 1)); echo "  FEL   gruppen är '$uploaded_group', väntat 'uploaded'"
+fi
+check "upload: dubblett"                           "409" "${admin_cookie[@]}" "${upload_csrf[@]}" "${upload_ok[@]}" "$BASE/admin/upload.php"
+check "uppladdat spår: icke-admin nekas"           "403" "${user_cookie[@]}" "$(music "$UPLOAD_NAME")"
+check "uppladdat spår: gäst nekas"                 "403" "$(music "$UPLOAD_NAME")"
+check "uppladdat spår: admin får spela"            "200" "${admin_cookie[@]}" "$(music "$UPLOAD_NAME")"
+check "music/.incoming nås inte via webben"        "400|404" "$BASE/music/.incoming/upload.lock"
+cleanup_upload
+if sudo test -f "$WEBROOT/music/$UPLOAD_NAME" || (cd "$WEBROOT" && sudo -u www-data grep -qF "$UPLOAD_NAME" data/track_groups.csv); then
+    fail=$((fail + 1)); echo "  FEL   uppladdningstestet städade inte efter sig"
+else
+    pass=$((pass + 1)); echo "  OK    testfil och grupprad borttagna"
+fi
+trap cleanup EXIT
+
 echo "== S3: API-validering (T8) — giltiga anrop skriver bara för __smoketest__"
 PROFILE_TRACK_URL="music/${PRIVATE_CHANNEL/_vce/_msc}"   # huvudfilen i flerkanalsspåret
 api_session=$(make_session "$TEST_GROUP")

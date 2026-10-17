@@ -149,7 +149,14 @@ function fmt_ts(int $ts): string {
 }
 
 // Vitlista: värdet skrivs ut i länkar nedan. Tidigare ekades $_GET['view'] rått (HTML-injektion, S7).
-$view = ($_GET['view'] ?? '') === 'users' ? 'users' : 'tracks';
+$view = in_array($_GET['view'] ?? '', ['users', 'upload'], true) ? $_GET['view'] : 'tracks';
+// Data till admin/upload.js (CSP: inga inline-skript, därför ett JSON-block).
+$upload_config = [
+    'csrf'        => csrf_token(),
+    'endpoint'    => 'upload.php',
+    'maxBytes'    => UPLOAD_MAX_BYTES,
+    'extensions'  => AUDIO_EXTENSIONS,
+];
 ?><!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -161,7 +168,7 @@ $view = ($_GET['view'] ?? '') === 'users' ? 'users' : 'tracks';
 :root {
   --bg:#111317; --surface:#1c1f26; --surface2:#252932;
   --border:#2e3340; --accent:#4e9eff; --accent2:#7ec8e3;
-  --text:#e2e6ef; --muted:#7a8299; --pos:#4ade80;
+  --text:#e2e6ef; --muted:#7a8299; --pos:#4ade80; --neg:#f87171; --warn:#fbbf24;
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; font-size:14px; }
@@ -217,6 +224,25 @@ tr:hover td { background:var(--surface); }
   border:1px solid var(--border); }
 .group-btn:hover { color:var(--text); text-decoration:none; }
 .group-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+/* ── Ladda upp ── */
+.upload-help { color:var(--muted); font-size:0.85rem; line-height:1.5; max-width:760px; margin-bottom:14px; }
+.upload-help p { margin-bottom:6px; }
+.upload-help code { color:var(--text); }
+.drop-zone { border:2px dashed var(--border); border-radius:10px; padding:28px; text-align:center;
+  color:var(--muted); max-width:760px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.drop-zone.over { border-color:var(--accent); color:var(--text); }
+.btn-pick { background:var(--accent); color:#fff; border-radius:6px; padding:7px 18px; cursor:pointer; font-weight:600; }
+.upload-list { list-style:none; max-width:760px; margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+.upload-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px; }
+.upload-item .row { display:flex; justify-content:space-between; gap:12px; }
+.upload-item .name { word-break:break-all; }
+.upload-item .size { color:var(--muted); white-space:nowrap; }
+.upload-item progress { width:100%; height:6px; margin-top:6px; }
+.upload-item .status { font-size:0.82rem; margin-top:4px; color:var(--muted); }
+.upload-item.ok .status { color:var(--pos); }
+.upload-item.err .status { color:var(--neg); }
+.upload-item .warn { font-size:0.8rem; color:var(--warn); margin-top:4px; }
 </style>
 </head>
 <body>
@@ -240,7 +266,9 @@ tr:hover td { background:var(--surface); }
 <div class="tabs">
   <a class="tab <?= $view === 'tracks' ? 'active' : '' ?>" href="?view=tracks&group=<?= urlencode($group_filter) ?>">Per låt</a>
   <a class="tab <?= $view === 'users'  ? 'active' : '' ?>" href="?view=users&group=<?= urlencode($group_filter) ?>">Per användare</a>
+  <a class="tab <?= $view === 'upload' ? 'active' : '' ?>" href="?view=upload">Ladda upp</a>
 </div>
+<?php if ($view !== 'upload'): ?>
 <div class="group-bar">
   <span class="group-label">Grupp:</span>
   <a class="group-btn <?= $group_filter === '' ? 'active' : '' ?>" href="?view=<?= htmlspecialchars($view, ENT_QUOTES) ?>">Alla lyssnare</a>
@@ -248,9 +276,30 @@ tr:hover td { background:var(--surface); }
   <a class="group-btn <?= $group_filter === $g ? 'active' : '' ?>" href="?view=<?= htmlspecialchars($view, ENT_QUOTES) ?>&group=<?= urlencode($g) ?>"><?= htmlspecialchars($g) ?></a>
   <?php endforeach ?>
 </div>
+<?php endif ?>
 
 <div class="content">
-<?php if ($total_plays === 0): ?>
+<?php if ($view === 'upload'): ?>
+  <script type="application/json" id="upload-config"><?= json_encode($upload_config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?></script>
+  <div class="upload-help">
+    <p>Tillåtna filer: <strong>.mp3</strong> och <strong>.m4a</strong>, högst <strong><?= (int)(UPLOAD_MAX_BYTES / 1048576) ?> MB</strong> per fil.
+       Mellanslag och å/ä/ö går bra. Ändelsen sparas med gemener.</p>
+    <p>Flerkanalsspår namnges med suffix före ändelsen: <code>_msc</code> (master), <code>_bin</code>, <code>_vce</code>, <code>_env</code>,
+       <code>_ch2</code>, <code>_ch3</code>, <code>_ch4</code>, t.ex. <code>001_djup-avslappning_msc.mp3</code>.</p>
+    <p>Nya spår hamnar i gruppen <strong><?= htmlspecialchars(UPLOAD_GROUP) ?></strong> och syns bara för admin.
+       Flytta dem till rätt grupp under <a href="groups.php?tab=tracks">Grupper → Låtar</a>.
+       En fil som redan finns skrivs inte över, och filer tas bort via SSH.</p>
+  </div>
+  <div class="drop-zone" id="upload-drop">
+    <p>Dra filer hit, eller</p>
+    <label class="btn-pick">Välj filer…
+      <input type="file" id="upload-input" multiple accept=".mp3,.m4a,audio/mpeg,audio/mp4" hidden>
+    </label>
+  </div>
+  <ul class="upload-list" id="upload-list"></ul>
+  <script src="upload.js?v=<?= htmlspecialchars(APP_VERSION) ?>"></script>
+
+<?php elseif ($total_plays === 0): ?>
   <div class="empty">Inga spelningar loggade än. Spela en låt i spelaren för att börja.</div>
 
 <?php elseif ($view === 'tracks'): ?>

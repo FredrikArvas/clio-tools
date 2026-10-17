@@ -99,7 +99,8 @@ function list_music_files(string $music_dir): array {
  * spår har. $extra_group är ett nytt, redan validerat namn som admin just skrivit in.
  */
 function collect_known_groups(array $users, array $track_map, string $extra_group = ''): array {
-    $groups = [GUEST_GROUP];
+    // UPLOAD_GROUP finns alltid, så att spår kan flyttas dit och därifrån i Låtar-fliken.
+    $groups = [GUEST_GROUP, UPLOAD_GROUP];
     foreach ($users as $user) {
         $groups = array_merge($groups, $user['groups']);
     }
@@ -108,6 +109,14 @@ function collect_known_groups(array $users, array $track_map, string $extra_grou
     $groups = array_values(array_unique(array_filter($groups, fn($group) => $group !== '')));
     sort($groups);
     return $groups;
+}
+
+/**
+ * Grupper som kan tilldelas användare: alla kända utom UPLOAD_GROUP. Uppladdade spår är bara
+ * för admin (access.php), så ingen användare ska kunna läggas i gruppen.
+ */
+function user_assignable_groups(array $known_groups): array {
+    return array_values(array_diff($known_groups, [UPLOAD_GROUP]));
 }
 
 /** Kända grupper som bryter mot vitlistan (äldre handredigerade data). Tom lista = allt ok. */
@@ -134,6 +143,9 @@ function validate_user_group_selection(array $users, array $known_groups, mixed 
             return [[], 'Okänd användare i formuläret. Ladda om sidan.'];
         }
         foreach (array_keys($checked) as $group) {
+            if ((string)$group === UPLOAD_GROUP) {
+                return [[], 'Gruppen "' . UPLOAD_GROUP . '" är reserverad för nyuppladdade spår och kan inte tilldelas användare.'];
+            }
             if (!in_array((string)$group, $known_groups, true)) {
                 return [[], 'Okänd grupp i formuläret. Ladda om sidan.'];
             }
@@ -211,6 +223,7 @@ function describe_track_group_changes(array $assignments, array $current_map): a
 function save_user_groups(string $users_path, array $new_groups): string {
     foreach ($new_groups as $groups) {
         if (find_invalid_group_names($groups)) return 'Ogiltigt gruppnamn avvisades.';
+        if (in_array(UPLOAD_GROUP, $groups, true)) return 'Gruppen "' . UPLOAD_GROUP . '" kan inte tilldelas användare.';
     }
     return with_file_lock($users_path, function () use ($users_path, $new_groups): string {
         $raw = is_file($users_path) ? file_get_contents($users_path) : false;

@@ -14,7 +14,11 @@
  *   Om index.php och stream.php skulle räkna olika uppstår en lucka — därför delar de
  *   scan_music() och main_channel_file() härifrån.
  * - Spår utan grupp syns för alla inloggade men aldrig för gäster.
+ * - Spår i UPLOAD_GROUP (config.php) syns bara för admin, inte ens för gruppen 'Alla'.
+ *   Kräver att config.php är inläst (alla anropare gör det).
  */
+
+require_once __DIR__ . '/config.php';   // UPLOAD_GROUP
 
 // Alla kanalsuffix. _msc är master; övriga är valfria (etiketter i channels.php).
 // Ordningen är också reservordningen för huvudfilen när _msc saknas (main_channel_file).
@@ -58,6 +62,8 @@ function track_group(string $filename, array $map): string {
 }
 
 function user_can_see(string $track_group, array $user): bool {
+    // Nyuppladdade spår (UPLOAD_GROUP, config.php) är bara för admin, även före 'Alla'.
+    if ($track_group === UPLOAD_GROUP) return !empty($user['admin']);
     if (!empty($user['admin'])) return true;
     if (in_array('Alla', $user['groups'] ?? [])) return true;
     if (is_guest($user)) return in_array($track_group, $user['groups']);

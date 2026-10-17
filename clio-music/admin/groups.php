@@ -65,6 +65,7 @@ function handle_add_group(): array {
     $name = posted_new_group_name();
     if ($name === '') return outcome('Ange ett gruppnamn.', 400);
     if (!is_valid_group_name($name)) return reject_change('users', INVALID_GROUP_MESSAGE);
+    if ($name === UPLOAD_GROUP) return reject_change('users', 'Gruppen "' . UPLOAD_GROUP . '" är reserverad för nyuppladdade spår.');
     return outcome('Gruppen "' . $name . '" är redo att tilldelas. Kryssa i den nedan och spara.');
 }
 
@@ -123,6 +124,7 @@ $all_users = read_admin_users($users_file);
 $track_map = load_track_groups();
 $pending_group = is_valid_group_name($typed_group_name) ? $typed_group_name : '';
 $groups        = collect_known_groups($all_users, $track_map, $pending_group);
+$user_groups   = user_assignable_groups($groups);   // UPLOAD_GROUP kan inte tilldelas användare
 $track_groups_without_all = array_values(array_diff($groups, [ALL_USERS_GROUP]));
 $tracks        = list_music_files($music_dir);
 $flash         = $outcome['message'];
@@ -244,7 +246,7 @@ tr:hover td { background:var(--surface); }
     <thead>
       <tr>
         <th>Användare</th>
-        <?php foreach ($groups as $group): ?>
+        <?php foreach ($user_groups as $group): ?>
         <th><?= escape_html($group) ?></th>
         <?php endforeach ?>
       </tr>
@@ -256,7 +258,7 @@ tr:hover td { background:var(--surface); }
           <strong><?= escape_html($user_data['display']) ?></strong><br>
           <span style="color:var(--muted);font-size:0.78rem"><?= escape_html((string)$username) ?></span>
         </td>
-        <?php foreach ($groups as $group): ?>
+        <?php foreach ($user_groups as $group): ?>
         <td>
           <label class="cb-label">
             <input type="checkbox" name="ug[<?= escape_html((string)$username) ?>][<?= escape_html($group) ?>]"
