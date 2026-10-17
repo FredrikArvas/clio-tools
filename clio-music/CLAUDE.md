@@ -4,7 +4,7 @@ Kontext för LLM-assistenter som arbetar med detta projekt. Säkerhetsmodellen i
 
 ## Vad projektet är
 
-PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson). Inloggningsskyddad, inga ramverk, inga npm-beroenden. Körs på EliteDesk GPU bakom Cloudflare på https://audio.arvas.international. Version: `APP_VERSION` i `config.php` (1.6.0 efter säkerhetssaneringen S1–S6).
+PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson). Inloggningsskyddad, inga ramverk, inga npm-beroenden. Körs på EliteDesk GPU bakom Cloudflare på https://audio.examensbyran.se. Version: `APP_VERSION` i `config.php` (1.6.0 efter säkerhetssaneringen S1–S6).
 
 ## Regler och konventioner
 
