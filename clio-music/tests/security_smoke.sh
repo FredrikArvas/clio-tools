@@ -15,6 +15,10 @@
 set -u
 
 BASE="${BASE:-http://127.0.0.1:8091}"
+# nginx har två server-block på 127.0.0.1:8091. Utan Host-rubrik svarar det första (gamla domänens
+# 301-omdirigering), så alla anrop skickar sajtens namn. Wrappern gäller varje curl i skriptet.
+SMOKE_HOST="${SMOKE_HOST:-audio.examensbyran.se}"
+curl() { command curl -H "Host: $SMOKE_HOST" "$@"; }
 SESSION_DIR="${SESSION_DIR:-/var/lib/php/sessions}"
 COOKIE_NAME="${COOKIE_NAME:-PHPSESSID}"
 
