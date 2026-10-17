@@ -91,11 +91,19 @@ kbd  { background:var(--surface2); border:1px solid var(--border); border-radius
     <h2>Lägga till låtar</h2>
     <ol>
       <li>Tagga MP3-filerna med albumnamn, titel och artist i ditt DAW eller en taggeditor (t.ex. Mp3tag, Logic, iTunes). Spelaren läser ID3v2 (v2.2, v2.3, v2.4) och faller tillbaka på ID3v1.</li>
-      <li>Ladda upp till <code>music/</code> via SFTP. Låtarna dyker upp direkt i spelaren.</li>
+      <li>Ladda upp via <a href="admin/index.php?view=upload" style="color:var(--accent2)">Admin → Ladda upp</a> (se nedan), eller till <code>music/</code> via SFTP. Filer via SFTP utan grupp syns direkt för alla inloggade.</li>
       <li>Album-sektioner genereras automatiskt — lika albumnamn grupperas i en kollapsibel sektion med en ▶-knapp.</li>
       <li>Tilldela grupp i <a href="admin/groups.php?tab=tracks" style="color:var(--accent2)">Grupper → Låtar</a> vid behov.</li>
     </ol>
     <div class="note">Saknar filen ID3-taggar används filnamnet som titel — understreck och bindestreck ersätts med mellanslag.</div>
+
+    <h2>Ladda upp i webbläsaren</h2>
+    <ul>
+      <li>Fliken <strong>Ladda upp</strong> i admin tar emot <code>.mp3</code> och <code>.m4a</code>, högst <?= (int)(UPLOAD_MAX_BYTES / 1048576) ?> MB per fil. Flera filer kan väljas eller dras in; de skickas en i taget.</li>
+      <li>Nya spår hamnar i gruppen <code><?= htmlspecialchars(UPLOAD_GROUP) ?></code> och syns <strong>bara för admin</strong> (inte ens för gruppen <em>Alla</em>). Flytta dem till rätt grupp i <a href="admin/groups.php?tab=tracks" style="color:var(--accent2)">Grupper → Låtar</a>.</li>
+      <li>Kanalfiler (<code>_bin</code>, <code>_vce</code> …) som läggs till ett befintligt spår ärver spårets grupp och hörs direkt. Listan visar en varning när det händer.</li>
+      <li>En fil med samma namn skrivs aldrig över. Fel fil tas bort via SSH: radera filen i <code>music/</code> och raden i <code>data/track_groups.csv</code>.</li>
+    </ul>
 
     <h2>4-kanalsspår</h2>
     <p>Exportera upp till fyra filer med identisk bas. Suffixet styr vad reglaget heter:</p>

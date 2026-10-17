@@ -27,7 +27,8 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - `login_user()` byter sessions-id. `logout_user()` tömmer och förstör sessionen.
 - Okända användarnamn verifieras mot `DUMMY_PASSWORD_HASH` (jämn svarstid).
 - `require_login()` redirectar till /login.php, även från admin/. API-endpoints som ska vara tillgängliga för gäster använder `current_user_or_guest()`, inte `require_login()`.
-- Grupper styr vilka spår användaren ser. Gruppen `Alla` ger tillgång till allt.
+- Grupper styr vilka spår användaren ser. Gruppen `Alla` ger tillgång till allt utom `UPLOAD_GROUP` (se nedan).
+- **`UPLOAD_GROUP`** (`uploaded`, config.php, v1.11.0): nyuppladdade spår. `user_can_see()` släpper bara igenom admin, och regeln ligger *före* `Alla`-kontrollen, så varken `Alla`, vanliga användare eller gäster ser dem. Gruppen kan väljas för spår i Låtar-fliken men aldrig tilldelas användare (`user_assignable_groups()`, validering i `groups_store.php`).
 
 ### Inloggningsspärr och klient-IP (S2)
 - **`login_throttle.php`**: räknare per användarnamn (5 fria försök) och per IP (20 fria). Exponentiell spärr 30 s → 15 min. Lagras i `data/login_attempts/`, flock-skyddat. Kontrolleras före lösenordet.
@@ -37,7 +38,7 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 ### CSRF och audit (S2)
 - **`csrf.php`**: `csrf_token()`, `csrf_field()`, `csrf_verify()`, `csrf_require()`, `logout_button($action)`. Formulär: `<?= csrf_field() ?>` och `csrf_require()` först i POST-hanteringen. Logout är POST med CSRF.
 - `player.js` skickar `API_HEADERS` (inkl. `X-CSRF-Token: CM_CSRF`) i alla POST-anrop.
-- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort. Events: `login_ok`, `login_failed`, `login_blocked`, `logout`, `session_expired`, `csrf_rejected`, `password_rehashed`, `password_rehash_needed` (skrivfel), `admin_groups_saved`, `admin_groups_rejected`.
+- **`audit.php`**: `audit_log($event, $context)` → `data/audit.jsonl`. Nycklar som matchar pass/hash/token/secret filtreras bort. Events: `login_ok`, `login_failed`, `login_blocked`, `logout`, `session_expired`, `csrf_rejected`, `password_rehashed`, `password_rehash_needed` (skrivfel), `admin_groups_saved`, `admin_groups_rejected`, `admin_upload_ok`, `admin_upload_rejected` (v1.11.0).
 
 ### Skyddad medialeverans (access.php + stream.php, S1)
 - **All behörighetslogik för spår bor i `access.php`** (`load_track_groups`, `track_group`, `user_can_see`, `scan_music`, `main_channel_file`, `owning_tracks`, `user_can_access_media`, `track_file_url`, `list_visible_tracks`, `visible_track_urls`). Duplicera den aldrig.
@@ -59,7 +60,9 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - `location /data/ { deny all; }` skyddar data/. data/.htaccess är borttagen ur repot: den är Apache-syntax och verkningslös under nginx. `location /tests/ { deny all; }` skyddar tests/.
 - Rubriker (`always`, server-nivå): nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options DENY, CSP. **nginx-arv:** en location med egen `add_header` ärver inga rubriker från servernivån. Lägg då in de två include-raderna där också.
 - **CSP är enforcing** sedan 2026-10-11: `script-src 'self' https://www.googletagmanager.com`. Stilar får `'unsafe-inline'` (medvetet undantag). `deploy_enforce.sh` byter bara rubriknamnet från Report-Only till enforcing.
-- `server_tokens off`, `fastcgi_hide_header X-Powered-By`, `client_max_body_size` 256k (server) och 64k (`/api/`). `limit_req` zon `clio_music_api` (120/min, burst 20) på `/api/`.
+- `server_tokens off`, `fastcgi_hide_header X-Powered-By`, `client_max_body_size` 256k (server) och 64k (`/api/`). `location = /admin/upload.php` (v1.11.0): 96M, `client_body_timeout`/`fastcgi_read_timeout` 300s, ingen egen `add_header` (ärver rubrikerna). `admin/upload_validation.php` nekas som `groups_store.php`.
+- **PHP-FPM för uppladdning (appliceras vid deploy, ej i repot):** `upload_max_filesize = 96M`, `post_max_size = 97M`, `max_input_time = 300`, `max_execution_time = 300`. Socketen `php8.3-fpm.sock` är den delade poolen `www`: `php_admin_value` där gäller alla sajter på servern, så en egen pool för clio_music är att föredra. Kontrollera att `fileinfo` är laddat (`php -m`) och ledigt utrymme för `upload_tmp_dir` och nginx `client_body_temp_path` (kroppen buffras på disk två gånger).
+- **Rättigheter för uppladdning:** `music/` → `clioadmin:www-data` 775. `music/.incoming/` skapas av PHP med 770. `limit_req` zon `clio_music_api` (120/min, burst 20) på `/api/`.
 - Åtkomstloggar: `/var/log/nginx/access.log` och `error.log`.
 
 ### API-kontrakt och validering (S3)
@@ -85,6 +88,15 @@ PHP-baserad musikspelare för meditationsljud (Miranon Media / Roger Gottardsson
 - Spårgrupp avgörs av `track_group()` i `access.php` (samma regel som `stream.php`). Nya filnamnsrader läggs först i `track_groups.csv` så att de vinner över prefixregler. Prefixregler och kommentarer bevaras.
 - Skrivning: flock på `<fil>.lock`, tempfil i samma katalog och `rename`, rättigheter bevaras. Rader som inte ändras skrivs tillbaka byte för byte. I `users.csv` ändras bara grupp-kolumnen. Sparning som lämnar ingen aktiv admin avvisas.
 - Alla formulär har `csrf_field()`. POST kräver `csrf_require()` efter adminkontrollen (icke-admin → 403). Sparningar och avvisningar loggas som `admin_groups_saved` och `admin_groups_rejected` (utan hashar).
+
+### Admin: uppladdning (v1.11.0)
+- **`admin/upload.php`**: POST multipart, fältet `file`, en fil per anrop. Svar JSON `{ok, filename, bytes, warnings}` eller `{ok: false, error, message}`. Ordning: inloggning (401), admin (403), POST (405), CSRF via `X-CSRF-Token` (403), `rate_limit_hit('upload', användare, UPLOAD_MAX_PER_HOUR, 3600)` (429 + Retry-After), `$_FILES`-fel (400/413), validering (400/413/415), finns redan (409).
+- **Grupprad före fil:** `fil;uploaded` skrivs med `save_track_groups()` och kontrolleras med `track_group()` innan filen flyttas (spår utan rad syns för alla inloggade). Filen går `move_uploaded_file()` → `music/.incoming/<slump>.part` (664) → `rename()` till `music/<fil>`. Fel efter gruppraden återställer spårets tidigare grupp. Steget från existenskontroll till rename körs under `with_file_lock(music/.incoming/upload)`.
+- **`admin/upload_validation.php`** (ren funktionsfil, nekas av nginx, testas med `php tests/upload_validation_test.php`): `validate_upload_filename()` (ett segment, giltig UTF-8, inga kontroll-/formattecken, inga `/ \ ;`, inte inledande `.`/`#`/blanksteg, URL:en ≤ `MAX_TRACK_URL_LENGTH`), `validate_upload_size()` (1..`UPLOAD_MAX_BYTES` = 95 MB), `validate_upload_content()` (ID3/MPEG-ramsynk resp. `ftyp`; finfo när tillägget finns), `check_channel_rules()` och `check_group_inheritance()` (varningar, avvisar inte). Felkoder → status och svensk text i `UPLOAD_ERRORS`.
+- **Ändelsen sparas med gemener** (`x.MP3` → `x.mp3`): `scan_music()` globbar `*.mp3`/`*.m4a`, skiftlägeskänsligt på Linux.
+- Kanalfiler ärver huvudspårets grupp. En ny `_bin` till ett befintligt spår hörs alltså direkt för spårets grupp; en ny `_msc` tar över och döljer hela spåret. Båda fallen ger en varning i svaret.
+- Ingen överskrivning och ingen borttagning i UI. Fel fil rättas via SSH (fil i `music/` + rad i `data/track_groups.csv`).
+- UI: fliken **Ladda upp** i `admin/index.php` (`?view=upload`), JS i `admin/upload.js` (XHR per fil, progress, `textContent`). Konfig och CSRF-token i `<script type="application/json" id="upload-config">`.
 
 ### Spelningslogg (api/log_play.php + admin/index.php)
 - Loggar till `data/plays.jsonl` efter 5 s uppspelning (kräver `audios.msc` playing-event).
@@ -158,7 +170,8 @@ Rollback: `rollback.sh` i samma katalog återställer från backupen. Skripten v
 ## Tester
 
 - **`tests/security_smoke.sh`**: körs på servern (`bash /var/www/clio_music/tests/security_smoke.sh`) mot 127.0.0.1:8091, förbi Cloudflare. Inloggade tester använder en tillfällig sessionsfil för `__smoketest__` i `/var/lib/php/sessions`, så `users.csv` rörs inte. Testets rader i `audit.jsonl` och `plays.jsonl` rensas efteråt. Läser `track_groups.csv` via `sudo -u www-data` (640).
-- **`php tests/api_validation_test.php`** och **`php tests/groups_store_test.php`**: kan köras från webroten på servern. Ingen av dem skriver till riktiga data.
+- **`php tests/api_validation_test.php`**, **`php tests/groups_store_test.php`**, **`php tests/upload_validation_test.php`** och **`php tests/channels_test.php`**: kan köras från webroten på servern. Ingen av dem skriver till riktiga data. upload_validation_test skapar sina små ljud-fixtures i en tempkatalog och testar även `user_can_see()` med `UPLOAD_GROUP`.
+- `security_smoke.sh` har ett uppladdningsavsnitt (v1.11.0): 401/403/405/415/409, lyckad uppladdning av en liten mp3, att raden `uploaded` finns och att icke-admin och gäst får 403 på filen. Testfilen, gruppraden och hastighetsräknaren tas bort efteråt (även vid avbrott).
 - Testprotokollet T1–T12 och fynden 1–13 finns i granskningsrapporten (`Säkerhetsgranskning_OWASP_2026-10-11.md`).
 
 ## Öppna punkter
@@ -168,6 +181,8 @@ Rollback: `rollback.sh` i samma katalog återställer från backupen. Skripten v
 - `track_label()` i admin/index.php strippar inte kanal-suffixet `_msc`. Spårnamnet syns därför med suffix i admin-dashboarden.
 - ~~Automatisk omhashning av lösenord uteblir~~ — åtgärdat v1.7.4: `save_user_hash()` i auth.php byter hash-kolumnen atomiskt vid inloggning.
 - Cloudflare-cache bör purgas för `frida_session_edited.*`.
+- Uppladdning nästa sprint: chunkad uppladdning (> 95 MB), borttagning/ersättning i UI.
+- Uppladdning: `x.mp3;uploaded` är som alla filnamnsrader i `track_groups.csv` också en prefixregel och läggs först. En befintlig fil vars namn börjar med det nya namnet (t.ex. `x.mp3.mp3`) hamnar därför också i `uploaded` (döljs, exponeras inte).
 - Användaradmin (skapa/inaktivera användare, sätta lösenord) i admin-gränssnittet — egen sprint, beslutad 2026-10-11. Tills dess: `sudo -u www-data nano data/users.csv` (filen är 640).
 - `help_admin.php` beskriver att `users.csv` redigeras via SSH/SFTP. Efter S6 kräver det sudo. Texten är inte ändrad (PHP-fil utanför S6).
 - White-label/teman (se Fredriks plan).

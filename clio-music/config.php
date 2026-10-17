@@ -6,7 +6,7 @@ $music_dir   = __DIR__ . '/music';
 $music_url   = 'music';
 $site_title  = 'Clio Music';
 $logo_url    = 'assets/logo.png';   // installationens logga; tom sträng = ingen logga
-define('APP_VERSION', '1.10.1');
+define('APP_VERSION', '1.11.0');
 define('APP_STAGE', 'beta');   // visas som markör vid titeln, t.ex. "beta 1.7.0". Tom sträng = ingen markör.
 $lyrics_url = 'lyrics';
 define('GUEST_GROUP',  'Gäst');
@@ -30,3 +30,10 @@ const MAX_TRACK_URL_LENGTH     = 300;     // tecken i en spår-URL (music/<fil>)
 // Spelningslogg: högst så många loggade spelningar per minut (fast fönster).
 const LOG_PLAY_GUEST_MAX_PER_MINUTE = 10;   // per IP; gäster har ingen egen identitet
 const LOG_PLAY_USER_MAX_PER_MINUTE  = 60;   // per inloggad användare
+
+// ── Uppladdning (admin/upload.php) ────────────────────────────────────────────
+// Nya spår hamnar i UPLOAD_GROUP, som bara admin ser (access.php: user_can_see), inte ens
+// användare i 'Alla'. Admin flyttar sedan spåret till rätt grupp i Grupper → Låtar.
+const UPLOAD_GROUP        = 'uploaded';
+const UPLOAD_MAX_BYTES    = 95 * 1024 * 1024;   // Cloudflare släpper max 100 MB per anrop
+const UPLOAD_MAX_PER_HOUR = 60;                 // uppladdningar per admin och timme
