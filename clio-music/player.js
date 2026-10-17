@@ -514,21 +514,40 @@ async function load(index, autoplay) {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
+// Sparar köns markör på servern när den ändras, så att nästa sidladdning
+// inte återställer en inaktuell position.
+function setQueueCursor(pos) {
+    if (queueCursor === pos) return;
+    queueCursor = pos;
+    saveGlobalSettings();
+}
+
+// Kön har spelats klart (naturligt slut, utan repeat-all): töm kön och
+// markören, spara och pausa.
+function finishQueue() {
+    queue       = [];
+    queueCursor = -1;
+    renderQueue();
+    updateQueueBadge();
+    saveGlobalSettings();
+    pauseAll();
+}
+
 function advanceNext(autoplay, force = false) {
     if (queue.length > 0 && queueCursor >= 0) {
         const next = queueCursor + 1;
         if (next < queue.length) {
-            queueCursor = next;
+            setQueueCursor(next);
             load(queue[queueCursor].idx, autoplay);
         } else if (playMode === 'repeat-all' || force) {
-            queueCursor = 0;
+            setQueueCursor(0);
             load(queue[0].idx, autoplay);
         } else {
-            pauseAll();
+            finishQueue();
         }
     } else {
         if (playMode === 'repeat-all' || force) {
-            queueCursor = -1;
+            setQueueCursor(-1);
             load((current + 1) % TRACKS.length, autoplay);
         } else {
             pauseAll();
@@ -539,12 +558,12 @@ function advanceNext(autoplay, force = false) {
 function advancePrev() {
     const wasPlaying = !audios.msc.paused;
     if (queue.length > 0 && queueCursor > 0) {
-        queueCursor--;
+        setQueueCursor(queueCursor - 1);
         load(queue[queueCursor].idx, wasPlaying);
     } else if (queue.length > 0 && queueCursor === 0) {
         load(queue[0].idx, wasPlaying);
     } else {
-        queueCursor = -1;
+        setQueueCursor(-1);
         load(current - 1, wasPlaying);
     }
 }
