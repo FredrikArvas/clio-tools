@@ -62,6 +62,14 @@ check('utan _msc: huvudfilen (_vce) blir master och dubbleras inte', $suffixes($
 check('fristående spår: en plats, Musik', channel_slots(null, 'solo.mp3') === [['_msc', 'solo.mp3']]);
 check('fristående spår är inte körspår', !is_choir_track(null));
 
+// ── Rubrik i spelarlistan: album, annars behörighetsgrupp ─────────────────────
+check('albumtaggen vinner över gruppen', track_section('FrUlleBo', 'FrUlleBo-låtar') === 'FrUlleBo');
+check('utan album: gruppnamnet', track_section('', 'FrUlleBo-låtar') === 'FrUlleBo-låtar');
+check('utan album: understreck blir mellanslag', track_section('', 'Ulrikas_35_årslåt') === 'Ulrikas 35 årslåt');
+check('utan album och grupp: ingen rubrik', track_section('', '') === '');
+check('utan album, uppladdat: egen rubrik', track_section('', UPLOAD_GROUP) === UPLOAD_SECTION_LABEL);
+check('uppladdat med album: albumet', track_section('Demo', UPLOAD_GROUP) === 'Demo');
+
 // ── access.php: suffixen grupperas och ärver huvudspårets behörighet ───────────
 $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'channels_test_' . bin2hex(random_bytes(4));
 mkdir($dir);

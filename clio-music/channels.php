@@ -30,7 +30,8 @@ const CHANNELS = [
     '_ch3' => ['label' => 'Stämma 3',  'icon' => '③',  'list_icon' => '③', 'default' => 0.8],
     '_ch4' => ['label' => 'Stämma 4',  'icon' => '④',  'list_icon' => '④', 'default' => 0.8],
 ];
-const CHANNEL_MSC_AS_VOICE = ['label' => 'Stämma 1', 'icon' => '①', 'list_icon' => '①', 'default' => 0.8];
+const UPLOAD_SECTION_LABEL = 'Nyuppladdat (bara admin)';   // rubrik för UPLOAD_GROUP utan albumtagg
+const CHANNEL_MSC_AS_VOICE =['label' => 'Stämma 1', 'icon' => '①', 'list_icon' => '①', 'default' => 0.8];
 
 /** Presentation för en kanal; $is_choir gör _msc till "Stämma 1". */
 function channel_info(string $suffix, bool $is_choir): array {
@@ -56,6 +57,17 @@ function channel_slots(?array $channel_files, string $main_file): array {
         $slots[] = [$suffix, $channel_files[$suffix]];
     }
     return $slots;
+}
+
+/**
+ * Rubriken spåret listas under i spelaren: albumtaggen, eller spårets behörighetsgrupp om taggen
+ * saknas (understreck visas som mellanslag). Spår utan både album och grupp får '' (ingen rubrik).
+ * Nyuppladdade spår (UPLOAD_GROUP) samlas under en egen rubrik som bara admin ser.
+ */
+function track_section(string $album, string $track_group): string {
+    if ($album !== '') return $album;
+    if ($track_group === UPLOAD_GROUP) return UPLOAD_SECTION_LABEL;
+    return str_replace('_', ' ', $track_group);
 }
 
 /** Är spåret ett körspår (minst en _chN-fil)? */
