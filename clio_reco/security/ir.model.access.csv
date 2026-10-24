@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clio_reco_genre_user,clio.reco.genre user,model_clio_reco_genre,group_clio_reco_user,1,0,0,0
+access_clio_reco_genre_manager,clio.reco.genre manager,model_clio_reco_genre,group_clio_reco_manager,1,1,1,1
+access_clio_reco_item_user,clio.reco.item user,model_clio_reco_item,group_clio_reco_user,1,0,0,0
+access_clio_reco_item_manager,clio.reco.item manager,model_clio_reco_item,group_clio_reco_manager,1,1,1,1

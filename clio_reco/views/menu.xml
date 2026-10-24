@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_clio_reco_root"
+        name="Rekommendationer"
+        sequence="90"
+        web_icon="clio_reco,static/description/icon.png"/>
+
+    <menuitem id="menu_clio_reco_catalog"
+        name="Katalog"
+        parent="menu_clio_reco_root"
+        sequence="10"/>
+
+    <menuitem id="menu_clio_reco_all"
+        name="Alla"
+        parent="menu_clio_reco_catalog"
+        action="action_clio_reco_item_all"
+        sequence="10"/>
+
+    <menuitem id="menu_clio_reco_books"
+        name="Böcker"
+        parent="menu_clio_reco_catalog"
+        action="action_clio_reco_item_books"
+        sequence="20"/>
+
+    <menuitem id="menu_clio_reco_films"
+        name="Filmer"
+        parent="menu_clio_reco_catalog"
+        action="action_clio_reco_item_films"
+        sequence="30"/>
+
+    <menuitem id="menu_clio_reco_links"
+        name="Länkar"
+        parent="menu_clio_reco_catalog"
+        action="action_clio_reco_item_links"
+        sequence="40"/>
+
+    <menuitem id="menu_clio_reco_config"
+        name="Konfiguration"
+        parent="menu_clio_reco_root"
+        sequence="90"
+        groups="clio_reco.group_clio_reco_manager"/>
+
+    <menuitem id="menu_clio_reco_genres"
+        name="Genrer"
+        parent="menu_clio_reco_config"
+        action="action_clio_reco_genre"
+        sequence="10"/>
+
+</odoo>
