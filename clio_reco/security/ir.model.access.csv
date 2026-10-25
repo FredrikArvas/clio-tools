@@ -1,9 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_clio_reco_context_curator,clio.reco.context kurator,model_clio_reco_context,group_clio_reco_curator,1,0,0,0
-access_clio_reco_context_manager,clio.reco.context manager,model_clio_reco_context,group_clio_reco_manager,1,1,1,1
-access_clio_reco_rating_curator,clio.reco.rating kurator,model_clio_reco_rating,group_clio_reco_curator,1,1,1,1
-access_clio_reco_rating_manager,clio.reco.rating manager,model_clio_reco_rating,group_clio_reco_manager,1,1,1,1
-access_clio_reco_rating_portal,clio.reco.rating portal,model_clio_reco_rating,base.group_portal,1,1,1,1
-access_clio_reco_rating_stat_curator,clio.reco.rating.stat kurator,model_clio_reco_rating_stat,group_clio_reco_curator,1,0,0,0
-access_clio_reco_rating_stat_manager,clio.reco.rating.stat manager,model_clio_reco_rating_stat,group_clio_reco_manager,1,0,0,0
-access_clio_reco_rating_stat_portal,clio.reco.rating.stat portal,model_clio_reco_rating_stat,base.group_portal,1,0,0,0
