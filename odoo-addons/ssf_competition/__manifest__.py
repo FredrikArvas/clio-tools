@@ -3,6 +3,7 @@
     "version": "19.0.1.16.0",
     "summary": "SSF competition data (Events, Competitions, Results) synced from SSFTA.",
     "author": "Arvas International AB",
+    "website": "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/ssf_competition",
     "depends": ["contacts"],
     "data": [
         "security/ir.model.access.csv",

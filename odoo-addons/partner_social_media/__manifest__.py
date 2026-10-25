@@ -4,6 +4,7 @@
     'summary': 'Adds social media fields to res.partner',
     'category': 'Contacts',
     'author': 'Fredrik Arvas / Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/partner_social_media',
     'license': 'LGPL-3',
     'depends': ['contacts'],
     'data': [

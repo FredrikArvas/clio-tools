@@ -4,6 +4,7 @@
     "category":    "Extra Tools",
     "summary":     "Samlad kontrollpanel för alla clio-agenter — flik-design med behörighetsstyrning.",
     "author":      "Fredrik Arvas / Arvas International AB",
+    "website":     "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_cockpit",
     "license":     "LGPL-3",
     "depends":     ["base"],
     "data": [

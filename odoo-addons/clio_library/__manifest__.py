@@ -3,6 +3,7 @@
     'version': '19.0.1.0.0',
     'summary': 'Arvas Familjebibliotek — bokregister, betyg och AI-smakrådgivare',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_library',
     'category': 'Extra Tools',
     'depends': ['base'],
     'data': [

@@ -3,6 +3,7 @@
     'version': '19.0.1.1.0',
     'summary': 'Odoo-vy för clio-vigil: källor, pipeline-kö och färdiga bevakningsobjekt',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_vigil',
     'depends': ['contacts', 'clio_cockpit'],
     'data': [
         'security/ir.model.access.csv',

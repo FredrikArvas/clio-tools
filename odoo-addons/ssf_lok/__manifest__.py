@@ -3,6 +3,7 @@
     "version": "19.0.1.0.0",
     "summary": "LOK-stödsrapporter (FeeReports) synkade från SSFTA.",
     "author": "Arvas International AB",
+    "website": "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/ssf_lok",
     "depends": ["ssf_competition"],
     "data": [
         "security/ir.model.access.csv",

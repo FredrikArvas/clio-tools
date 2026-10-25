@@ -3,6 +3,7 @@
     'version': '19.0.1.0.0',
     'summary': 'Lägger till Bolag och Roller synligt i listvy och formulär för SSF-kontakter.',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/odoo_partner_ssf',
     'depends': ['contacts'],
     'data': [
         'views/res_partner_views.xml',
