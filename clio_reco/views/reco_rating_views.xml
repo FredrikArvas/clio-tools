@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_clio_reco_rating_list" model="ir.ui.view">
+        <field name="name">clio.reco.rating.list</field>
+        <field name="model">clio.reco.rating</field>
+        <field name="arch" type="xml">
+            <list string="Betyg">
+                <field name="work_id"/>
+                <field name="context_id"/>
+                <field name="user_id"/>
+                <field name="score"/>
+                <field name="visibility" widget="badge"/>
+                <field name="consent" widget="badge"
+                    decoration-success="consent == 'given'"
+                    decoration-muted="consent == 'unset'"
+                    decoration-danger="consent == 'withdrawn'"/>
+                <field name="origin" widget="badge"/>
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_clio_reco_rating_form" model="ir.ui.view">
+        <field name="name">clio.reco.rating.form</field>
+        <field name="model">clio.reco.rating</field>
+        <field name="arch" type="xml">
+            <form string="Betyg">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="work_id"/>
+                            <field name="context_id"/>
+                            <field name="user_id"
+                                groups="clio_reco.group_clio_reco_manager"/>
+                            <field name="score"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="visibility"/>
+                            <field name="consent"/>
+                            <field name="origin"/>
+                            <field name="source"
+                                invisible="origin == 'manual'"/>
+                        </group>
+                    </group>
+                    <field name="comment" placeholder="Kommentar (frivillig)…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_clio_reco_rating_search" model="ir.ui.view">
+        <field name="name">clio.reco.rating.search</field>
+        <field name="model">clio.reco.rating</field>
+        <field name="arch" type="xml">
+            <search string="Betyg">
+                <field name="work_id"/>
+                <field name="context_id"/>
+                <field name="user_id" groups="clio_reco.group_clio_reco_manager"/>
+                <filter name="filter_public" string="Publika"
+                    domain="[('visibility', '=', 'public')]"/>
+                <filter name="filter_manual" string="Manuella"
+                    domain="[('origin', '=', 'manual')]"/>
+                <filter name="filter_import" string="Importerade"
+                    domain="[('origin', '=', 'import')]"/>
+                <separator/>
+                <filter name="filter_consent_given" string="Samtycke givet"
+                    domain="[('consent', '=', 'given')]"/>
+                <group expand="0" string="Gruppera efter">
+                    <filter name="group_context" string="Sammanhang"
+                        context="{'group_by': 'context_id'}"/>
+                    <filter name="group_origin" string="Ursprung"
+                        context="{'group_by': 'origin'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_clio_reco_rating" model="ir.actions.act_window">
+        <field name="name">Betyg</field>
+        <field name="res_model">clio.reco.rating</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_clio_reco_rating_search"/>
+    </record>
+
+</odoo>

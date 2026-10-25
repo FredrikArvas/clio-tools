@@ -3,48 +3,26 @@
 
     <menuitem id="menu_clio_reco_root"
         name="Rekommendationer"
-        sequence="90"
-        web_icon="clio_reco,static/description/icon.png"/>
+        sequence="50"
+        groups="clio_reco.group_clio_reco_curator"/>
 
-    <menuitem id="menu_clio_reco_catalog"
-        name="Katalog"
+    <menuitem id="menu_clio_reco_ratings"
+        name="Betyg"
         parent="menu_clio_reco_root"
+        action="action_clio_reco_rating"
         sequence="10"/>
 
-    <menuitem id="menu_clio_reco_all"
-        name="Alla"
-        parent="menu_clio_reco_catalog"
-        action="action_clio_reco_item_all"
-        sequence="10"/>
-
-    <menuitem id="menu_clio_reco_books"
-        name="Böcker"
-        parent="menu_clio_reco_catalog"
-        action="action_clio_reco_item_books"
+    <menuitem id="menu_clio_reco_contexts"
+        name="Sammanhang"
+        parent="menu_clio_reco_root"
+        action="action_clio_reco_context"
         sequence="20"/>
 
-    <menuitem id="menu_clio_reco_films"
-        name="Filmer"
-        parent="menu_clio_reco_catalog"
-        action="action_clio_reco_item_films"
-        sequence="30"/>
-
-    <menuitem id="menu_clio_reco_links"
-        name="Länkar"
-        parent="menu_clio_reco_catalog"
-        action="action_clio_reco_item_links"
-        sequence="40"/>
-
-    <menuitem id="menu_clio_reco_config"
-        name="Konfiguration"
+    <menuitem id="menu_clio_reco_stat"
+        name="Statistik"
         parent="menu_clio_reco_root"
-        sequence="90"
-        groups="clio_reco.group_clio_reco_manager"/>
-
-    <menuitem id="menu_clio_reco_genres"
-        name="Genrer"
-        parent="menu_clio_reco_config"
-        action="action_clio_reco_genre"
-        sequence="10"/>
+        action="action_clio_reco_rating_stat"
+        sequence="30"
+        groups="clio_reco.group_clio_reco_curator"/>
 
 </odoo>

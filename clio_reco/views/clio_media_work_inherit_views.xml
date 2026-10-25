@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Smart-knapp "X betyg" och betygs-flik på verksformuläret -->
+    <record id="view_clio_media_work_form_reco" model="ir.ui.view">
+        <field name="name">clio.media.work.form.reco</field>
+        <field name="model">clio.media.work</field>
+        <field name="inherit_id" ref="clio_media.view_clio_media_work_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_ratings" type="object"
+                    class="oe_stat_button" icon="fa-star">
+                    <field name="rating_count" widget="statinfo" string="Betyg"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Betyg" name="ratings">
+                    <field name="rating_ids" context="{'default_work_id': active_id}">
+                        <list>
+                            <field name="context_id"/>
+                            <field name="user_id"/>
+                            <field name="score"/>
+                            <field name="visibility" widget="badge"/>
+                            <field name="date"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
