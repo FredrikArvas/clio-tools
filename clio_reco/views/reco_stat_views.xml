@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_clio_reco_rating_stat_list" model="ir.ui.view">
+        <field name="name">clio.reco.rating.stat.list</field>
+        <field name="model">clio.reco.rating.stat</field>
+        <field name="arch" type="xml">
+            <list string="Betygsstatistik" create="false" edit="false" delete="false">
+                <field name="work_id"/>
+                <field name="context_id"/>
+                <field name="rating_count" string="Antal"/>
+                <field name="avg_score" string="Snitt" widget="float" digits="[6,2]"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_clio_reco_rating_stat_pivot" model="ir.ui.view">
+        <field name="name">clio.reco.rating.stat.pivot</field>
+        <field name="model">clio.reco.rating.stat</field>
+        <field name="arch" type="xml">
+            <pivot string="Betygsstatistik">
+                <field name="work_id" type="row"/>
+                <field name="context_id" type="col"/>
+                <field name="avg_score" type="measure"/>
+                <field name="rating_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_clio_reco_rating_stat" model="ir.actions.act_window">
+        <field name="name">Statistik</field>
+        <field name="res_model">clio.reco.rating.stat</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+
+</odoo>

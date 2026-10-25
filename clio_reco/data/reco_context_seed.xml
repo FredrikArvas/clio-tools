@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="context_passar_begravning" model="clio.reco.context">
+        <field name="name">Passar vid begravning</field>
+        <field name="question">Passar verket vid en begravning?</field>
+        <field name="scale_min">1</field>
+        <field name="scale_max">5</field>
+        <field name="scale_label_min">Passar inte alls</field>
+        <field name="scale_label_max">Passar utmärkt</field>
+        <field name="is_sensitive">True</field>
+        <field name="state">approved</field>
+        <field name="work_type_ids" eval="[
+            Command.link(ref('clio_media.work_type_book')),
+            Command.link(ref('clio_media.work_type_song')),
+            Command.link(ref('clio_media.work_type_psalm')),
+        ]"/>
+    </record>
+
+</odoo>

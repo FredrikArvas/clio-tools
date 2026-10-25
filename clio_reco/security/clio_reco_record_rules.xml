@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Kurator: läser egna + publika betyg; skriver bara egna -->
+    <record id="rule_clio_reco_rating_curator_read" model="ir.rule">
+        <field name="name">Clio Reco Rating — kurator läser egna och publika</field>
+        <field name="model_id" ref="model_clio_reco_rating"/>
+        <field name="groups" eval="[Command.link(ref('group_clio_reco_curator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="domain_force">['|', ('user_id', '=', user.id), ('visibility', '=', 'public')]</field>
+    </record>
+
+    <record id="rule_clio_reco_rating_curator_write" model="ir.rule">
+        <field name="name">Clio Reco Rating — kurator skriver bara egna</field>
+        <field name="model_id" ref="model_clio_reco_rating"/>
+        <field name="groups" eval="[Command.link(ref('group_clio_reco_curator'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
+
+    <!-- Portal: egna betyg (används från R3) -->
+    <record id="rule_clio_reco_rating_portal" model="ir.rule">
+        <field name="name">Clio Reco Rating — portal ser bara egna</field>
+        <field name="model_id" ref="model_clio_reco_rating"/>
+        <field name="groups" eval="[Command.link(ref('base.group_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
+
+</odoo>
