@@ -3,6 +3,7 @@
     'version': '19.0.1.1.0',
     'summary': 'Färgkodad navbar per databas med konfigurerbar färgväljare',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_theme',
     'depends': ['web'],
     'data': [
         'security/ir.model.access.csv',

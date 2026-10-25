@@ -3,6 +3,7 @@
     'version': '19.0.1.0.0',
     'summary': 'Projektlista med NCC-status — hämtad från Notion via clio-service',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_ncc_project',
     'category': 'Clio',
     'depends': ['base'],
     'data': [

@@ -4,6 +4,7 @@
     'version': '19.0.4.2.0',
     'summary': 'Meta-modul: installerar alla moduler for AIAB-databasen',
     'author': 'Arvas International AB',
+    'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/odoo_aiab',
     'license': 'LGPL-3',
     'depends': [
         # ── Clio-moduler ──────────────────────────────────────────────────

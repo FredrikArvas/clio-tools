@@ -4,6 +4,7 @@
     "category":    "Research",
     "summary":     "UAP encounter tracking and classification system (Notion â†’ Odoo migration).",
     "author":      "Fredrik Arvas / Arvas International AB",
+    "website":     "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_uap",
     "license":     "LGPL-3",
     "depends":     ["base", "contacts"],
     "data": [

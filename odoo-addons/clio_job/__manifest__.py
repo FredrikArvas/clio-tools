@@ -4,6 +4,7 @@
     "category":    "Extra Tools",
     "summary":     "Extends res.partner with job-signal profile and match history for Clio automation.",
     "author":      "Fredrik Arvas / Arvas International AB",
+    "website":     "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_job",
     "license":     "LGPL-3",
     "depends":     ["contacts"],
     "data": [
