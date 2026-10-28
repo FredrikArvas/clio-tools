@@ -107,3 +107,14 @@ clio-rag-mcp/chat.html
 
 # clio-uap källdata med personnamn: lever bara i uap-databasen
 clio-uap/uap_sources_*.csv
+
+# Node-beroenden (clio-docx m.fl.)
+node_modules/
+
+# Persondata och manus — publikt repo, bara kod i git
+clio-recruit/analysis/
+clio-recruit/results/
+clio-fetch-contacts/persons_*.json
+clio-fetch-contacts/raw_*.html
+clio-bookrev/output/
+clio-bookrev/testdata/
