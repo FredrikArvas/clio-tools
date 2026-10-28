@@ -2,7 +2,9 @@
 ingest_minne.py — generisk ingest för *minnet-mappar i Dropbox.
 
 Indexerar PDF/DOCX/PPTX/TXT från en källmapp till valfri Qdrant-collection.
-Checksum-baserad: hoppar över oförändrade filer. Körs av cron eller manuellt.
+Läsaren väljs efter filens innehåll, inte ändelsen (en .docx kan vara PDF,
+pptx eller xlsx). Checksum-baserad: hoppar över oförändrade filer.
+Körs av cron eller manuellt.
 
 Körning:
   python3 ingest_minne.py --source ~/Dropbox/projekt/Capgemini/Skidförbundet/ssfminnet --collection mem_ssf
@@ -10,7 +12,7 @@ Körning:
   python3 ingest_minne.py --source ... --collection ... --force   # tvinga omindexering
 """
 from __future__ import annotations
-import argparse, hashlib, uuid
+import argparse, hashlib, io, uuid, zipfile
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -25,6 +27,13 @@ EMBED_DIM     = 1536
 CHUNK_WORDS   = 500
 OVERLAP_WORDS = 60
 SUPPORTED_EXT = {".pdf", ".docx", ".pptx", ".txt"}
+
+# Första sökvägsdelen i en OOXML-zip avslöjar den verkliga typen
+OOXML_PREFIXES = {"word/": "docx", "ppt/": "pptx", "xl/": "xlsx"}
+TEMPLATE_CONTENT_TYPES = {
+    b"presentationml.template.main+xml": b"presentationml.presentation.main+xml",
+    b"wordprocessingml.template.main+xml": b"wordprocessingml.document.main+xml",
+}
 
 # ---------------------------------------------------------------------------
 def get_client() -> QdrantClient:
@@ -56,7 +65,7 @@ def extract_docx(path: Path) -> str:
     from docx.oxml.ns import qn
     from docx.table import Table
     from docx.text.paragraph import Paragraph
-    doc = Document(str(path))
+    doc = Document(_without_template_type(path))
     parts = []
     def iter_blocks(parent):
         for child in parent.element.body.iterchildren():
@@ -82,9 +91,23 @@ def extract_docx(path: Path) -> str:
                     parts.append(" | ".join(cells))
     return "\n".join(parts)
 
+def _without_template_type(path: Path) -> io.BytesIO:
+    """Kopia i minnet där mallens innehållstyp (.potx/.dotx) är bytt mot vanlig
+    presentation/dokument, eftersom python-pptx och python-docx nekar mallar."""
+    out = io.BytesIO()
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "[Content_Types].xml":
+                for template_type, main_type in TEMPLATE_CONTENT_TYPES.items():
+                    data = data.replace(template_type, main_type)
+            zout.writestr(item, data)
+    out.seek(0)
+    return out
+
 def extract_pptx(path: Path) -> str:
     from pptx import Presentation
-    prs = Presentation(str(path))
+    prs = Presentation(_without_template_type(path))
     parts = []
     for i, slide in enumerate(prs.slides, 1):
         texts = [s.text_frame.text.strip() for s in slide.shapes if s.has_text_frame]
@@ -92,12 +115,46 @@ def extract_pptx(path: Path) -> str:
             parts.append(f"[Bild {i}] " + " ".join(t for t in texts if t))
     return "\n".join(parts)
 
+def extract_xlsx(path: Path) -> str:
+    from openpyxl import load_workbook
+    # Filobjekt i stället för sökväg: openpyxl nekar annars allt som inte heter .xlsx
+    wb = load_workbook(io.BytesIO(path.read_bytes()), read_only=True, data_only=True)
+    parts = []
+    try:
+        for sheet in wb.worksheets:
+            parts.append(f"[Blad {sheet.title}]")
+            for row in sheet.iter_rows(values_only=True):
+                cells = [str(v).strip() for v in row if v is not None and str(v).strip()]
+                if cells:
+                    parts.append(" | ".join(cells))
+    finally:
+        wb.close()
+    return "\n".join(parts)
+
+def detect_kind(path: Path) -> str:
+    """Filens verkliga typ utifrån innehållet: pdf, docx, pptx, xlsx eller txt.
+    Ändelsen används bara när innehållet inte känns igen (ändelser ljuger i *minnet-mappar)."""
+    with path.open("rb") as fh:
+        head = fh.read(5)
+    if head == b"%PDF-":
+        return "pdf"
+    if zipfile.is_zipfile(path):
+        with zipfile.ZipFile(path) as z:
+            names = z.namelist()
+        for prefix, kind in OOXML_PREFIXES.items():
+            if any(n.startswith(prefix) for n in names):
+                return kind
+    return path.suffix.lower().lstrip(".")
+
 def extract_text(path: Path) -> str:
-    ext = path.suffix.lower()
-    if ext == ".pdf":   return extract_pdf(path)
-    if ext == ".docx":  return extract_docx(path)
-    if ext == ".pptx":  return extract_pptx(path)
-    if ext == ".txt":   return path.read_text(errors="ignore")
+    kind = detect_kind(path)
+    if kind != path.suffix.lower().lstrip("."):
+        print(f"  → innehållet är {kind}, inte {path.suffix.lower()}")
+    if kind == "pdf":   return extract_pdf(path)
+    if kind == "docx":  return extract_docx(path)
+    if kind == "pptx":  return extract_pptx(path)
+    if kind == "xlsx":  return extract_xlsx(path)
+    if kind == "txt":   return path.read_text(errors="ignore")
     return ""
 
 # ---------------------------------------------------------------------------
