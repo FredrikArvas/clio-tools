@@ -1,0 +1,8 @@
+# clio-bmc requirements
+anthropic>=0.25.0
+python-dotenv>=1.0.0
+notion-client>=2.0.0
+requests
+beautifulsoup4
+lxml
+pytest>=7.0.0
