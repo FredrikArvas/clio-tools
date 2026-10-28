@@ -170,6 +170,18 @@ def ingest_file(path: Path, collection: str, force: bool = False) -> int:
     print(f"  → {new_count} nya chunks (av {len(chunks)} totalt)")
     return new_count
 
+def ingest_files(files: list[Path], collection: str, force: bool = False) -> tuple[int, list[Path]]:
+    """Indexerar filerna en i taget. En fil som fallerar loggas och hoppas över,
+    så att resten av mappen ändå indexeras. Returnerar (nya chunks, felande filer)."""
+    total, failed = 0, []
+    for f in files:
+        try:
+            total += ingest_file(f, collection, force)
+        except Exception as exc:
+            print(f"  → FEL: {f}: {type(exc).__name__}: {exc}")
+            failed.append(f)
+    return total, failed
+
 # ---------------------------------------------------------------------------
 def main() -> None:
     parser = argparse.ArgumentParser(description="Indexera *minnet-mapp till Qdrant")
@@ -189,8 +201,10 @@ def main() -> None:
              if f.suffix.lower() in SUPPORTED_EXT and f.is_file()]
     print(f"\n[ingest_minne] {len(files)} filer i {source.name} → {args.collection}")
 
-    total = sum(ingest_file(f, args.collection, args.force) for f in files)
-    print(f"\n[ingest_minne] KLAR — {total} nya chunks i '{args.collection}'")
+    total, failed = ingest_files(files, args.collection, args.force)
+    print(f"\n[ingest_minne] KLAR — {total} nya chunks i '{args.collection}', {len(failed)} filer med fel")
+    if failed:
+        raise SystemExit(2)
 
 if __name__ == "__main__":
     main()

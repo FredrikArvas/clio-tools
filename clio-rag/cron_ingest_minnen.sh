@@ -1,12 +1,13 @@
 #!/bin/bash
 # cron_ingest_minnen.sh — indexerar alla *minnet-mappar
-# Körs varje timme via cron: 0 * * * * /home/clioadmin/clio-tools/clio-rag/cron_ingest_minnen.sh
+# Körs varje timme via cron: 0 * * * * /home/clioadmin/19.0/clio-tools/clio-rag/cron_ingest_minnen.sh
 
-PYTHON=/home/clioadmin/clio-tools/venv/bin/python3
-SCRIPT=/home/clioadmin/clio-tools/clio-rag/ingest_minne.py
-LOG=/home/clioadmin/clio-tools/clio-rag/cron_ingest.log
+TOOLS=/home/clioadmin/19.0/clio-tools
+PYTHON=$TOOLS/.venv/bin/python
+SCRIPT=$TOOLS/clio-rag/ingest_minne.py
+LOG=/home/clioadmin/logs/clio-rag-ingest.log
 
-cd /home/clioadmin/clio-tools/clio-rag
+cd "$TOOLS/clio-rag" || { echo "[$(date '+%Y-%m-%d %H:%M')] FEL: $TOOLS/clio-rag saknas" >> "$LOG"; exit 1; }
 
 declare -A MINNEN=(
   [mem_ssf]="$HOME/Dropbox/projekt/Capgemini/Skidförbundet/ssfminnet"
