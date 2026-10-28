@@ -104,3 +104,6 @@ config/client_secret_*.json
 clio-vigil/data/
 clio-vigil/.env
 clio-rag-mcp/chat.html
+
+# clio-uap källdata med personnamn: lever bara i uap-databasen
+clio-uap/uap_sources_*.csv
