@@ -1,0 +1,12 @@
+{
+  "name": "clio-docx",
+  "version": "1.0.0",
+  "description": "Markdown → Word (.docx) med varumärkesprofiler",
+  "main": "md2docx.js",
+  "scripts": {
+    "convert": "node md2docx.js"
+  },
+  "dependencies": {
+    "docx": "^9.0.0"
+  }
+}
