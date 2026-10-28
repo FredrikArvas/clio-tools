@@ -9,8 +9,9 @@ LOG=/home/clioadmin/logs/clio-rag-ingest.log
 
 cd "$TOOLS/clio-rag" || { echo "[$(date '+%Y-%m-%d %H:%M')] FEL: $TOOLS/clio-rag saknas" >> "$LOG"; exit 1; }
 
+# mem_ssf ingår inte: SSF-projektet är avslutat och parkerat (2026-10-28).
+# mem_ssf är indexerad klart och ska inte skrivas till av det här jobbet.
 declare -A MINNEN=(
-  [mem_ssf]="$HOME/Dropbox/projekt/Capgemini/Skidförbundet/ssfminnet"
   [mem_aiab]="$HOME/Dropbox/ftg/AIAB/aiabminnet"
   [mem_gsf]="$HOME/Dropbox/ftg/GSF/gsfminnet"
 )

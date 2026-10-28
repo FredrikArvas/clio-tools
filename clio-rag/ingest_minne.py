@@ -7,8 +7,8 @@ pptx eller xlsx). Checksum-baserad: hoppar över oförändrade filer.
 Körs av cron eller manuellt.
 
 Körning:
-  python3 ingest_minne.py --source ~/Dropbox/projekt/Capgemini/Skidförbundet/ssfminnet --collection mem_ssf
   python3 ingest_minne.py --source ~/Dropbox/ftg/AIAB/aiabminnet --collection mem_aiab
+  python3 ingest_minne.py --source ~/Dropbox/ftg/GSF/gsfminnet --collection mem_gsf
   python3 ingest_minne.py --source ... --collection ... --force   # tvinga omindexering
 """
 from __future__ import annotations
@@ -243,7 +243,7 @@ def ingest_files(files: list[Path], collection: str, force: bool = False) -> tup
 def main() -> None:
     parser = argparse.ArgumentParser(description="Indexera *minnet-mapp till Qdrant")
     parser.add_argument("--source",     required=True, type=Path, help="Källmapp (Dropbox/*minnet/)")
-    parser.add_argument("--collection", required=True, help="Qdrant collection-namn (t.ex. mem_ssf)")
+    parser.add_argument("--collection", required=True, help="Qdrant collection-namn (t.ex. mem_aiab)")
     parser.add_argument("--force",      action="store_true", help="Tvinga omindexering")
     args = parser.parse_args()
 
