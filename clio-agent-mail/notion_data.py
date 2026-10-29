@@ -763,43 +763,6 @@ def create_masterlist_row(
         return False
 
 
-def append_kodord_to_sync_spec(page_id: str, kodord: str, ncc_page_id: str) -> bool:
-    """
-    Lägger till 'kodord:page_id' i kodordskodblocket i synkspecifikationssidan.
-    Identifierar blocket via förekomsten av 'väg:' eller 'vision:' i ett code-block.
-    Best-effort — misslyckas tyst.
-    """
-    try:
-        data = _notion_get(f"blocks/{page_id}/children")
-        blocks = data.get("results", [])
-        target_id = None
-        current_text = ""
-        for block in blocks:
-            if block.get("type") == "code":
-                rich = block.get("code", {}).get("rich_text", [])
-                text = "".join(r.get("plain_text", "") for r in rich)
-                if "väg:" in text or "vision:" in text:
-                    target_id = block["id"]
-                    current_text = text
-                    break
-        if not target_id:
-            logger.warning("[append_kodord] Synkblock ej hittat i synkspecifikationssidan")
-            return False
-
-        updated = current_text.rstrip() + f"\n{kodord}:{ncc_page_id}"
-        chunks = [updated[i:i+1800] for i in range(0, len(updated), 1800)]
-        rich_text = [{"type": "text", "text": {"content": c}} for c in chunks]
-        _notion_patch(
-            f"blocks/{target_id}",
-            {"code": {"rich_text": rich_text, "language": "javascript"}},
-        )
-        logger.info(f"[append_kodord] #{kodord} tillagt i synkblocket")
-        return True
-    except Exception as e:
-        logger.error(f"[append_kodord] {e}")
-        return False
-
-
 def clear_cache():
     """Tömmer cacheminnet. Används i tester och vid reload."""
     _cache.clear()
