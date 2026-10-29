@@ -11,16 +11,22 @@ import json
 import os
 import subprocess
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 BASE_DIR = Path("/home/clioadmin/19.0/clio-tools/clio-agent-mail")
 CLIO_TOOLS = Path("/home/clioadmin/19.0/clio-tools")
 STATE_FILE = Path("/home/clioadmin/logs/vigil_watchdog_state.json")
 LOG_FILE = Path("/home/clioadmin/logs/vigil_watchdog.log")
+VIGIL_STATUS_FILE = CLIO_TOOLS / "clio-vigil" / "data" / ".vigil_status"
 MAX_RESTARTS = 3
 MAIL_ACCOUNT = "clio"
 MAIL_TO = "fredrik@arvas.se"
+
+# Odoo-hälsa: larma när Odoo varit otillgänglig längre än tröskeln,
+# därefter högst en påminnelse per intervall tills det är återställt.
+ODOO_ALERT_AFTER = timedelta(minutes=30)
+ODOO_REMIND_EVERY = timedelta(hours=24)
 
 SERVICES = [
     "clio-vigil.service",
@@ -105,10 +111,72 @@ def start_service(service: str) -> bool:
     return result.returncode == 0
 
 
+def _parse_iso(value) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value) if value else None
+    except (TypeError, ValueError):
+        return None
+
+
+def check_odoo_health(state: dict) -> bool:
+    """
+    Läser .vigil_status (skrivs av main.py) och larmar om pipelinen kört utan
+    Odoo-anslutning längre än ODOO_ALERT_AFTER. Mailar "återställd" när det går igen.
+    Returnerar True om state ändrats.
+    """
+    try:
+        status = json.loads(VIGIL_STATUS_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        log(f"ODOO? kunde inte läsa {VIGIL_STATUS_FILE}: {e}")
+        return False
+    if "odoo" not in status:
+        return False  # äldre statusformat — inget att bedöma
+
+    health = state.setdefault("odoo_health", {"alerted_at": None})
+    now = datetime.now(timezone.utc)
+
+    if status["odoo"] == "ok":
+        log("OK  Odoo (uap)")
+        if not health.get("alerted_at"):
+            return False
+        health["alerted_at"] = None
+        send_email(
+            "[Vigil-watchdog] Odoo-anslutningen är återställd",
+            f"clio-vigil når Odoo (uap) igen.\nSenaste körning: {status.get('completed_at')}",
+        )
+        return True
+
+    ok_at = _parse_iso(status.get("odoo_ok_at"))
+    down_for = now - ok_at if ok_at else None
+    if down_for is not None and down_for < ODOO_ALERT_AFTER:
+        log(f"VÄNTAR Odoo otillgänglig i {down_for} (larm efter {ODOO_ALERT_AFTER})")
+        return False
+
+    alerted_at = _parse_iso(health.get("alerted_at"))
+    if alerted_at and now - alerted_at < ODOO_REMIND_EVERY:
+        log(f"FAIL Odoo otillgänglig — larm redan skickat {alerted_at:%Y-%m-%d %H:%M}")
+        return False
+
+    health["alerted_at"] = now.isoformat()
+    log(f"FAIL Odoo otillgänglig — larmar ({status.get('odoo_error')})")
+    send_email(
+        "[Vigil-watchdog] ⚠️ clio-vigil når inte Odoo (uap)",
+        "Pipelinen kör vidare mot SQLite men synkar inte till Odoo,\n"
+        "och källor läses från YAML i stället för clio.vigil.source.\n\n"
+        f"Fel: {status.get('odoo_error')}\n"
+        f"Senast OK: {status.get('odoo_ok_at') or 'okänt'}\n"
+        f"Senaste körning: {status.get('completed_at')} (steg: {status.get('step')})\n\n"
+        "Kontrollera VIGIL_ODOO_* i ~/19.0/clio-tools/.env.\n"
+        "OBS: VIGIL_ODOO_URL måste vara värdnamnet (dbfilter=^%d$), inte IP-adress.\n"
+        f"Nästa påminnelse tidigast om {ODOO_REMIND_EVERY.total_seconds() / 3600:g} h.",
+    )
+    return True
+
+
 def main():
     state = load_state()
     today = str(date.today())
-    changed = False
+    changed = check_odoo_health(state)
 
     for service in SERVICES:
         svc = state.setdefault(service, {
