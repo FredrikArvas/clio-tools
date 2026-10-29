@@ -662,14 +662,30 @@ def main():
 
     conn = init_db()
 
-    # Odoo-anslutning (mjukt beroende — körningen fortsätter utan)
+    # Odoo-anslutning (mjukt beroende — SQLite-arbetet fortsätter utan, men körningen
+    # markeras som fel i .vigil_status och vigil_watchdog.py larmar)
+    _odoo_error = None
     try:
-        from odoo_writer import get_odoo_env, sync_items_from_conn, sync_items_to_media, write_sources, read_sources, write_heartbeat
+        from odoo_writer import get_odoo_env, last_connect_error, sync_items_from_conn, sync_items_to_media, write_sources, read_sources, write_heartbeat
         from odoo_reader import pull_state_changes, import_manual_items
         _odoo_env = get_odoo_env()
+        _odoo_error = last_connect_error()
     except Exception as _e:
-        logger.warning("odoo_writer/reader saknas eller anslutning misslyckades: %s", _e)
+        _odoo_error = f"odoo_writer/reader kunde inte laddas: {_e}"
         _odoo_env = None
+
+    _pipeline_step = any([
+        args.run, args.caption_check, args.download, args.transcribe, args.summarize,
+        args.index, args.classify_uap, args.digest, args.full,
+    ])
+    if _odoo_env is None and _pipeline_step:
+        logger.error(
+            "Odoo otillgänglig — kör utan synk, källor från YAML. Orsak: %s", _odoo_error
+        )
+
+    # Synk till Odoo körs en gång i slutet av körningen (inte efter varje steg):
+    # helsynken är dyr och samtidiga synkar har skrivit tillbaka gammalt state.
+    _sync_labels: list[str] = []
 
     def _odoo_pull(label: str = "") -> None:
         """Hämtar tillståndsändringar och manuella poster från Odoo → SQLite. Kraschsäkert."""
@@ -689,6 +705,10 @@ def main():
             logger.warning("import_manual_items misslyckades (%s): %s", label, _ie)
 
     def _odoo_sync(label: str = "") -> None:
+        """Begär synk — utförs en gång i slutet av körningen av _odoo_sync_now()."""
+        _sync_labels.append(label)
+
+    def _odoo_sync_now(label: str = "") -> None:
         """Synkar pipeline-objekt till clio.vigil.item och clio.media.article."""
         if _odoo_env is None:
             return
@@ -824,20 +844,16 @@ def main():
         _sys.path.insert(0, str(_Path(__file__).parent.parent / "clio-uap"))
         _sys.path.insert(0, str(_Path(__file__).parent.parent))
         from classifiers.uap_pipeline import run_uap_classifier
-        try:
-            import sys as _s2
-            _s2.path.insert(0, str(_Path(__file__).parent.parent / "clio_odoo"))
-            from clio_odoo import connect as _odoo_connect
-            _odoo_env = _odoo_connect()
-        except Exception as _e:
-            logger.error(f"Odoo-anslutning misslyckades: {_e}")
-            _odoo_env = None
+        # Samma uap-anslutning som resten av körningen. Tidigare kopplades här upp
+        # mot ODOO_URL/ODOO_DB (aiab) — encounters och heartbeat hamnade i fel databas.
         if _odoo_env or args.dry_run:
             counts = run_uap_classifier(conn, _odoo_env, max_items=args.max, dry_run=args.dry_run)
             logger.info(
                 f"UAP-klassificering: {counts['classified']} klassificerade, "
                 f"{counts['imported']} importerade till Odoo"
             )
+        else:
+            logger.error("UAP-klassificering hoppas över — ingen Odoo-anslutning (objekten ligger kvar i queued)")
 
     if args.digest or args.full:
         _odoo_pull("före digest")
@@ -883,6 +899,10 @@ def main():
                 print("--- {} ({}) ---".format(r["journalist"], r["publication"]))
                 print(r.get("pitch_text", ""))
 
+    # Samlad synk till Odoo — en gång per körning
+    if _sync_labels:
+        _odoo_sync_now("slut (" + ", ".join(dict.fromkeys(_sync_labels)) + ")")
+
     # Heartbeat — alltid vid körning med pipeline-steg
     if _odoo_env is not None and any([
         args.run, args.transcribe, args.summarize,
@@ -908,14 +928,24 @@ def main():
         _step = next((k for k, v in _step_flags.items() if v), "run")
         _status_file = Path(__file__).parent / "data" / ".vigil_status"
         _status_file.parent.mkdir(parents=True, exist_ok=True)
+        _now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        try:
+            _prev_status = json.loads(_status_file.read_text())
+        except Exception:
+            _prev_status = {}
+        _odoo_ok = _odoo_env is not None
         _status_file.write_text(json.dumps({
             "step":         _step,
-            "status":       "done",
+            "status":       "done" if _odoo_ok else "error",
             "started_at":   _started_at,
-            "completed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "completed_at": _now_iso,
             "triggered_by": "systemd.timer",
+            # Läses av vigil_watchdog.py (larm om Odoo varit nere > tröskel)
+            "odoo":         "ok" if _odoo_ok else "unavailable",
+            "odoo_error":   None if _odoo_ok else _odoo_error,
+            "odoo_ok_at":   _now_iso if _odoo_ok else _prev_status.get("odoo_ok_at"),
         }))
-        logger.info("vigil_status skriven: steg=%s", _step)
+        logger.info("vigil_status skriven: steg=%s odoo=%s", _step, "ok" if _odoo_ok else "unavailable")
     except Exception as _se:
         logger.warning("Kunde inte skriva vigil_status: %s", _se)
 
