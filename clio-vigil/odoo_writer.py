@@ -26,6 +26,10 @@ _logger = logging.getLogger(__name__)
 
 TOOL_NAME = "clio-vigil"
 
+# Google News-parametrar — finns inte som fält på clio.vigil.source
+GOOGLE_NEWS_LANG    = "en"
+GOOGLE_NEWS_COUNTRY = "US"
+
 # Tillstånd som är värda att spegla till Odoo (discovered = för många)
 SYNC_STATES = [
     "filtered_in",
@@ -46,28 +50,53 @@ SYNC_STATES = [
 # Anslutning
 # ---------------------------------------------------------------------------
 
+_VIGIL_ENV_KEYS = ("VIGIL_ODOO_URL", "VIGIL_ODOO_DB", "VIGIL_ODOO_USER", "VIGIL_ODOO_PASSWORD")
+
+# Senaste anslutningsfel (None = senaste försöket lyckades) — läses av main.py för status/larm
+_last_connect_error: str | None = None
+
+
+def last_connect_error() -> str | None:
+    """Returnerar felorsaken från senaste get_odoo_env(), eller None om den lyckades."""
+    return _last_connect_error
+
+
 def get_odoo_env():
     """
-    Returnerar en ansluten OdooConnector mot vigil-databasen, eller None vid fel.
-    Läser VIGIL_ODOO_URL / VIGIL_ODOO_DB från root-/.env (clio-tools/.env),
-    annars ODOO_URL / ODOO_DB.
+    Returnerar en ansluten OdooConnector mot vigil-databasen (uap), eller None vid fel.
+
+    Kräver alla fyra VIGIL_ODOO_* i root-.env (clio-tools/.env) — ingen fallback
+    till ODOO_* (det personliga kontot mot aiab).
+    OBS: VIGIL_ODOO_URL måste vara värdnamnet (https://uap.arvas.international).
+    Odoo kör dbfilter=^%d$, så en IP-adress filtrerar bort uap → "Authentication failed".
     """
+    global _last_connect_error
     import os
     from pathlib import Path
     try:
         from dotenv import load_dotenv
         load_dotenv(Path(__file__).parent.parent / ".env", override=False)
-    except Exception:
-        pass
+    except Exception as exc:
+        _logger.warning("Kunde inte läsa .env: %s", exc)
+
+    missing = [k for k in _VIGIL_ENV_KEYS if not os.environ.get(k)]
+    if missing:
+        _last_connect_error = "saknade miljövariabler: " + ", ".join(missing)
+        _logger.error("Odoo-anslutning ej möjlig — %s", _last_connect_error)
+        return None
+
+    url, db, user = (os.environ[k] for k in _VIGIL_ENV_KEYS[:3])
     try:
         from clio_odoo import connect
-        return connect(
-            url=os.environ.get("VIGIL_ODOO_URL") or None,
-            db=os.environ.get("VIGIL_ODOO_DB") or None,
-        )
+        env = connect(url=url, db=db, user=user, password=os.environ["VIGIL_ODOO_PASSWORD"])
     except Exception as exc:
-        _logger.warning("Odoo-anslutning misslyckades: %s", exc)
+        _last_connect_error = f"{exc} (url={url}, db={db}, user={user})"
+        _logger.error("Odoo-anslutning misslyckades: %s", _last_connect_error)
         return None
+
+    _last_connect_error = None
+    _logger.info("Odoo: ansluten till %s (db=%s) som %s", url, db, user)
+    return env
 
 
 # ---------------------------------------------------------------------------
@@ -108,6 +137,17 @@ def _read_transcript(row) -> str:
         return ""
 
 
+def _odoo_language(row):
+    """
+    SQLite language → clio.vigil.item.language (ISO 639-1, Char).
+    'multi' är en källegenskap (okänt per avsnitt) → lämnas tomt, samma regel som i Odoo-modulen.
+    """
+    code = (row["language"] or "").strip().lower() if "language" in row.keys() else ""
+    if not code or code == "multi":
+        return False
+    return code
+
+
 def _item_to_vals(row) -> dict:
     """Konverterar en SQLite-rad (sqlite3.Row) till Odoo-faltvarden."""
     transcript = _read_transcript(row)
@@ -119,6 +159,7 @@ def _item_to_vals(row) -> dict:
         "source_name":      (row["source_name"] or "")[:200],
         "source_maturity":  row["source_maturity"] or "tidig",
         "published_at":     _dt(row["published_at"]),
+        "language":         _odoo_language(row),
         "duration_seconds": row["duration_seconds"] or False,
         "relevance_score":  float(row["relevance_score"] or 0.0),
         "priority_score":   float(row["priority_score"] or 0.0),
@@ -230,11 +271,13 @@ def read_sources(odoo_env, domain: str) -> list[dict]:
     if odoo_env is None:
         return []
 
+    # OBS: clio.vigil.source har inga fält lang/country — begär dem aldrig (Invalid field
+    # → hela insamlingen kraschar). Fixat 2026-08-14 men återinfört via git; åter fixat 2026-10-19.
     rows = odoo_env["clio.vigil.source"].search_read(
         [("domain", "=", domain), ("active", "=", True)],
         [
             "name", "source_type", "url", "channel_id",
-            "google_news_query", "lang", "country", "language",
+            "google_news_query", "language",
             "maturity", "weight", "transcription_threshold",
             "auth_env", "archive_enabled",
         ],
@@ -262,8 +305,8 @@ def read_sources(odoo_env, domain: str) -> list[dict]:
             s["channel_id"] = r["channel_id"] or ""
         elif r["source_type"] == "google_news":
             s["query"]   = r["google_news_query"] or ""
-            s["lang"]    = r["lang"] or "en"
-            s["country"] = r["country"] or "US"
+            s["lang"]    = GOOGLE_NEWS_LANG
+            s["country"] = GOOGLE_NEWS_COUNTRY
         else:
             s["url"] = r["url"] or ""
 
