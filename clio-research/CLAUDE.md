@@ -160,17 +160,17 @@ Den gamla 8-fas-pipelinen (`main.py`) körs fortfarande på servern och hanterar
 
 - **Semantic Scholar:** API-nyckel ogiltig — returnerar 403
 - **CyberLeninka:** JavaScript-SPA, scraping fungerar ej tills R1.5 / Playwright
-- **Qdrant:** `vigil_research`-kollektionen har dim 1024 på servern, OpenAI-embedding ger 1536 → upsert misslyckas tyst vid varje körning
-- **Embedding:** `qdrant_indexer.py` och `relevance_filter.py` använder `text-embedding-3-small` (OpenAI, dim 1536). Migrera till lokal Ollama-modell, radera kollektionen och återskapa (backlog tills v2 P4).
-- **Relevanströskel:** `MIN_SIMILARITY = 0.20` (i `relevance_filter.py`). Om OpenAI-nyckeln saknas fallbackar filtret tyst till `relevance_score=0.5` och tar upp till 60 källor utan filtrering.
+- **Qdrant:** `vigil_research`-kollektionen måste återskapas på servern efter Ollama-migrationen (radera och återskapa med dim 1024 — matchar nu bge-m3). Körningar 001–022 behöver re-indexeras.
+- **Relevanströskel:** `MIN_SIMILARITY = 0.20` (i `relevance_filter.py`). Om Ollama inte svarar fallbackar filtret tyst till `relevance_score=0.5` och tar upp till 60 källor utan filtrering.
 
 ---
 
 ## Backlog (v2)
 
 - [ ] Ny Semantic Scholar API-nyckel ([semanticscholar.org/product/api](https://www.semanticscholar.org/product/api))
+- [ ] Re-indexera körningar 001–022 mot ny Ollama-embedding (radera `vigil_research`, kör om `qdrant_indexer.index_report` per körning)
 - [ ] Semantisk X/Y-scoring i kvadrantdiagrammet
-- [ ] Höj relevanströskel → 0.18–0.20 när Semantic Scholar återkopplad
+- [ ] Höj relevanströskel → 0.25–0.30 efter Semantic Scholar-återkoppling (bge-m3 kan ge högre absoluta scores)
 
 ---
 
