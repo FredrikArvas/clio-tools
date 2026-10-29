@@ -86,6 +86,19 @@ discovered → filtered_in / filtered_out
 - `sync_items_to_media()` skriver bara basdata + länk — duplicera INTE vigil-fält i clio.media.article
 - `build_sources_config()` hör hemma i `odoo_writer.py`, inte `main.py`
 - Transkriptfiler lagras i `data/transcripts/vigil_{id}.json` på servern
+- **`VIGIL_ODOO_URL` måste vara värdnamnet** (`https://uap.arvas.international`), aldrig IP:port. Odoo kör `dbfilter = ^%d$` → via IP filtreras `uap` bort och svaret blir "Authentication failed" (orsakade synkstopp 2026-09-25 → 2026-10-18)
+- `get_odoo_env()` kräver alla fyra `VIGIL_ODOO_URL/DB/USER/PASSWORD` (clio-bot) — ingen fallback till `ODOO_*` (aiab/personligt konto). clio-bot måste vara med i gruppen Clio Admin i uap (heartbeat)
+- Odoo-synk körs **en gång i slutet** av varje `main.py`-körning (`_odoo_sync()` begär, `_odoo_sync_now()` utför)
+- **Språk (`language`):** `clio.vigil.item.language` är en ISO 639-1-kod (`Char`, constraint `[a-z]{2,3}`) sedan clio_vigil 19.0.1.10.0 — tidigare Selection en/sv/pt/other. `_item_to_vals()` synkar språket; `multi` (källegenskap = okänt per avsnitt) → tomt. Källans språk (`clio.vigil.source.language`, Selection en/sv/pt/multi) är utgångsvärde och styr Whisper-modell: `sv` → kb-whisper. Svenska källor MÅSTE ha `sv`, annars transkriberas de med turbo
+- `--classify-uap` använder samma uap-anslutning — koppla aldrig upp med `clio_odoo.connect()` utan argument (ger aiab)
+
+## Odoo-larm (2026-10-18)
+
+`main.py` skriver `odoo: ok|unavailable`, `odoo_error` och `odoo_ok_at` i `data/.vigil_status` (status `error` om Odoo saknas).
+`vigil_watchdog.py` mailar när Odoo varit otillgänglig > 30 min, därefter max en påminnelse/24 h, och mailar "återställd" när det går igen.
+Larmstatus: `odoo_health` i `~/logs/vigil_watchdog_state.json`.
+
+**`clio-vigil-summarize.timer` är pausad sedan 2026-10-18** — samtidiga helsynkar från två processer skrev tillbaka gammalt state till SQLite (`pull_state_changes`, "Odoo vann"). Huvudpipelinen summerar ändå i pass 1. Starta inte timern igen förrän synken är enkelriktad och inkrementell (punkt 4–5 i `genomlysning-2026-10-18.md`).
 
 ## Odoo-addon
 
