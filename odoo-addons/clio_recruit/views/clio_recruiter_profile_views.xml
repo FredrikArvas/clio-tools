@@ -60,15 +60,15 @@
           </group>
           <group string="Kandidatprofil">
             <field name="target_characteristics" string="Eftersökta egenskaper"
-                   widget="text" placeholder="En egenskap per rad…" nolabel="1"/>
+                   widget="text" placeholder="En egenskap per rad…" nolabel="1" colspan="2"/>
             <field name="target_avoid" string="Undvik"
-                   widget="text" placeholder="En per rad…" nolabel="1"/>
+                   widget="text" placeholder="En per rad…" nolabel="1" colspan="2"/>
           </group>
           <group string="Triggersignaler">
             <field name="trigger_signals_high"   string="Högvärda signaler"
-                   widget="text" placeholder="En signal per rad…" nolabel="1"/>
+                   widget="text" placeholder="En signal per rad…" nolabel="1" colspan="2"/>
             <field name="trigger_signals_medium" string="Medelvärda signaler"
-                   widget="text" placeholder="En signal per rad…" nolabel="1"/>
+                   widget="text" placeholder="En signal per rad…" nolabel="1" colspan="2"/>
           </group>
           <notebook>
             <page string="Matchhistorik">
