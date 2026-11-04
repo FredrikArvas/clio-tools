@@ -110,3 +110,59 @@ def load_profile_by_email(email: str) -> dict | None:
     """Returnerar en enskild profil eller None om den inte finns."""
     profiles = load_profiles(partner_email=email)
     return profiles[0] if profiles else None
+
+
+def load_recruiter_profiles() -> list[dict]:
+    """
+    Hämtar aktiva clio.recruiter.profile-poster från Odoo.
+
+    Returns:
+        Lista av rekryterarprofil-dicts kompatibla med run.py:s profile_override.
+    """
+    from clio_odoo import connect
+
+    try:
+        env = connect()
+    except Exception as exc:
+        _logger.error("Kunde inte ansluta till Odoo: %s", exc)
+        raise
+
+    Profile = env["clio.recruiter.profile"]
+
+    fields = [
+        "id", "name", "email", "language",
+        "target_role", "target_seniority",
+        "target_industries", "target_characteristics", "target_avoid",
+        "trigger_signals_high", "trigger_signals_medium",
+    ]
+    raw = Profile.search_read([("active", "=", True)], fields)
+
+    if not raw:
+        _logger.warning("Inga aktiva rekryterarprofiler hittades i Odoo.")
+        return []
+
+    results = []
+    for p in raw:
+        profile = {
+            "name":     p.get("name", ""),
+            "email":    p.get("email", ""),
+            "language": p.get("language", "") or "sv",
+            "profile_type": "recruiter",
+            "target_candidate": {
+                "role":            p.get("target_role", "") or "",
+                "seniority":       p.get("target_seniority", "") or "",
+                "characteristics": _text_to_list(p.get("target_characteristics", "")),
+                "avoid":           _text_to_list(p.get("target_avoid", "")),
+            },
+            "trigger_signals": {
+                "high_value":   _text_to_list(p.get("trigger_signals_high", "")),
+                "medium_value": _text_to_list(p.get("trigger_signals_medium", "")),
+            },
+            "target_industries": _text_to_list(p.get("target_industries", "")),
+            "_odoo_id": int(p["id"]),
+        }
+        results.append(profile)
+        _logger.debug("Rekryterarprofil laddad: %s (%s)", profile["name"], profile["email"])
+
+    _logger.info("Laddade %d rekryterarprofil(er) från Odoo.", len(results))
+    return results
