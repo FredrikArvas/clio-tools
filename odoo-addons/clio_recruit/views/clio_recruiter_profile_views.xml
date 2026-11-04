@@ -24,6 +24,13 @@
     <field name="model">clio.recruiter.profile</field>
     <field name="arch" type="xml">
       <form string="Rekryterarprofil">
+        <header>
+          <button name="action_run_manual_search"
+                  type="object"
+                  string="Kör manuell sökning"
+                  class="btn-primary"
+                  confirm="Söker artiklar i databasen och skickar rapport till mottagaren. Fortsätt?"/>
+        </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
             <button name="action_view_matches"
