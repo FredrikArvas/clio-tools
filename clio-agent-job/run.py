@@ -72,6 +72,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                    help="Kor utan Odoo (las YAML, skriv inte matchningar eller heartbeat)")
     p.add_argument("--odoo-recruiter", action="store_true",
                    help="Kor bevakningar for alla aktiva Clio Recruit-profiler i Odoo")
+    p.add_argument("--odoo-recruiter-id", type=int, default=None,
+                   help="Kor bevakning for en specifik Clio Recruit-profil (Odoo-ID)")
     return p.parse_args(argv)
 
 
@@ -293,9 +295,11 @@ def main(argv=None) -> None:
         print(last_run_summary())
         return
 
-    if args.odoo_recruiter:
+    if args.odoo_recruiter or args.odoo_recruiter_id:
         from odoo_reader import load_recruiter_profiles
         profiles = load_recruiter_profiles()
+        if args.odoo_recruiter_id:
+            profiles = [p for p in profiles if p.get("_odoo_id") == args.odoo_recruiter_id]
         if not profiles:
             print("[clio-job] Inga aktiva Clio Recruit-profiler i Odoo.")
             sys.exit(0)
