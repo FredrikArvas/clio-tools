@@ -82,11 +82,29 @@
     </field>
   </record>
 
+  <!-- Sökvy -->
+  <record id="view_clio_job_profile_search" model="ir.ui.view">
+    <field name="name">clio.job.profile.search</field>
+    <field name="model">clio.job.profile</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="partner_id"/>
+        <field name="role"/>
+        <filter name="active"   string="Aktiva"     domain="[('active','=',True)]"/>
+        <filter name="archived" string="Arkiverade" domain="[('active','=',False)]" default="1"/>
+        <group>
+          <filter name="group_geography" string="Geografi" context="{'group_by': 'geography'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
   <!-- Menypost -->
   <record id="action_clio_job_profile" model="ir.actions.act_window">
     <field name="name">Clio Job — Profiles</field>
     <field name="res_model">clio.job.profile</field>
     <field name="view_mode">list,form</field>
+    <field name="context">{'active_test': False}</field>
   </record>
 
 </odoo>
