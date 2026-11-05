@@ -93,7 +93,7 @@ class ClioRecruiterProfile(models.Model):
             rec.match_count = len(rec.match_ids)
 
     def action_run_manual_search(self):
-        """Kör manuell artikelsökning mot befintlig DB för denna profil och skickar rapport."""
+        """Startar manuell artikelsökning i bakgrunden. Resultat syns i Matchhistorik-fliken."""
         self.ensure_one()
         if not self.email:
             return {
@@ -103,27 +103,30 @@ class ClioRecruiterProfile(models.Model):
             }
 
         try:
-            proc = subprocess.run(
+            subprocess.Popen(
                 [sys.executable, _AGENT_SCRIPT, "--odoo-recruiter-id", str(self.id)],
-                capture_output=True,
-                text=True,
-                timeout=300,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
-            output = proc.stdout + (proc.stderr or "")
-        except subprocess.TimeoutExpired:
-            output = "[FEL] Sökningen tog för lång tid (>5 min)."
         except Exception as exc:
-            output = f"[FEL] Kunde inte starta agenten: {exc}"
+            self.message_post(
+                body=f"<b>Manuell sökning — fel vid start</b><br/><pre>{exc}</pre>",
+                subject=f"Manuell sökning — {self.name}",
+            )
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {"message": f"Kunde inte starta sökningen: {exc}", "type": "danger"},
+            }
 
-        # Posta resultat i chatter
         self.message_post(
-            body=f"<b>Manuell sökning</b><br/><pre>{output[:4000]}</pre>",
+            body="<b>Manuell sökning startad</b> — resultaten sparas i Matchhistorik-fliken när klart (ca 5–10 min).",
             subject=f"Manuell sökning — {self.name}",
         )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
-            "params": {"message": "Sökning klar — se chatter för resultat.", "type": "success"},
+            "params": {"message": "Sökning startad — se Matchhistorik när klart.", "type": "success"},
         }
 
     def action_view_matches(self):
