@@ -6,7 +6,7 @@ Medieövervakningspipeline: RSS, YouTube, webb → filter → transkription → 
 
 **Server:** `clioadmin@100.107.127.104`
 **Aktiv sökväg:** `~/19.0/clio-tools/clio-vigil/` (branch `19.0`, enda aktiva branchen)
-**Schemaläggning:** systemd-timer `clio-vigil.service` — kör `--full --all-domains --max 10` dagligen 06:30
+**Schemaläggning:** `clio-vigil.timer` → `run_vigil.sh` i loop: pass 1 `--summarize --index --classify-uap --max 50`, pass 2 `--run --download --max 10`, pass 3 `--transcribe --summarize --index --classify-uap --max 10`. Digest: `clio-vigil-digest.timer` 06:30 (skickar mail). Watchdog: `clio-vigil-watchdog.timer`
 
 ```bash
 cd ~/19.0/clio-tools/clio-vigil
@@ -91,6 +91,14 @@ discovered → filtered_in / filtered_out
 - Odoo-synk körs **en gång i slutet** av varje `main.py`-körning (`_odoo_sync()` begär, `_odoo_sync_now()` utför)
 - **Språk (`language`):** `clio.vigil.item.language` är en ISO 639-1-kod (`Char`, constraint `[a-z]{2,3}`) sedan clio_vigil 19.0.1.10.0 — tidigare Selection en/sv/pt/other. `_item_to_vals()` synkar språket; `multi` (källegenskap = okänt per avsnitt) → tomt. Källans språk (`clio.vigil.source.language`, Selection en/sv/pt/multi) är utgångsvärde och styr Whisper-modell: `sv` → kb-whisper. Svenska källor MÅSTE ha `sv`, annars transkriberas de med turbo
 - `--classify-uap` använder samma uap-anslutning — koppla aldrig upp med `clio_odoo.connect()` utan argument (ger aiab)
+- **Ingen ocommittad kod på servern.** Handpatchar på servern och fixar på sidogrenar har regresserat (lang/country två gånger). Ändra i en worktree på `19.0`, pytest, push, `git pull --ff-only` på servern
+- **Transkriberingskön (2026-11-08, d1485c1 + 191a409):** bara `downloaded` (och strandade `transcribing` med `whisper_segment > 0`) transkriberas. Text-RSS utan `enclosure_url` ligger kvar i `queued` och går till `--classify-uap`. 0 segment utan SIGTERM → `failed`. Preemption sker bara för `downloaded`, och pausat objekt med `audio_path` går tillbaka till `downloaded`
+- **`--classify-uap` tar även poddar i `queued`** (på titel + beskrivning) — de kan bli klassade N innan de transkriberats. Öppen designfråga: ljud först eller klassning först?
+- **Synkkapplöpning:** `sync_items_from_conn` läser alla rader i början av synken (~15 min) och `pull_state_changes` låter Odoo vinna om `write_date` är nyare än `state_updated_at`. Ändras SQLite medan en synk pågår skrivs det över av den gamla ögonblicksbilden. Ändra aldrig state för hand mitt i en körning — vänta tills timrarna står still
+- **Helsynk efter varje steg tar ~15 min** (15 000+ objekt, vigil.item + media.article). En manuell körning av alla sju steg tar därför ~2 h
+- `Wrong value for clio.vigil.item.language: 'fi'` (3 YouTube-poster) → uap kör äldre clio_vigil med Selection-språk; uppgradera modulen i uap så att Char-fältet gäller
+- `write_sources`/`read_sources`: `clio.vigil.source` har **inte** fälten `lang`/`country` — skicka dem aldrig (a2d77a5)
+- Manuell stegvis körning: `~/vigil_manual.sh` på servern (utan digest), logg i `~/logs/vigil-manual-*.log`. Stoppa `clio-vigil.timer` + `clio-vigil-watchdog.timer` först (kräver sudo, Fredrik)
 
 ## Odoo-larm (2026-10-18)
 
