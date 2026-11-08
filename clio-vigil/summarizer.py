@@ -16,12 +16,13 @@ Fördjupningsanalys: Claude API för objekt med priority_score >= CLAUDE_THRESHO
 # Eller byt LOCAL_MODEL="" för att inaktivera lokal motor helt.
 
 Flöde:
-  1. Hämta objekt med state IN (transcribed, ...) OCH transcript_path IS NOT NULL
-  2. Läs in transkript-JSON (segments med tidsstämplar)
+  1. Hämta objekt utan summary som har transcript_path, eller (textposter)
+     description ≥ MIN_TEXT_CHARS
+  2. Läs in transkript-JSON (segments med tidsstämplar), eller title + description
   3. priority_score >= CLAUDE_THRESHOLD → Claude API (djupanalys, trunkerat)
      priority_score <  CLAUDE_THRESHOLD → Ollama chunk-loop (full längd)
   4. Spara summary i vigil_items.summary
-  5. Sätter state = summarized
+  5. Sätter state = summarized (bara från transcribed/captioned; indexed ligger kvar)
 
 Körning:
   python summarizer.py --run [--domain ufo] [--max 20]
@@ -61,6 +62,11 @@ CLAUDE_THRESHOLD    = float(os.getenv("CLAUDE_THRESHOLD", "0.5"))
 
 # Claude-path: trunkera till 20 000 chars (Claude hanterar längre kontext fint)
 MAX_TRANSCRIPT_CHARS = 20_000
+
+# Textposter (RSS/webb utan transkript) sammanfattas från title + description
+# om description är minst så här lång. Kortare (t.ex. Google News "rubrik - källa")
+# ger inget att sammanfatta — digesten visar då description direkt.
+MIN_TEXT_CHARS = 400
 
 # Ollama chunk-loop: 14 000 chars per chunk (~3 500 tokens + ~500 tokens prompt/output overhead
 # = 4 000 tokens total, inom qwen2.5:3b:s 4096-token fönster)
@@ -132,6 +138,28 @@ def _transcript_to_text(transcript_path: str) -> str:
         return " ".join(s["text"] for s in segments if s.get("text"))
     except (json.JSONDecodeError, TypeError):
         return raw
+
+
+def _description_text(item) -> str:
+    """Description som ren text (HTML-entiteter avkodade, blanktecken hopslagna)."""
+    import html
+    return " ".join(html.unescape(item["description"] or "").split())
+
+
+def _item_source_text(item) -> Optional[str]:
+    """
+    Text att sammanfatta: transkript om det finns, annars title + description
+    för textposter med tillräckligt lång description. None om inget finns.
+    Kastar FileNotFoundError/ValueError om transkriptfilen saknas eller är tom.
+    """
+    if item["transcript_path"]:
+        return _transcript_to_text(item["transcript_path"])
+    # Samma längdmått som SQL-urvalet i run_summarizer (rå längd), så att en
+    # vald post aldrig avvisas här och väljs om och om igen.
+    if len(item["description"] or "") < MIN_TEXT_CHARS:
+        return None
+    description = _description_text(item)
+    return f"{item['title'] or ''}\n\n{description}".strip()
 
 
 # ---------------------------------------------------------------------------
@@ -268,14 +296,15 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         logger.error(f"Item {item_id} hittades inte")
         return None
 
-    if not item["transcript_path"]:
-        logger.warning(f"Item {item_id} saknar transcript_path")
-        return None
-
     try:
-        transcript_text = _transcript_to_text(item["transcript_path"])
+        transcript_text = _item_source_text(item)
     except FileNotFoundError as e:
         logger.error(str(e))
+        return None
+    if transcript_text is None:
+        logger.warning(
+            f"Item {item_id} saknar transkript och description ≥ {MIN_TEXT_CHARS} tecken"
+        )
         return None
 
     priority = item["priority_score"] or 0.0
@@ -311,7 +340,10 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         (summary, item_id),
     )
     conn.commit()
-    transition(conn, item_id, "summarized")
+    # Bara poster som väntar på summering flyttas fram. En redan indexerad post
+    # ska ligga kvar som indexed, annars missar digesten den.
+    if item["state"] in ("transcribed", "captioned"):
+        transition(conn, item_id, "summarized")
 
     logger.info(f"Item {item_id} [{engine}] (prio={priority:.2f}): {summary[:80]}…")
     return summary
@@ -323,21 +355,23 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
 
 def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20, odoo_env=None) -> dict:
     """
-    Sammanfattar objekt som har transkript men saknar summary.
-    Obs: filtrerar aktivt bort items utan transcript_path — de kan aldrig summeras
-    via transkript-flödet och ska inte ta upp slots i kön.
+    Sammanfattar objekt som saknar summary och har något att sammanfatta:
+    transkript, eller (textposter) en description på minst MIN_TEXT_CHARS tecken.
+    Poster utan något av dem väljs aldrig, så de tar inte slots i kön.
     """
     query = """
         SELECT id FROM vigil_items
         WHERE state IN ('transcribed', 'captioned', 'summarized', 'indexed', 'notified')
           AND (summary IS NULL OR summary = '')
-          AND transcript_path IS NOT NULL AND transcript_path != ''
+          AND ((transcript_path IS NOT NULL AND transcript_path != '')
+               OR length(coalesce(description, '')) >= ?)
           {}
         ORDER BY priority_score DESC
         LIMIT ?
     """.format("AND domain = ?" if domain else "")
 
-    params = (domain, max_items) if domain else (max_items,)
+    params = ((MIN_TEXT_CHARS, domain, max_items) if domain
+              else (MIN_TEXT_CHARS, max_items))
     rows = conn.execute(query, params).fetchall()
 
     counts = {"done": 0, "failed": 0, "claude": 0, "ollama": 0}
@@ -346,12 +380,6 @@ def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20, odoo
             result = summarize_item(conn, row["id"])
             if result:
                 counts["done"] += 1
-                # Flytta till summarized om item kom från transcribed/captioned
-                item_state = conn.execute(
-                    "SELECT state FROM vigil_items WHERE id=?", (row["id"],)
-                ).fetchone()
-                if item_state and item_state["state"] in ("transcribed", "captioned"):
-                    transition(conn, row["id"], "summarized")
                 if odoo_env is not None:
                     try:
                         from odoo_writer import sync_single_item
