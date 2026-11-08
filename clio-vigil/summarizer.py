@@ -321,6 +321,8 @@ def _load_claude_runner():
         path = _here.parent / "clio-research" / "claude_runner.py"
         spec = importlib.util.spec_from_file_location("claude_runner", path)
         module = importlib.util.module_from_spec(spec)
+        # Dataclasses i modulen slår upp sys.modules[__module__] — registrera först.
+        sys.modules["claude_runner"] = module
         spec.loader.exec_module(module)
         _claude_runner = module
     return _claude_runner
