@@ -53,6 +53,22 @@ def _extract_description(entry) -> str:
     return " ".join(parts)
 
 
+def extract_author(entry) -> Optional[str]:
+    """Byline ur ett feedparser-entry, eller None.
+
+    author_detail kan ha nyckeln "name" med värdet None (t.ex. DN, Aftonbladet,
+    SvD) — tidigare kraschade .strip() då och hela flödet hoppades över.
+    """
+    author = None
+    if getattr(entry, "author_detail", None):
+        author = entry.author_detail.get("name")
+    if not author:
+        author = getattr(entry, "author", None)
+    if not isinstance(author, str):
+        return None
+    return author.strip() or None
+
+
 # ---------------------------------------------------------------------------
 # Huvud-collector
 # ---------------------------------------------------------------------------
@@ -139,12 +155,7 @@ def collect_rss(conn, domain_config: dict) -> dict:
                         pass
 
                 # Extrahera author/byline för journalist_extractor
-                author = None
-                if hasattr(entry, "author_detail") and entry.author_detail:
-                    author = entry.author_detail.get("name", "")
-                if not author and hasattr(entry, "author"):
-                    author = entry.author or ""
-                author = author.strip() or None
+                author = extract_author(entry)
 
                 item_id = upsert_item(
                     conn,
