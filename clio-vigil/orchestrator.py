@@ -447,7 +447,14 @@ def preempt_current(conn: sqlite3.Connection, current_id: int,
     Pausar pågående transkriptionsjobb vid aktuellt Whisper-segment.
     Sparar position så att jobbet kan återupptas.
     """
-    ok = transition(conn, current_id, "queued",
+    # Med nedladdad audio återgår objektet till 'downloaded' så att kön tar upp
+    # det igen (get_next_for_transcription läser inte queued). Utan audio_path
+    # raderas ljudet efter körningen och objektet måste laddas ner på nytt.
+    row = conn.execute(
+        "SELECT audio_path FROM vigil_items WHERE id = ?", (current_id,)
+    ).fetchone()
+    new_state = "downloaded" if row and row["audio_path"] else "queued"
+    ok = transition(conn, current_id, new_state,
                     whisper_segment=segment)
     conn.execute(
         """UPDATE transcription_queue
