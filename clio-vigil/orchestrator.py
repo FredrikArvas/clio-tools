@@ -401,7 +401,7 @@ def get_next_queued(conn: sqlite3.Connection, domain: Optional[str] = None):
 def get_next_for_transcription(conn: sqlite3.Connection, domain: Optional[str] = None):
     """
     Hämtar nästa objekt för transkription.
-    Prioritetsordning: transcribing (resume) > downloaded (audio klar) > queued text-only.
+    Prioritetsordning: transcribing (resume) > downloaded (audio klar).
     """
     domain_clause = "AND domain = ?" if domain else ""
     params = (domain,) if domain else ()
@@ -434,18 +434,11 @@ def get_next_for_transcription(conn: sqlite3.Connection, domain: Optional[str] =
     if row:
         return row
 
-    # 2. Fallback: queued items utan audio (text-only RSS)
-    row = conn.execute(
-        f"""SELECT vi.* FROM vigil_items vi
-              WHERE vi.state = 'queued'
-              {domain_clause}
-              AND vi.source_type = 'rss'
-              AND (json_extract(vi.raw_metadata, '$.enclosure_url') IS NULL
-                   OR json_extract(vi.raw_metadata, '$.enclosure_url') = '')
-              ORDER BY vi.priority_score DESC LIMIT 1""",
-        params,
-    ).fetchone()
-    return row
+    # Text-only RSS (ingen enclosure_url) transkriberas inte — det finns inget ljud.
+    # De ligger kvar i queued och tas om hand av summarize/classify. Den tidigare
+    # fallbacken laddade ner artikelns HTML till Whisper, fick 0 segment och lämnade
+    # posten fast i transcribing.
+    return None
 
 
 def preempt_current(conn: sqlite3.Connection, current_id: int,
