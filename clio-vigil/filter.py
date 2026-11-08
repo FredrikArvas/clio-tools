@@ -112,14 +112,17 @@ def _length_verdict(duration, domain_config: dict):
 
 
 def _score_rows(conn, rows, keywords: dict) -> list:
-    """Räknar score för varje rad och sparar relevance_score. Returnerar (row, score)."""
+    """
+    Räknar score för varje rad och sparar relevance_score. Returnerar (row, score).
+    Oförändrade score skrivs inte, så att Odoo-synken inte ser raden som ändrad.
+    """
     scored = [
         (row, keyword_score(f"{row['title'] or ''} {row['description'] or ''}", keywords))
         for row in rows
     ]
     conn.executemany(
-        "UPDATE vigil_items SET relevance_score = ? WHERE id = ?",
-        [(score, row["id"]) for row, score in scored],
+        "UPDATE vigil_items SET relevance_score = ? WHERE id = ? AND relevance_score IS NOT ?",
+        [(score, row["id"], score) for row, score in scored],
     )
     conn.commit()
     return scored

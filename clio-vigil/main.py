@@ -633,6 +633,7 @@ def main():
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
+    parser.add_argument("--full-sync",   action="store_true", help="Synka alla poster till Odoo, inte bara ändrade (kombineras med t.ex. --run; sker automatiskt var 24:e timme)")
     parser.add_argument("--max",         type=int, default=10, help="Max objekt per steg (default: 10)")
 
     args = parser.parse_args()
@@ -718,13 +719,13 @@ def main():
         if _odoo_env is None:
             return
         try:
-            n = sync_items_from_conn(_odoo_env, conn)
+            n = sync_items_from_conn(_odoo_env, conn, is_full=args.full_sync)
             if n:
                 logger.info("Odoo-sync (vigil.item) %s: %d objekt", label, n)
         except Exception as _se:
             logger.warning("Odoo-sync (vigil.item) misslyckades (%s): %s", label, _se)
         try:
-            m = sync_items_to_media(_odoo_env, conn)
+            m = sync_items_to_media(_odoo_env, conn, is_full=args.full_sync)
             if m:
                 logger.info("Odoo-sync (media.article) %s: %d objekt", label, m)
         except Exception as _me:
