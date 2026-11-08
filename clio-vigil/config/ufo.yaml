@@ -34,6 +34,17 @@ keywords:
     - congress uap
     - citizen hearing
     - extraterrestrial
+    # 2026-11-08: matchning på hela ord (+ böjningar), se filter.py
+    - alien
+    - area 51
+    - abduct
+    - remote viewing
+    - galactic federation
+    - uso
+    - nordic
+    - gray
+    - aaro
+    - project blue book
   secondary:
     - skinwalker
     - roswell
@@ -59,6 +70,10 @@ keywords:
     - orb
     - pleiadian
     - plejaderna
+    - pleiades
+    - kryon
+    - encounter
+    - coast
     - sirius
     - arcturian
     - lyran

@@ -252,12 +252,9 @@ def pick_source(conn) -> None:
     print(f"\n  ✓ Totalt: {total_new} nya objekt, {total_queued} i kö")
 
 
-def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
-    """Kör collect → filter → queue för en domän."""
-    logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
+def load_config_with_sources(domain_id: str, odoo_env=None) -> dict:
+    """Domänconfig från YAML med källor från Odoo om anslutning finns, annars YAML-källor."""
     config = load_domain_config(domain_id)
-
-    # Källor: läs från Odoo om anslutning finns, annars YAML-fallback
     if odoo_env is not None:
         from odoo_writer import read_sources, build_sources_config
         odoo_sources = read_sources(odoo_env, domain_id)
@@ -268,6 +265,13 @@ def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
             logger.warning(f"Inga aktiva Odoo-källor för domän={domain_id} — faller tillbaka på YAML")
     else:
         logger.warning("Ingen Odoo-anslutning — läser källkonfiguration från YAML")
+    return config
+
+
+def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
+    """Kör collect → filter → queue för en domän."""
+    logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
+    config = load_config_with_sources(domain_id, odoo_env)
 
     # Steg 1: Insamling
     rss_counts = collect_rss(conn, config)
@@ -614,6 +618,7 @@ def main():
     parser.add_argument("--clear-queue",          action="store_true", help="Rensa kön (återställ tillstånd)")
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
+    parser.add_argument("--refilter",             action="store_true", help="Poängsätt om filtered_out med aktuella nyckelord och köa de som nu klarar tröskeln (--dry-run = bara räkna)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
     parser.add_argument("--extract-journalists", action="store_true", help="Extrahera journalistbylines ur insamlade artiklar")
     parser.add_argument("--build-profiles",      action="store_true", help="Bygg journalist-profiler via Claude")
@@ -652,7 +657,7 @@ def main():
         args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
-        args.recompute_priorities, args.classify_uap, args.seed_sources,
+        args.recompute_priorities, args.refilter, args.classify_uap, args.seed_sources,
         args.extract_journalists, bool(args.pitch),
         args.archive_sources, bool(args.archive_source),
     ])
@@ -782,6 +787,21 @@ def main():
         from orchestrator import recompute_all_priorities
         n = recompute_all_priorities(conn)
         print(f"\n✓ Räknade om priority_score för {n} objekt (inkl. tidsfaktor)")
+
+    elif args.refilter:
+        from filter import refilter_filtered_out
+        if not args.dry_run:
+            _odoo_pull("före omfiltrering")
+        domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]
+        for domain_id in domains:
+            config = load_config_with_sources(domain_id, _odoo_env)
+            counts = refilter_filtered_out(conn, config, is_dry_run=args.dry_run)
+            label = "skulle köas" if args.dry_run else "köade"
+            print(f"\n[{domain_id}] {counts['requeued']} av {counts['checked']} filtered_out {label}")
+            for source, n in sorted(counts["per_source"].items(), key=lambda kv: -kv[1]):
+                print(f"  {n:5d}  {source}")
+        if not args.dry_run:
+            _odoo_sync("efter omfiltrering")
 
     elif args.run or args.full:
         _odoo_pull("före insamling")
