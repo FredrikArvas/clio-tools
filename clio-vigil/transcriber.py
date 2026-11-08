@@ -179,7 +179,10 @@ def download_audio(item: dict) -> Optional[Path]:
         ok = _download_youtube(url, output_path)
     elif source_type == "rss":
         raw = json.loads(item["raw_metadata"] or "{}")
-        audio_url = raw.get("enclosure_url") or url
+        audio_url = raw.get("enclosure_url")
+        if not audio_url:
+            logger.warning(f"RSS-item {item_id} saknar enclosure_url (textartikel) — ingen audio att hämta")
+            return None
         logger.info(f"Laddar ned RSS-audio: {audio_url[:70]}")
         ok = _download_url(audio_url, output_path)
     else:
@@ -290,7 +293,7 @@ def _transcribe_whisper_stream(
                 f"SIGTERM: item {item_id} avbruten vid segment {seg_idx} "
                 f"— {len(existing_segments) + len(new_segments)} segment sparade"
             )
-            return [], False  # Signalera SIGTERM via tom lista
+            return [], False, None, 0.0  # Signalera SIGTERM via tom lista
 
         new_segments.append({
             "start": round(seg.start, 2),
@@ -445,7 +448,11 @@ def transcribe_item(conn, item_id: int, domain_config: dict) -> bool:
         return False
 
     if not all_segments:
-        # SIGTERM under whisper — item är kvar i transcribing för återupptagning
+        if _shutdown_requested:
+            # SIGTERM under whisper — item är kvar i transcribing för återupptagning
+            return False
+        logger.warning(f"Whisper gav 0 segment för item {item_id} — markeras failed")
+        transition(conn, item_id, "failed", error_message="Whisper gav 0 segment")
         return False
 
     _flush_segments(transcript_json, all_segments)
