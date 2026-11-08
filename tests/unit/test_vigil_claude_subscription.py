@@ -152,3 +152,10 @@ def test_claude_failure_falls_back_to_ollama(runner, conn, monkeypatch):
     assert summarizer.summarize_item(conn, item_id) == "OLLAMA"
     row = conn.execute("SELECT summary FROM vigil_items WHERE id=?", (item_id,)).fetchone()
     assert row["summary"] == "OLLAMA"
+
+
+def test_real_claude_runner_loads(monkeypatch):
+    """Den riktiga claude_runner ska gå att ladda (dataclass kräver sys.modules-registrering)."""
+    monkeypatch.setattr(summarizer, "_claude_runner", None)
+    module = summarizer._load_claude_runner()
+    assert module.STATUS_LIMIT and callable(module.run_claude)
