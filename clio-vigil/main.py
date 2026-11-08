@@ -67,6 +67,34 @@ logger = logging.getLogger("clio-vigil")
 
 CONFIG_DIR = Path(__file__).parent / "config"
 
+# Digest väntar på processlåset i stället för att ge upp direkt.
+# clio-vigil-digest.service måste ha TimeoutStartSec större än detta + digestens egen tid.
+DIGEST_LOCK_WAIT_SECONDS = int(os.getenv("DIGEST_LOCK_WAIT_SECONDS", "2700"))
+LOCK_POLL_SECONDS = 10
+EXIT_LOCK_TIMEOUT = 75   # EX_TEMPFAIL — systemd markerar körningen som misslyckad
+
+
+def _acquire_lock(lock_fh, wait_seconds: int = 0,
+                  poll_seconds: float = LOCK_POLL_SECONDS) -> bool:
+    """Tar exklusivt flock. Väntar upp till wait_seconds. True om låset togs."""
+    import fcntl
+    import time
+    deadline = time.monotonic() + wait_seconds
+    has_logged_wait = False
+    while True:
+        try:
+            fcntl.flock(lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if has_logged_wait:
+                logger.info("Låset taget efter väntan.")
+            return True
+        except BlockingIOError:
+            if time.monotonic() >= deadline:
+                return False
+            if not has_logged_wait:
+                logger.info("Låset upptaget — väntar upp till %d s.", wait_seconds)
+                has_logged_wait = True
+            time.sleep(poll_seconds)
+
 
 def load_domain_config(domain_id: str) -> dict:
     """Laddar YAML-konfiguration för en domän."""
@@ -640,17 +668,23 @@ def main():
     _started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     # Exklusivt processlås — förhindrar parallella körningar (timer + manuell batch)
-    import fcntl as _fcntl
     _summarize_only = args.summarize and not any([
         args.run, args.transcribe, args.index, args.classify_uap,
         args.digest, args.full, args.download, args.caption_check,
     ])
     _lock_path = '/tmp/clio-vigil-summarize.lock' if _summarize_only else '/tmp/clio-vigil.lock'
     _lock_fh = open(_lock_path, 'w')
-    try:
-        _fcntl.flock(_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
-    except BlockingIOError:
+    # Digesten är schemalagd en gång per dygn och får inte tyst hoppas över bara
+    # för att pipelinen råkar köra — den väntar in låset.
+    _wait_seconds = DIGEST_LOCK_WAIT_SECONDS if (args.digest or args.full) else 0
+    if not _acquire_lock(_lock_fh, _wait_seconds):
         _who = 'summering' if _summarize_only else 'clio-vigil'
+        if _wait_seconds:
+            logger.error(
+                'Digest: låset upptaget i %d s av en annan %s-process — ingen digest skickad.',
+                _wait_seconds, _who,
+            )
+            sys.exit(EXIT_LOCK_TIMEOUT)
         logger.info('En annan %s-process kör redan — avslutar.', _who)
         sys.exit(0)
 
