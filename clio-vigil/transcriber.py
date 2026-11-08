@@ -326,9 +326,14 @@ def _transcribe_whisper_stream(
 # ---------------------------------------------------------------------------
 
 def _should_preempt(conn, current_id: int, current_priority: float) -> Optional[int]:
+    """Id för ett transkriberbart objekt med högre prioritet, annars None.
+
+    Bara 'downloaded' räknas: queued-poster kan vara textartiklar som aldrig
+    transkriberas, och att pausa för dem lämnade poddavsnitt halvfärdiga.
+    """
     row = conn.execute(
         """SELECT id FROM vigil_items
-           WHERE state = 'queued' AND id != ? AND priority_score > ?
+           WHERE state = 'downloaded' AND id != ? AND priority_score > ?
            ORDER BY priority_score DESC LIMIT 1""",
         (current_id, current_priority),
     ).fetchone()
@@ -537,7 +542,8 @@ def run_transcription_queue(conn, domain: Optional[str] = None,
             state_row = conn.execute(
                 "SELECT state FROM vigil_items WHERE id = ?", (item_id,)
             ).fetchone()
-            if state_row and state_row["state"] == "queued":
+            if state_row and state_row["state"] in ("queued", "downloaded"):
+                # Pausad (preemption) eller nedladdning misslyckades — försöks igen
                 counts["preempted"] += 1
                 continue
             elif state_row and state_row["state"] == "transcribing":

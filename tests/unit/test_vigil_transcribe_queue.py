@@ -100,3 +100,34 @@ def test_segment_ger_transcribed(conn, monkeypatch, tmp_path):
     ok, state = _run_transcribe(conn, monkeypatch, tmp_path, segs, shutdown=False)
     assert ok is True
     assert state["state"] == "transcribed"
+
+
+# --- Preemption ------------------------------------------------------------
+
+def test_textartikel_i_queued_preempterar_inte(conn):
+    pod = _add(conn, "https://example.com/pod", "transcribing", enclosure="https://x/a.mp3", priority=1.0)
+    _add(conn, "https://example.com/text", "queued", enclosure=None, priority=9.0)
+    assert transcriber._should_preempt(conn, pod, 1.0) is None
+
+
+def test_nedladdat_med_hogre_prioritet_preempterar(conn):
+    pod = _add(conn, "https://example.com/pod", "transcribing", enclosure="https://x/a.mp3", priority=1.0)
+    other = _add(conn, "https://example.com/pod2", "downloaded", enclosure="https://x/b.mp3", priority=9.0)
+    assert transcriber._should_preempt(conn, pod, 1.0) == other
+
+
+def test_pausad_med_audio_gar_till_downloaded_och_aterupptas(conn):
+    pod = _add(conn, "https://example.com/pod", "transcribing", enclosure="https://x/a.mp3")
+    conn.execute("UPDATE vigil_items SET audio_path = '/tmp/a.mp3' WHERE id = ?", (pod,))
+    conn.commit()
+    orchestrator.preempt_current(conn, pod, reason="test", segment=50)
+    row = conn.execute("SELECT state, whisper_segment FROM vigil_items WHERE id = ?", (pod,)).fetchone()
+    assert (row["state"], row["whisper_segment"]) == ("downloaded", 50)
+    assert orchestrator.get_next_for_transcription(conn, "ufo")["id"] == pod
+
+
+def test_pausad_utan_audio_gar_till_queued(conn):
+    pod = _add(conn, "https://example.com/pod", "transcribing", enclosure="https://x/a.mp3")
+    orchestrator.preempt_current(conn, pod, reason="test", segment=50)
+    state = conn.execute("SELECT state FROM vigil_items WHERE id = ?", (pod,)).fetchone()["state"]
+    assert state == "queued"
