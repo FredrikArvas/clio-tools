@@ -242,9 +242,9 @@ def write_sources(odoo_env, sources: list[dict]) -> int:
                 vals["channel_id"] = s.get("channel_id", "")
                 vals["url"]        = s.get("url", "") or ""
             elif source_type == "google_news":
+                # clio.vigil.source saknar lang/country (Invalid field) — språket går via
+                # "language" ovan; country finns inte i Odoo, defaults sätts i read_sources-vägen.
                 vals["google_news_query"] = s.get("query", s.get("google_news_query", ""))
-                vals["lang"]    = s.get("lang", "en")
-                vals["country"] = s.get("country", "US")
             else:
                 vals["url"] = (s.get("url", "") or "").strip()
 
