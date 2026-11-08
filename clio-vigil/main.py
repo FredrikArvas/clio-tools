@@ -854,6 +854,7 @@ def main():
             )
         else:
             logger.error("UAP-klassificering hoppas över — ingen Odoo-anslutning (objekten ligger kvar i queued)")
+        _odoo_sync("efter UAP-klassificering")
 
     if args.digest or args.full:
         _odoo_pull("före digest")
