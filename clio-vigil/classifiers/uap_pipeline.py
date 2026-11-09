@@ -12,6 +12,9 @@ Designbeslut:
   - Sätter vigil_items.state → "uap_classified" efter körning (ny terminal state)
   - Skapar aldrig dubbletter i Odoo: kontrollerar url i research_notes
   - Confidence-tröskel: 0.70 (definierad i uap_classifier.py)
+  - Kvalitet går före tid: vid kvotgräns avbryts körningen och vid fel i
+    claude -p ligger posten kvar som queued till nästa körning. Bara poster
+    som fått ett (tolkningsbart eller otolkbart) svar markeras uap_classified.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ import logging
 import sqlite3
 from typing import Optional
 
+from claude_backend import SubscriptionLimitError
 from classifiers.uap_classifier import classify, queue_for_approval
 
 logger = logging.getLogger(__name__)
@@ -104,7 +108,8 @@ def run_uap_classifier(
     items = _get_candidates(conn, max_items)
     logger.info(f"[uap-classify] {len(items)} items att klassificera")
 
-    counts = {"classified": 0, "candidates": 0, "imported": 0, "skipped": 0, "errors": 0}
+    counts = {"classified": 0, "candidates": 0, "imported": 0, "skipped": 0, "errors": 0,
+              "deferred": 0}
 
     for item in items:
         title = item["title"]
@@ -118,10 +123,14 @@ def run_uap_classifier(
 
         try:
             result = classify(title=title, content=content)
+        except SubscriptionLimitError:
+            logger.warning("[uap-classify] Kvotgräns — resten väntar till nästa körning")
+            counts["deferred"] = len(items) - counts["classified"] - counts["errors"]
+            break
         except Exception as e:
+            # Posten ligger kvar som queued och provas igen nästa körning
             logger.error(f"  Klassificeringsfel [{title[:40]}]: {e}")
             counts["errors"] += 1
-            _mark_classified(conn, item["id"], None)
             continue
 
         counts["classified"] += 1

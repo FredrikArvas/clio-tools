@@ -35,13 +35,13 @@ Körning:
 import json
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
 
+import claude_backend
 from orchestrator import init_db, transition
 
 logger = logging.getLogger(__name__)
@@ -51,26 +51,14 @@ _here = Path(__file__).parent
 load_dotenv(_here.parent / ".env")
 load_dotenv(_here / ".env", override=True)
 
-MODEL_SONNET = "claude-sonnet-4-6"
-MODEL_HAIKU  = "claude-haiku-4-5-20251001"
-
 ANTHROPIC_API_KEY   = os.getenv("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", MODEL_SONNET)
+CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", claude_backend.MODEL_SONNET)
 
-# Claude-steget körs på prenumerationen via `claude -p` (Claude Code inloggat på
-# servern). VIGIL_CLAUDE_BACKEND=api går tillbaka till Anthropic API (per token).
+# Claude-steget körs på prenumerationen via `claude -p` (claude_backend).
+# VIGIL_CLAUDE_BACKEND=api går tillbaka till Anthropic API (per token).
 BACKEND_SUBSCRIPTION = "subscription"
 BACKEND_API          = "api"
 CLAUDE_BACKEND       = os.getenv("VIGIL_CLAUDE_BACKEND", BACKEND_SUBSCRIPTION)
-# Körkatalog utanför git-repot, så att repots CLAUDE.md inte laddas i prompten
-CLAUDE_WORKDIR       = Path(os.getenv("VIGIL_CLAUDE_WORKDIR",
-                                      str(Path.home() / ".cache" / "clio-vigil-claude")))
-CLAUDE_TIMEOUT_SECONDS = 300
-OUTPUT_ONLY_INSTRUCTION = (
-    "Svara ENBART med sammanfattningstexten. Inga tokenestimat, inga skämt, "
-    "ingen inledning eller avslutning."
-)
-CLI_FOOTER_PATTERN = re.compile(r"^\s*(📊|🎪|---\s*$)")
 
 # Lokal motor — qwen2.5:3b (1.9 GB, ryms i GTX 1050 Ti 4 GB)
 # mistral:7b (4.4 GB) överstiger GPU-minnet och kör på CPU — för långsamt
@@ -309,60 +297,9 @@ def _call_claude_api(system_prompt: str, user_message: str) -> str:
     return response.content[0].text.strip()
 
 
-_claude_runner = None
-_is_subscription_limited = False
-
-
-def _load_claude_runner():
-    """Delad `claude -p`-körare från clio-research (tar bort API-nyckeln ur miljön)."""
-    global _claude_runner
-    if _claude_runner is None:
-        import importlib.util
-        path = _here.parent / "clio-research" / "claude_runner.py"
-        spec = importlib.util.spec_from_file_location("claude_runner", path)
-        module = importlib.util.module_from_spec(spec)
-        # Dataclasses i modulen slår upp sys.modules[__module__] — registrera först.
-        sys.modules["claude_runner"] = module
-        spec.loader.exec_module(module)
-        _claude_runner = module
-    return _claude_runner
-
-
-def _strip_cli_extras(text: str) -> str:
-    """
-    Tar bort det serverns globala ~/.claude/CLAUDE.md lägger till (tokenfot,
-    skämt efter '---'). Det laddas trots --setting-sources project.
-    """
-    lines = text.strip().splitlines()
-    for idx, line in enumerate(lines):
-        if CLI_FOOTER_PATTERN.match(line):
-            lines = lines[:idx]
-            break
-    return "\n".join(lines).strip()
-
-
 def _call_claude_subscription(system_prompt: str, user_message: str) -> str:
-    """Claude via `claude -p` på prenumerationen. Slutar försöka resten av körningen vid kvotgräns."""
-    global _is_subscription_limited
-    if _is_subscription_limited:
-        raise RuntimeError("Prenumerationens kvot nådd tidigare i körningen")
-
-    runner = _load_claude_runner()
-    CLAUDE_WORKDIR.mkdir(parents=True, exist_ok=True)
-    result = runner.run_claude(
-        "analyst", user_message, CLAUDE_MODEL, CLAUDE_WORKDIR,
-        system_prompt=f"{system_prompt} {OUTPUT_ONLY_INSTRUCTION}",
-        max_turns=1, timeout_s=CLAUDE_TIMEOUT_SECONDS,
-    )
-    if result.status == runner.STATUS_LIMIT:
-        _is_subscription_limited = True
-        logger.warning("claude -p: kvotgräns — resten av körningen går till Ollama")
-    if not result.is_ok:
-        raise RuntimeError(f"claude -p {result.status}: {result.message}")
-    summary = _strip_cli_extras(result.text)
-    if not summary:
-        raise RuntimeError("claude -p gav tomt svar")
-    return summary
+    """Claude via `claude -p` på prenumerationen. Kvotgräns ger Ollama för resten av körningen."""
+    return claude_backend.call_subscription(system_prompt, user_message, CLAUDE_MODEL)
 
 
 # ---------------------------------------------------------------------------
