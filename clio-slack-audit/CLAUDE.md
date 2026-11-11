@@ -19,8 +19,8 @@ Enbart läsande anrop — ingenting skrivs eller ändras i Slack.
 
 - **Deno 2.x**
 - **Token** i `.env` (gitignorerad): `SLACK_AUDIT_TOKEN=xoxp-…`
-  - Samma app som `clio-scim-department` i `clio-slack-scim/`, men med fler scopes.
-  - Måste ominstalleras av **Org Owner** för att få alla scopen.
+  - **Separat app** `clio-slack-audit` — inte samma som `clio-scim-department`.
+  - Installeras av **Org Owner** på org-nivå (krävs för `auditlogs:read`).
   - Listas aldrig i chatten, loggas aldrig, skrivs aldrig i kod.
 - **Scopen** som krävs: se README.md. `auditlogs:read` kräver Org Owner vid install.
 

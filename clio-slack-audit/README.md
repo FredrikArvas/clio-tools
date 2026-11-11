@@ -5,22 +5,19 @@ Deno + TypeScript, enbart läsande anrop — ingenting skrivs eller ändras i Sl
 
 ## Krav
 
-### Token
+### Slack-app
 
-User OAuth Token (`xoxp-…`) med scopen nedan, **org-installerad av Org Owner**.
-Samma app som `clio-scim-department` (`clio-slack-scim`) — lägg till scopen i appens manifest
-och ominstallera som Org Owner för att få en ny token.
+Skapa en **separat** Slack-app `clio-slack-audit` (skild från `clio-scim-department`).
+Appen installeras på org-nivå av en **Org Owner** (krävs för `auditlogs:read`).
 
-#### Scopen som måste läggas till appens manifest
+#### App-manifest
 
 ```json
 {
+  "display_information": { "name": "clio-slack-audit" },
   "oauth_config": {
     "scopes": {
       "user": [
-        "admin",
-        "users:read",
-        "users:read.email",
         "admin.teams:read",
         "admin.apps:read",
         "admin.conversations:read",
@@ -33,12 +30,21 @@ och ominstallera som Org Owner för att få en ny token.
         "users.profile:read"
       ]
     }
+  },
+  "settings": {
+    "org_deploy_enabled": true,
+    "token_rotation_enabled": false
   }
 }
 ```
 
 **OBS:** `auditlogs:read` kräver att installatören är *Org Owner*, inte bara Org Admin.
 Utan det scopet skrivs `missing_scope` för området "Audit log" i rapporten — exporten fortsätter.
+
+SCIM-anropen (12–14) använder samma `xoxp-`-token med Bearer-autentisering; det fungerar utan
+det breda `admin`-scopet eftersom vi bara läser.
+
+### Token
 
 ### Deno
 
