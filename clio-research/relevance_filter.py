@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import logging
 import math
-import os
+
+from embedder import embed
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL = "text-embedding-3-small"
 DEFAULT_TOP_N = 60
 MIN_SIMILARITY = 0.20
 
@@ -28,7 +28,7 @@ def filter_by_relevance(sources: list[dict], question: str, top_n: int = DEFAULT
     texts = [_source_text(s) for s in sources]
 
     try:
-        embeddings = _embed([question] + texts)
+        embeddings = embed([question] + texts)
     except Exception as e:
         logger.warning("[relevance_filter] Embedding misslyckades: %s — returnerar alla källor", e)
         for s in sources:
@@ -76,21 +76,6 @@ def _source_text(source: dict) -> str:
     title = source.get("title") or ""
     abstract = (source.get("abstract") or "")[:400]
     return f"{title}. {abstract}".strip()
-
-
-def _embed(texts: list[str]) -> list[list[float]]:
-    """Batchad embedding med OpenAI."""
-    import openai
-    client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-
-    all_vectors = []
-    batch_size = 100
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
-        resp = client.embeddings.create(input=batch, model=EMBEDDING_MODEL)
-        all_vectors.extend([d.embedding for d in resp.data])
-
-    return all_vectors
 
 
 def _cosine(a: list[float], b: list[float]) -> float:

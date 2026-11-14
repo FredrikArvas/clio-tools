@@ -842,7 +842,6 @@ def _cmd_ncc_ny(mail_item, config) -> CommandResult:
         )
 
     # Förälderns page_id
-    SYNC_SPEC_PAGE = "33d67666d98a81368c12fab463b95de1"
     parent_page_id = "33467666d98a816db2c0d30cb97206a3"  # Mall & Projektöversikt
     if foralder_kw:
         pp = next((p for p in index if p.get("kodord") == foralder_kw), None)
@@ -886,13 +885,6 @@ def _cmd_ncc_ny(mail_item, config) -> CommandResult:
         ncc_namn=f"{namn} — NCC",
     )
 
-    # Synkblock (best-effort)
-    notion_client.append_kodord_to_sync_spec(
-        page_id=SYNC_SPEC_PAGE,
-        kodord=kodord,
-        ncc_page_id=ncc_page_id,
-    )
-
     # Svar = bekräftelse + aktuell lista
     lista = _cmd_ncc_lista(mail_item, config)
     confirm = (
@@ -903,7 +895,7 @@ def _cmd_ncc_ny(mail_item, config) -> CommandResult:
         f"  Nr:       {nr or '(ej satt)'}\n"
         f"  Förälder: {'#' + foralder_kw if foralder_kw else '(ingen)'}\n"
         f"  Notion:   {ncc_url}\n\n"
-        f"Synkblocket uppdaterat — synka CLAUDE.md manuellt vid behov.\n\n"
+        f"ncc-codes.md uppdateras vid nästa ncc_sync.ps1-körning (dagligen 07:00).\n\n"
         f"{'─' * 44}\n\n{lista.reply_body}"
     )
     return CommandResult(confirm)

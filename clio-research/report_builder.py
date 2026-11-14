@@ -44,13 +44,43 @@ def build(protocol: dict, sources: list[dict], run_id: str, done_dir: Path) -> P
     out_path.write_text(report_md, encoding="utf-8")
     logger.info("[report_builder] Rapport sparad: %s", out_path)
 
-    try:
-        import pdf_builder
-        pdf_builder.build_pdf(out_path)
-    except Exception as e:
-        logger.warning("[report_builder] PDF-generering misslyckades: %s", e)
+    output_cfg = protocol.get("output", {})
+
+    if output_cfg.get("pdf", False):
+        try:
+            import pdf_builder
+            pdf_builder.build_pdf(out_path)
+        except Exception as e:
+            logger.warning("[report_builder] PDF-generering misslyckades: %s", e)
+
+    if output_cfg.get("word", False):
+        try:
+            import word_builder
+            docx_path = word_builder.build_docx(out_path)
+            logger.info("[report_builder] Word sparad: %s", docx_path)
+        except Exception as e:
+            logger.warning("[report_builder] Word-generering misslyckades: %s", e)
+
+    save_to = output_cfg.get("save_to")
+    if save_to:
+        _copy_to_save_to(out_path, Path(save_to), output_cfg)
 
     return out_path
+
+
+def _copy_to_save_to(md_path: Path, save_to: Path, output_cfg: dict) -> None:
+    import shutil
+    try:
+        save_to.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(md_path, save_to / md_path.name)
+        logger.info("[report_builder] Kopierade .md till %s", save_to)
+        if output_cfg.get("word", False):
+            docx_path = md_path.with_suffix(".docx")
+            if docx_path.exists():
+                shutil.copy2(docx_path, save_to / docx_path.name)
+                logger.info("[report_builder] Kopierade .docx till %s", save_to)
+    except Exception as e:
+        logger.warning("[report_builder] save_to-kopiering misslyckades: %s", e)
 
 
 def _generate_sections(client, prompts: dict, system: str, question: str,

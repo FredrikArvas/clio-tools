@@ -7,11 +7,11 @@ import os
 import uuid
 from pathlib import Path
 
+from embedder import embed, VECTOR_SIZE
+
 logger = logging.getLogger(__name__)
 
 COLLECTION_NAME = "vigil_research"
-VECTOR_SIZE = 1536
-EMBEDDING_MODEL = "text-embedding-3-small"
 CHUNK_SIZE = 400
 CACHE_SIMILARITY_THRESHOLD = 0.78
 
@@ -78,7 +78,7 @@ def index_report(protocol: dict, sources: list[dict], report_path: Path, run_id:
         return
 
     try:
-        vectors = _embed([c["text"] for c in chunks])
+        vectors = embed([c["text"] for c in chunks])
     except Exception as e:
         logger.warning("[qdrant_indexer] Embedding misslyckades: %s", e)
         return
@@ -112,7 +112,7 @@ def load_cached_sources(question: str, top_k: int = 30) -> list[dict]:
         return []
 
     try:
-        q_vector = _embed([question])[0]
+        q_vector = embed([question])[0]
     except Exception as e:
         logger.warning("[qdrant_indexer] Cache-embedding misslyckades: %s", e)
         return []
@@ -191,11 +191,3 @@ def _ensure_collection(client, VectorParams, Distance) -> None:
         logger.info("[qdrant_indexer] Skapade collection: %s", COLLECTION_NAME)
 
 
-def _embed(texts: list[str]) -> list[list[float]]:
-    import openai
-    client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    all_vecs = []
-    for i in range(0, len(texts), 100):
-        resp = client.embeddings.create(input=texts[i:i + 100], model=EMBEDDING_MODEL)
-        all_vecs.extend([d.embedding for d in resp.data])
-    return all_vecs

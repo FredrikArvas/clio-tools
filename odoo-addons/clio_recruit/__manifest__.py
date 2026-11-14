@@ -6,7 +6,7 @@
     "author":      "Arvas International AB",
     "website":     "https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_recruit",
     "license":     "LGPL-3",
-    "depends":     ["contacts", "clio_cockpit"],
+    "depends":     ["contacts", "clio_cockpit", "mail"],
     "data": [
         "security/ir.model.access.csv",
         "views/clio_recruiter_profile_views.xml",

@@ -88,7 +88,8 @@ def load_hw_config() -> dict:
 
 def select_backend(hw: dict) -> tuple:
     if hw.get("cuda"):
-        return "cuda", "float16"
+        compute = hw.get("compute_type", "float16")
+        return "cuda", compute
     return "cpu", "int8"
 
 
