@@ -1,0 +1,126 @@
+{
+ "_note": "Sparat svar fran api.crossref.org/works/<doi> 2026-11-14, nedskuret till de falt connectorn begar",
+ "message": {
+  "DOI": "10.1017/pasa.2026.10230",
+  "title": [
+   "Critical evaluation of studies alleging evidence for technosignatures in the POSS1-E photographic plates"
+  ],
+  "author": [
+   {
+    "ORCID": "https://orcid.org/0009-0003-4052-3172",
+    "authenticated-orcid": false,
+    "given": "Wesley Andrés",
+    "family": "Watters",
+    "sequence": "first",
+    "affiliation": [
+     {
+      "name": "Wellesley College"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   },
+   {
+    "given": "Laura",
+    "family": "Dominé",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "National Institute of Information and Communications Technology"
+     },
+     {
+      "name": "Division of Physics University of Kyoto"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   },
+   {
+    "given": "Sarah",
+    "family": "Little",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Independent Scholar"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   },
+   {
+    "given": "Cameron",
+    "family": "Pratt",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Independent Scholar"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   },
+   {
+    "given": "Kevin Henry",
+    "family": "Knuth",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "State University of New York at Albany"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   },
+   {
+    "given": "Matthew",
+    "family": "Szenher",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Independent Scholar"
+     }
+    ],
+    "role": [
+     {
+      "vocabulary": "crossref",
+      "role": "author"
+     }
+    ]
+   }
+  ],
+  "published": {
+   "date-parts": [
+    [
+     2026
+    ]
+   ]
+  },
+  "abstract": "<jats:title>Abstract</jats:title>\n                  <jats:p>Recent studies by B. Villarroel and colleagues have assembled and analysed datasets of unidentified features measured from digital scans of photographic plates captured by the first-epoch Palomar Observatory Sky Survey (POSS1) in the pre-Sputnik era. These studies have called attention to (i) a purported deficit of features within Earth’s shadow; (ii) the sporadic presence of linear clusters; and (iii) a positive correlation between the timing of feature observations and nuclear tests as well as Unidentified Aerial Phenomena (UAP) sighting reports. These observations were cited as evidence that some fraction of the unidentified features represent glinting artificial objects near Earth. We have examined these claims using two previously published datasets that are closely related to those used in the Villarroel et al. studies. For these datasets, the Villarroel et al. assumption of a spatially uniform-random background distribution of features, essential to the Earth shadow analysis, is shown to be false. After finding the null distribution of feature count deviations from the background, we find no statistically significant deficit in the shadow. We also determine that a third of the features in the reported linear clusters were not confidently distinguished from catalogue stars. We find that the reported correlation between the timing of feature observations and nuclear tests becomes insignificant after properly normalising by the relevant number of observation days and is almost completely determined by the observation schedule of the Palomar telescope. We uncover important inconsistencies in the definitions of the datasets used in these studies, as well as the use of unvalidated datasets containing catalogue stars, scan artefacts, and plate defects. It has not been shown that any of the features in these datasets represent optical transients. We examine the spatial distribution of the plate-derived features, finding an overall gradual increase in number density towards the corners and edges of plates, as well as examples of (i) empty north-south strips that span multiple plates; (ii) clusters and voids having geometric shapes; and (iii) amorphous clusters. We also highlight a circular argument used in these studies, that leverages the results of an inferential analysis to justify conclusions about the origin of the features as well as the validity of the measurements. Finally, we also review the literature concerning historical searches for optical transients in photographic plates corresponding to gamma ray bursts (GRBs); following decades of work, researchers were unable to make a confident identification of a GRB-associated optical transient.</jats:p>",
+  "container-title": [
+   "Publications of the Astronomical Society of Australia"
+  ],
+  "URL": "https://doi.org/10.1017/pasa.2026.10230",
+  "type": "journal-article",
+  "is-referenced-by-count": 1
+ }
+}

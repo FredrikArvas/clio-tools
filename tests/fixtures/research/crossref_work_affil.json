@@ -1,0 +1,702 @@
+{
+ "_note": "Sparat svar fran api.crossref.org/works/<doi> 2026-11-14, nedskuret till de falt connectorn begar",
+ "message": {
+  "DOI": "10.1142/s2251171723400068",
+  "title": [
+   "The Scientific Investigation of Unidentified Aerial Phenomena (UAP) Using Multimodal Ground-Based Observatories"
+  ],
+  "author": [
+   {
+    "given": "Wesley Andrés",
+    "family": "Watters",
+    "sequence": "first",
+    "affiliation": [
+     {
+      "name": "Whitin Observatory, Department of Astronomy, Wellesley College, 106 Central St. Wellesley, MA, USA 02481"
+     },
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Abraham",
+    "family": "Loeb",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Astronomy, Harvard University, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Frank",
+    "family": "Laukien",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Chemistry and Chemical Biology, Harvard University, 12 Oxford Street Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "ORCID": "https://orcid.org/0000-0003-2586-2697",
+    "authenticated-orcid": false,
+    "given": "Richard",
+    "family": "Cloete",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Alex",
+    "family": "Delacroix",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Caltech Optical Observatory, Pasadena, CA, USA 91125"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Sergei",
+    "family": "Dobroshinsky",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Benjamin",
+    "family": "Horvath",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Ezra",
+    "family": "Kelderman",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Sarah",
+    "family": "Little",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Scientific Coalition for UAP Studies, Fort Myers, FL, USA 33913"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Eric",
+    "family": "Masson",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Andrew",
+    "family": "Mead",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Mitch",
+    "family": "Randall",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Ascendant AI, Boulder, CO, USA 80304"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Forrest",
+    "family": "Schultz",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Atlas Lens Co., Glendale, CA, USA 91201"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Matthew",
+    "family": "Szenher",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Foteini",
+    "family": "Vervelidou",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Earth, Atmospheric, & Planetary Sciences, Massachusetts Institute of Technology Cambridge, MA, USA 02139"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Abigail",
+    "family": "White",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Angelique",
+    "family": "Ahlström",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Carol",
+    "family": "Cleland",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Philosophy, Center for the Study of Origins, University of Colorado Boulder Boulder, CO, USA 80309"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Spencer",
+    "family": "Dockal",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Whitin Observatory, Department of Astronomy, Wellesley College, 106 Central St. Wellesley, MA, USA 02481"
+     },
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Natasha",
+    "family": "Donahue",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Athabasca University, Centre for Science, 1 University Dr., Athabasca, AB, Canada T9S 3A3"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Mark",
+    "family": "Elowitz",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Carson",
+    "family": "Ezell",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Alex",
+    "family": "Gersznowicz",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Nicholas",
+    "family": "Gold",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Michael G.",
+    "family": "Hercz",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Eric",
+    "family": "Keto",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Kevin H.",
+    "family": "Knuth",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Physics, State University of New York at Albany 1400 Washington Avenue, Albany, NY, USA 12222"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Anthony",
+    "family": "Lux",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Gary J.",
+    "family": "Melnick",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Amaya",
+    "family": "Moro-Martín",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Space Telescope Science Institute, 3700 San Martin Drive, Baltimore, MD, USA 21218"
+     },
+     {
+      "name": "Department of Physics & Astronomy, Johns Hopkins University, 3400 N. Charles Street Baltimore, MD, USA 21218"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Javier",
+    "family": "Martin-Torres",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Department of Planetary Sciences, School of Geosciences, University of Aberdeen Meston Building, Aberdeen, Scotland, UK AB24 3UE"
+     },
+     {
+      "name": "Instituto Andaluz de Ciencias de la Tierra (UGR-CSIC), Av. de las Palmeras 4, 18100 Armilla, Granada, Spain"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Daniel Llusa",
+    "family": "Ribes",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Paul",
+    "family": "Sail",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Massimo",
+    "family": "Teodorani",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "John Joseph",
+    "family": "Tedesco",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Gerald Thomas",
+    "family": "Tedesco",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Michelle",
+    "family": "Tu",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Whitin Observatory, Department of Astronomy, Wellesley College, 106 Central St. Wellesley, MA, USA 02481"
+     },
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   },
+   {
+    "given": "Maria-Paz",
+    "family": "Zorzano",
+    "sequence": "additional",
+    "affiliation": [
+     {
+      "name": "Galileo Project, 60 Garden Street, Cambridge, MA, USA 02138"
+     },
+     {
+      "name": "Centro de Astrobiología (CSIC-INTA), Madrid, Spain"
+     }
+    ],
+    "role": [
+     {
+      "role": "author",
+      "vocabulary": "crossref"
+     }
+    ]
+   }
+  ],
+  "published": {
+   "date-parts": [
+    [
+     2023,
+     3
+    ]
+   ]
+  },
+  "abstract": "<jats:p>Unidentified Aerial Phenomena (UAP) have resisted explanation and have received little formal scientific attention for 75 years. A primary objective of the Galileo Project is to build an integrated software and instrumentation system designed to conduct a multimodal census of aerial phenomena and to recognize anomalies. Here we present key motivations for the study of UAP and address historical objections to this research. We describe an approach for highlighting outlier events in the high-dimensional parameter space of our census measurements. We provide a detailed roadmap for deciding measurement requirements, as well as a science traceability matrix (STM) for connecting sought-after physical parameters to observables and instrument requirements. We also discuss potential strategies for deciding where to locate instruments for development, testing, and final deployment. Our instrument package is multimodal and multispectral, consisting of (1) wide-field cameras in multiple bands for targeting and tracking of aerial objects and deriving their positions and kinematics using triangulation; (2) narrow-field instruments including cameras for characterizing morphology, spectra, polarimetry, and photometry; (3) passive multistatic arrays of antennas and receivers for radar-derived range and kinematics; (4) radio spectrum analyzers to measure radio and microwave emissions; (5) microphones for sampling acoustic emissions in the infrasonic through ultrasonic frequency bands; and (6) environmental sensors for characterizing ambient conditions (temperature, pressure, humidity, and wind velocity), as well as quasistatic electric and magnetic fields, and energetic particles. The use of multispectral instruments and multiple sensor modalities will help to ensure that artifacts are recognized and that true detections are corroborated and verifiable. Data processing pipelines are being developed that apply state-of-the-art techniques for multi-sensor data fusion, hypothesis tracking, semi-supervised classification, and outlier detection.</jats:p>",
+  "container-title": [
+   "Journal of Astronomical Instrumentation"
+  ],
+  "URL": "https://doi.org/10.1142/s2251171723400068",
+  "type": "journal-article",
+  "is-referenced-by-count": 17
+ }
+}

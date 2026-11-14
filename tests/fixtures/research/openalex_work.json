@@ -1,0 +1,507 @@
+{
+ "id": "https://openalex.org/W4391389886",
+ "title": "Investigating UAP Events Using Astronomical Techniques",
+ "authorships": [
+  {
+   "author_position": "first",
+   "author": {
+    "id": "https://openalex.org/A5084845953",
+    "display_name": "M. Teodorani",
+    "orcid": "https://orcid.org/0009-0000-7706-7455",
+    "observed_orcids": [
+     "https://orcid.org/0009-0000-7706-7455"
+    ]
+   },
+   "institutions": [
+    {
+     "id": "https://openalex.org/I4405266370",
+     "display_name": "Society for UAP Studies",
+     "ror": "https://ror.org/02gz2qb95",
+     "country_code": "US",
+     "type": "other",
+     "lineage": [
+      "https://openalex.org/I4405266370"
+     ]
+    }
+   ],
+   "countries": [
+    "US"
+   ],
+   "is_corresponding": true,
+   "raw_author_name": "Massimo Teodorani",
+   "raw_affiliation_strings": [
+    "Project Hessdalen",
+    "Society for UAP Studies"
+   ],
+   "raw_orcid": "https://orcid.org/0009-0000-7706-7455",
+   "affiliations": [
+    {
+     "raw_affiliation_string": "Project Hessdalen",
+     "institution_ids": []
+    },
+    {
+     "raw_affiliation_string": "Society for UAP Studies",
+     "institution_ids": [
+      "https://openalex.org/I4405266370"
+     ]
+    }
+   ]
+  }
+ ],
+ "publication_year": 2024,
+ "language": "en",
+ "doi": "https://doi.org/10.59661/001c.92684",
+ "abstract_inverted_index": {
+  "The": [
+   0,
+   81,
+   102
+  ],
+  "most": [
+   1,
+   82
+  ],
+  "important": [
+   2,
+   83
+  ],
+  "procedures": [
+   3
+  ],
+  "about": [
+   4
+  ],
+  "the": [
+   5,
+   25,
+   29,
+   46,
+   55,
+   59,
+   62,
+   70,
+   111,
+   114,
+   132,
+   138,
+   142,
+   148,
+   152
+  ],
+  "scientific": [
+   6
+  ],
+  "investigation": [
+   7
+  ],
+  "of": [
+   8,
+   48,
+   57,
+   61,
+   104,
+   110,
+   150
+  ],
+  "Unidentified": [
+   9
+  ],
+  "Aerial": [
+   10
+  ],
+  "Phenomena": [
+   11
+  ],
+  "(UAP)": [
+   12
+  ],
+  "using": [
+   13,
+   35
+  ],
+  "astronomy-like": [
+   14
+  ],
+  "methods": [
+   15
+  ],
+  "are": [
+   16,
+   27,
+   87,
+   127
+  ],
+  "conceptually": [
+   17
+  ],
+  "presented": [
+   18
+  ],
+  "and": [
+   19,
+   37,
+   51,
+   53,
+   141
+  ],
+  "discussed,": [
+   20
+  ],
+  "where": [
+   21,
+   113
+  ],
+  "results": [
+   22
+  ],
+  "obtained": [
+   23
+  ],
+  "in": [
+   24,
+   64,
+   89
+  ],
+  "past": [
+   26
+  ],
+  "triggering": [
+   28
+  ],
+  "proposal": [
+   30
+  ],
+  "for": [
+   31
+  ],
+  "new": [
+   32
+  ],
+  "observational": [
+   33
+  ],
+  "sessions": [
+   34
+  ],
+  "multiwavelength": [
+   36
+  ],
+  "multimode": [
+   38
+  ],
+  "instruments.": [
+   39
+  ],
+  "A": [
+   40
+  ],
+  "special": [
+   41
+  ],
+  "emphasis": [
+   42,
+   94
+  ],
+  "is": [
+   43,
+   116,
+   118,
+   156
+  ],
+  "posed": [
+   44
+  ],
+  "on": [
+   45,
+   54,
+   95
+  ],
+  "techniques": [
+   47
+  ],
+  "magnetometry,": [
+   49
+  ],
+  "photometry": [
+   50
+  ],
+  "spectroscopy,": [
+   52
+  ],
+  "importance": [
+   56
+  ],
+  "studying": [
+   58
+  ],
+  "variability": [
+   60
+  ],
+  "phenomenon": [
+   63,
+   115
+  ],
+  "order": [
+   65
+  ],
+  "to": [
+   66,
+   68,
+   137,
+   146
+  ],
+  "try": [
+   67
+  ],
+  "understand": [
+   69
+  ],
+  "physical": [
+   71,
+   85
+  ],
+  "process": [
+   72
+  ],
+  "that": [
+   73
+  ],
+  "governs": [
+   74
+  ],
+  "it,": [
+   75
+  ],
+  "including": [
+   76
+  ],
+  "a": [
+   77,
+   92
+  ],
+  "possible": [
+   78
+  ],
+  "propulsion": [
+   79
+  ],
+  "mechanism.": [
+   80
+  ],
+  "obtainable": [
+   84
+  ],
+  "parameters": [
+   86
+  ],
+  "discussed": [
+   88
+  ],
+  "detail,": [
+   90
+  ],
+  "with": [
+   91,
+   131
+  ],
+  "particular": [
+   93
+  ],
+  "how": [
+   96
+  ],
+  "they": [
+   97
+  ],
+  "might": [
+   98
+  ],
+  "be": [
+   99
+  ],
+  "correlated": [
+   100
+  ],
+  "together.": [
+   101
+  ],
+  "idea": [
+   103
+  ],
+  "placing": [
+   105
+  ],
+  "measurement": [
+   106
+  ],
+  "instruments": [
+   107
+  ],
+  "at": [
+   108,
+   124
+  ],
+  "areas": [
+   109
+  ],
+  "world": [
+   112
+  ],
+  "recurrent": [
+   117
+  ],
+  "strongly": [
+   119
+  ],
+  "suggested.": [
+   120
+  ],
+  "Past": [
+   121
+  ],
+  "monitoring": [
+   122
+  ],
+  "campaigns": [
+   123
+  ],
+  "such": [
+   125
+  ],
+  "locations": [
+   126
+  ],
+  "punctually": [
+   128
+  ],
+  "mentioned": [
+   129
+  ],
+  "together": [
+   130
+  ],
+  "pertinent": [
+   133
+  ],
+  "literature.": [
+   134
+  ],
+  "In": [
+   135
+  ],
+  "addition": [
+   136
+  ],
+  "natural,": [
+   139
+  ],
+  "manmade": [
+   140
+  ],
+  "extraterrestrial": [
+   143
+  ],
+  "hypotheses": [
+   144
+  ],
+  "used": [
+   145
+  ],
+  "explain": [
+   147
+  ],
+  "nature": [
+   149
+  ],
+  "UAPs,": [
+   151
+  ],
+  "“plasma": [
+   153
+  ],
+  "life”": [
+   154
+  ],
+  "hypothesis": [
+   155
+  ],
+  "ventured": [
+   157
+  ],
+  "too.": [
+   158
+  ]
+ },
+ "primary_location": {
+  "id": "doi:10.59661/001c.92684",
+  "doi": "https://doi.org/10.59661/001c.92684",
+  "is_oa": true,
+  "landing_page_url": "https://doi.org/10.59661/001c.92684",
+  "pdf_url": "https://limina.scholasticahq.com/article/92684.pdf",
+  "source": {
+   "id": "https://openalex.org/S5407042408",
+   "display_name": "Limina - The Journal of UAP Studies",
+   "issn_l": "2995-0376",
+   "issn": [
+    "2995-0376",
+    "2995-0384"
+   ],
+   "is_oa": false,
+   "is_in_doaj": false,
+   "is_core": false,
+   "listed_in": [],
+   "host_organization": null,
+   "host_organization_name": null,
+   "host_organization_lineage": [],
+   "host_organization_lineage_names": [],
+   "type": "journal"
+  },
+  "license": "cc-by-nc-nd",
+  "license_id": "https://openalex.org/licenses/cc-by-nc-nd",
+  "version": "publishedVersion",
+  "is_accepted": true,
+  "is_published": true,
+  "raw_source_name": "Limina - The Journal of UAP Studies",
+  "raw_type": "journal-article"
+ },
+ "best_oa_location": {
+  "id": "doi:10.59661/001c.92684",
+  "doi": "https://doi.org/10.59661/001c.92684",
+  "is_oa": true,
+  "landing_page_url": "https://doi.org/10.59661/001c.92684",
+  "pdf_url": "https://limina.scholasticahq.com/article/92684.pdf",
+  "source": {
+   "id": "https://openalex.org/S5407042408",
+   "display_name": "Limina - The Journal of UAP Studies",
+   "issn_l": "2995-0376",
+   "issn": [
+    "2995-0376",
+    "2995-0384"
+   ],
+   "is_oa": false,
+   "is_in_doaj": false,
+   "is_core": false,
+   "listed_in": [],
+   "host_organization": null,
+   "host_organization_name": null,
+   "host_organization_lineage": [],
+   "host_organization_lineage_names": [],
+   "type": "journal"
+  },
+  "license": "cc-by-nc-nd",
+  "license_id": "https://openalex.org/licenses/cc-by-nc-nd",
+  "version": "publishedVersion",
+  "is_accepted": true,
+  "is_published": true,
+  "raw_source_name": "Limina - The Journal of UAP Studies",
+  "raw_type": "journal-article"
+ },
+ "open_access": {
+  "is_oa": true,
+  "oa_status": "hybrid",
+  "oa_url": "https://limina.scholasticahq.com/article/92684.pdf",
+  "any_repository_has_fulltext": false
+ },
+ "type": "article",
+ "cited_by_count": 5
+}
