@@ -1,204 +1,128 @@
-"""credibility_scorer.py — Poängsätter källor på 6 dimensioner (0–3 var, max 18p)."""
+"""
+credibility_scorer.py
+Källkvalitet: det som går att räkna (PLAN_research_pipeline_v2.md avsnitt 11 punkt 3).
+
+Python räknar ålder och citeringar till `quality`. Land och institution ligger i
+källans `country_codes` och `institutions`, hämtade ur metadata av connectorerna.
+Metod, oberoende och falsifieringsförsök bedöms av analytikern, som fyller
+`quality.assessment` med en motivering per källa. Här lämnas fältet `null`.
+
+Den tidigare poängen (0–18) byggde på nyckelordsmatchning mot sammanfattningen och
+gav 4–8 för alla källor i rapport 021. Den är borttagen. Geografisk konvergens
+räknas inte längre per källa utan per påstående, över de källor som belägger det
+(`geographic_spread`).
+
+`score_all` finns kvar som tunn brygga för R1.x-flödet i main.py.
+"""
 
 from __future__ import annotations
 
-import re
+import datetime
 import logging
+
+# ── Configuration ─────────────────────────────────────────────────────────────
+
+__version__ = "2.0.0"
 
 logger = logging.getLogger(__name__)
 
-MAX_SCORE = 18
-DIMENSIONS = [
-    "methodological_rigor",
-    "institutional_independence",
-    "geographic_convergence",
-    "internal_consistency",
-    "falsification_attempts",
-    "temporal_stability",
-]
 
+# ── Källformatet (v2) ─────────────────────────────────────────────────────────
 
-def score(source: dict) -> dict:
+def assess(source: dict, current_year: int | None = None) -> dict:
+    """Fyll `quality` på en källa i källformatet med det som går att räkna.
+
+    `citations` behålls som den kom ur metadata (None om databasen inte anger den).
+    `age_years` räknas ur `year`. En bedömning som analytikern redan skrivit i
+    `quality.assessment` lämnas orörd; annars är den None.
+
+    Returns:
+        Källan (ändrad på plats).
     """
-    Beräkna credibility score för en källobjekt.
-    Lägger till 'credibility_score' (0–18) och 'credibility_breakdown' (dict).
-    Returnerar källobjektet (muterat in-place).
-    """
-    breakdown = {
-        "methodological_rigor": _score_methodology(source),
-        "institutional_independence": _score_independence(source),
-        "geographic_convergence": _score_geography(source),
-        "internal_consistency": _score_consistency(source),
-        "falsification_attempts": _score_falsification(source),
-        "temporal_stability": _score_temporal(source),
+    current_year = current_year or datetime.date.today().year
+    quality = source.get("quality") or {}
+    citations = quality.get("citations")
+    source["quality"] = {
+        "citations": citations if _is_count(citations) else None,
+        "age_years": age_years(source.get("year"), current_year),
+        "assessment": quality.get("assessment"),
     }
-
-    total = sum(breakdown.values())
-    source["credibility_score"] = total
-    source["credibility_breakdown"] = breakdown
     return source
 
 
-def score_all(sources: list[dict], all_sources: list[dict] | None = None) -> list[dict]:
-    """
-    Poängsätt alla källor. Uppdaterar geographic_convergence baserat på alla källor.
-    """
-    if all_sources is not None:
-        regions_with_sources = _count_regions(all_sources)
-    else:
-        regions_with_sources = _count_regions(sources)
-
-    for src in sources:
-        score(src)
-        geo = _score_geography_global(src, regions_with_sources)
-        src["credibility_breakdown"]["geographic_convergence"] = geo
-        src["credibility_score"] = sum(src["credibility_breakdown"].values())
-
+def assess_all(sources: list[dict], current_year: int | None = None) -> list[dict]:
+    """Kör `assess` på varje källa."""
+    for source in sources:
+        assess(source, current_year)
     return sources
 
 
-def _score_methodology(src: dict) -> int:
-    """0=Anekdot, 1=Observation, 2=Kontrollerad studie, 3=RCT/replikerad."""
-    abstract = (src.get("abstract") or "").lower()
-    title = (src.get("title") or "").lower()
-    text = abstract + " " + title
-
-    rct_terms = ["randomized", "randomised", "rct", "double-blind", "placebo-controlled",
-                 "replication", "replicated", "meta-analysis", "systematic review"]
-    controlled_terms = ["controlled", "control group", "experiment", "measurement",
-                        "statistically significant", "p-value", "n="]
-    observational_terms = ["observation", "case study", "survey", "questionnaire",
-                           "interview", "reported", "anecdot"]
-
-    for t in rct_terms:
-        if t in text:
-            return 3
-
-    for t in controlled_terms:
-        if t in text:
-            return 2
-
-    for t in observational_terms:
-        if t in text:
-            return 1
-
-    return 1
-
-
-def _score_independence(src: dict) -> int:
-    """0=Stark intressekonflikt, 1=Oklar finansiering, 2=Oberoende, 3=Multi-institutionell."""
-    journal = (src.get("journal") or "").lower()
-    database = (src.get("database") or "").lower()
-
-    conflict_terms = ["funded by", "supported by", "grant from", "sponsored"]
-    abstract = (src.get("abstract") or "").lower()
-
-    for t in conflict_terms:
-        if t in abstract:
-            return 0
-
-    if database in ("openalex", "semantic_scholar", "core", "crossref"):
-        return 2
-
-    if database in ("cyberleninka", "jstage"):
-        return 2
-
-    return 1
-
-
-def _score_geography(src: dict) -> int:
-    """Enskild källa = 1 per default. Uppdateras globalt i score_all()."""
-    return 1
-
-
-def _score_geography_global(src: dict, regions_with_sources: dict) -> int:
-    """0=Enskild källa, 1=2 regioner, 2=3–4 regioner, 3=5+ regioner."""
-    num_regions = len(regions_with_sources)
-    if num_regions >= 5:
-        return 3
-    if num_regions >= 3:
-        return 2
-    if num_regions >= 2:
-        return 1
-    return 0
-
-
-def _score_consistency(src: dict) -> int:
-    """0=Inre motsägelser, 1=Delvis konsistent, 2=Konsistent, 3=Konsistent+matematiskt."""
-    abstract = (src.get("abstract") or "").lower()
-    title = (src.get("title") or "").lower()
-    text = abstract + " " + title
-
-    math_terms = ["equation", "formula", "mathematical model", "теоретическая модель",
-                  "数式", "モデル"]
-    inconsistency_terms = ["contradiction", "inconsistent", "paradox", "conflicting"]
-
-    for t in inconsistency_terms:
-        if t in text:
-            return 0
-
-    for t in math_terms:
-        if t in text:
-            return 3
-
-    if abstract:
-        return 2
-
-    return 1
-
-
-def _score_falsification(src: dict) -> int:
-    """0=Inga kända, 1=Informella, 2=Formella ej replikerade, 3=Formella replikerade."""
-    abstract = (src.get("abstract") or "").lower()
-    title = (src.get("title") or "").lower()
-    text = abstract + " " + title
-
-    formal_rep = ["failed replication", "replication failure", "could not replicate",
-                  "no effect found", "null result"]
-    formal = ["falsif", "refut", "debunk", "skeptic", "critique of"]
-    informal = ["pseudoscience", "myth", "fraud"]
-
-    for t in formal_rep:
-        if t in text:
-            return 3
-
-    for t in formal:
-        if t in text:
-            return 2
-
-    for t in informal:
-        if t in text:
-            return 1
-
-    return 0
-
-
-def _score_temporal(src: dict) -> int:
-    """0=Enstaka, 1=Följdforskning, 2=Håller >10 år, 3=Håller >20 år."""
-    year = src.get("year")
-    citation_count = src.get("citation_count", 0) or 0
-
-    if year is None:
-        return 0
-
-    import datetime
-    current_year = datetime.date.today().year
+def age_years(year, current_year: int) -> int | None:
+    """Källans ålder i hela år. None när året saknas eller ligger i framtiden."""
+    if isinstance(year, bool) or not isinstance(year, int):
+        return None
     age = current_year - year
+    return age if age >= 0 else None
 
-    if age >= 20 and citation_count >= 5:
+
+def geographic_spread(sources: list[dict]) -> dict:
+    """Länder bland en uppsättning källor, t.ex. de som belägger ett påstående.
+
+    Returns:
+        {"countries": {"FR": 2, "US": 1}, "known": 3, "unknown": 1}
+        där `known` är antal källor med minst en landskod och `unknown` antal utan.
+        Källor utan landskod får inte räknas som stöd för geografisk spridning.
+    """
+    countries: dict[str, int] = {}
+    known = unknown = 0
+    for source in sources:
+        codes = source.get("country_codes") or []
+        if not codes:
+            unknown += 1
+            continue
+        known += 1
+        for code in dict.fromkeys(codes):
+            countries[code] = countries.get(code, 0) + 1
+    return {"countries": dict(sorted(countries.items())), "known": known, "unknown": unknown}
+
+
+# ── Äldre flöde (R1.x, main.py) ───────────────────────────────────────────────
+
+def score_all(sources: list[dict], all_sources: list[dict] | None = None) -> list[dict]:
+    """Brygga för R1.x-flödet: räknar kvalitet på råträffar.
+
+    Lägger `quality` (citeringar, ålder) på varje råträff. `credibility_score` och
+    `credibility_breakdown` sätts fortfarande eftersom citation_chaser och
+    report_builder läser dem, men innehåller nu bara den räknebara dimensionen
+    `temporal_stability` (0–3). Skalan 0–18 gäller inte längre.
+
+    `all_sources` togs emot för den globala geografipoängen och används inte.
+    """
+    current_year = datetime.date.today().year
+    for src in sources:
+        citations = src.get("citation_count")
+        citations = citations if _is_count(citations) else None
+        age = age_years(src.get("year"), current_year)
+        src["quality"] = {"citations": citations, "age_years": age, "assessment": None}
+        temporal = _temporal_stability(age, citations)
+        src["credibility_breakdown"] = {"temporal_stability": temporal}
+        src["credibility_score"] = temporal
+    return sources
+
+
+def _temporal_stability(age: int | None, citations: int | None) -> int:
+    """0=enstaka, 1=följdforskning finns, 2=håller över 10 år, 3=håller över 20 år."""
+    citations = citations or 0
+    if age is None:
+        return 0
+    if age >= 20 and citations >= 5:
         return 3
-    if age >= 10 and citation_count >= 2:
+    if age >= 10 and citations >= 2:
         return 2
-    if citation_count >= 1:
+    if citations >= 1:
         return 1
     return 0
 
 
-def _count_regions(sources: list[dict]) -> dict:
-    """Räkna unika regioner bland källorna."""
-    regions: dict[str, int] = {}
-    for src in sources:
-        region = src.get("region")
-        if region:
-            regions[region] = regions.get(region, 0) + 1
-    return regions
+def _is_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
