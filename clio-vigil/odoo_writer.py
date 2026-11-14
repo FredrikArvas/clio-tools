@@ -45,6 +45,14 @@ SYNC_STATES = [
     "failed",
 ]
 
+# Inkrementell synk (2026-11-08): bara rader ändrade sedan senaste synken skickas.
+# changed_at underhålls av SQLite-triggern vigil_items_changed (orchestrator.py).
+# En full synk körs ändå var FULL_SYNC_INTERVAL_HOURS som skyddsnät.
+FULL_SYNC_INTERVAL_HOURS = 24
+ITEM_STAMP_COLUMN  = "odoo_item_synced_at"
+MEDIA_STAMP_COLUMN = "odoo_media_synced_at"
+_SQLITE_NOW = "strftime('%Y-%m-%dT%H:%M:%f', 'now')"
+
 
 # ---------------------------------------------------------------------------
 # Anslutning
@@ -342,34 +350,107 @@ def sync_item(odoo_env, row) -> bool:
         return False
 
 
-def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None) -> int:
+def _supports_incremental(conn) -> bool:
+    """True om databasen har synk-kolumnerna, vigil_meta och ändringstriggern (init_db-migrerad)."""
+    columns = {r[1] for r in conn.execute("PRAGMA table_info(vigil_items)")}
+    objects = {
+        r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE name IN ('vigil_items_changed', 'vigil_meta')"
+        )
+    }
+    return {"changed_at", ITEM_STAMP_COLUMN, MEDIA_STAMP_COLUMN} <= columns and len(objects) == 2
+
+
+def _full_sync_key(stamp_column: str) -> str:
+    return f"last_full_sync:{stamp_column}"
+
+
+def _is_full_sync_due(conn, stamp_column: str) -> bool:
+    row = conn.execute(
+        f"SELECT value <= strftime('%Y-%m-%dT%H:%M:%f', 'now', '-{FULL_SYNC_INTERVAL_HOURS} hours') "
+        "FROM vigil_meta WHERE key = ?",
+        (_full_sync_key(stamp_column),),
+    ).fetchone()
+    return row is None or bool(row[0])
+
+
+def _select_rows_to_sync(conn, states: list[str], stamp_column: str, is_full: bool) -> dict:
+    """
+    Väljer rader att synka. Inkrementellt: bara rader där changed_at är nyare än
+    stamp_column (eller stämpel saknas). Faller tillbaka på full synk om databasen
+    saknar triggern/kolumnerna, eller om senaste fulla synk är äldre än intervallet.
+
+    Returnerar {"rows", "snapshot", "is_incremental", "is_full"}. snapshot är tiden
+    *före* läsningen — rader som ändras under synken får changed_at > snapshot och
+    tas med nästa gång.
+    """
+    is_incremental = _supports_incremental(conn)
+    if not is_incremental:
+        _logger.info("Odoo-synk: databasen saknar ändringsspårning — full synk utan stämplar")
+    is_full = is_full or not is_incremental or _is_full_sync_due(conn, stamp_column)
+
+    snapshot = conn.execute(f"SELECT {_SQLITE_NOW}").fetchone()[0]
+    placeholders = ",".join("?" * len(states))
+    sql = f"SELECT * FROM vigil_items WHERE state IN ({placeholders})"
+    if not is_full:
+        sql += f" AND ({stamp_column} IS NULL OR changed_at > {stamp_column})"
+    rows = conn.execute(sql, states).fetchall()
+    return {"rows": rows, "snapshot": snapshot, "is_incremental": is_incremental, "is_full": is_full}
+
+
+def _mark_synced(conn, selection: dict, stamp_column: str, ok_ids: list, failed_ids: list) -> None:
+    """
+    Stämplar lyckade rader med snapshot-tiden och nollställer stämpeln för misslyckade
+    (så att de försöks igen nästa körning). Att bara ändra stämpeln triggar inte changed_at.
+    """
+    if not selection["is_incremental"]:
+        return
+    conn.executemany(
+        f"UPDATE vigil_items SET {stamp_column} = ? WHERE id = ?",
+        [(selection["snapshot"], item_id) for item_id in ok_ids],
+    )
+    conn.executemany(
+        f"UPDATE vigil_items SET {stamp_column} = NULL WHERE id = ?",
+        [(item_id,) for item_id in failed_ids],
+    )
+    if selection["is_full"]:
+        conn.execute(
+            "INSERT OR REPLACE INTO vigil_meta (key, value) VALUES (?, ?)",
+            (_full_sync_key(stamp_column), selection["snapshot"]),
+        )
+    conn.commit()
+
+
+def _log_sync_result(name: str, selection: dict, synced: int) -> None:
+    mode = "full" if selection["is_full"] else "inkrementell"
+    _logger.info("%s: %d/%d objekt synkade (%s)", name, synced, len(selection["rows"]), mode)
+
+
+def sync_items_from_conn(odoo_env, conn, states: list[str] | None = None, is_full: bool = False) -> int:
     """
     Läser objekt från SQLite och upsert:ar till clio.vigil.item.
     Returnerar antal synkade poster.
 
-    states: lista av tillstånd att synka (default: SYNC_STATES).
+    states:  lista av tillstånd att synka (default: SYNC_STATES).
+    is_full: synka alla rader, inte bara ändrade (sker också automatiskt var
+             FULL_SYNC_INTERVAL_HOURS).
     """
     if odoo_env is None:
         return 0
 
-    states = states or SYNC_STATES
-    placeholders = ",".join("?" * len(states))
-
     try:
-        rows = conn.execute(
-            f"SELECT * FROM vigil_items WHERE state IN ({placeholders})",
-            states,
-        ).fetchall()
+        selection = _select_rows_to_sync(conn, states or SYNC_STATES, ITEM_STAMP_COLUMN, is_full)
     except Exception as exc:
         _logger.warning("sync_items_from_conn: SQLite-läsfel: %s", exc)
         return 0
 
-    if not rows:
-        return 0
+    ok_ids, failed_ids = [], []
+    for row in selection["rows"]:
+        (ok_ids if sync_item(odoo_env, row) else failed_ids).append(row["id"])
 
-    synced = sum(1 for row in rows if sync_item(odoo_env, row))
-    _logger.info("sync_items_from_conn: %d/%d objekt synkade", synced, len(rows))
-    return synced
+    _mark_synced(conn, selection, ITEM_STAMP_COLUMN, ok_ids, failed_ids)
+    _log_sync_result("sync_items_from_conn", selection, len(ok_ids))
+    return len(ok_ids)
 
 
 def sync_journalists_from_conn(odoo_env, conn) -> int:
@@ -435,69 +516,75 @@ def _media_type_from_row(row) -> str:
     return "article"
 
 
-def sync_items_to_media(odoo_env, conn, states: list[str] | None = None) -> int:
+def _sync_media_row(Article, VigilItem, row) -> bool | None:
+    """
+    Upsert:ar en rad till clio.media.article.
+    Returnerar True (klar), None (skriven men utan vigil_item-länk) eller False (fel).
+    """
+    url = row["url"]
+    try:
+        vigil_recs = VigilItem.search_read([("url", "=", url)], ["id"], limit=1)
+        vigil_id = vigil_recs[0]["id"] if vigil_recs else False
+
+        transcript = _read_transcript(row)
+        vals = {
+            "url":         url,
+            "title":       (row["title"] or "")[:500],
+            "source":      (row["source_name"] or "")[:200],
+            "media_type":  _media_type_from_row(row),
+            "published":   _dt(row["published_at"]),
+            "first_seen":  _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
+            "data_source": "vigil_%s" % row["domain"],
+            "vigil_item_id": vigil_id,
+        }
+        if row["summary"]:
+            vals["body_snippet"] = row["summary"]
+        if transcript:
+            vals["body"] = transcript
+
+        existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
+        if existing:
+            Article.write([existing[0]["id"]], vals)
+        else:
+            Article.create(vals)
+        return True if vigil_id else None
+    except Exception as exc:
+        _logger.warning("sync_items_to_media: fel for %s: %s", str(url)[:60], exc)
+        return False
+
+
+def sync_items_to_media(odoo_env, conn, states: list[str] | None = None, is_full: bool = False) -> int:
     """
     Upsert vigil_items till clio.media.article (redaktionellt arkiv).
     Skriver bara basdata + vigil_item_id-länken.
     Vigil-specifik data (state, score, transkript) lasas via lanken.
+
+    Inkrementell som sync_items_from_conn. Artiklar som skrevs utan vigil_item-länk
+    (t.ex. för att vigil.item-synken misslyckades) stämplas inte, så att länken sätts
+    när vigil.item väl finns.
     """
     if odoo_env is None:
         return 0
 
-    sync_states = states or SYNC_STATES
-    placeholders = ",".join("?" * len(sync_states))
-
     try:
-        rows = conn.execute(
-            f"SELECT * FROM vigil_items WHERE state IN ({placeholders})",
-            sync_states,
-        ).fetchall()
+        selection = _select_rows_to_sync(conn, states or SYNC_STATES, MEDIA_STAMP_COLUMN, is_full)
     except Exception as exc:
         _logger.warning("sync_items_to_media: SQLite-lasfel: %s", exc)
         return 0
 
-    if not rows:
-        return 0
-
     Article   = odoo_env["clio.media.article"]
     VigilItem = odoo_env["clio.vigil.item"]
-    synced = 0
+    ok_ids, retry_ids, synced = [], [], 0
 
-    for row in rows:
-        url = row["url"] if hasattr(row, "__getitem__") else None
-        if not url:
+    for row in selection["rows"]:
+        if not row["url"]:
             continue
-        try:
-            # Hitta matchande clio.vigil.item
-            vigil_recs = VigilItem.search_read([("url", "=", url)], ["id"], limit=1)
-            vigil_id = vigil_recs[0]["id"] if vigil_recs else False
+        result = _sync_media_row(Article, VigilItem, row)
+        synced += result is not False
+        (ok_ids if result else retry_ids).append(row["id"])
 
-            transcript = _read_transcript(row)
-            vals = {
-                "url":         url,
-                "title":       (row["title"] or "")[:500],
-                "source":      (row["source_name"] or "")[:200],
-                "media_type":  _media_type_from_row(row),
-                "published":   _dt(row["published_at"]),
-                "first_seen":  _dt(row["published_at"]) or _dt(row["created_at"]) or _utcnow_str(),
-                "data_source": "vigil_%s" % row["domain"],
-                "vigil_item_id": vigil_id,
-            }
-            if row["summary"]:
-                vals["body_snippet"] = row["summary"]
-            if transcript:
-                vals["body"] = transcript
-
-            existing = Article.search_read([("url", "=", url)], ["id"], limit=1)
-            if existing:
-                Article.write([existing[0]["id"]], vals)
-            else:
-                Article.create(vals)
-            synced += 1
-        except Exception as exc:
-            _logger.warning("sync_items_to_media: fel for %s: %s", str(url)[:60], exc)
-
-    _logger.info("sync_items_to_media: %d/%d objekt synkade", synced, len(rows))
+    _mark_synced(conn, selection, MEDIA_STAMP_COLUMN, ok_ids, retry_ids)
+    _log_sync_result("sync_items_to_media", selection, synced)
     return synced
 
 
