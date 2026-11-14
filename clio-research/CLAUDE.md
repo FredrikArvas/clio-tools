@@ -129,6 +129,47 @@ python3 clio-research/main.py --resume clio-research-021_20261029_142300
 
 ---
 
+## Fulltextmoduler (FT0–FT1, klar 2026-11-14)
+
+### `contact.py`
+Hanterar kontaktadressen som Unpaywall och Crossref kräver i API-anrop. Läser ur
+`CLIO_CONTACT_EMAIL` i miljön; returnerar `None` om variabeln saknas. `redact(text)`
+ersätter adressen (och URL-kodade varianter) med `<kontaktadress>` i felmeddelanden och
+loggar. Adressen får aldrig hamna i sparade filer, loggfiler eller testdata.
+
+### `source_model.py`
+Definierar källformatet för `01_sources.json` (kontraktet i PLAN_research_pipeline_v2.md
+avsnitt 12). Konverterar rå API-träffar till källobjekt (`from_raw_hit`), validerar hela
+listan mot kontraktet (`validate_sources`), och läser/skriver filen atomiskt. Fältnamnen
+är bindande och får inte ändras; `FETCH_ROUTES` och `READ_LEVELS` speglar planens
+terminologi exakt.
+
+### `fulltext_fetcher.py`
+Fulltextkedjan. Version 1.1.0, sprint FT0 + FT1 (PLAN_fulltext_v1.0.md avsnitt 5).
+
+Nio steg i prioritetsordning, varav sex körs på `delbar`-nivå:
+1. `openalex` – best_oa_location.pdf_url eller landningssida
+2. `unpaywall` – url_for_pdf (kräver CLIO_CONTACT_EMAIL)
+3. `core` – fullText eller downloadUrl
+4. `semantic_scholar` – openAccessPdf.url via DOI-uppslag
+5. `direct` – källans URL eller doi.org-länk
+6. `wayback` – Internet Archive för URL:er som gav HTTP 403
+
+`snabb` kör bara steg 1; `standard` kör 1–4 (utan semantic_scholar och wayback).
+403-svar från innehållsanrop spåras i `_Context.got_403_urls` för Wayback-steget.
+PDF extraheras med PyMuPDF, HTML med trafilatura. Nätverksfel kastas aldrig; de
+skrivs i `fetch.error`. Inga omförsök och ingen förfalskad webbläsaridentitet.
+
+### `connectors/metadata.py`
+Gemensam tolkning av metadata för konnektorerna. `openalex_source_type` sätter
+källtypen baserat på OpenAlex `type` och publaiceringsplatsens typ (journal/conference/
+repository). `openalex_affiliations` och `crossref_affiliations` extraherar
+landskoder och institutionsnamn ur `authorships`/`author`. `country_from_affiliation`
+parsar ett affilieringssträngs sista kommaavgränsade led mot en lista på ~60 landsnamn.
+Kodar inga gissningar: saknas uppgiften i API-svaret returneras `None` eller tom lista.
+
+---
+
 ## Aktuellt utvecklingsläge: v2, sprint P1
 
 | Sprint | Status | Innehåll |
