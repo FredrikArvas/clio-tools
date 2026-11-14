@@ -1,6 +1,6 @@
 """
 prov_fulltext.py
-Provkör fulltextkedjan på riktigt mot källorna i spår 3:s mätning (rapport 021).
+Provkör fulltextkedjan på riktigt mot källorna i rapport 021.
 
 Läser `fetch_sample_021.csv` (vilka källor spår 3 prövade och hur det gick) och
 `oa_status_021.csv` (DOI och OpenAlex-id per källa), hämtar metadata via
@@ -11,10 +11,13 @@ OpenAlex-connectorn, kör `fulltext_fetcher` och skriver utfallet till en egen m
     <ut>/resultat.csv        en rad per källa, spår 3 och spår 1 sida vid sida
     <ut>/jamforelse.md       sammanfattning
 
+Med --all körs alla 60 källorna ur oa_status_021.csv (inget jämförelseavsnitt mot spår 3).
+
 Sätter aldrig CLIO_CONTACT_EMAIL. Är den inte satt hoppas Unpaywall-steget över.
 
 Usage:
-    python clio-research/prov_fulltext.py --prov-dir "<…>\\_fulltext_prov" [--level standard]
+    python clio-research/prov_fulltext.py --prov-dir "<…>\\_fulltext_prov" --out-dir spar3b [--level standard]
+    python clio-research/prov_fulltext.py --prov-dir "<…>\\_fulltext_prov" --out-dir spar3b_60 --all [--level delbar]
 """
 
 from __future__ import annotations
@@ -37,11 +40,10 @@ from contact import contact_email  # noqa: E402
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 SAMPLE_CSV = "fetch_sample_021.csv"
 OA_CSV = "oa_status_021.csv"
-OUT_DIR = "spar1"
 
 log = logging.getLogger("prov_fulltext")
 
@@ -71,8 +73,8 @@ def build_source(row: dict) -> dict:
     return credibility_scorer.assess(source)
 
 
-def run(prov_dir: Path, level: str) -> Path:
-    out = prov_dir / OUT_DIR
+def run(prov_dir: Path, out_dir: str, level: str) -> Path:
+    out = prov_dir / out_dir
     out.mkdir(parents=True, exist_ok=True)
     sample = load_sample(prov_dir)
     fetcher = fulltext_fetcher.FulltextFetcher(out, level=level)
@@ -140,17 +142,80 @@ def summary(rows: list[dict], level: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def run_all(prov_dir: Path, out_dir: str, level: str) -> Path:
+    """Kör kedjan på alla 60 källorna från oa_status_021.csv."""
+    out = prov_dir / out_dir
+    out.mkdir(parents=True, exist_ok=True)
+    with open(prov_dir / OA_CSV, encoding="utf-8", newline="") as f:
+        all_rows = list(csv.DictReader(f))
+    fetcher = fulltext_fetcher.FulltextFetcher(out, level=level)
+
+    sources, result_rows = [], []
+    for row in all_rows:
+        openalex_id = row["openalex_id"].rsplit("/", 1)[-1]
+        try:
+            source = build_source({"nr": row["nr"], "openalex_id": openalex_id})
+        except Exception as e:
+            log.warning("Kan inte hämta källa nr %s: %s", row["nr"], e)
+            result_rows.append({"nr": row["nr"], "lasniva": "fel", "vag": "none",
+                                 "tecken": 0, "is_oa": row.get("is_oa", ""), "fel": str(e)})
+            continue
+        fetcher.fetch(source)
+        fetch = source["fetch"]
+        result_rows.append({"nr": row["nr"], "lasniva": source["read_level"],
+                             "vag": fetch["route"], "tecken": fetch["chars"],
+                             "is_oa": row.get("is_oa", ""), "fel": fetch["error"] or ""})
+        sources.append(source)
+
+    with open(out / "resultat_60.csv", "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(result_rows[0]))
+        writer.writeheader()
+        writer.writerows(result_rows)
+
+    md = _summary_all(result_rows, level)
+    (out / "jamforelse_60.md").write_text(md, encoding="utf-8")
+    return out
+
+
+def _summary_all(rows: list[dict], level: str) -> str:
+    from collections import Counter
+    niva = Counter(r["lasniva"] for r in rows)
+    vag = Counter(r["vag"] for r in rows if r["vag"] != "none")
+    lines = [
+        f"# Provkörning på 60 källorna (rapport 021), {date.today().isoformat()}",
+        "",
+        f"Nivå `{level}`, steg {', '.join(fulltext_fetcher.STEPS_BY_LEVEL[level])}. "
+        f"Kontaktadress satt: {'ja' if contact_email() else 'nej'}.",
+        "",
+        "## Läsnivåer",
+        "",
+    ]
+    for nivå, antal in sorted(niva.items()):
+        lines.append(f"- {nivå}: {antal} av {len(rows)}")
+    lines += ["", "## Hämtvägar", ""]
+    for route, antal in sorted(vag.items(), key=lambda x: -x[1]):
+        lines.append(f"- {route}: {antal}")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Provkör fulltextkedjan mot spår 3:s tio källor")
+    parser = argparse.ArgumentParser(description="Provkör fulltextkedjan mot rapport 021")
     parser.add_argument("--prov-dir", required=True, type=Path, help="Mappen _fulltext_prov")
+    parser.add_argument("--out-dir", required=True, help="Underkatalog för resultaten (t.ex. spar3b)")
     parser.add_argument("--level", default="standard", choices=list(fulltext_fetcher.STEPS_BY_LEVEL))
+    parser.add_argument("--all", action="store_true", dest="all_sources",
+                        help="Kör alla 60 källorna (oa_status_021.csv) istället för de tio i provet")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
     if not args.prov_dir.is_dir():
         log.error("Mappen finns inte: %s", args.prov_dir)
         return 1
-    out = run(args.prov_dir, args.level)
-    print((out / "jamforelse.md").read_text(encoding="utf-8"))
+    if args.all_sources:
+        out = run_all(args.prov_dir, args.out_dir, args.level)
+        print((out / "jamforelse_60.md").read_text(encoding="utf-8"))
+    else:
+        out = run(args.prov_dir, args.out_dir, args.level)
+        print((out / "jamforelse.md").read_text(encoding="utf-8"))
     return 0
 
 
