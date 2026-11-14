@@ -3,9 +3,10 @@ migrate_yaml_to_odoo.py
 Läser YAML-profiler och skapar/uppdaterar clio.job.profile-poster i Odoo.
 
 Kör på EliteDesk GPU:
-    python migrate_yaml_to_odoo.py [--dry-run] [--profile richard.yaml]
+    python migrate_yaml_to_odoo.py [--dry-run] [--profile richard.yaml] [--inactive]
 
 Utan --profile körs alla YAML-filer i profiles/ (utom stubs med source: odoo).
+--inactive skapar/uppdaterar profiler med active=False (syns i Odoo men bevakas ej).
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ def _lines_to_text(value) -> str:
     return str(value).strip() if value else ""
 
 
-def migrate_profile(env, data: dict, dry_run: bool) -> None:
+def migrate_profile(env, data: dict, dry_run: bool, inactive: bool = False) -> None:
     name  = data.get("name", "").strip()
     email = data.get("email", "").strip()
 
@@ -89,6 +90,7 @@ def migrate_profile(env, data: dict, dry_run: bool) -> None:
         "education":       _lines_to_text(data.get("education", [])),
         "target_roles":    _lines_to_text(data.get("target_roles", [])),
         "signal_keywords": _lines_to_text(data.get("signal_keywords", [])),
+        "active":          not inactive,
     }
 
     Profile = env["clio.job.profile"]
@@ -117,6 +119,7 @@ def main():
     ap = argparse.ArgumentParser(description="Migrera YAML-profiler till Odoo clio.job.profile")
     ap.add_argument("--dry-run", action="store_true", help="Visa vad som skulle göras, utan att skriva")
     ap.add_argument("--profile", type=str, default=None, help="Specifik YAML-fil (t.ex. richard.yaml)")
+    ap.add_argument("--inactive", action="store_true", help="Skapa/uppdatera profiler som inaktiva (active=False)")
     args = ap.parse_args()
 
     # Välj profiler
@@ -153,7 +156,7 @@ def main():
     for fname, data in to_migrate:
         print(f"[{fname}]")
         try:
-            migrate_profile(env, data, dry_run=args.dry_run)
+            migrate_profile(env, data, dry_run=args.dry_run, inactive=args.inactive)
         except Exception as e:
             print(f"  [FEL] {e}")
 

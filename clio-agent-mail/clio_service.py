@@ -711,6 +711,28 @@ def _route_health_docker(_data: dict) -> dict:
         return {"ok": False, "error": str(e)}
 
 
+# ── Clio Recruit ─────────────────────────────────────────────────────────────
+
+def _route_recruit_run(data: dict) -> dict:
+    import subprocess, sys as _sys
+    profile_id = data.get("profile_id")
+    if not profile_id or not str(profile_id).lstrip("-").isdigit():
+        return {"ok": False, "error": "profile_id saknas eller ogiltigt"}
+    dry_run = bool(data.get("dry_run", False))
+    script = str(ROOT_DIR / "clio-agent-job" / "run.py")
+    cmd = [_sys.executable, script, "--odoo-recruiter-id", str(int(profile_id))]
+    if dry_run:
+        cmd.append("--dry-run")
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        output = proc.stdout + (proc.stderr or "")
+        return {"ok": True, "output": output[:8000], "exit_code": proc.returncode}
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "error": "Sökningen tog för lång tid (>300s)"}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
 # ── Router ────────────────────────────────────────────────────────────────────
 
 _ROUTES: dict[tuple[str, str], callable] = {
@@ -755,6 +777,7 @@ _ROUTES: dict[tuple[str, str], callable] = {
     ("POST", "/mail/ncc/lista/json"):  _route_mail_ncc_lista_json,
     ("POST", "/mail/ncc/ny"):          _route_mail_ncc_ny,
     ("POST", "/mail/update"):          _route_mail_update,
+    ("POST", "/recruit/run"):          _route_recruit_run,
 }
 
 

@@ -2,10 +2,10 @@
 main.py — clio-research entry point.
 
 Användning:
-  python main.py --protocol clio-research-001
-  python main.py --list
-  python main.py --status clio-research-001_20260503_142300
-  python main.py --resume clio-research-001_20260503_142300
+  python3 main.py --protocol clio-research-001
+  python3 main.py --list
+  python3 main.py --status clio-research-001_20260503_142300
+  python3 main.py --resume clio-research-001_20260503_142300
 """
 
 from __future__ import annotations
