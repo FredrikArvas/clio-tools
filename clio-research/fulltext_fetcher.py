@@ -99,6 +99,7 @@ class HttpResult:
     status: int
     content: bytes = b""
     content_type: str = ""
+    final_url: str = ""    # adressen efter omdirigeringar; bara värdnamnet används
 
 
 class Http:
@@ -116,7 +117,7 @@ class Http:
             with requests.get(url, params=params, headers=send, stream=True,
                               timeout=(min(10.0, timeout), timeout), allow_redirects=True) as resp:
                 if resp.status_code != 200:
-                    return HttpResult(resp.status_code)
+                    return HttpResult(resp.status_code, final_url=resp.url or "")
                 chunks, size = [], 0
                 for chunk in resp.iter_content(chunk_size=65536):
                     if deadline is not None and time.monotonic() > deadline:
@@ -125,7 +126,7 @@ class Http:
                     if size > MAX_BYTES:
                         raise FetchFailed(f"filen är större än {MAX_BYTES // (1024 * 1024)} MB")
                     chunks.append(chunk)
-                return HttpResult(200, b"".join(chunks), resp.headers.get("Content-Type", ""))
+                return HttpResult(200, b"".join(chunks), resp.headers.get("Content-Type", ""), resp.url or "")
         except requests.Timeout as e:
             raise FetchTimeout() from e
         except requests.RequestException as e:
@@ -469,7 +470,8 @@ class FulltextFetcher:
             ctx.failures.append(redact(f"{label}: {e} ({host})"))
             return None
         if result.status != 200:
-            ctx.failures.append(f"{label}: HTTP {result.status} ({host})")
+            # Efter en omdirigering (doi.org → utgivaren) är det slutvärden som vägrade.
+            ctx.failures.append(f"{label}: HTTP {result.status} ({_host(result.final_url or url)})")
             return None
         return result
 
@@ -508,6 +510,7 @@ class FulltextFetcher:
         result = self._get(cand.route, url, ctx)
         if result is None:
             return
+        host = _host(result.final_url or url)
         try:
             if is_pdf(result.content, result.content_type):
                 kind, text = "pdf", extract_pdf(result.content)
@@ -555,7 +558,7 @@ class FulltextFetcher:
         if ctx.failures:
             notes.append("Misslyckade försök: " + "; ".join(ctx.failures) + ".")
         if level != "fulltext" and ctx.skips:
-            notes.append("Ej prövat: " + "; ".join(ctx.skips) + ".")
+            notes.append("Steg utan försök eller träff: " + "; ".join(ctx.skips) + ".")
         source["read_level"] = level
         source["read_note"] = redact(" ".join(notes)) if notes else None
 

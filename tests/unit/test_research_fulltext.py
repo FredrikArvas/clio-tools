@@ -333,6 +333,18 @@ def test_short_html_is_saved_but_read_level_is_sammanfattning(tmp_path):
     sm.validate_source(source, complete=False)
 
 
+def test_refusal_names_the_host_that_refused_after_redirect(tmp_path):
+    doi_url = "https://doi.org/10.1000/xyz"
+    fetcher, _, _ = make_fetcher(tmp_path, {
+        OPENALEX_URL: openalex_reply(pdf_url=None, landing=doi_url),
+        CORE_URL: json_result({"results": []}),
+        doi_url: ff.HttpResult(403, final_url=f"https://dl.example-utgivare.org/doi/full/10.1000/xyz?email={EMAIL}"),
+    })
+    source = fetcher.fetch(make_source(url=doi_url))
+    assert source["fetch"]["error"] == "direct_url: HTTP 403 (dl.example-utgivare.org)"
+    assert EMAIL not in json.dumps(source)
+
+
 def test_denied_host_is_never_fetched(tmp_path):
     rg = "https://www.researchgate.net/publication/1"
     fetcher, http, _ = make_fetcher(tmp_path, {CORE_URL: json_result({"results": []})})
@@ -463,6 +475,7 @@ def test_real_http_client_sends_honest_user_agent_and_returns_refusal(monkeypatc
     class Resp:
         status_code = 403
         headers = {}
+        url = "https://utgivare.example.com/slutadress"
 
         def __enter__(self):
             return self
@@ -477,6 +490,7 @@ def test_real_http_client_sends_honest_user_agent_and_returns_refusal(monkeypatc
     monkeypatch.setattr(requests, "get", fake_get)
     result = ff.Http().get(PDF_URL)
     assert result.status == 403
+    assert result.final_url == "https://utgivare.example.com/slutadress"
     assert seen["headers"]["User-Agent"] == ff.USER_AGENT
 
 
