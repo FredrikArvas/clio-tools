@@ -7,8 +7,14 @@ import time
 import logging
 import requests
 
+from .metadata import openalex_affiliations, openalex_source_type
+
 BASE_URL = "https://api.openalex.org/works"
 SLEEP = 0.1
+SELECT_FIELDS = (
+    "id,title,authorships,publication_year,language,doi,abstract_inverted_index,"
+    "primary_location,type,cited_by_count"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +25,7 @@ def search(query: str, max_results: int = 50, language: str | None = None) -> li
     params = {
         "search": query,
         "per-page": min(max_results, 200),
-        "select": "id,title,authorships,publication_year,language,doi,abstract_inverted_index,primary_location",
+        "select": SELECT_FIELDS,
     }
     if email:
         params["mailto"] = email
@@ -73,6 +79,10 @@ def _normalize(item: dict) -> dict | None:
     location = item.get("primary_location") or {}
     source = location.get("source") or {}
 
+    # Land och institution ur metadata. Tom lista betyder att OpenAlex inte anger något.
+    country_codes, institutions = openalex_affiliations(item.get("authorships"))
+    cited = item.get("cited_by_count")
+
     from protocol_loader import source_id as make_id
     return {
         "source_id": make_id(title, item.get("publication_year"), doi),
@@ -81,7 +91,12 @@ def _normalize(item: dict) -> dict | None:
         "year": item.get("publication_year"),
         "language": item.get("language"),
         "database": "openalex",
-        "region": None,
+        "external_id": (item.get("id") or "").rsplit("/", 1)[-1] or None,
+        "source_type": openalex_source_type(item.get("type"), source.get("type")),
+        "country_codes": country_codes,
+        "institutions": institutions,
+        "citation_count": cited if isinstance(cited, int) else None,
+        "region": country_codes[0] if country_codes else None,
         "abstract": abstract,
         "fulltext_url": location.get("landing_page_url"),
         "doi": doi or None,
