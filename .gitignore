@@ -118,3 +118,12 @@ clio-fetch-contacts/persons_*.json
 clio-fetch-contacts/raw_*.html
 clio-bookrev/output/
 clio-bookrev/testdata/
+
+# Serverdata som inte hör hemma i git (tillagt 2026-11-14 vid serverstädning)
+clio-afu/data/
+clio-uap/sefaa_pdfs/
+clio-uap/cuap_pdfs/
+clio-vigil/*.db
+clio-vigil/research/*.json
+*.bak
+*.bak-*
