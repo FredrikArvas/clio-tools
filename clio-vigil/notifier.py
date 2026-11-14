@@ -48,15 +48,15 @@ DIGEST_TO = os.getenv("DIGEST_TO", "fredrik@arvas.se")
 def _fetch_digest_items(conn, domain: Optional[str] = None,
                         limit: int = 30) -> list[dict]:
     """
-    Hämtar indexed-objekt med summary som ännu ej notifierats.
-    Sorterat på priority_score DESC.
+    Hämtar indexed-objekt som ännu ej notifierats. Sorterat på priority_score DESC.
+    Summary krävs inte: textposter (RSS/Google News) saknar ofta summary och
+    visas då med description (se _item_blurb).
     """
     query = """
-        SELECT id, domain, title, summary, url, source_name,
+        SELECT id, domain, title, summary, description, url, source_name,
                source_maturity, published_at, priority_score
         FROM vigil_items
         WHERE state = 'indexed'
-          AND summary IS NOT NULL AND summary != ''
           AND published_at IS NOT NULL
           AND published_at >= date('now', '-30 days')
           {}
@@ -89,6 +89,27 @@ def _fmt_date(iso: Optional[str]) -> str:
         return "—"
 
 
+MAX_BLURB_CHARS = 500
+
+
+def _item_blurb(item: dict) -> str:
+    """
+    Brödtext för ett objekt: summary om den finns, annars description
+    (avkodad, trunkerad). Tom sträng om description bara upprepar rubriken
+    (Google News: "rubrik - källa").
+    """
+    import html
+    if item.get("summary"):
+        return item["summary"]
+    description = " ".join(html.unescape(item.get("description") or "").split())
+    title = " ".join((item.get("title") or "").split())
+    if not description or (title and description.startswith(title[:40])):
+        return ""
+    if len(description) > MAX_BLURB_CHARS:
+        description = description[:MAX_BLURB_CHARS].rsplit(" ", 1)[0] + " …"
+    return description
+
+
 def _format_item_text(item: dict, idx: int) -> str:
     """Formaterar ett objekt som plain text-block."""
     maturity = _MATURITY_LABEL.get(item["source_maturity"], item["source_maturity"])
@@ -96,9 +117,10 @@ def _format_item_text(item: dict, idx: int) -> str:
         f"{idx}. {item['title'] or '(utan rubrik)'}\n"
         f"   {item['source_name'] or '—'} · {_fmt_date(item['published_at'])} · {maturity}"
     )
-    summary = item["summary"] or "(ingen sammanfattning)"
-    url     = item["url"] or ""
-    return f"{header}\n\n   {summary}\n\n   🔗 {url}"
+    blurb = _item_blurb(item)
+    url   = item["url"] or ""
+    body  = f"\n\n   {blurb}" if blurb else ""
+    return f"{header}{body}\n\n   🔗 {url}"
 
 
 def _format_item_html(item: dict, idx: int) -> str:
@@ -108,14 +130,17 @@ def _format_item_html(item: dict, idx: int) -> str:
     title    = html.escape(item["title"] or "(utan rubrik)")
     source   = html.escape(item["source_name"] or "—")
     date     = _fmt_date(item["published_at"])
-    summary  = html.escape(item["summary"] or "(ingen sammanfattning)")
+    blurb    = _item_blurb(item)
     url      = html.escape(item["url"] or "")
+    blurb_html = (
+        f'\n  <p style="margin:0 0 8px 0;font-size:14px;color:#3D2E0A;line-height:1.5;">'
+        f'{html.escape(blurb)}</p>' if blurb else ""
+    )
 
     return f"""
 <div style="margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #e0d8c8;">
   <p style="margin:0 0 4px 0;font-size:15px;font-weight:bold;color:#2A3F6F;">{idx}. {title}</p>
-  <p style="margin:0 0 8px 0;font-size:12px;color:#888;">{source} &middot; {date} &middot; {maturity}</p>
-  <p style="margin:0 0 8px 0;font-size:14px;color:#3D2E0A;line-height:1.5;">{summary}</p>
+  <p style="margin:0 0 8px 0;font-size:12px;color:#888;">{source} &middot; {date} &middot; {maturity}</p>{blurb_html}
   <a href="{url}" style="font-size:13px;color:#4A6FA5;">Öppna källa →</a>
 </div>"""
 

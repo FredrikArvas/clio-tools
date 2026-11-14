@@ -67,6 +67,34 @@ logger = logging.getLogger("clio-vigil")
 
 CONFIG_DIR = Path(__file__).parent / "config"
 
+# Digest väntar på processlåset i stället för att ge upp direkt.
+# clio-vigil-digest.service måste ha TimeoutStartSec större än detta + digestens egen tid.
+DIGEST_LOCK_WAIT_SECONDS = int(os.getenv("DIGEST_LOCK_WAIT_SECONDS", "2700"))
+LOCK_POLL_SECONDS = 10
+EXIT_LOCK_TIMEOUT = 75   # EX_TEMPFAIL — systemd markerar körningen som misslyckad
+
+
+def _acquire_lock(lock_fh, wait_seconds: int = 0,
+                  poll_seconds: float = LOCK_POLL_SECONDS) -> bool:
+    """Tar exklusivt flock. Väntar upp till wait_seconds. True om låset togs."""
+    import fcntl
+    import time
+    deadline = time.monotonic() + wait_seconds
+    has_logged_wait = False
+    while True:
+        try:
+            fcntl.flock(lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if has_logged_wait:
+                logger.info("Låset taget efter väntan.")
+            return True
+        except BlockingIOError:
+            if time.monotonic() >= deadline:
+                return False
+            if not has_logged_wait:
+                logger.info("Låset upptaget — väntar upp till %d s.", wait_seconds)
+                has_logged_wait = True
+            time.sleep(poll_seconds)
+
 
 def load_domain_config(domain_id: str) -> dict:
     """Laddar YAML-konfiguration för en domän."""
@@ -252,12 +280,9 @@ def pick_source(conn) -> None:
     print(f"\n  ✓ Totalt: {total_new} nya objekt, {total_queued} i kö")
 
 
-def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
-    """Kör collect → filter → queue för en domän."""
-    logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
+def load_config_with_sources(domain_id: str, odoo_env=None) -> dict:
+    """Domänconfig från YAML med källor från Odoo om anslutning finns, annars YAML-källor."""
     config = load_domain_config(domain_id)
-
-    # Källor: läs från Odoo om anslutning finns, annars YAML-fallback
     if odoo_env is not None:
         from odoo_writer import read_sources, build_sources_config
         odoo_sources = read_sources(odoo_env, domain_id)
@@ -268,6 +293,13 @@ def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
             logger.warning(f"Inga aktiva Odoo-källor för domän={domain_id} — faller tillbaka på YAML")
     else:
         logger.warning("Ingen Odoo-anslutning — läser källkonfiguration från YAML")
+    return config
+
+
+def run_pipeline(conn, domain_id: str, odoo_env=None) -> None:
+    """Kör collect → filter → queue för en domän."""
+    logger.info(f"═══ Pipeline start: [{domain_id}] ═══")
+    config = load_config_with_sources(domain_id, odoo_env)
 
     # Steg 1: Insamling
     rss_counts = collect_rss(conn, config)
@@ -614,6 +646,7 @@ def main():
     parser.add_argument("--clear-queue",          action="store_true", help="Rensa kön (återställ tillstånd)")
     parser.add_argument("--pick-source",          action="store_true", help="Välj vilken källa som ska hämtas in")
     parser.add_argument("--recompute-priorities", action="store_true", help="Räkna om priority_score för alla objekt (inkl. ny tidsfaktor)")
+    parser.add_argument("--refilter",             action="store_true", help="Poängsätt om filtered_out med aktuella nyckelord och köa de som nu klarar tröskeln (--dry-run = bara räkna)")
     parser.add_argument("--import-url",   type=str,            help="Importera webb-sida eller PDF direkt")
     parser.add_argument("--extract-journalists", action="store_true", help="Extrahera journalistbylines ur insamlade artiklar")
     parser.add_argument("--build-profiles",      action="store_true", help="Bygg journalist-profiler via Claude")
@@ -628,23 +661,30 @@ def main():
     parser.add_argument("--domain",      type=str,            help="Begränsa till domän (t.ex. ufo)")
     parser.add_argument("--all-domains", action="store_true", help="Kör alla konfigurerade domäner")
     parser.add_argument("--dry-run",     action="store_true", help="Simulera utan sändning (digest)")
+    parser.add_argument("--full-sync",   action="store_true", help="Synka alla poster till Odoo, inte bara ändrade (kombineras med t.ex. --run; sker automatiskt var 24:e timme)")
     parser.add_argument("--max",         type=int, default=10, help="Max objekt per steg (default: 10)")
 
     args = parser.parse_args()
     _started_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     # Exklusivt processlås — förhindrar parallella körningar (timer + manuell batch)
-    import fcntl as _fcntl
     _summarize_only = args.summarize and not any([
         args.run, args.transcribe, args.index, args.classify_uap,
         args.digest, args.full, args.download, args.caption_check,
     ])
     _lock_path = '/tmp/clio-vigil-summarize.lock' if _summarize_only else '/tmp/clio-vigil.lock'
     _lock_fh = open(_lock_path, 'w')
-    try:
-        _fcntl.flock(_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
-    except BlockingIOError:
+    # Digesten är schemalagd en gång per dygn och får inte tyst hoppas över bara
+    # för att pipelinen råkar köra — den väntar in låset.
+    _wait_seconds = DIGEST_LOCK_WAIT_SECONDS if (args.digest or args.full) else 0
+    if not _acquire_lock(_lock_fh, _wait_seconds):
         _who = 'summering' if _summarize_only else 'clio-vigil'
+        if _wait_seconds:
+            logger.error(
+                'Digest: låset upptaget i %d s av en annan %s-process — ingen digest skickad.',
+                _wait_seconds, _who,
+            )
+            sys.exit(EXIT_LOCK_TIMEOUT)
         logger.info('En annan %s-process kör redan — avslutar.', _who)
         sys.exit(0)
 
@@ -652,7 +692,7 @@ def main():
         args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
         args.digest, args.full, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
-        args.recompute_priorities, args.classify_uap, args.seed_sources,
+        args.recompute_priorities, args.refilter, args.classify_uap, args.seed_sources,
         args.extract_journalists, bool(args.pitch),
         args.archive_sources, bool(args.archive_source),
     ])
@@ -713,13 +753,13 @@ def main():
         if _odoo_env is None:
             return
         try:
-            n = sync_items_from_conn(_odoo_env, conn)
+            n = sync_items_from_conn(_odoo_env, conn, is_full=args.full_sync)
             if n:
                 logger.info("Odoo-sync (vigil.item) %s: %d objekt", label, n)
         except Exception as _se:
             logger.warning("Odoo-sync (vigil.item) misslyckades (%s): %s", label, _se)
         try:
-            m = sync_items_to_media(_odoo_env, conn)
+            m = sync_items_to_media(_odoo_env, conn, is_full=args.full_sync)
             if m:
                 logger.info("Odoo-sync (media.article) %s: %d objekt", label, m)
         except Exception as _me:
@@ -782,6 +822,21 @@ def main():
         from orchestrator import recompute_all_priorities
         n = recompute_all_priorities(conn)
         print(f"\n✓ Räknade om priority_score för {n} objekt (inkl. tidsfaktor)")
+
+    elif args.refilter:
+        from filter import refilter_filtered_out
+        if not args.dry_run:
+            _odoo_pull("före omfiltrering")
+        domains = get_all_domains() if args.all_domains else [args.domain or "ufo"]
+        for domain_id in domains:
+            config = load_config_with_sources(domain_id, _odoo_env)
+            counts = refilter_filtered_out(conn, config, is_dry_run=args.dry_run)
+            label = "skulle köas" if args.dry_run else "köade"
+            print(f"\n[{domain_id}] {counts['requeued']} av {counts['checked']} filtered_out {label}")
+            for source, n in sorted(counts["per_source"].items(), key=lambda kv: -kv[1]):
+                print(f"  {n:5d}  {source}")
+        if not args.dry_run:
+            _odoo_sync("efter omfiltrering")
 
     elif args.run or args.full:
         _odoo_pull("före insamling")

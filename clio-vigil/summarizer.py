@@ -8,20 +8,24 @@ Primär motor: Ollama (lokal, gratis) via LOCAL_MODEL (default: qwen2.5:3b).
   - Passar qwen2.5:3b:s 4096-token kontextfönster utan trunkering.
   - Konkatenerar alla chunk-summaries till ett komplett dokument.
 
-Fördjupningsanalys: Claude API för objekt med priority_score >= CLAUDE_THRESHOLD.
+Fördjupningsanalys: Claude Sonnet för objekt med priority_score >= CLAUDE_THRESHOLD.
+  - Körs på prenumerationen via `claude -p` (clio-research/claude_runner.py),
+    eller Anthropic API med VIGIL_CLAUDE_BACKEND=api.
   - Trunkerar transkript till MAX_TRANSCRIPT_CHARS (Claude hanterar längre kontext).
+  - Misslyckas Claude (fel, kvotgräns) tar Ollama över.
 
 # ÅTERGÅNG TILL CLAUDE-ONLY
 # Sätt CLAUDE_THRESHOLD=0.0 i .env för att skicka ALLT till Claude.
 # Eller byt LOCAL_MODEL="" för att inaktivera lokal motor helt.
 
 Flöde:
-  1. Hämta objekt med state IN (transcribed, ...) OCH transcript_path IS NOT NULL
-  2. Läs in transkript-JSON (segments med tidsstämplar)
+  1. Hämta objekt utan summary som har transcript_path, eller (textposter)
+     description ≥ MIN_TEXT_CHARS
+  2. Läs in transkript-JSON (segments med tidsstämplar), eller title + description
   3. priority_score >= CLAUDE_THRESHOLD → Claude API (djupanalys, trunkerat)
      priority_score <  CLAUDE_THRESHOLD → Ollama chunk-loop (full längd)
   4. Spara summary i vigil_items.summary
-  5. Sätter state = summarized
+  5. Sätter state = summarized (bara från transcribed/captioned; indexed ligger kvar)
 
 Körning:
   python summarizer.py --run [--domain ufo] [--max 20]
@@ -37,6 +41,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
+import claude_backend
 from orchestrator import init_db, transition
 
 logger = logging.getLogger(__name__)
@@ -47,7 +52,13 @@ load_dotenv(_here.parent / ".env")
 load_dotenv(_here / ".env", override=True)
 
 ANTHROPIC_API_KEY   = os.getenv("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
+CLAUDE_MODEL        = os.getenv("CLAUDE_MODEL", claude_backend.MODEL_SONNET)
+
+# Claude-steget körs på prenumerationen via `claude -p` (claude_backend).
+# VIGIL_CLAUDE_BACKEND=api går tillbaka till Anthropic API (per token).
+BACKEND_SUBSCRIPTION = "subscription"
+BACKEND_API          = "api"
+CLAUDE_BACKEND       = os.getenv("VIGIL_CLAUDE_BACKEND", BACKEND_SUBSCRIPTION)
 
 # Lokal motor — qwen2.5:3b (1.9 GB, ryms i GTX 1050 Ti 4 GB)
 # mistral:7b (4.4 GB) överstiger GPU-minnet och kör på CPU — för långsamt
@@ -61,6 +72,11 @@ CLAUDE_THRESHOLD    = float(os.getenv("CLAUDE_THRESHOLD", "0.5"))
 
 # Claude-path: trunkera till 20 000 chars (Claude hanterar längre kontext fint)
 MAX_TRANSCRIPT_CHARS = 20_000
+
+# Textposter (RSS/webb utan transkript) sammanfattas från title + description
+# om description är minst så här lång. Kortare (t.ex. Google News "rubrik - källa")
+# ger inget att sammanfatta — digesten visar då description direkt.
+MIN_TEXT_CHARS = 400
 
 # Ollama chunk-loop: 14 000 chars per chunk (~3 500 tokens + ~500 tokens prompt/output overhead
 # = 4 000 tokens total, inom qwen2.5:3b:s 4096-token fönster)
@@ -132,6 +148,28 @@ def _transcript_to_text(transcript_path: str) -> str:
         return " ".join(s["text"] for s in segments if s.get("text"))
     except (json.JSONDecodeError, TypeError):
         return raw
+
+
+def _description_text(item) -> str:
+    """Description som ren text (HTML-entiteter avkodade, blanktecken hopslagna)."""
+    import html
+    return " ".join(html.unescape(item["description"] or "").split())
+
+
+def _item_source_text(item) -> Optional[str]:
+    """
+    Text att sammanfatta: transkript om det finns, annars title + description
+    för textposter med tillräckligt lång description. None om inget finns.
+    Kastar FileNotFoundError/ValueError om transkriptfilen saknas eller är tom.
+    """
+    if item["transcript_path"]:
+        return _transcript_to_text(item["transcript_path"])
+    # Samma längdmått som SQL-urvalet i run_summarizer (rå längd), så att en
+    # vald post aldrig avvisas här och väljs om och om igen.
+    if len(item["description"] or "") < MIN_TEXT_CHARS:
+        return None
+    description = _description_text(item)
+    return f"{item['title'] or ''}\n\n{description}".strip()
 
 
 # ---------------------------------------------------------------------------
@@ -210,36 +248,44 @@ def _summarize_with_ollama(item: dict, full_text: str) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
-# Summering via Claude API (fördjupningsanalys för hög prioritet)
+# Summering via Claude (fördjupningsanalys för hög prioritet)
 # ---------------------------------------------------------------------------
 
-def _summarize_with_claude(item: dict, transcript_text: str) -> Optional[str]:
-    """
-    Fördjupningsanalys: Claude API.
-    Används för objekt med priority_score >= CLAUDE_THRESHOLD.
-
-    # ÅTERGÅNG TILL CLAUDE-ONLY: anropa denna funktion för alla items.
-    """
-    try:
-        import anthropic
-    except ImportError:
-        raise ImportError("anthropic saknas — kör: pip install anthropic")
-
-    if not ANTHROPIC_API_KEY:
-        raise EnvironmentError("ANTHROPIC_API_KEY saknas i .env")
-
-    system_prompt = _get_system_prompt(item["domain"])
-    # Trunkera för Claude: ta från 10% in för att hoppa intro-prat
+def _claude_user_message(item: dict, transcript_text: str) -> str:
+    """Promptens användardel. Trunkerar från 10 % in för att hoppa intro-prat."""
     text = transcript_text
     if len(text) > MAX_TRANSCRIPT_CHARS:
         start = max(0, len(text) // 10)
         text = text[start : start + MAX_TRANSCRIPT_CHARS]
-    user_message = (
+    return (
         f"Titel: {item['title'] or '—'}\n"
         f"Källa: {item['source_name'] or '—'}\n"
         f"Publicerad: {(item['published_at'] or '—')[:10]}\n\n"
-        f"Transkript:\n{text}"
+        f"Text:\n{text}"
     )
+
+
+def _summarize_with_claude(item: dict, transcript_text: str) -> Optional[str]:
+    """
+    Fördjupningsanalys för objekt med priority_score >= CLAUDE_THRESHOLD.
+    Kör via prenumerationen (`claude -p`) eller API:t beroende på CLAUDE_BACKEND.
+    Kastar vid fel, så att summarize_item faller tillbaka på Ollama.
+    """
+    system_prompt = _get_system_prompt(item["domain"])
+    user_message = _claude_user_message(item, transcript_text)
+    if CLAUDE_BACKEND == BACKEND_SUBSCRIPTION:
+        return _call_claude_subscription(system_prompt, user_message)
+    return _call_claude_api(system_prompt, user_message)
+
+
+def _call_claude_api(system_prompt: str, user_message: str) -> str:
+    """Claude via Anthropic API (debiteras per token)."""
+    try:
+        import anthropic
+    except ImportError:
+        raise ImportError("anthropic saknas — kör: pip install anthropic")
+    if not ANTHROPIC_API_KEY:
+        raise EnvironmentError("ANTHROPIC_API_KEY saknas i .env")
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     response = client.messages.create(
@@ -249,6 +295,11 @@ def _summarize_with_claude(item: dict, transcript_text: str) -> Optional[str]:
         messages=[{"role": "user", "content": user_message}],
     )
     return response.content[0].text.strip()
+
+
+def _call_claude_subscription(system_prompt: str, user_message: str) -> str:
+    """Claude via `claude -p` på prenumerationen. Kvotgräns ger Ollama för resten av körningen."""
+    return claude_backend.call_subscription(system_prompt, user_message, CLAUDE_MODEL)
 
 
 # ---------------------------------------------------------------------------
@@ -268,14 +319,15 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         logger.error(f"Item {item_id} hittades inte")
         return None
 
-    if not item["transcript_path"]:
-        logger.warning(f"Item {item_id} saknar transcript_path")
-        return None
-
     try:
-        transcript_text = _transcript_to_text(item["transcript_path"])
+        transcript_text = _item_source_text(item)
     except FileNotFoundError as e:
         logger.error(str(e))
+        return None
+    if transcript_text is None:
+        logger.warning(
+            f"Item {item_id} saknar transkript och description ≥ {MIN_TEXT_CHARS} tecken"
+        )
         return None
 
     priority = item["priority_score"] or 0.0
@@ -286,9 +338,10 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         try:
             summary = _summarize_with_claude(item, transcript_text)
         except Exception as e:
-            logger.error(f"Claude API-fel för item {item_id}: {e}")
+            logger.error(f"Claude-fel för item {item_id}: {e}")
             # Fallback till Ollama om Claude misslyckas
             logger.info(f"Item {item_id}: faller tillbaka på Ollama efter Claude-fel")
+            engine = f"Ollama-fallback ({LOCAL_MODEL})"
             summary = _summarize_with_ollama(item, transcript_text)
     else:
         engine = f"Ollama ({LOCAL_MODEL})"
@@ -311,7 +364,10 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
         (summary, item_id),
     )
     conn.commit()
-    transition(conn, item_id, "summarized")
+    # Bara poster som väntar på summering flyttas fram. En redan indexerad post
+    # ska ligga kvar som indexed, annars missar digesten den.
+    if item["state"] in ("transcribed", "captioned"):
+        transition(conn, item_id, "summarized")
 
     logger.info(f"Item {item_id} [{engine}] (prio={priority:.2f}): {summary[:80]}…")
     return summary
@@ -323,21 +379,23 @@ def summarize_item(conn, item_id: int) -> Optional[str]:
 
 def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20, odoo_env=None) -> dict:
     """
-    Sammanfattar objekt som har transkript men saknar summary.
-    Obs: filtrerar aktivt bort items utan transcript_path — de kan aldrig summeras
-    via transkript-flödet och ska inte ta upp slots i kön.
+    Sammanfattar objekt som saknar summary och har något att sammanfatta:
+    transkript, eller (textposter) en description på minst MIN_TEXT_CHARS tecken.
+    Poster utan något av dem väljs aldrig, så de tar inte slots i kön.
     """
     query = """
         SELECT id FROM vigil_items
         WHERE state IN ('transcribed', 'captioned', 'summarized', 'indexed', 'notified')
           AND (summary IS NULL OR summary = '')
-          AND transcript_path IS NOT NULL AND transcript_path != ''
+          AND ((transcript_path IS NOT NULL AND transcript_path != '')
+               OR length(coalesce(description, '')) >= ?)
           {}
         ORDER BY priority_score DESC
         LIMIT ?
     """.format("AND domain = ?" if domain else "")
 
-    params = (domain, max_items) if domain else (max_items,)
+    params = ((MIN_TEXT_CHARS, domain, max_items) if domain
+              else (MIN_TEXT_CHARS, max_items))
     rows = conn.execute(query, params).fetchall()
 
     counts = {"done": 0, "failed": 0, "claude": 0, "ollama": 0}
@@ -346,12 +404,6 @@ def run_summarizer(conn, domain: Optional[str] = None, max_items: int = 20, odoo
             result = summarize_item(conn, row["id"])
             if result:
                 counts["done"] += 1
-                # Flytta till summarized om item kom från transcribed/captioned
-                item_state = conn.execute(
-                    "SELECT state FROM vigil_items WHERE id=?", (row["id"],)
-                ).fetchone()
-                if item_state and item_state["state"] in ("transcribed", "captioned"):
-                    transition(conn, row["id"], "summarized")
                 if odoo_env is not None:
                     try:
                         from odoo_writer import sync_single_item

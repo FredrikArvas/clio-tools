@@ -12,13 +12,24 @@ Designbeslut (ADD v0.2):
   - filtered_out sparas i DB — blockeras inte, utvärderas ej vidare
   - Relevansscore 0.0–1.0 sparas för framtida kalibrering
   - Källkvalitet påverkar INTE filtret — bara prioritetstalet
+
+Nyckelord matchar hela ord (2026-11-08). Tidigare räckte en delsträng, så
+"nde" träffade "under" och "aaro" träffade "Aaron". Vanliga böjningsändelser
+(KEYWORD_SUFFIXES) tillåts: "abduct" fångar "abduction", "alien" fångar "aliens".
 """
 
 import re
 import logging
-from typing import Optional
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
+
+PRIMARY_WEIGHT     = 0.4
+PRIMARY_MAX        = 1.0
+SECONDARY_WEIGHT   = 0.15
+SECONDARY_MAX      = 0.3
+DEFAULT_THRESHOLD  = 0.55
+KEYWORD_SUFFIXES   = ("s", "es", "ed", "ee", "ees", "ion", "ions", "ing")
 
 
 # ---------------------------------------------------------------------------
@@ -30,9 +41,20 @@ def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower().strip())
 
 
+@lru_cache(maxsize=1024)
+def _keyword_pattern(keyword: str) -> re.Pattern:
+    """Regex som matchar nyckelordet som helt ord, med tillåtna böjningsändelser."""
+    suffixes = "|".join(KEYWORD_SUFFIXES)
+    return re.compile(rf"(?<!\w){re.escape(_normalize(keyword))}(?:{suffixes})?(?!\w)")
+
+
+def _count_hits(normalized: str, keywords: list) -> int:
+    return sum(1 for kw in keywords if kw and _keyword_pattern(kw).search(normalized))
+
+
 def keyword_score(text: str, keywords: dict) -> float:
     """
-    Beräknar relevansscore baserat på nyckelordsmatchning.
+    Beräknar relevansscore baserat på nyckelordsmatchning (hela ord).
 
     keywords = {
         "primary": ["ufo", "uap", ...],    # tyngre vikt
@@ -45,16 +67,11 @@ def keyword_score(text: str, keywords: dict) -> float:
         return 0.0
 
     normalized = _normalize(text)
-    primary = keywords.get("primary", [])
-    secondary = keywords.get("secondary", [])
+    primary_hits = _count_hits(normalized, keywords.get("primary", []))
+    secondary_hits = _count_hits(normalized, keywords.get("secondary", []))
 
-    primary_hits = sum(1 for kw in primary if _normalize(kw) in normalized)
-    secondary_hits = sum(1 for kw in secondary if _normalize(kw) in normalized)
-
-    # Primary-träff = 0.4 per träff (max 1.0)
-    # Secondary-träff = 0.15 per träff (max 0.3)
-    primary_score = min(primary_hits * 0.4, 1.0)
-    secondary_bonus = min(secondary_hits * 0.15, 0.3)
+    primary_score = min(primary_hits * PRIMARY_WEIGHT, PRIMARY_MAX)
+    secondary_bonus = min(secondary_hits * SECONDARY_WEIGHT, SECONDARY_MAX)
 
     return round(min(primary_score + secondary_bonus, 1.0), 3)
 
@@ -81,110 +98,137 @@ def _build_source_thresholds(domain_config: dict) -> dict:
     return thresholds
 
 
+def _length_verdict(duration, domain_config: dict):
+    """A1: Returnerar 'för kort'/'för lång' om duration ligger utanför gränserna, annars None."""
+    if duration is None:
+        return None
+    min_dur = domain_config.get("min_duration_sec", None)
+    max_dur = domain_config.get("max_duration_sec", None)
+    if min_dur is not None and duration < min_dur:
+        return "för kort"
+    if max_dur is not None and duration > max_dur:
+        return "för lång"
+    return None
+
+
+def _score_rows(conn, rows, keywords: dict) -> list:
+    """
+    Räknar score för varje rad och sparar relevance_score. Returnerar (row, score).
+    Oförändrade score skrivs inte, så att Odoo-synken inte ser raden som ändrad.
+    """
+    scored = [
+        (row, keyword_score(f"{row['title'] or ''} {row['description'] or ''}", keywords))
+        for row in rows
+    ]
+    conn.executemany(
+        "UPDATE vigil_items SET relevance_score = ? WHERE id = ? AND relevance_score IS NOT ?",
+        [(score, row["id"], score) for row, score in scored],
+    )
+    conn.commit()
+    return scored
+
+
+def _queue_item(conn, item_id: int, title: str, threshold: float) -> None:
+    """filtered_in → queued med prioritetstal och plats i transkriptionskön."""
+    from orchestrator import transition, update_priority
+
+    transition(conn, item_id, "filtered_in")
+    prio = update_priority(conn, item_id)
+    transition(conn, item_id, "queued")
+    conn.execute(
+        """INSERT OR IGNORE INTO transcription_queue (item_id, priority_score, queued_at)
+           VALUES (?, ?, datetime('now'))""",
+        (item_id, prio),
+    )
+    logger.debug(f"Item {item_id} köad (prio {prio:.3f}, tröskel {threshold}): {(title or '')[:50]}")
+
+
+def _select_rows(conn, state: str, domain_id: str) -> list:
+    return conn.execute(
+        """SELECT id, title, description, duration_seconds, source_name
+           FROM vigil_items WHERE state = ? AND domain = ?""",
+        (state, domain_id),
+    ).fetchall()
+
+
 def run_filter(conn, domain_config: dict) -> dict:
     """
     Kör relevansfilter på alla discovered-objekt i en domän.
-    Uppdaterar state till filtered_in eller filtered_out.
+    Uppdaterar state till filtered_in (→ queued) eller filtered_out.
 
     Filterordning:
       1. A1 Längdfilter  — hoppa över objekt utanför min/max_duration_sec
       2. A2 Nyckelordsfilter — relevansscore mot käll-/domäntröskel
     Returnerar räknare.
     """
-    from orchestrator import transition, update_priority
+    from orchestrator import transition
 
-    domain_id  = domain_config["domain_id"]
-    threshold  = domain_config.get("relevance_threshold", 0.55)
-    keywords   = domain_config.get("keywords", {})
-
-    # A1: Längdgränser (sekunder). None = ingen gräns.
-    min_dur = domain_config.get("min_duration_sec", None)
-    max_dur = domain_config.get("max_duration_sec", None)
-
-    # A2: Per-källtröskel
+    domain_id = domain_config["domain_id"]
+    threshold = domain_config.get("relevance_threshold", DEFAULT_THRESHOLD)
     source_thresholds = _build_source_thresholds(domain_config)
-
     counts = {"filtered_in": 0, "filtered_out": 0, "length_filtered": 0}
 
-    rows = conn.execute(
-        """SELECT id, title, description, duration_seconds, source_name
-           FROM vigil_items WHERE state = 'discovered' AND domain = ?""",
-        (domain_id,)
-    ).fetchall()
+    rows = _select_rows(conn, "discovered", domain_id)
+    for row, score in _score_rows(conn, rows, domain_config.get("keywords", {})):
+        verdict = _length_verdict(row["duration_seconds"], domain_config)
+        if verdict:
+            transition(conn, row["id"], "filtered_out")
+            counts["filtered_out"] += 1
+            counts["length_filtered"] += 1
+            logger.debug(f"Längdfilter ({verdict} {row['duration_seconds']}s): {(row['title'] or '')[:50]}")
+            continue
 
-    scored = []
-    for row in rows:
-        text  = f"{row['title'] or ''} {row['description'] or ''}"
-        score = keyword_score(text, keywords)
-        scored.append((
-            row["id"],
-            row["title"],
-            row["duration_seconds"],
-            row["source_name"] or "",
-            score,
-        ))
-
-    # Batch-uppdatera relevance_score
-    conn.executemany(
-        "UPDATE vigil_items SET relevance_score = ? WHERE id = ?",
-        [(score, item_id) for item_id, _, _, _, score in scored]
-    )
-    conn.commit()
-
-    # Tillståndsövergångar
-    for item_id, title, duration, source_name, score in scored:
-
-        # A1: Längdfilter — filtrera ut om duration är känd och utanför gränser
-        if duration is not None:
-            if min_dur is not None and duration < min_dur:
-                transition(conn, item_id, "filtered_out")
-                counts["filtered_out"] += 1
-                counts["length_filtered"] += 1
-                logger.debug(
-                    f"Längdfilter (för kort {duration}s < {min_dur}s): "
-                    f"{(title or '')[:50]}"
-                )
-                continue
-            if max_dur is not None and duration > max_dur:
-                transition(conn, item_id, "filtered_out")
-                counts["filtered_out"] += 1
-                counts["length_filtered"] += 1
-                logger.debug(
-                    f"Längdfilter (för lång {duration}s > {max_dur}s): "
-                    f"{(title or '')[:50]}"
-                )
-                continue
-
-        # A2: Välj tröskel — käll-override eller domänstandard
-        effective_threshold = source_thresholds.get(source_name, threshold)
-
+        effective_threshold = source_thresholds.get(row["source_name"] or "", threshold)
         if score >= effective_threshold:
-            new_state = "filtered_in"
+            _queue_item(conn, row["id"], row["title"], effective_threshold)
             counts["filtered_in"] += 1
         else:
-            new_state = "filtered_out"
+            transition(conn, row["id"], "filtered_out")
             counts["filtered_out"] += 1
 
-        transition(conn, item_id, new_state)
-
-        if new_state == "filtered_in":
-            prio = update_priority(conn, item_id)
-            transition(conn, item_id, "queued")
-            conn.execute(
-                """INSERT OR IGNORE INTO transcription_queue (item_id, priority_score, queued_at)
-                   VALUES (?, ?, datetime('now'))""",
-                (item_id, prio)
-            )
-            logger.debug(
-                f"Item {item_id} köad (prio {prio:.3f}, tröskel {effective_threshold}): "
-                f"{(title or '')[:50]}"
-            )
-
     conn.commit()
-
     logger.info(
         f"Filter klar [{domain_id}]: "
         f"{counts['filtered_in']} in, {counts['filtered_out']} ut "
         f"({counts['length_filtered']} längdfiltrerade, tröskel={threshold})"
+    )
+    return counts
+
+
+def refilter_filtered_out(conn, domain_config: dict, is_dry_run: bool = False) -> dict:
+    """
+    Poängsätter om filtered_out-objekt med aktuella nyckelord.
+    Objekt som nu klarar tröskeln (och längdfiltret) köas som vid vanlig filtrering.
+    Övriga ligger kvar i filtered_out med uppdaterad relevance_score.
+
+    is_dry_run=True räknar bara — ingenting skrivs.
+    Returnerar {"checked", "requeued", "per_source"}.
+    """
+    domain_id = domain_config["domain_id"]
+    threshold = domain_config.get("relevance_threshold", DEFAULT_THRESHOLD)
+    keywords = domain_config.get("keywords", {})
+    source_thresholds = _build_source_thresholds(domain_config)
+    rows = _select_rows(conn, "filtered_out", domain_id)
+
+    if is_dry_run:
+        scored = [(r, keyword_score(f"{r['title'] or ''} {r['description'] or ''}", keywords)) for r in rows]
+    else:
+        scored = _score_rows(conn, rows, keywords)
+
+    counts = {"checked": len(rows), "requeued": 0, "per_source": {}}
+    for row, score in scored:
+        source = row["source_name"] or ""
+        effective_threshold = source_thresholds.get(source, threshold)
+        if _length_verdict(row["duration_seconds"], domain_config) or score < effective_threshold:
+            continue
+        counts["requeued"] += 1
+        counts["per_source"][source] = counts["per_source"].get(source, 0) + 1
+        if not is_dry_run:
+            _queue_item(conn, row["id"], row["title"], effective_threshold)
+
+    conn.commit()
+    logger.info(
+        f"Omfiltrering [{domain_id}]: {counts['requeued']} av {counts['checked']} "
+        f"filtered_out köade{' (torrkörning)' if is_dry_run else ''}"
     )
     return counts

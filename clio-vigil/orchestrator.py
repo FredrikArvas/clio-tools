@@ -191,6 +191,22 @@ _MIGRATIONS = [
     # Sprint E: resume-stöd för indexering + kraschisolering
     "ALTER TABLE vigil_items ADD COLUMN indexed_chunks INTEGER DEFAULT 0",
     "ALTER TABLE vigil_items ADD COLUMN error_message TEXT",
+    # 2026-11-08: inkrementell Odoo-synk. changed_at sätts av triggern nedan vid varje
+    # UPDATE som inte bara stämplar synk-kolumnerna; synken skickar rader där
+    # changed_at > odoo_*_synced_at (eller stämpel saknas). Se odoo_writer.py.
+    "ALTER TABLE vigil_items ADD COLUMN changed_at TEXT",
+    "ALTER TABLE vigil_items ADD COLUMN odoo_item_synced_at TEXT",
+    "ALTER TABLE vigil_items ADD COLUMN odoo_media_synced_at TEXT",
+    "CREATE TABLE IF NOT EXISTS vigil_meta (key TEXT PRIMARY KEY, value TEXT)",
+    """CREATE TRIGGER IF NOT EXISTS vigil_items_changed
+       AFTER UPDATE ON vigil_items FOR EACH ROW
+       WHEN NEW.odoo_item_synced_at IS OLD.odoo_item_synced_at
+        AND NEW.odoo_media_synced_at IS OLD.odoo_media_synced_at
+        AND NEW.changed_at IS OLD.changed_at
+       BEGIN
+         UPDATE vigil_items SET changed_at = strftime('%Y-%m-%dT%H:%M:%f', 'now')
+         WHERE id = NEW.id;
+       END""",
 ]
 
 
@@ -200,12 +216,13 @@ def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path, timeout=30)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
-    # Idempotenta migreringar — ignorera fel om kolumnen redan finns
+    # Idempotenta migreringar — "duplicate column" betyder redan migrerad, övriga fel loggas
     for sql in _MIGRATIONS:
         try:
             conn.execute(sql)
-        except Exception:
-            pass
+        except sqlite3.OperationalError as exc:
+            if "duplicate column" not in str(exc):
+                logger.warning(f"Migrering misslyckades: {exc} — {sql.split(chr(10))[0][:80]}")
     conn.commit()
     logger.info(f"vigil.db initierad: {db_path}")
     return conn

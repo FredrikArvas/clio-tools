@@ -1,7 +1,9 @@
 """
 clio-vigil — classifiers/uap_classifier.py
 ===========================================
-Klassificerar UAP-innehåll via Claude API.
+Klassificerar UAP-innehåll med Claude Sonnet via prenumerationen (`claude -p`,
+se claude_backend.py). Vid kvotgräns kastas SubscriptionLimitError och posten
+väntar till nästa körning — kvalitet går före tid, ingen lokal fallback.
 
 Returnerar:
     encounter_class   : "1"–"4" (eller None om ej applicerbart)
@@ -20,13 +22,15 @@ from __future__ import annotations
 import json
 import logging
 import os
-import sys
-from pathlib import Path
-from typing import Optional
+import re
+
+import claude_backend
 
 logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.70
+CLASSIFIER_MODEL = os.getenv("UAP_CLASSIFIER_MODEL", claude_backend.MODEL_SONNET)
+MAX_CONTENT_CHARS = 2000
 
 _SYSTEM_PROMPT = """\
 Du är UAP-analytiker och klassificerar innehåll enligt ett fastställt system.
@@ -75,72 +79,42 @@ Svara med JSON:
 """
 
 
-def classify(
-    title: str,
-    content: str,
-    model: str = "claude-haiku-4-5-20251001",
-) -> dict:
+def classify(title: str, content: str, model: str = CLASSIFIER_MODEL) -> dict:
     """
-    Klassificera UAP-innehåll via Claude API.
-
-    Args:
-        title:   Rubrik från artikel/video
-        content: Text att klassificera (max ~2000 tecken)
-        model:   Claude-modell (haiku för snabb/billig klassificering)
+    Klassificera UAP-innehåll.
 
     Returns:
         dict med encounter_class, discourse_level, official_response,
-        confidence, summary, reasoning, import_candidate
+        confidence, summary, reasoning, import_candidate, error.
+        error sätts när svaret inte gick att tolka.
+
+    Raises:
+        claude_backend.SubscriptionLimitError: kvoten är nådd.
+        RuntimeError: claude -p misslyckades (timeout, fel, tomt svar).
     """
-    try:
-        import anthropic
-    except ImportError:
-        logger.error("anthropic saknas. Kör: pip install anthropic")
-        return _error_result("anthropic not installed")
+    user_message = _USER_TEMPLATE.format(title=title, content=content[:MAX_CONTENT_CHARS])
+    raw = claude_backend.call_subscription(_SYSTEM_PROMPT, user_message, model)
+    result = _parse_json(raw)
+    if result is None:
+        return _error_result(f"Inget giltigt JSON i svar: {raw[:200]}")
+    return _normalize(result)
 
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        return _error_result("ANTHROPIC_API_KEY saknas")
 
-    # Trunkera innehåll för att hålla nere kostnaden
-    content_truncated = content[:2000] if len(content) > 2000 else content
+def _parse_json(raw: str) -> dict | None:
+    """Tolkar svaret som JSON, eller det första {...}-blocket i det."""
+    for candidate in (raw, *re.findall(r"\{.*\}", raw, re.DOTALL)):
+        try:
+            parsed = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+    return None
 
-    client = anthropic.Anthropic(api_key=api_key)
-    try:
-        response = client.messages.create(
-            model=model,
-            max_tokens=512,
-            system=_SYSTEM_PROMPT,
-            messages=[{
-                "role": "user",
-                "content": _USER_TEMPLATE.format(
-                    title=title,
-                    content=content_truncated,
-                ),
-            }],
-        )
-    except Exception as e:
-        logger.error(f"Claude API-fel: {e}")
-        return _error_result(str(e))
 
-    raw = response.content[0].text.strip()
-
-    try:
-        result = json.loads(raw)
-    except json.JSONDecodeError:
-        # Försök extrahera JSON från svaret
-        import re
-        m = re.search(r"\{.*\}", raw, re.DOTALL)
-        if m:
-            try:
-                result = json.loads(m.group())
-            except json.JSONDecodeError:
-                return _error_result(f"JSON-fel: {raw[:200]}")
-        else:
-            return _error_result(f"Inget JSON i svar: {raw[:200]}")
-
-    # Normalisera
-    enc_class = result.get("encounter_class", "N")
+def _normalize(result: dict) -> dict:
+    """Begränsar fälten till giltiga värden."""
+    enc_class = str(result.get("encounter_class", "N"))
     if enc_class not in ("1", "2", "3", "4", "N"):
         enc_class = "N"
 
