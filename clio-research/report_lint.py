@@ -248,8 +248,9 @@ def normalize_text(text: str) -> str:
     """Gör källtext och citat jämförbara: ligaturer, citattecken, bindestreck och blanktecken."""
     s = unicodedata.normalize("NFKC", text or "")
     s = s.replace("\u00ad", "")
-    s = s.translate(str.maketrans({"’": "'", "‘": "'", "‚": "'", "“": '"', "”": '"', "„": '"',
-                                   "«": '"', "»": '"', "–": "-", "—": "-", "‐": "-", "‑": "-"}))
+    # Alla citattecken likställs: citat skrivs ofta om från “…” till '…' eller tvärtom.
+    s = s.translate(str.maketrans({"’": "'", "‘": "'", "‚": "'", "“": "'", "”": "'", "„": "'",
+                                   "«": "'", "»": "'", '"': "'", "–": "-", "—": "-", "‐": "-", "‑": "-"}))
     s = re.sub(r"\s+", " ", s).lower()
     s = re.sub(r"(\w)- (\w)", r"\1\2", s)     # avstavning över radbrytning i PDF-text
     s = re.sub(r"[*_`]", "", s)
@@ -259,7 +260,7 @@ def normalize_text(text: str) -> str:
 def quote_found(quote: str, haystack: str) -> bool:
     """Sant om citatet finns i texten. '…' delar citatet i delar som ska hittas i ordning."""
     fragments = [normalize_text(f) for f in _ELLIPSIS_RE.split(quote or "")]
-    fragments = [f.strip(" \"'") for f in fragments if len(f.strip(" \"'")) >= MIN_FRAGMENT_CHARS]
+    fragments = [f.strip(" '") for f in fragments if len(f.strip(" '")) >= MIN_FRAGMENT_CHARS]
     if not fragments:
         return False
     pos = 0
