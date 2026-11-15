@@ -160,7 +160,7 @@ revision_task: |
   Föregående register:
   {previous_register}
 
-# Sidfot per spridning. UTKAST — väntar på Fredriks godkännande.
+# Sidfot per spridning. Godkänd av Fredrik 2026-11-15.
 footer:
   intern: >-
     Arvas International AB, {date}. Underlaget är framtaget med AI-stöd (clio-research) för
