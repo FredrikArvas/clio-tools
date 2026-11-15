@@ -1,6 +1,6 @@
 {
     "name":        "Clio UAP Tracking",
-    "version":     "19.0.1.1.0",
+    "version":     "19.0.1.6.0",
     "category":    "Research",
     "summary":     "UAP encounter tracking and classification system (Notion â†’ Odoo migration).",
     "author":      "Fredrik Arvas / Arvas International AB",
