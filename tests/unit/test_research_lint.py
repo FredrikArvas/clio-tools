@@ -521,3 +521,11 @@ def test_quote_found_normalizes_pdf_text():
     hay = rl.normalize_text("The ﬁrst classi-\nfication “works”.")
     assert rl.quote_found("the first classification \"works\"", hay)
     assert not rl.quote_found("the second classification", hay)
+
+
+def test_quote_found_ignores_quote_mark_style():
+    """Fall från provkörningen 2026-11-15: källan har “junk drawer”, modellen skrev 'junk drawer'."""
+    hay = rl.normalize_text("it transformed a phenomenon with clear observa-\ntional signatures into a "
+                            "“junk drawer” of objects")
+    assert rl.quote_found("it transformed a phenomenon with clear observational signatures into a "
+                          "'junk drawer' of objects", hay)
