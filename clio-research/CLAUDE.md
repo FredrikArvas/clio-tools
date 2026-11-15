@@ -170,6 +170,27 @@ Kodar inga gissningar: saknas uppgiften i API-svaret returneras `None` eller tom
 
 ---
 
+## Rapportsteget S2 (spår 2, 2026-11-15)
+
+### `report_writer.py`
+Analyssteget. Bygger prompten ur protokollet och `01_sources.json`, anropar
+`claude_runner.run_claude` (roll `analyst`, `MODEL_ANALYST_QUICK` på nivå snabb, annars
+`MODEL_ANALYST`) och delar svaret vid `<<<RAPPORT>>>`, `<<<REGISTER>>>` och `<<<SLUT>>>`.
+Modellen skriver titel och avsnitten Kort svar till Luckor; Python skriver Metod,
+Källförteckning (bara citerade källor, med läsnivå), Bilagor och sidfot. Filer:
+`02_response_v<k>.txt`, `02_draft_v<k>.md`, `02_claims_v<k>.json`, `03_lint_v<k>.md`.
+`revise()` tar en kravlista. Word via `clio-docx/md2docx.js --profile aiab` på nivå
+standard och delbar (sökväg kan bytas med `CLIO_MD2DOCX`). Prompter: `config/prompts_v2.yaml`.
+
+### `report_lint.py`
+Deterministisk kontroll, regler R01–R20 (rubriker, tomma och avklippta avsnitt, avbrutet
+svar, `[n]` mot källförteckning och underlag, obligatoriska avsnitt per nivå, tomma värden,
+dubbla citat, negativa slutsatser, emojier, ställningstagande utan hypotes, läsnivå och
+påståenderegistret). Ett MÅSTE ger `REVISE`. Avsnittsordningen per nivå
+(`REQUIRED_SECTIONS`) är den enda källan för både prompt och kontroll.
+
+---
+
 ## Aktuellt utvecklingsläge: v2, sprint P1
 
 | Sprint | Status | Innehåll |
