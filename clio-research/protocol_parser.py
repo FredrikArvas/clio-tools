@@ -92,7 +92,6 @@ def find_protocol(protocol_id: str, inbox_dir: Path) -> Path:
         exact = inbox_dir / f"{protocol_id}{suffix}"
         if exact.exists():
             return exact
-    for suffix in (".md", ".json"):
         matches = sorted(p for p in inbox_dir.glob(f"{protocol_id}_*{suffix}") if not p.stem.endswith("-sources"))
         if len(matches) == 1:
             return matches[0]
@@ -191,8 +190,8 @@ def parse_markdown(text: str, path: Path | str | None = None) -> dict:
             problems.append(f"platshållare kvar på rad {no}: {match}")
 
     sections = _split(lines)
-    meta = _metadata(sections.get("metadata", {}).get("", []))
-    if not sections.get("metadata"):
+    meta = _metadata(_sub(_section(sections, "metadata"), ""))
+    if not _section(sections, "metadata"):
         problems.append("avsnittet METADATA saknas")
 
     protocol_id = meta.get("run_id", "").strip()
@@ -204,7 +203,7 @@ def parse_markdown(text: str, path: Path | str | None = None) -> dict:
     level, spread = _level_and_spread(meta.get("niva"), meta.get("spridning"), problems)
     max_rev = _max_revisions(meta.get("max_revisions"), problems)
 
-    tasks = sections.get("forskningsuppgifter", {})
+    tasks = _section(sections, "forskningsuppgifter")
     question = meta.get("question", "").strip() or _prose(_sub(tasks, "huvudfråga"))
     if not question:
         problems.append("huvudfrågan saknas (### Huvudfråga under FORSKNINGSUPPGIFTER, eller Fråga: i METADATA)")
@@ -229,14 +228,14 @@ def parse_markdown(text: str, path: Path | str | None = None) -> dict:
     if problems:
         raise ProtocolError(problems, path)
 
-    background = sections.get("bakgrundskontext", {})
+    background = _section(sections, "bakgrundskontext")
     context = "\n\n".join(p for p in (
         _prose(_sub(background, "projekt och syfte")),
         _prose(_sub(background, "centrala begrepp")),
         _prose(_sub(background, "vad är redan känt")),
     ) if p)
     scope = _prose(_sub(background, "avgränsning"))
-    criteria = [m.group(1) for line in _all(sections.get("granskningskriterier", {}))
+    criteria = [m.group(1) for line in _all(_section(sections, "granskningskriterier"))
                 for m in [_BULLET_RE.match(line) or _NUMBERED_RE.match(line)] if m]
 
     keywords: dict[str, list[str]] = {}
@@ -344,6 +343,13 @@ def _split(lines: list[str]) -> dict[str, dict[str, list[str]]]:
         if h2 is not None:
             out[h2].setdefault(h3, []).append(line)
     return out
+
+
+def _section(sections: dict, prefix: str) -> dict[str, list[str]]:
+    for key, value in sections.items():
+        if key.startswith(prefix):
+            return value
+    return {}
 
 
 def _sub(section: dict[str, list[str]], prefix: str) -> list[str]:
