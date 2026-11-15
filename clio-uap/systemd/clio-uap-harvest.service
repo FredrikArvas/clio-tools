@@ -1,0 +1,14 @@
+[Unit]
+Description=UAP Harvest — periodisk insamling av UAP-incidenter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=clioadmin
+WorkingDirectory=/home/clioadmin/19.0/clio-tools/clio-uap
+ExecStart=/home/clioadmin/19.0/clio-tools/.venv/bin/python3 uap_harvest.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clio-uap-harvest
+TimeoutStartSec=3600

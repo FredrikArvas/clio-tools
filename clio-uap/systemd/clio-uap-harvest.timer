@@ -1,0 +1,11 @@
+[Unit]
+Description=UAP Harvest — körs varje söndagsnatt kl 03:00
+Requires=clio-uap-harvest.service
+
+[Timer]
+OnCalendar=Sun *-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
