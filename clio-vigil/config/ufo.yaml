@@ -267,20 +267,21 @@ sources:
 
 
   # Webb-crawling (Release 2)
-  - url: https://www.war.gov/UFO/
-    name: "DOW PURSUE — Declassified UAP Records"
-    maturity: akademisk
-    weight: 1.5
-    crawl_depth: 1
-    # PURSUE (Presidential Unsealing and Reporting System for UAP Encounters)
-    # U.S. Department of War — rullande declassning i trancher (R01–R07 per 2026-10-23)
-    # Ingen RSS; webb-crawling behövs för att fånga nya releases
+  web_crawl:
+    - url: https://www.war.gov/UFO/
+      name: "DOW PURSUE — Declassified UAP Records"
+      maturity: akademisk
+      weight: 1.5
+      crawl_depth: 1
+      # PURSUE (Presidential Unsealing and Reporting System for UAP Encounters)
+      # U.S. Department of War — rullande declassning i trancher (R01–R07 per 2026-10-23)
+      # Ingen RSS; webb-crawling behövs för att fånga nya releases
 
-  # - url: https://www.archiveoftheunknown.com
-  #   name: Archive for the Unknown (Norrköping)
-  #   maturity: etablerad
-  #   weight: 1.1
-  #   crawl_depth: 2
+    # - url: https://www.archiveoftheunknown.com
+    #   name: Archive for the Unknown (Norrköping)
+    #   maturity: etablerad
+    #   weight: 1.1
+    #   crawl_depth: 2
 
 
   # Google News RSS — trending-signal för pitching
