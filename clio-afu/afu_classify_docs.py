@@ -27,7 +27,7 @@ import subprocess
 import sys
 import urllib.parse
 import xmlrpc.client
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 
 import requests
@@ -421,7 +421,7 @@ def load_done_paths(output_file: Path) -> set[str]:
 # ─── Hjälpfunktioner ──────────────────────────────────────────────────────────
 
 def _now() -> str:
-    return datetime.utcnow().isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _write_record(out, record: dict) -> None:
