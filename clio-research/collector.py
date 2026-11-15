@@ -143,11 +143,14 @@ def cap_by_level(kept: list[dict], level: str) -> tuple[list[dict], list[dict]]:
     limit = MAX_SOURCES_BY_LEVEL[level]
     if len(kept) <= limit:
         return kept, []
+    measured = any(s["relevance"].get("similarity") is not None for s in kept)
     order = sorted(kept, key=lambda s: -(s["relevance"].get("similarity") or 0.0))
     over = order[limit:]
+    reason = (f"Över gränsen men utanför de {limit} mest lika för nivå {level}." if measured else
+              f"Ingen likhet beräknad (inbäddningen gick inte att köra); utanför de {limit} första "
+              f"i sökordningen för nivå {level}.")
     for src in over:
-        src["filtered"] = {"stage": "likhet",
-                           "reason": f"Över gränsen men utanför de {limit} mest lika för nivå {level}."}
+        src["filtered"] = {"stage": "likhet", "reason": reason}
     over_ids = {id(s) for s in over}
     return [s for s in kept if id(s) not in over_ids], over
 
@@ -396,6 +399,8 @@ def collect(run_dir: Path, protocol: dict, runner: Callable = run_claude, search
                      "read_levels": dict(Counter(s["read_level"] for s in sources))}
     result.message = (f"{len(sources)} källor ({len(web)} webbfynd), {len(mismatches)} felträffar, "
                       f"{len(dropped)} bortsorterade på likhet")
+    if kept and all(s["relevance"].get("similarity") is None for s in kept):
+        result.message += "; OBS: ingen likhetssållning, inbäddningen gick inte att köra"
     return result
 
 

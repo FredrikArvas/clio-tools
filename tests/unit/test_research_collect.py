@@ -230,6 +230,13 @@ def test_cap_by_level_moves_the_least_similar():
     assert all(s["filtered"]["stage"] == "likhet" for s in over)
 
 
+def test_cap_without_embedding_says_so():
+    sources = [{"title": str(i), "relevance": {"similarity": None}} for i in range(20)]
+    kept, over = collector.cap_by_level(sources, "snabb")
+    assert [s["title"] for s in kept] == [str(i) for i in range(15)]
+    assert "Ingen likhet beräknad" in over[0]["filtered"]["reason"]
+
+
 def test_crossref_lookup_uses_python_metadata():
     f = Fakes()
     raw_hit = collector.crossref_lookup("10.9/web", f.crossref_get)
