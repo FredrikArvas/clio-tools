@@ -603,6 +603,13 @@ def lint_report(markdown: str, level: str = DEFAULT_LEVEL, sources: list[dict] |
     return result
 
 
+def cited_numbers(markdown: str) -> list[int]:
+    """Källnummer som brödtexten citerar (utan källförteckning och bilagor), sorterade."""
+    _, sections = parse_sections(markdown)
+    body, _, _ = _split_regions(sections)
+    return sorted(_citations(body))
+
+
 def write_lint(run_dir: Path, version: int, result: LintResult) -> Path:
     path = Path(run_dir) / f"03_lint_v{version}.md"
     path.write_text(result.to_markdown(version), encoding="utf-8")

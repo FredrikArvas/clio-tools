@@ -39,6 +39,8 @@ analyst_system: |
   - Ett citat används en gång i hela rapporten.
   - Rapporten konstaterar. Den argumenterar inte för sin egen trovärdighet.
   - Inga emojier, inga skämt, ingen token-räkning, ingen sidfot.
+  - Formatering: fetstil med ** går bra. Ingen kursiv, inga numrerade listor (använd "- ")
+    och inga lodstreck inne i tabellceller. Word-konverteringen stöder inte mer.
   - Varje stycke, punkt och avsnitt slutar med skiljetecken. Inget avsnitt får vara tomt.
   - Skriv inte avsnitten Metod, Källförteckning eller Bilagor. De läggs till av koden.
 
