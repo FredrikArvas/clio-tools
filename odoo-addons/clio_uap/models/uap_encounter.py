@@ -116,6 +116,83 @@ class UapEncounter(models.Model):
         string="Verification Log",
     )
 
+    # --- Transmorf-taxonomin (Projekt 23) ---
+    is_case_report = fields.Boolean(
+        string="Fallrapport",
+        default=False,
+        help="True om dokumentet beskriver ett faktiskt observationstillfälle/möte med UAP/fenomen.",
+    )
+    eth_origin = fields.Selection(
+        selection=[
+            ("0", "0 — Förklarat/mänskligt ursprung"),
+            ("1", "1 — Troligen mänskligt, oklart"),
+            ("2", "2 — Okänt ursprung"),
+            ("3", "3 — Stark icke-mänsklig indikation"),
+            ("4", "4 — Icke-mänsklig med officiell korroboration"),
+            ("5", "5 — Bekräftat av declassificerade dokument"),
+        ],
+        string="ETH Origin",
+        index=True,
+    )
+    craft_class = fields.Selection(
+        selection=[
+            ("I",       "I — Tetra"),
+            ("II",      "II — Tic-Tac"),
+            ("III",     "III — Blob"),
+            ("IV",      "IV — Beam"),
+            ("V",       "V — Manta-Ray"),
+            ("VI",      "VI — Bright-Star"),
+            ("VII",     "VII — Jellyfish"),
+            ("VIII",    "VIII — Hornet"),
+            ("IX",      "IX — Egg"),
+            ("X",       "X — Teardrop"),
+            ("unknown", "Unknown"),
+        ],
+        string="Craft Class (Skywatcher)",
+    )
+    entity_type = fields.Selection(
+        selection=[
+            ("Nordic",    "Nordic"),
+            ("TallGray",  "TallGray"),
+            ("ShortGray", "ShortGray"),
+            ("LongGray",  "LongGray"),
+            ("Reptilian", "Reptilian"),
+            ("Mantid",    "Mantid"),
+            ("Hybrid",    "Hybrid"),
+            ("Energy",    "Energy"),
+            ("Unknown",   "Unknown"),
+        ],
+        string="Entity Type",
+    )
+    intelligence_indicator = fields.Selection(
+        selection=[
+            ("0", "0 — Inga tecken på intelligens"),
+            ("1", "1 — Möjlig reaktiv/avsiktlig rörelse"),
+            ("2", "2 — Tydlig intelligens"),
+            ("3", "3 — Direkt kontakt eller kommunikation"),
+        ],
+        string="Intelligence Indicator",
+    )
+    suppression_indicator = fields.Boolean(
+        string="Suppression Indicator",
+        default=False,
+        help="Texten tonar ned eller undviker ETH-implikationer trots eth_origin >= 3.",
+    )
+    suppression_note = fields.Char(
+        string="Suppression Note",
+        size=120,
+    )
+    afu_article_id = fields.Integer(
+        string="AFU Article ID",
+        help="Odoo-ID för källartikeln i clio.media.article (uap-databasen).",
+        index=True,
+    )
+    afu_doc_path = fields.Char(
+        string="AFU Document Path",
+        help="Relativ sökväg till källdokumentet under data/downloads/.",
+        index=True,
+    )
+
     # --- Övrigt ---
     research_notes = fields.Text(string="Research Notes")
     neo4j_node_id = fields.Char(string="Neo4j Node ID", readonly=True, copy=False)

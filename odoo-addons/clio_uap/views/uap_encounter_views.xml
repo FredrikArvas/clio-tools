@@ -15,6 +15,9 @@
         <field name="discourse_level"/>
         <field name="official_response"/>
         <field name="status"/>
+        <field name="is_case_report" optional="show"/>
+        <field name="eth_origin" optional="show"/>
+        <field name="suppression_indicator" optional="hide"/>
         <field name="source_count" string="Sources"/>
         <field name="witness_count" string="Witnesses"/>
       </list>
@@ -65,6 +68,16 @@
             <field name="encounter_class"/>
             <field name="discourse_level"/>
             <field name="official_response"/>
+          </group>
+
+          <group string="Transmorf-taxonomin (Projekt 23)">
+            <field name="is_case_report"/>
+            <field name="eth_origin"/>
+            <field name="craft_class"/>
+            <field name="entity_type"/>
+            <field name="intelligence_indicator"/>
+            <field name="suppression_indicator"/>
+            <field name="suppression_note" attrs="{'invisible': [('suppression_indicator','=',False)]}"/>
           </group>
 
           <notebook>
@@ -125,6 +138,13 @@
                   <field name="verification_status"/>
                 </list>
               </field>
+            </page>
+
+            <page string="AFU-källa">
+              <group>
+                <field name="afu_doc_path" string="Dokumentsökväg"/>
+                <field name="afu_article_id" string="Article ID (clio.media)"/>
+              </group>
             </page>
 
             <page string="Technical">
@@ -215,10 +235,16 @@
         <separator/>
         <filter string="Class 3+" name="class3" domain="[('encounter_class','in',['3','4'])]"/>
         <filter string="Discourse 4+" name="disc4" domain="[('discourse_level','in',['4','5'])]"/>
+        <separator/>
+        <filter string="Fallrapporter" name="case_report" domain="[('is_case_report','=',True)]"/>
+        <filter string="ETH ≥ 3" name="eth3" domain="[('eth_origin','in',['3','4','5'])]"/>
+        <filter string="Suppression" name="suppression" domain="[('suppression_indicator','=',True)]"/>
+        <filter string="AFU-dokument" name="afu" domain="[('afu_doc_path','!=',False)]"/>
         <group>
           <filter string="Country" name="by_country" context="{'group_by': 'country_id'}"/>
           <filter string="Encounter Class" name="by_class" context="{'group_by': 'encounter_class'}"/>
           <filter string="Discourse Level" name="by_disc" context="{'group_by': 'discourse_level'}"/>
+          <filter string="ETH Origin" name="by_eth" context="{'group_by': 'eth_origin'}"/>
           <filter string="Status" name="by_status" context="{'group_by': 'status'}"/>
         </group>
       </search>
