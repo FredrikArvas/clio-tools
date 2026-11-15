@@ -64,6 +64,7 @@ ROLE = "collector"
 MAX_CANDIDATES_BY_LEVEL = {"snabb": 40, "standard": 80, "delbar": 120}
 MAX_SOURCES_BY_LEVEL = {"snabb": 15, "standard": 40, "delbar": 60}
 ROLE_RANK = {"direkt": 0, "analogi": 1, "bakgrund": 2}
+MIN_TITLE_KEY_CHARS = 20
 MAX_PHASE_BY_LEVEL = {"snabb": 2, "standard": 4, "delbar": 4}
 RESULT_FACTOR_BY_LEVEL = {"snabb": 0.5, "standard": 1.0, "delbar": 1.0}
 MAX_WEB_FINDS = {"snabb": 0, "standard": 10, "delbar": 20}
@@ -125,9 +126,25 @@ def search_indexes(protocol: dict, level: str, search_fn: Callable | None = None
     return raw, searchlog
 
 
+def title_key(title) -> str | None:
+    """Normaliserad titel för dubblettkontroll: gemener, bara bokstäver och siffror.
+    None för korta titlar ("UAP", "Introduction"), som inte räcker för att avgöra att två
+    träffar är samma verk."""
+    key = " ".join(re.sub(r"[^\w]+", " ", str(title or "").lower()).split())
+    return key if len(key) >= MIN_TITLE_KEY_CHARS else None
+
+
+def _richness(src: dict) -> tuple:
+    return (bool(src.get("doi")), bool(src.get("abstract")), bool(src.get("country_codes")))
+
+
 def to_sources(raw_hits: list[dict], current_year: int | None = None) -> list[dict]:
-    """Råträffar → källor i kontraktets format, utan dubbletter (source_id eller DOI)."""
-    out, ids, dois = [], set(), set()
+    """Råträffar → källor i kontraktets format, utan dubbletter: samma source_id, samma DOI
+    eller samma normaliserade titel. Av två träffar med samma titel behålls den med mest
+    metadata (DOI, sammanfattning, land), på den förstas plats."""
+    out: list[dict] = []
+    ids, dois = set(), set()
+    titles: dict[str, int] = {}
     for raw in raw_hits:
         try:
             src = sm.from_raw_hit(raw)
@@ -136,9 +153,23 @@ def to_sources(raw_hits: list[dict], current_year: int | None = None) -> list[di
             continue
         if src["source_id"] in ids or (src["doi"] and src["doi"] in dois):
             continue
+        key = title_key(src["title"])
+        if key and key in titles:
+            index = titles[key]
+            if _richness(src) > _richness(out[index]):
+                log.info("[S1] dubblett på titel: %s ersätter %s", src["source_id"], out[index]["source_id"])
+                out[index] = src
+            else:
+                log.info("[S1] dubblett på titel: %s hoppas över", src["source_id"])
+            ids.add(src["source_id"])
+            if src["doi"]:
+                dois.add(src["doi"])
+            continue
         ids.add(src["source_id"])
         if src["doi"]:
             dois.add(src["doi"])
+        if key:
+            titles[key] = len(out)
         out.append(src)
     return credibility_scorer.assess_all(out, current_year)
 
@@ -315,6 +346,7 @@ def web_sources(finds: list, existing: list[dict], level: str, crossref_get=None
     """Webbfynd → källor. Returnerar (nya källor utan n, avvisade fynd med skäl)."""
     dois = {s["doi"] for s in existing if s.get("doi")}
     urls = {(s.get("url") or "").rstrip("/") for s in existing if s.get("url")}
+    titles = {k for k in (title_key(s.get("title")) for s in existing) if k}
     new, rejected = [], []
     for item in finds[:MAX_WEB_FINDS[level]]:
         if not isinstance(item, dict):
@@ -352,6 +384,12 @@ def web_sources(finds: list, existing: list[dict], level: str, crossref_get=None
         except sm.SourceError as exc:
             rejected.append({"find": item, "reason": str(exc)})
             continue
+        key = title_key(src["title"])
+        if key and key in titles:
+            rejected.append({"find": item, "reason": "titeln finns redan i underlaget"})
+            continue
+        if key:
+            titles.add(key)
         src["relevance"] = {"role": role, "why": why, "similarity": None}
         if src["doi"]:
             dois.add(src["doi"])

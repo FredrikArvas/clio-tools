@@ -273,3 +273,23 @@ def test_parse_reply_variants():
     assert v == [] and w == []
     with pytest.raises(Exception):
         collector.parse_reply('{"webbfynd": []}')
+
+
+def test_same_title_from_two_databases_is_one_source():
+    hits = [
+        raw(1, "Looking up the sky: unidentified aerial phenomena and macroeconomic attention", abstract=None),
+        raw(2, "Looking Up The Sky: Unidentified Aerial Phenomena and Macroeconomic Attention",
+            doi="10.5/sky", db="crossref"),
+        raw(3, "UAP"), raw(4, "UAP"),                         # för kort titel: ingen sammanslagning
+    ]
+    sources = collector.to_sources(hits, YEAR)
+    assert [s["title"][:11] for s in sources] == ["Looking Up ", "UAP", "UAP"]
+    assert sources[0]["doi"] == "10.5/sky" and sources[0]["database"] == "crossref"   # mest metadata vinner
+
+
+def test_web_find_with_known_title_is_rejected():
+    existing = [{"title": "Nära källa ett om klassificering", "doi": None, "url": None}]
+    finds = [{"title": "Nära källa ett om KLASSIFICERING.", "url": "https://z.org/a", "doi": None,
+              "role": "direkt", "why": "Samma verk.", "query": "q"}]
+    new, rejected = collector.web_sources(finds, existing, "standard")
+    assert new == [] and rejected[0]["reason"] == "titeln finns redan i underlaget"
