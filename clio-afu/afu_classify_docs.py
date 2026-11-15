@@ -190,11 +190,28 @@ def _normalize_selection_int(val, valid_range: range) -> str | None:
         return None
 
 
+_CRAFT_NAME_TO_KEY = {
+    "tetra": "I", "tic-tac": "II", "tic tac": "II", "tictac": "II",
+    "blob": "III", "beam": "IV", "manta-ray": "V", "manta ray": "V", "manta": "V",
+    "bright-star": "VI", "bright star": "VI", "jellyfish": "VII",
+    "hornet": "VIII", "egg": "IX", "teardrop": "X",
+    "i": "I", "ii": "II", "iii": "III", "iv": "IV", "v": "V",
+    "vi": "VI", "vii": "VII", "viii": "VIII", "ix": "IX", "x": "X",
+}
+
 def _normalize_craft_class(val) -> str | None:
     if not val or str(val).lower() in ("null", "none", ""):
         return None
-    # Ollama kan returnera "Unknown" — vi lagrar "unknown" (Odoo Selection-nyckel)
-    return "unknown" if val == "Unknown" else val
+    s = str(val).strip()
+    mapped = _CRAFT_NAME_TO_KEY.get(s.lower())
+    if mapped:
+        return mapped
+    if s == "Unknown":
+        return "unknown"
+    # Redan ett giltigt romerskt tal-nyckel?
+    if s in {"I","II","III","IV","V","VI","VII","VIII","IX","X","unknown"}:
+        return s
+    return None
 
 
 def _build_encounter_vals(filepath: str, filename: str, source_dir: str,
@@ -220,11 +237,11 @@ def _build_encounter_vals(filepath: str, filename: str, source_dir: str,
             f"[ETH] eth_origin={cls.get('eth_origin')} | discourse={cls.get('discourse_level')}"
         ),
         "is_case_report":         True,
-        "eth_origin":             _normalize_selection_int(cls.get("eth_origin"), range(6)),
-        "craft_class":            _normalize_craft_class(cls.get("craft_class")),
-        "entity_type":            (entity_raw if entity_raw in valid_entities else None),
-        "intelligence_indicator": _normalize_selection_int(cls.get("intelligence_indicator"), range(4)),
-        "discourse_level":        _normalize_selection_int(cls.get("discourse_level"), range(1, 6)),
+        "eth_origin":             _normalize_selection_int(cls.get("eth_origin"), range(6)) or False,
+        "craft_class":            _normalize_craft_class(cls.get("craft_class")) or False,
+        "entity_type":            (entity_raw if entity_raw in valid_entities else False),
+        "intelligence_indicator": _normalize_selection_int(cls.get("intelligence_indicator"), range(4)) or False,
+        "discourse_level":        _normalize_selection_int(cls.get("discourse_level"), range(1, 6)) or False,
         "suppression_indicator":  bool(cls.get("suppression_indicator", False)),
         "suppression_note":       (cls.get("suppression_note") or False),
         "afu_article_id":         article_id or 0,
