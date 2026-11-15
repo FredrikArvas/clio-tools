@@ -14,11 +14,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from rotate_passwords import (
     RESULT_PREFIX,
     _extract_result,
+    _lookup_script,
     _set_password_script,
+    _summarize_stderr,
     _verify_script,
     parse_accounts,
     parse_databases,
     process_one,
+    warn_missing_logins,
 )
 
 
@@ -86,22 +89,57 @@ def test_extract_result_not_found():
 
 # ── process_one: dry-run ───────────────────────────────────────────────────────
 
-def test_dry_run_does_not_call_docker():
-    account = {"label": "ADMIN", "login": "admin", "password": "pw"}
-    with patch("rotate_passwords._run_shell") as mock_shell:
+def test_dry_run_only_looks_up_and_never_sends_password():
+    account = {"label": "ADMIN", "login": "admin", "password": "TopSecret!42"}
+    stdout = f"{RESULT_PREFIX} FOUND id=2\n"
+    with patch("rotate_passwords._run_shell", return_value=(0, stdout, "")) as mock_shell:
         row = process_one("container", "odoo19", "aiab", account, dry_run=True)
-    mock_shell.assert_not_called()
-    assert row["status"] == "DRY_RUN"
+    assert mock_shell.call_count == 1
+    sent_code = mock_shell.call_args[0][2]
+    assert "TopSecret!42" not in sent_code
+    assert "write(" not in sent_code
+    assert row["status"] == "WOULD_CHANGE"
+
+
+def test_dry_run_missing_login_returns_skipped():
+    account = {"label": "FREDRIK", "login": "fredrik@example.com", "password": "pw"}
+    stdout = f"{RESULT_PREFIX} SKIP: kontot finns inte\n"
+    with patch("rotate_passwords._run_shell", return_value=(0, stdout, "")):
+        row = process_one("container", "odoo19", "aiab19b", account, dry_run=True)
+    assert row["status"] == "SKIPPED"
+    assert "finns inte" in row["detail"]
+
+
+def test_dry_run_missing_database_returns_fail():
+    account = {"label": "ADMIN", "login": "admin", "password": "pw"}
+    stderr = 'psycopg2.OperationalError: FATAL:  database "nope" does not exist\n'
+    with patch("rotate_passwords._run_shell", return_value=(1, "", stderr)):
+        row = process_one("container", "odoo19", "nope", account, dry_run=True)
+    assert row["status"] == "FAIL"
+    assert "finns inte" in row["detail"]
 
 
 # ── process_one: missing login (SKIP) ─────────────────────────────────────────
 
 def test_missing_login_returns_skipped():
     account = {"label": "ADMIN", "login": "admin", "password": "pw"}
-    stdout = f"{RESULT_PREFIX} SKIP: login not found\n"
-    with patch("rotate_passwords._run_shell", return_value=(0, stdout, "")):
+    stdout = f"{RESULT_PREFIX} SKIP: kontot finns inte\n"
+    with patch("rotate_passwords._run_shell", return_value=(0, stdout, "")) as mock_shell:
         row = process_one("container", "odoo19", "aiab", account, dry_run=False)
     assert row["status"] == "SKIPPED"
+    # Ingen verifiering ska köras när kontot saknas
+    assert mock_shell.call_count == 1
+
+
+def test_warn_missing_logins_only_when_missing_everywhere():
+    rows = [
+        {"login": "admin", "status": "OK"},
+        {"login": "fredrik@example.com", "status": "SKIPPED"},
+        {"login": "fredrik@example.com", "status": "SKIPPED"},
+        {"login": "x@example.com", "status": "SKIPPED"},
+        {"login": "x@example.com", "status": "OK"},
+    ]
+    assert warn_missing_logins(rows) == ["fredrik@example.com"]
 
 
 # ── process_one: docker exec failure ──────────────────────────────────────────
@@ -165,3 +203,57 @@ def test_no_code_injection_in_set_script():
     script = _set_password_script("admin", malicious)
     assert repr(malicious) in script
     assert "os.system" not in script.replace(repr(malicious), "")
+
+
+# ── Odoo 19-specifikt ─────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("make", [
+    lambda: _lookup_script("admin"),
+    lambda: _set_password_script("admin", "pw'x\"y"),
+    lambda: _verify_script("admin", "pw'x\"y"),
+])
+def test_generated_scripts_are_valid_python(make):
+    compile(make(), "<odoo-shell>", "exec")
+
+
+def test_set_script_uses_write_not_set_password():
+    script = _set_password_script("admin", "pw")
+    assert "write({'password'" in script
+    assert "_set_password(" not in script
+
+
+def test_verify_script_uses_odoo19_credential_dict_and_with_user():
+    script = _verify_script("admin", "pw")
+    assert "'type': 'password'" in script
+    assert "with_user(user)._check_credentials(credential" in script
+
+
+def test_lookup_includes_archived_users():
+    assert "active_test=False" in _lookup_script("admin")
+
+
+def test_shell_command_order_is_odoo19():
+    with patch("rotate_passwords.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        from rotate_passwords import _run_shell
+        _run_shell("c", "aiab19b", "print(1)")
+    cmd = mock_run.call_args[0][0]
+    assert cmd[cmd.index("odoo") + 1] == "shell"
+    assert "pw" not in " ".join(cmd)
+
+
+def test_verification_shell_failure_gives_unverified_not_crash():
+    account = {"label": "ADMIN", "login": "admin", "password": "pw"}
+    side_effects = [(0, f"{RESULT_PREFIX} OK\n", ""), (1, "", "boom Error: x")]
+    with patch("rotate_passwords._run_shell", side_effect=side_effects):
+        row = process_one("container", "odoo19", "aiab", account, dry_run=False)
+    assert row["status"] == "OK_UNVERIFIED"
+
+
+def test_summarize_stderr_skips_startup_noise():
+    stderr = (
+        "2026-11-14 20:13:09,678 WARNING ? odoo.tools.config: missing --http-interface\n"
+        "2026-11-14 20:13:09,678 INFO ? odoo: Odoo version 19.0\n"
+        "TypeError: ResUsers._set_password() takes 1 positional argument but 2 were given\n"
+    )
+    assert _summarize_stderr(stderr).startswith("TypeError")
