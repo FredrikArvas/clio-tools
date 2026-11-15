@@ -91,7 +91,7 @@ def default_steps() -> Steps:
 
 # ── Start och återupptag ──────────────────────────────────────────────────────
 
-def start_run(protocol_ref: str, inbox_dir: Path = INBOX_DIR, base: Path | None = None,
+def start_run(protocol_ref: str, inbox_dir: Path | None = None, base: Path | None = None,
               niva: str | None = None, now: datetime | None = None) -> tuple[rs.RunState, Path, dict]:
     """Läs protokollet, skapa körkatalogen och spara det normaliserade protokollet.
 
@@ -100,7 +100,7 @@ def start_run(protocol_ref: str, inbox_dir: Path = INBOX_DIR, base: Path | None 
         FileNotFoundError: protokollfilen saknas.
     """
     import protocol_parser as pp
-    path = pp.find_protocol(protocol_ref, inbox_dir)
+    path = pp.find_protocol(protocol_ref, inbox_dir or INBOX_DIR)
     protocol = pp.load_protocol(path)
     if niva:
         if niva not in pp.LEVELS:
