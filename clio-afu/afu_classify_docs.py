@@ -362,6 +362,20 @@ def extract_text_full(path: Path) -> str | None:
 
 # ─── Ollama-klassificering ────────────────────────────────────────────────────
 
+def _extract_json(raw: str) -> dict:
+    """Extraherar JSON ur Ollama-svar som kan innehålla markdown-block eller extra text."""
+    raw = raw.strip()
+    # Strippa ```json ... ``` eller ``` ... ```
+    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
+    if m:
+        raw = m.group(1)
+    # Hitta första { ... }
+    m = re.search(r"\{.*\}", raw, re.DOTALL)
+    if m:
+        raw = m.group(0)
+    return json.loads(raw)
+
+
 def classify_transmorf(text: str, filename: str, source_dir: str, model: str) -> dict:
     prompt = CLASSIFY_PROMPT.format(
         filename=filename,
@@ -374,13 +388,13 @@ def classify_transmorf(text: str, filename: str, source_dir: str, model: str) ->
         "system":  SYSTEM_PROMPT,
         "prompt":  prompt,
         "stream":  False,
-        "format":  "json",
-        "options": {"temperature": 0.1},
+        # format:"json" utelämnas — constrained generation kan loopa; vi parsar manuellt
+        "options": {"temperature": 0.1, "num_ctx": 4096},
     }
     resp = requests.post(OLLAMA_URL, json=payload, timeout=OLLAMA_TIMEOUT)
     resp.raise_for_status()
     raw = resp.json().get("response", "{}")
-    return json.loads(raw)
+    return _extract_json(raw)
 
 
 # ─── Filsamling ───────────────────────────────────────────────────────────────
