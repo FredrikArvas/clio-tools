@@ -222,19 +222,42 @@ def test_limit_pauses_and_rerun_uses_checkpoint(tmp_path):
     assert len(sm.read_sources(tmp_path)) == 3
 
 
-def test_cap_by_level_moves_the_least_similar():
-    sources = [{"title": str(i), "relevance": {"similarity": i / 100}} for i in range(20)]
+def test_candidate_cap_moves_the_least_similar():
+    sources = [{"title": str(i), "relevance": {"similarity": i / 100}} for i in range(45)]
     kept, over = collector.cap_by_level(sources, "snabb")
-    assert len(kept) == 15 and len(over) == 5
+    assert len(kept) == 40 and len(over) == 5
     assert {s["title"] for s in over} == {"0", "1", "2", "3", "4"}
     assert all(s["filtered"]["stage"] == "likhet" for s in over)
 
 
-def test_cap_without_embedding_says_so():
-    sources = [{"title": str(i), "relevance": {"similarity": None}} for i in range(20)]
+def test_candidate_cap_without_embedding_says_so():
+    sources = [{"title": str(i), "relevance": {"similarity": None}} for i in range(45)]
     kept, over = collector.cap_by_level(sources, "snabb")
-    assert [s["title"] for s in kept] == [str(i) for i in range(15)]
+    assert [s["title"] for s in kept] == [str(i) for i in range(40)]
     assert "Ingen likhet beräknad" in over[0]["filtered"]["reason"]
+
+
+def test_cap_after_verdicts_prefers_role_then_similarity():
+    roles = ["bakgrund"] * 10 + ["direkt"] * 4 + ["analogi"] * 4
+    sources = [{"n": i + 1, "title": str(i), "relevance": {"role": r, "why": "Skäl.", "similarity": i / 100}}
+               for i, r in enumerate(roles)]
+    kept, over = collector.cap_after_verdicts(sources, "snabb")
+    assert len(kept) == 15 and len(over) == 3
+    assert {s["relevance"]["role"] for s in over} == {"bakgrund"}
+    assert {s["n"] for s in over} == {1, 2, 3}                    # de minst lika bakgrundskällorna
+    assert all(s["filtered"]["stage"] == "relevans" and "utanför de 15" in s["filtered"]["reason"]
+               for s in over)
+
+
+def test_snabb_judges_more_candidates_than_it_keeps(tmp_path, monkeypatch):
+    monkeypatch.setitem(collector.MAX_SOURCES_BY_LEVEL, "snabb", 2)
+    f = Fakes([reply(verdicts_for([(1, "bakgrund"), (2, "direkt"), (3, "analogi")]))])
+    res = f.collect(tmp_path, protocol("snabb"))
+    assert res.is_ok, res.message
+    assert res.counts["candidates"] == 3 and res.counts["beyond_cap"] == 1
+    assert [s["n"] for s in sm.read_sources(tmp_path)] == [2, 3]
+    beyond = {s["n"]: s for s in sm.read_filtered(tmp_path)}[1]
+    assert beyond["relevance"]["role"] == "bakgrund" and beyond["filtered"]["stage"] == "relevans"
 
 
 def test_crossref_lookup_uses_python_metadata():

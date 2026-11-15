@@ -6,12 +6,13 @@ Insamlingssteget S1 i research-pipeline v2 (PLAN_research_pipeline_v2.md avsnitt
 Kedjan:
     1. connectorerna via search_runner (faser 1–4 ur protokollet, färre på nivå snabb)
     2. råträff → källformat (source_model), dubbletter bort, räknebar kvalitet
-    3. grovsållning på likhet (relevance_filter.coarse_filter) och tak per nivå
+    3. grovsållning på likhet (relevance_filter.coarse_filter) och kandidattak per nivå (40/80/120)
     4. fulltextkedjan för nivån (fulltext_fetcher) → kallor/
        → kontrollpunkt 01_candidates.json, så att ett återupptaget S1 inte söker om
     5. insamlarmodellen (claude_runner, roll collector, Sonnet 4.6):
        relevans per källa (role, why) och, på standard och delbar, webbfynd utanför indexen
-    6. felträffar → 01_filtered.json (relevance_filter.apply_verdicts)
+    6. felträffar → 01_filtered.json (relevance_filter.apply_verdicts); därefter nivåns tak
+       (15/40/60) bland de relevanta, direkt före analogi före bakgrund
     7. webbfynd: DOI → metadata från CrossRef (i Python, aldrig ur modellens svar);
        utan DOI → webbkälla. Samma källformat och samma fulltextkedja.
     8. 01_sources.json, 01_filtered.json, 01_sources.md
@@ -58,7 +59,11 @@ RESPONSE_FILE = "01_response_{attempt}.txt"
 SOURCES_MD = "01_sources.md"
 ROLE = "collector"
 
+# Insamlaren bedömer fler kandidater än som behålls: likhetsgränsen sållar nästan inget med
+# bge-m3 (provkörning 900: 0 av 94 under 0.20), och de mest lika var ofta akronymträffar.
+MAX_CANDIDATES_BY_LEVEL = {"snabb": 40, "standard": 80, "delbar": 120}
 MAX_SOURCES_BY_LEVEL = {"snabb": 15, "standard": 40, "delbar": 60}
+ROLE_RANK = {"direkt": 0, "analogi": 1, "bakgrund": 2}
 MAX_PHASE_BY_LEVEL = {"snabb": 2, "standard": 4, "delbar": 4}
 RESULT_FACTOR_BY_LEVEL = {"snabb": 0.5, "standard": 1.0, "delbar": 1.0}
 MAX_WEB_FINDS = {"snabb": 0, "standard": 10, "delbar": 20}
@@ -139,8 +144,9 @@ def to_sources(raw_hits: list[dict], current_year: int | None = None) -> list[di
 
 
 def cap_by_level(kept: list[dict], level: str) -> tuple[list[dict], list[dict]]:
-    """Behåll de mest lika källorna upp till nivåns tak. Resten blir bortsorterade på likhet."""
-    limit = MAX_SOURCES_BY_LEVEL[level]
+    """Behåll de mest lika källorna upp till nivåns kandidattak (det insamlaren får bedöma).
+    Resten blir bortsorterade på likhet."""
+    limit = MAX_CANDIDATES_BY_LEVEL[level]
     if len(kept) <= limit:
         return kept, []
     measured = any(s["relevance"].get("similarity") is not None for s in kept)
@@ -153,6 +159,23 @@ def cap_by_level(kept: list[dict], level: str) -> tuple[list[dict], list[dict]]:
         src["filtered"] = {"stage": "likhet", "reason": reason}
     over_ids = {id(s) for s in over}
     return [s for s in kept if id(s) not in over_ids], over
+
+
+def cap_after_verdicts(relevant: list[dict], level: str) -> tuple[list[dict], list[dict]]:
+    """Nivåns tak på underlaget, efter insamlarens bedömning: direkt före analogi före bakgrund,
+    inom samma roll de mest lika. Resten hamnar i 01_filtered.json med roll och skäl kvar."""
+    limit = MAX_SOURCES_BY_LEVEL[level]
+    if len(relevant) <= limit:
+        return relevant, []
+    order = sorted(relevant, key=lambda s: (ROLE_RANK.get(s["relevance"]["role"], 9),
+                                            -(s["relevance"].get("similarity") or 0.0), s["n"]))
+    over = order[limit:]
+    for src in over:
+        src["filtered"] = {"stage": "relevans",
+                           "reason": f"Bedömd som {src['relevance']['role']} men utanför de {limit} "
+                                     f"källorna för nivå {level} ({src['relevance']['why']})"}
+    over_ids = {id(s) for s in over}
+    return [s for s in relevant if id(s) not in over_ids], over
 
 
 def gather_candidates(run_dir: Path, protocol: dict, level: str, search_fn=None, embed_fn=None,
@@ -366,7 +389,8 @@ def collect(run_dir: Path, protocol: dict, runner: Callable = run_claude, search
         try:
             verdicts, finds = parse_reply(reply.text)
             # Prövas på kopior: ett ogiltigt svar får inte ändra källorna.
-            relevance_filter.apply_verdicts(json.loads(json.dumps(kept)), verdicts)
+            with _quiet(relevance_filter.logger):
+                relevance_filter.apply_verdicts(json.loads(json.dumps(kept)), verdicts)
             break
         except relevance_filter.RelevanceError as exc:
             log.warning("[S1] relevanssvar %d ogiltigt: %s", attempt, exc)
@@ -377,9 +401,10 @@ def collect(run_dir: Path, protocol: dict, runner: Callable = run_claude, search
         return _fail(result, "error", "insamlarmodellens svar var ogiltigt två gånger")
 
     relevant, mismatches = relevance_filter.apply_verdicts(kept, verdicts)
-    web, rejected = web_sources(finds if MAX_WEB_FINDS[level] else [], relevant + mismatches + dropped,
+    relevant, beyond = cap_after_verdicts(relevant, level)
+    web, rejected = web_sources(finds if MAX_WEB_FINDS[level] else [], relevant + mismatches + beyond + dropped,
                                 level, crossref_get, current_year)
-    taken = {s["n"] for s in relevant + mismatches if s.get("n")}
+    taken = {s["n"] for s in relevant + mismatches + beyond if s.get("n")}
     sm.assign_numbers(web, taken)
     if web:
         if fetch_fn is None:
@@ -388,20 +413,35 @@ def collect(run_dir: Path, protocol: dict, runner: Callable = run_claude, search
         fetch_fn(web, run_dir, level)
 
     sources = sorted(relevant + web, key=lambda s: s["n"])
-    filtered = mismatches + dropped
+    filtered = mismatches + beyond + dropped
     sm.write_sources(run_dir, sources)
     sm.write_filtered(run_dir, filtered)
     (run_dir / SOURCES_MD).write_text(render_markdown(protocol, level, sources, filtered, rejected,
                                                       cand.get("searchlog", [])), encoding="utf-8")
     result.status = "ok"
     result.counts = {"sources": len(sources), "filtered": len(filtered), "web": len(web),
+                     "candidates": len(kept), "beyond_cap": len(beyond),
                      "web_rejected": len(rejected), "mismatches": len(mismatches),
                      "read_levels": dict(Counter(s["read_level"] for s in sources))}
-    result.message = (f"{len(sources)} källor ({len(web)} webbfynd), {len(mismatches)} felträffar, "
+    result.message = (f"{len(kept)} kandidater bedömda: {len(sources)} källor ({len(web)} webbfynd), "
+                      f"{len(mismatches)} felträffar, {len(beyond)} relevanta över taket; "
                       f"{len(dropped)} bortsorterade på likhet")
     if kept and all(s["relevance"].get("similarity") is None for s in kept):
         result.message += "; OBS: ingen likhetssållning, inbäddningen gick inte att köra"
     return result
+
+
+class _quiet:
+    """Tysta en logger tillfälligt (provet av svaret på kopior ska inte logga två gånger)."""
+
+    def __init__(self, logger):
+        self.logger = logger
+
+    def __enter__(self):
+        self.prev, self.logger.disabled = self.logger.disabled, True
+
+    def __exit__(self, *exc):
+        self.logger.disabled = self.prev
 
 
 def _fail(result: CollectResult, status: str, message: str) -> CollectResult:

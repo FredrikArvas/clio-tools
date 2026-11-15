@@ -206,10 +206,11 @@ Slutkod: 0 `ready_for_human`, 2 protokollfel, 3 `paused_limit`, 4 `needs_human`.
 - `protocol_parser.py` läser mallen (`inbox/<id>.md`, PROMPT_TEMPLATE v2.0) eller JSON. Nya fält:
   `Nivå` (standard om inget anges) och `Spridning` (intern). Huvudfråga, Del 3 och minst en sökterm krävs;
   kvarlämnade `{{…}}` ger fel. Det normaliserade protokollet sparas som `protocol.json` i körkatalogen.
-- `collector.py` (S1): connectorer → källformat → grovsållning och tak per nivå (15/40/60) → fulltextkedjan
+- `collector.py` (S1): connectorer → källformat → grovsållning och kandidattak (40/80/120) → fulltextkedjan
   → kontrollpunkt `01_candidates.json` → insamlarmodellen (relevans per källa; webbfynd på standard och
   delbar, prompter i `config/prompts_s1.yaml`) → CrossRef-metadata för webbfynd med DOI (Python, aldrig
-  modellens uppgifter) → `01_sources.json`, `01_filtered.json`, `01_sources.md`, `kallor/`.
+  modellens uppgifter) → nivåns tak (15/40/60) bland de relevanta, direkt före analogi före bakgrund
+  → `01_sources.json`, `01_filtered.json`, `01_sources.md`, `kallor/`.
 - S2: `report_writer.analyse`/`revise` + `check` (report_lint). MÅSTE → revision, högst `Max revisionsvarv`
   (2), sedan `needs_human`. Kravlistan per utkast sparas i `03_lint_v<k>.json`.
 - S3a, S3b och S4 är platshållare i `run_pipeline` (ref_checker, granskaren, motbevisvarvet, leverans).
