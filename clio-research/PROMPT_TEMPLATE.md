@@ -14,7 +14,15 @@ Datum:        {{ÅÅÅÅ-MM-DD}}
 Författare:   Fredrik Arvas / Arvas International AB
 Projekt:      {{Vigil / Exby / AIAB / annat}}
 Version:      v1
+Nivå:         standard
+Spridning:    intern
+Profil:       aiab
+Max revisionsvarv: 2
 ```
+
+Nivå: `snabb` (vardagsfråga, 10–15 källor, ingen webbsökning), `standard` (underlag att luta sig mot)
+eller `delbar` (ska visas för andra). Spridning: `intern` eller `delbar` (styr sidfoten).
+Saknas raderna gäller `standard` och `intern`.
 
 ---
 
@@ -49,6 +57,12 @@ Token-räkning aktiv: estimera och visa `📊 Tokens` i slutet av varje delsvar.
 
 ## FORSKNINGSUPPGIFTER
 
+### Huvudfråga
+{{Frågan i en eller två meningar. Används för relevanssållningen och i rapporten.}}
+
+### Hypotes (valfritt)
+{{Uttalad hypotes, eller skriv "ingen".}}
+
 ### Del 1 — Primärkällor
 Spåra, hämta och läs följande:
 
@@ -71,6 +85,12 @@ Researchen ska ge svar på följande:
 1. {{Fråga 1}}
 2. {{Fråga 2}}
 3. {{Fråga 3}}
+
+---
+
+## GRANSKNINGSKRITERIER (valfritt)
+
+- {{Extra punkt för granskaren i just den här körningen, eller ta bort avsnittet.}}
 
 ---
 
@@ -126,4 +146,4 @@ Om tid/tokens är begränsat, prioritera i denna ordning:
 
 ---
 
-*Mall version 1.0 | 2026-10-28 | Arvas International AB*
+*Mall version 2.0 | 2026-11-15 | Arvas International AB*
