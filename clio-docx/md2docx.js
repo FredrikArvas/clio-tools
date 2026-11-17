@@ -297,16 +297,22 @@ function localDate() {
 function smallRun(text) {
   return { font: THEME.font, size: THEME.bodySize - 4, color: THEME.colorMuted, ...(text !== undefined ? { text } : {}) };
 }
+const HF_STYLE = 'ClioHeaderFooter';
+const hfStyles = { paragraphStyles: [{ id: HF_STYLE, name: 'Clio sidhuvud och sidfot', run: smallRun() }] };
 const headers = withHeader ? { default: new Header({ children: [new Paragraph({
+  style: HF_STYLE,
   alignment: AlignmentType.RIGHT,
   children: [new TextRun(smallRun(`${path.basename(OUTPUT)}  ·  Skapad ${createdDate || localDate()}`))],
 })] }) } : undefined;
 const footers = withPageNumbers ? { default: new Footer({ children: [new Paragraph({
+  style: HF_STYLE,   // Word ritar rätt; LibreOffice visar sidsiffrorna i standardstorlek
   alignment: AlignmentType.CENTER,
-  children: [new TextRun({ ...smallRun(), children: ['Sida ', PageNumber.CURRENT, ' av ', PageNumber.TOTAL_PAGES] })],
+  children: ['Sida ', PageNumber.CURRENT, ' av ', PageNumber.TOTAL_PAGES]
+    .map(part => new TextRun({ ...smallRun(), children: [part] })),
 })] }) } : undefined;
 
 const doc = new Document({
+  ...(headers || footers ? { styles: hfStyles } : {}),
   sections: [{
     properties: { page: { margin: { top: convertInchesToTwip(1), right: convertInchesToTwip(1.2), bottom: convertInchesToTwip(1), left: convertInchesToTwip(1.2) } } },
     ...(headers ? { headers } : {}),
