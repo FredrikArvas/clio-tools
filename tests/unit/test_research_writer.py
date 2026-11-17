@@ -374,9 +374,11 @@ def test_word_command_uses_aiab_profile(tmp_path):
         calls.append((cmd, kw))
         return subprocess.CompletedProcess(cmd, 0, "", "")
 
-    out = rw.build_word(tmp_path / "02_draft_v1.md", "standard", script=tmp_path / "md2docx.js", runner=fake)
+    out = rw.build_word(tmp_path / "02_draft_v1.md", "standard", script=tmp_path / "md2docx.js", runner=fake,
+                        created=TODAY)
     cmd, kw = calls[0]
-    assert cmd[0] == "node" and cmd[-2:] == ["--profile", "aiab"]
+    assert cmd[0] == "node" and cmd[cmd.index("--profile") + 1] == "aiab"
+    assert {"--header", "--page-numbers", "--date=2026-11-15"} <= set(cmd)
     assert out == tmp_path / "02_draft_v1.docx" and kw["cwd"] == str(tmp_path)
 
 
@@ -391,5 +393,12 @@ def test_word_failure_raises(tmp_path):
 @pytest.mark.skipif(not (rw.MD2DOCX.parent / "node_modules").exists(), reason="clio-docx/node_modules saknas")
 def test_word_real_md2docx(run_dir):
     draft = rw.analyse(run_dir, protocol(), runner=FakeRunner(response()), today=TODAY)
-    out = rw.build_word(draft.md_path, "standard")
+    out = rw.build_word(draft.md_path, "standard", created=TODAY)
     assert out.exists() and out.stat().st_size > 2000
+    import zipfile
+    with zipfile.ZipFile(out) as z:
+        names = z.namelist()
+        header = next(z.read(n).decode("utf-8") for n in names if n.startswith("word/header"))
+        footer = next(z.read(n).decode("utf-8") for n in names if n.startswith("word/footer"))
+    assert "02_draft_v1.docx" in header and "Skapad 2026-11-15" in header
+    assert "PAGE" in footer and "NUMPAGES" in footer and "Sida " in footer

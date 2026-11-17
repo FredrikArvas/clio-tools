@@ -1,6 +1,9 @@
 'use strict';
 // md2docx.js — Markdown → Word (.docx)
 // Användning: node md2docx.js input.md [output.docx] [--profile capgemini|aiab]
+//             [--header] [--page-numbers] [--date=ÅÅÅÅ-MM-DD]
+//   --header        sidhuvud med filnamn och skapad-datum (dagens datum om --date saknas)
+//   --page-numbers  sidfot med "Sida X av Y"
 //
 // Kör från clio-docx-katalogen (node_modules ligger där).
 
@@ -8,7 +11,7 @@ const {
   Document, Packer, Paragraph, TextRun, HeadingLevel,
   Table, TableRow, TableCell, WidthType, BorderStyle,
   AlignmentType, ShadingType, TableLayoutType, VerticalAlign,
-  convertInchesToTwip,
+  convertInchesToTwip, Header, Footer, PageNumber,
 } = require('docx');
 const fs   = require('fs');
 const path = require('path');
@@ -100,10 +103,14 @@ const PROFILES = {
 // ── CLI-argument ────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 let profileName = 'capgemini';
+let withHeader = false, withPageNumbers = false, createdDate = null;
 const cleanArgs = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--profile' && args[i + 1]) { profileName = args[++i]; }
   else if (args[i].startsWith('--profile='))  { profileName = args[i].split('=')[1]; }
+  else if (args[i] === '--header')             { withHeader = true; }
+  else if (args[i] === '--page-numbers')       { withPageNumbers = true; }
+  else if (args[i].startsWith('--date='))     { createdDate = args[i].split('=')[1]; }
   else if (!args[i].startsWith('--'))         { cleanArgs.push(args[i]); }
 }
 const THEME = PROFILES[profileName] || PROFILES.capgemini;
@@ -280,9 +287,30 @@ function parseMarkdown(content) {
 
 // ── Bygg och spara ─────────────────────────────────────────────────────────
 const md = fs.readFileSync(INPUT, 'utf8');
+
+// Sidhuvud och sidfot är valfria, så att befintliga anrop ger samma dokument som förut.
+function localDate() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function smallRun(text) {
+  return { font: THEME.font, size: THEME.bodySize - 4, color: THEME.colorMuted, ...(text !== undefined ? { text } : {}) };
+}
+const headers = withHeader ? { default: new Header({ children: [new Paragraph({
+  alignment: AlignmentType.RIGHT,
+  children: [new TextRun(smallRun(`${path.basename(OUTPUT)}  ·  Skapad ${createdDate || localDate()}`))],
+})] }) } : undefined;
+const footers = withPageNumbers ? { default: new Footer({ children: [new Paragraph({
+  alignment: AlignmentType.CENTER,
+  children: [new TextRun({ ...smallRun(), children: ['Sida ', PageNumber.CURRENT, ' av ', PageNumber.TOTAL_PAGES] })],
+})] }) } : undefined;
+
 const doc = new Document({
   sections: [{
     properties: { page: { margin: { top: convertInchesToTwip(1), right: convertInchesToTwip(1.2), bottom: convertInchesToTwip(1), left: convertInchesToTwip(1.2) } } },
+    ...(headers ? { headers } : {}),
+    ...(footers ? { footers } : {}),
     children: parseMarkdown(md),
   }],
 });
