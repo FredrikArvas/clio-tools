@@ -576,7 +576,7 @@ def write_report(run_dir: Path, protocol: dict, runner: Callable = run_claude, r
         draft = revise(run_dir, protocol, lint.requirements(), draft.version, runner, sources, prompts, today)
         lint = check(run_dir, protocol, draft, sources)
     if word and draft.ok:
-        build_word(draft.md_path, draft.level)
+        build_word(draft.md_path, draft.level, created=today)
     return draft, lint
 
 
@@ -587,14 +587,16 @@ class WordError(RuntimeError):
 
 
 def build_word(md_path: Path, level: str, profile: str = WORD_PROFILE, script: Path | None = None,
-               runner: Callable = subprocess.run) -> Path | None:
-    """Word via clio-docx/md2docx.js. Nivå snabb ger ingen Word-fil (None)."""
+               runner: Callable = subprocess.run, created: str | None = None) -> Path | None:
+    """Word via clio-docx/md2docx.js, med filnamn och skapad-datum i sidhuvudet och
+    sidnummer i sidfoten. Nivå snabb ger ingen Word-fil (None)."""
     if level not in WORD_LEVELS:
         return None
     script = Path(script or MD2DOCX)
     md_path = Path(md_path)
     out = md_path.with_suffix(".docx")
-    command = ["node", str(script), str(md_path), str(out), "--profile", profile]
+    command = ["node", str(script), str(md_path), str(out), "--profile", profile,
+               "--header", "--page-numbers", f"--date={created or date.today().isoformat()}"]
     try:
         completed = runner(command, cwd=str(script.parent), capture_output=True, text=True,
                            encoding="utf-8", timeout=WORD_TIMEOUT_S)
