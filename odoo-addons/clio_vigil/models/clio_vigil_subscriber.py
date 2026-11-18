@@ -47,6 +47,14 @@ class ClioVigilSubscriber(models.Model):
         string  = "Antal leveranser",
         compute = "_compute_delivery_count",
     )
+    resend_request_ids = fields.One2many(
+        "clio.vigil.resend.request", "subscriber_id",
+        string = "Skicka-om begäranden",
+    )
+    resend_pending_count = fields.Integer(
+        string  = "Väntande",
+        compute = "_compute_resend_pending_count",
+    )
 
     _partner_uniq = models.Constraint(
         "UNIQUE(partner_id)",
@@ -62,3 +70,20 @@ class ClioVigilSubscriber(models.Model):
     def _compute_delivery_count(self):
         for rec in self:
             rec.delivery_count = len(rec.delivery_ids)
+
+    def _compute_resend_pending_count(self):
+        for rec in self:
+            rec.resend_pending_count = self.env["clio.vigil.resend.request"].search_count([
+                ("subscriber_id", "=", rec.id),
+                ("state", "=", "pending"),
+            ])
+
+    def action_resend_wizard(self):
+        return {
+            "type":      "ir.actions.act_window",
+            "name":      "Skicka om utskick",
+            "res_model": "clio.vigil.resend.wizard",
+            "view_mode": "form",
+            "target":    "new",
+            "context":   {"active_ids": self.ids},
+        }

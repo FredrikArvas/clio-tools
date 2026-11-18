@@ -690,6 +690,36 @@ def write_deliveries(odoo_env, deliveries: list[dict]) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Skicka-om begäranden
+# ---------------------------------------------------------------------------
+
+def mark_resend_sent(odoo_env, request_id: int, result: str) -> None:
+    """Markerar en skicka-om-begäran som skickad."""
+    if odoo_env is None:
+        return
+    try:
+        odoo_env["clio.vigil.resend.request"].write(
+            [request_id],
+            {"state": "sent", "sent_at": _utcnow_str(), "result": result},
+        )
+    except Exception as exc:
+        _logger.warning("mark_resend_sent: begäran %d: %s", request_id, exc)
+
+
+def mark_resend_failed(odoo_env, request_id: int, error: str) -> None:
+    """Markerar en skicka-om-begäran som misslyckad med felorsak."""
+    if odoo_env is None:
+        return
+    try:
+        odoo_env["clio.vigil.resend.request"].write(
+            [request_id],
+            {"state": "failed", "result": error[:255]},
+        )
+    except Exception as exc:
+        _logger.warning("mark_resend_failed: begäran %d: %s", request_id, exc)
+
+
+# ---------------------------------------------------------------------------
 # Heartbeat
 # ---------------------------------------------------------------------------
 
