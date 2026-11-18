@@ -28,6 +28,7 @@ STEP_ARGS = {
     "full":          ["--full", "--all-domains"],
     "seed":          ["--seed-sources"],
     "recompute":     ["--recompute-priorities"],
+    "resend":        ["--resend"],
 }
 
 

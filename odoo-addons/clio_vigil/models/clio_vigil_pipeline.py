@@ -28,6 +28,7 @@ _STEP_LABELS = {
     "full":       "Full pipeline",
     "seed":       "Importera källor",
     "recompute":  "Räkna om prioriteter",
+    "resend":     "Skicka om (köade)",
 }
 
 
@@ -156,3 +157,7 @@ class ClioVigilPipeline(models.TransientModel):
     def action_recompute(self):
         self._write_trigger("recompute")
         return self._notify("recompute")
+
+    def action_resend(self):
+        self._write_trigger("resend")
+        return self._notify("resend")
