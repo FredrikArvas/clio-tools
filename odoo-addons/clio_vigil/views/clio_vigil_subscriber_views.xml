@@ -106,7 +106,7 @@
       <form string="Prenumerant">
         <header>
           <button name="action_resend_wizard"
-                  string="Skicka om utskick"
+                  string="Lägg till äldre utskick i kö"
                   type="object"
                   icon="fa-refresh"/>
         </header>

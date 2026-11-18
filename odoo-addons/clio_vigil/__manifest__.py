@@ -1,6 +1,6 @@
 {
     'name': 'Clio Vigil — Mediebevakning',
-    'version': '19.0.1.12.0',
+    'version': '19.0.1.13.0',
     'summary': 'Odoo-vy för clio-vigil: källor, pipeline-kö och färdiga bevakningsobjekt',
     'author': 'Arvas International AB',
     'website': 'https://github.com/FredrikArvas/clio-odoo-addons/tree/19.0/clio_vigil',
@@ -13,6 +13,7 @@
         'views/clio_vigil_subscriber_views.xml',
         'views/clio_vigil_wizard_views.xml',
         'views/clio_vigil_pipeline_views.xml',
+        'views/clio_media_article_vigil_views.xml',
         'views/menu.xml',
     ],
     'installable': True,
