@@ -1,0 +1,38 @@
+[
+  {
+    "source_ref": "isbn:9789144132648",
+    "name": "Kommunikation och organisation",
+    "work_type": "book",
+    "author": "Strid, Jan",
+    "year": 2021,
+    "description": "Grundläggande lärobok i organisationskommunikation.",
+    "genres": ["Kommunikationsvetenskap", "Organisationsteori"],
+    "identifiers": [
+      {"scheme": "isbn", "value": "9789144132648"}
+    ]
+  },
+  {
+    "source_ref": "isbn:9789147100293",
+    "name": "Statsvetenskaplig metod",
+    "work_type": "book",
+    "author": "Esaiasson, Peter; Gilljam, Mikael; Oscarsson, Henrik; Towns, Ann E.; Wängnerud, Lena",
+    "year": 2017,
+    "description": "Standardverket om metod inom statsvetenskap. Kallas ofta 'Metodpraktikan'.",
+    "genres": ["Statsvetenskap", "Metodologi"],
+    "identifiers": [
+      {"scheme": "isbn", "value": "9789147100293"}
+    ]
+  },
+  {
+    "source_ref": "manual:forsvarsmakten-hkv-2024-pm",
+    "name": "Försvarsmakten i samhällets tjänst – en introduktion",
+    "work_type": "report",
+    "author": "Försvarsmakten",
+    "year": 2024,
+    "description": "Internt PM. Ingen ISBN.",
+    "genres": ["Försvar", "Säkerhetspolitik"],
+    "identifiers": [
+      {"scheme": "url", "value": "https://example.internal/pm2024.pdf"}
+    ]
+  }
+]

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "clio-media/import_schema_work",
+  "title": "clio.media.work – importformat",
+  "description": "Batch-import till clio.media.work i Odoo. Rotnivå är en array av verk.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/work"
+  },
+  "$defs": {
+    "work": {
+      "type": "object",
+      "required": ["name", "work_type"],
+      "additionalProperties": false,
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "description": "Unik nyckel för idempotent import. Konvention: 'isbn:<ISBN13>' om ISBN finns, annars 'manual:<valfritt-unikt-id>'. Lämnas tom om man inte vill spåra källan."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verkets titel (obligatorisk)."
+        },
+        "work_type": {
+          "type": "string",
+          "enum": [
+            "book",
+            "film",
+            "series",
+            "episode",
+            "album",
+            "song",
+            "psalm",
+            "podcast",
+            "podcast_episode",
+            "report",
+            "website"
+          ],
+          "description": "Verkstyp – intern kod från clio.media.work.type. Kurslitteratur: 'book'. Kompendium/PM: 'report'."
+        },
+        "author": {
+          "type": "string",
+          "description": "Upphovsperson(er) som fritext. Flera: 'Efternamn, Förnamn; Efternamn2, Förnamn2' (semikolon-separerat)."
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 2100,
+          "description": "Utgivningsår (av den upplaga som avses, inte originalutgivning)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Fritext eller enkel HTML. Används som bokomslag-text, kurskommentar eller abstrakt."
+        },
+        "genres": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Genrenamn (skapas i clio.media.genre om de saknas). T.ex. ['Statsvetenskap', 'Metodologi']."
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "description": "Externa identifierare – se identifier-def nedan."
+        }
+      }
+    },
+    "identifier": {
+      "type": "object",
+      "required": ["scheme", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "enum": ["isbn", "spotify", "tmdb", "musicbrainz", "notion", "psalm_nr", "url"],
+          "description": "Identifierarschema (hårt begränsat till kända värden i modellen)."
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifierarens värde. ISBN: utan bindestreck, 13 siffror, t.ex. '9789144132648'. URL: fullständig https-adress."
+        }
+      }
+    }
+  }
+}
