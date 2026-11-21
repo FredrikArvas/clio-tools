@@ -99,17 +99,20 @@ class ClioMediaArticleVigilExt(models.Model):
     def _compute_repub_count(self):
         # Räknar live via SQL för prestanda — ingen @api.depends behövs eftersom
         # store=False alltid triggar om (inga cache-problem med det inversa fältet).
-        if not self.ids:
-            return
-        self.env.cr.execute(
-            """
-            SELECT canonical_article_id, COUNT(*) AS cnt
-            FROM clio_media_article
-            WHERE canonical_article_id = ANY(%s)
-            GROUP BY canonical_article_id
-            """,
-            (list(self.ids),),
-        )
-        counts = dict(self.env.cr.fetchall())
+        # Nya (osparade) poster har NewId, inte int — filtrera bort dem från SQL
+        # men tilldela alltid 0 (Odoo kräver tilldelning för hela self).
+        real_ids = [i for i in self.ids if isinstance(i, int)]
+        counts = {}
+        if real_ids:
+            self.env.cr.execute(
+                """
+                SELECT canonical_article_id, COUNT(*) AS cnt
+                FROM clio_media_article
+                WHERE canonical_article_id = ANY(%s)
+                GROUP BY canonical_article_id
+                """,
+                (real_ids,),
+            )
+            counts = dict(self.env.cr.fetchall())
         for rec in self:
             rec.repub_count = counts.get(rec.id, 0)
