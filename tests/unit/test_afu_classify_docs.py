@@ -121,5 +121,64 @@ class TestEncounterVals(unittest.TestCase):
         self.assertFalse(v["suppression_indicator"])
 
 
+class TestArticleClassificationVals(unittest.TestCase):
+    def test_full_record(self):
+        v = mod.article_classification_vals({
+            "is_case_report": "true", "eth_origin": 2, "craft_class": "Tic-Tac",
+            "case_date": "1946-07-24", "location": "Kamlunge", "summary_sv": "Spökraket.",
+            "text_chars": 1818, "enriched_at": "2026-11-22T21:00:50.123+00:00",
+        })
+        self.assertTrue(v["is_afu_case_report"])
+        self.assertEqual(v["afu_eth_origin"], "2")
+        self.assertEqual(v["afu_craft_class"], "II")
+        self.assertEqual(v["afu_case_year"], 1946)
+        self.assertEqual(v["afu_classified_at"], "2026-11-22 21:00:50")
+
+    def test_empty_record_gives_falsy_values(self):
+        v = mod.article_classification_vals({"text_chars": 0})
+        self.assertFalse(v["is_afu_case_report"])
+        self.assertFalse(v["afu_eth_origin"])
+        self.assertEqual(v["afu_case_year"], 0)
+        self.assertFalse(v["afu_summary"])
+
+    def test_bad_case_date_gives_no_year(self):
+        self.assertEqual(mod._case_year("okänt"), 0)
+        self.assertEqual(mod._case_year("9999-01"), 0)
+
+
+class TestSyncArticle(unittest.TestCase):
+    def _kw(self, article):
+        calls = []
+
+        def kw(model, method, args, kwargs=None):
+            calls.append((method, args))
+            return [article] if method == "search_read" and article else []
+        return kw, calls
+
+    def test_writes_fields_and_empty_body(self):
+        kw, calls = self._kw({"id": 7, "body": False})
+        rec = {"filepath": "UFO-reports/a.pdf", "text_chars": 3, "enriched_at": ""}
+        self.assertEqual(mod.sync_article(kw, rec, "hej", "t"), 7)
+        vals = calls[-1][1][1]
+        self.assertEqual(vals["body"], "hej")
+        self.assertIn("afu_text_chars", vals)
+
+    def test_keeps_existing_body(self):
+        kw, calls = self._kw({"id": 7, "body": "befintlig"})
+        mod.sync_article(kw, {"filepath": "a.pdf"}, "ny", "t")
+        self.assertNotIn("body", calls[-1][1][1])
+
+    def test_missing_article_returns_none(self):
+        kw, calls = self._kw(None)
+        self.assertIsNone(mod.sync_article(kw, {"filepath": "a.pdf"}, "x", "t"))
+        self.assertEqual([c[0] for c in calls], ["search_read"])
+
+    def test_odoo_error_is_logged_not_raised(self):
+        def kw(*a, **k):
+            raise ConnectionError("nere")
+        with self.assertLogs(mod.logger, level="WARNING"):
+            self.assertIsNone(mod.sync_article(kw, {"filepath": "a.pdf"}, "x", "t"))
+
+
 if __name__ == "__main__":
     unittest.main()

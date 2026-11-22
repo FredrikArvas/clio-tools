@@ -190,10 +190,52 @@ def find_article(kw, filepath: str) -> dict | None:
     return rows[0] if rows else None
 
 
-def update_article_body(kw, article_id: int, text: str) -> None:
-    snippet = text[:SNIPPET_LEN]
-    kw("clio.media.article", "write",
-       [[article_id], {"body": text, "body_snippet": snippet}])
+def sync_article(kw, record: dict, text: str | None, label: str) -> int | None:
+    """
+    Skriver klassningsfälten (och body om den är tom) till artikeln.
+    Returnerar artikel-id, eller None om artikeln saknas eller skrivningen
+    misslyckas (loggas — klassningen i JSONL gäller ändå).
+    """
+    try:
+        article = find_article(kw, record["filepath"])
+        if not article:
+            return None
+        vals = article_classification_vals(record)
+        body = article.get("body")
+        if text and (body is False or (isinstance(body, str) and body.strip() == "")):
+            vals.update({"body": text, "body_snippet": text[:SNIPPET_LEN]})
+        kw("clio.media.article", "write", [[article["id"]], vals])
+        return article["id"]
+    except Exception as e:
+        logger.warning(f"{label} — article-uppdatering misslyckades: {e}")
+        return None
+
+
+def _case_year(case_date) -> int:
+    m = re.match(r"\s*(\d{4})", str(case_date or ""))
+    year = int(m.group(1)) if m else 0
+    return year if 1000 <= year <= date.today().year else 0
+
+
+def article_classification_vals(record: dict) -> dict:
+    """
+    Klassningsfält för clio.media.article (clio_afu_archives) ur en
+    JSONL-post. Används både vid klassning och vid backfill.
+    """
+    enriched = str(record.get("enriched_at") or "")[:19].replace("T", " ")
+    return {
+        "is_afu_case_report":         to_bool(record.get("is_case_report")),
+        "afu_eth_origin":             _normalize_selection_int(record.get("eth_origin"), range(6)) or False,
+        "afu_intelligence_indicator": _normalize_selection_int(record.get("intelligence_indicator"), range(4)) or False,
+        "afu_discourse_level":        _normalize_selection_int(record.get("discourse_level"), range(1, 6)) or False,
+        "afu_craft_class":            _normalize_craft_class(record.get("craft_class")) or False,
+        "afu_case_date":              str(record.get("case_date") or "")[:20] or False,
+        "afu_case_year":              _case_year(record.get("case_date")),
+        "afu_location":               str(record.get("location") or "")[:250] or False,
+        "afu_summary":                record.get("summary_sv") or False,
+        "afu_text_chars":             int(record.get("text_chars") or 0),
+        "afu_classified_at":          enriched or False,
+    }
 
 
 def _normalize_selection_int(val, valid_range: range) -> str | None:
@@ -562,11 +604,14 @@ def main():
 
             if not text:
                 logger.info(f"{label} — ingen text kunde utvinnas")
-                _write_record(out, {
+                record = {
                     "filepath": filepath, "filename": filename,
                     "source_dir": source_dir, "text_chars": 0,
                     "is_case_report": False, "enriched_at": _now(),
-                })
+                }
+                if kw:
+                    sync_article(kw, record, None, label)
+                _write_record(out, record)
                 stats["no_text"] += 1
                 continue
 
@@ -590,37 +635,28 @@ def main():
             if is_case or int(eth or 0) >= 2 or sup:
                 logger.info(f"{label} ★ case={is_case} eth={eth} suppress={sup}")
 
-            # 3. Uppdatera clio.media.article om body var SENTINEL
-            article_id = None
-            if kw:
-                try:
-                    article = find_article(kw, filepath)
-                    if article:
-                        article_id = article["id"]
-                        body = article.get("body")
-                        if body is False or (isinstance(body, str) and body.strip() == ""):
-                            update_article_body(kw, article_id, text)
-                except Exception as e:
-                    logger.warning(f"{label} — article-uppdatering misslyckades: {e}")
-
-            # 4. Skapa uap.encounter vid fallrapport
-            encounter_odoo_id = None
-            if is_case and kw:
-                encounter_odoo_id = create_encounter(
-                    kw, filepath, filename, source_dir, cls, article_id
-                )
-                if encounter_odoo_id:
-                    stats["encounter_created"] += 1
-
-            _write_record(out, {
+            record = {
+                **cls,
                 "filepath":          filepath,
                 "source_dir":        source_dir,
                 "filename":          filename,
                 "text_chars":        len(text),
-                "encounter_odoo_id": encounter_odoo_id,
+                "encounter_odoo_id": None,
                 "enriched_at":       _now(),
-                **cls,
-            })
+            }
+
+            # 3. clio.media.article: body (om tom) + klassningsfält
+            article_id = sync_article(kw, record, text, label) if kw else None
+
+            # 4. Skapa uap.encounter vid fallrapport
+            if is_case and kw:
+                record["encounter_odoo_id"] = create_encounter(
+                    kw, filepath, filename, source_dir, cls, article_id
+                )
+                if record["encounter_odoo_id"]:
+                    stats["encounter_created"] += 1
+
+            _write_record(out, record)
             stats["ok"] += 1
             if is_case:
                 stats["case_report"] += 1
