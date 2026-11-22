@@ -19,6 +19,7 @@ Pythonberoenden:
 """
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -69,6 +70,15 @@ MAX_OCR_PAGES      = 20    # begränsa minnestrycket för stora PDF:er
 SENTINEL_BODY      = " "   # markör från extract_afu_documents_text.py
 
 SUPPORTED_EXTS = {".pdf", ".docx", ".doc", ".rtf", ".txt"}
+
+# Kataloger som AFU själva sorterat bort (tomma/irrelevanta skannade sidor)
+EXCLUDED_DIR_NAMES = {"EmptyPages", "IrrelevantPages", "InventoryInfo"}
+# RA 2013-skanningarna finns både som PDF (F9_n_pdf) och RTF (F9_n_rtf) —
+# samma sidor. Vi klassar bara PDF-versionen för att undvika dubbletter.
+EXCLUDED_DIR_PATTERN = re.compile(r"^F9_\d+_rtf$")
+
+RTF_MAGIC = b"{\\rtf"
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")  # ogiltiga i XML-RPC
 
 logging.basicConfig(
     level=logging.INFO,
@@ -122,19 +132,23 @@ KÄLLA: {source_dir}
 TEXT (max {max_chars} tecken):
 {text}
 
-Returnera exakt detta JSON (inga extra fält):
+Fyll i varje fält utifrån TEXTEN ovan. Mallen nedan visar bara typerna —
+kopiera den inte. Utredningar, förhör och vittnesuppgifter om en specifik
+observation räknas som is_case_report=true.
+
+Svara med ett JSON-objekt med exakt dessa fält:
 {{
-  "is_case_report": false,
-  "craft_class": null,
-  "entity_type": null,
-  "eth_origin": 0,
-  "intelligence_indicator": 0,
-  "discourse_level": 1,
-  "suppression_indicator": false,
-  "suppression_note": null,
-  "case_date": null,
-  "location": null,
-  "summary_sv": ""
+  "is_case_report": <true|false>,
+  "craft_class": <"I".."X" | "Unknown" | null>,
+  "entity_type": <sträng | null>,
+  "eth_origin": <0-5>,
+  "intelligence_indicator": <0-3>,
+  "discourse_level": <1-5>,
+  "suppression_indicator": <true|false>,
+  "suppression_note": <sträng | null>,
+  "case_date": <"YYYY-MM-DD" | "YYYY-MM" | null>,
+  "location": <sträng | null>,
+  "summary_sv": <en mening på svenska>
 }}"""
 
 
@@ -190,6 +204,13 @@ def _normalize_selection_int(val, valid_range: range) -> str | None:
         return None
 
 
+def to_bool(val) -> bool:
+    """LLM:en svarar ibland "false" som sträng — bool("false") vore True."""
+    if isinstance(val, str):
+        return val.strip().lower() in ("true", "yes", "ja", "1")
+    return bool(val)
+
+
 _CRAFT_NAME_TO_KEY = {
     "tetra": "I", "tic-tac": "II", "tic tac": "II", "tictac": "II",
     "blob": "III", "beam": "IV", "manta-ray": "V", "manta ray": "V", "manta": "V",
@@ -216,9 +237,9 @@ def _normalize_craft_class(val) -> str | None:
 
 def _build_encounter_vals(filepath: str, filename: str, source_dir: str,
                           cls: dict, article_id: int | None) -> dict:
-    year = date.today().year
-    path_hash = abs(hash(filepath)) % 9999
-    auto_id = f"AFU_{year}_{path_hash:04d}"
+    # Deterministiskt per sökväg (inbyggda hash() slumpas per process)
+    path_hash = hashlib.sha1(filepath.encode("utf-8")).hexdigest()[:10]
+    auto_id = f"AFU_{path_hash}"
 
     valid_entities = {
         "Nordic", "TallGray", "ShortGray", "LongGray",
@@ -242,7 +263,7 @@ def _build_encounter_vals(filepath: str, filename: str, source_dir: str,
         "entity_type":            (entity_raw if entity_raw in valid_entities else False),
         "intelligence_indicator": _normalize_selection_int(cls.get("intelligence_indicator"), range(4)) or False,
         "discourse_level":        _normalize_selection_int(cls.get("discourse_level"), range(1, 6)) or False,
-        "suppression_indicator":  bool(cls.get("suppression_indicator", False)),
+        "suppression_indicator":  to_bool(cls.get("suppression_indicator")),
         "suppression_note":       (cls.get("suppression_note") or False),
         "afu_article_id":         article_id or 0,
         "afu_doc_path":           filepath[:500],
@@ -307,7 +328,18 @@ def _extract_docx(path: Path) -> str:
 
 def _extract_rtf(path: Path) -> str:
     from striprtf.striprtf import rtf_to_text
-    return rtf_to_text(path.read_bytes().decode("utf-8", errors="replace"))
+    data = path.read_bytes()
+    try:
+        content = data.decode("utf-8")
+    except UnicodeDecodeError:
+        content = data.decode("cp1252", errors="replace")
+    return rtf_to_text(content)
+
+
+def _is_rtf(path: Path) -> bool:
+    """Många AFU-.doc-filer är egentligen RTF — antiword klarar inte dem."""
+    with open(path, "rb") as f:
+        return f.read(len(RTF_MAGIC)) == RTF_MAGIC
 
 
 def _extract_doc_antiword(path: Path) -> str | None:
@@ -321,7 +353,8 @@ def _extract_doc_antiword(path: Path) -> str | None:
 
 
 def clean_text(raw: str) -> str:
-    text = re.sub(r"[ \t]+", " ", raw)
+    text = _CONTROL_CHARS.sub("", raw)
+    text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = re.sub(r"(?m)^\s*\d{1,4}\s*$", "", text)   # ta bort rena sidnummer
     return text.strip()
@@ -345,7 +378,7 @@ def extract_text_full(path: Path) -> str | None:
             text = clean_text(raw)
         elif ext == ".docx":
             text = clean_text(_extract_docx(path))
-        elif ext == ".rtf":
+        elif ext == ".rtf" or (ext == ".doc" and _is_rtf(path)):
             text = clean_text(_extract_rtf(path))
         elif ext == ".doc":
             raw = _extract_doc_antiword(path)
@@ -399,6 +432,14 @@ def classify_transmorf(text: str, filename: str, source_dir: str, model: str) ->
 
 # ─── Filsamling ───────────────────────────────────────────────────────────────
 
+def is_excluded(rel: Path) -> bool:
+    """True om någon katalog i sökvägen är bortsorterad (se EXCLUDED_*)."""
+    return any(
+        part in EXCLUDED_DIR_NAMES or EXCLUDED_DIR_PATTERN.match(part)
+        for part in rel.parts[:-1]
+    )
+
+
 def collect_files(dir_filter: str | None = None) -> list[tuple[Path, str, str]]:
     """
     Returnerar lista av (path, relative_filepath, source_dir) i prioritetsordning.
@@ -418,7 +459,7 @@ def collect_files(dir_filter: str | None = None) -> list[tuple[Path, str, str]]:
                 continue
             rel = path.relative_to(DOWNLOADS_DIR)
             fp = rel.as_posix()      # alltid forward slashes, oavsett OS
-            if fp in seen:
+            if fp in seen or is_excluded(rel):
                 continue
             seen.add(fp)
             source_dir = rel.parts[0] if rel.parts else ""
@@ -542,9 +583,10 @@ def main():
                 stats["error"] += 1
                 continue
 
-            is_case = bool(cls.get("is_case_report", False))
-            eth     = cls.get("eth_origin", 0)
-            sup     = cls.get("suppression_indicator", False)
+            is_case = to_bool(cls.get("is_case_report"))
+            cls["is_case_report"] = is_case
+            eth     = _normalize_selection_int(cls.get("eth_origin"), range(6))
+            sup     = to_bool(cls.get("suppression_indicator"))
             if is_case or int(eth or 0) >= 2 or sup:
                 logger.info(f"{label} ★ case={is_case} eth={eth} suppress={sup}")
 
