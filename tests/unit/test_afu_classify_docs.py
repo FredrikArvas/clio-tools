@@ -114,6 +114,14 @@ class TestEncounterVals(unittest.TestCase):
         self.assertEqual(a["encounter_id"], b["encounter_id"])
         self.assertNotEqual(a["encounter_id"], c["encounter_id"])
 
+    def test_article_linked_as_source_document(self):
+        v = mod._build_encounter_vals("x.pdf", "x.pdf", "UFO-reports", {}, 42)
+        self.assertEqual(v["article_ids"], [(4, 42)])
+
+    def test_no_article_gives_no_link(self):
+        v = mod._build_encounter_vals("x.pdf", "x.pdf", "UFO-reports", {}, None)
+        self.assertEqual(v["article_ids"], [])
+
     def test_string_false_suppression(self):
         v = mod._build_encounter_vals(
             "x.pdf", "x.pdf", "UFO-reports", {"suppression_indicator": "false"}, None

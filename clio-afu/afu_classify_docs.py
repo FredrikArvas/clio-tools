@@ -311,6 +311,7 @@ def _build_encounter_vals(filepath: str, filename: str, source_dir: str,
         "suppression_indicator":  to_bool(cls.get("suppression_indicator")),
         "suppression_note":       (cls.get("suppression_note") or False),
         "afu_article_id":         article_id or 0,
+        "article_ids":            [(4, article_id)] if article_id else [],
         "afu_doc_path":           filepath[:500],
         "status":                 "pending",
     }
