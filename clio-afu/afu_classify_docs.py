@@ -6,12 +6,15 @@ Flöde per fil:
   1. Textextraktion: PyMuPDF → om skannat PDF (gles text) → Tesseract OCR
   2. Ollama qwen2.5:3b → transmorf-klassificering
   3. Resume-safe JSONL-checkpoint keyed på relativ sökväg
-  4. is_case_report=True → uap.encounter skapas i Odoo (status=pending)
-  5. Uppdaterar clio.media.article.body om det var SENTINEL
+  4. Klassningsfält (+ body om tom) skrivs till clio.media.article
+  5. Endast med --create-encounters: is_case_report=True → uap.encounter
+     (status=pending). Avstängt som standard — en encounter per sida gav
+     dubbletter (samma händelse som skanning, översättning, flera sidor).
 
 Kör från ~/19.0/clio-tools/clio-afu/ på servern
 Usage:
     python3 afu_classify_docs.py [--max N] [--dir TEXT] [--dry-run] [--model MODEL]
+                                 [--create-encounters]
 Systemberoenden (engångsinstallation på servern):
     sudo apt install tesseract-ocr tesseract-ocr-swe tesseract-ocr-eng poppler-utils
 Pythonberoenden:
@@ -557,6 +560,8 @@ def main():
                         help=f"Ollama-modell (default: {MODEL})")
     parser.add_argument("--dry-run", action="store_true",
                         help="Klassificera men skriv inte till Odoo")
+    parser.add_argument("--create-encounters", action="store_true",
+                        help="Skapa uap.encounter per fallrapport (av som standard)")
     args = parser.parse_args()
 
     if not DOWNLOADS_DIR.exists():
@@ -649,7 +654,7 @@ def main():
             article_id = sync_article(kw, record, text, label) if kw else None
 
             # 4. Skapa uap.encounter vid fallrapport
-            if is_case and kw:
+            if is_case and kw and args.create_encounters:
                 record["encounter_odoo_id"] = create_encounter(
                     kw, filepath, filename, source_dir, cls, article_id
                 )
