@@ -468,9 +468,9 @@ def classify_transmorf(text: str, filename: str, source_dir: str, model: str) ->
         "prompt":  prompt,
         "stream":  False,
         # format:"json" utelämnas — constrained generation kan loopa; vi parsar manuellt
-        "options": {"temperature": 0.1, "num_ctx": 4096},
+        "options": {"temperature": 0.1, "num_ctx": 4096, "num_predict": 400},
     }
-    resp = requests.post(OLLAMA_URL, json=payload, timeout=OLLAMA_TIMEOUT)
+    resp = requests.post(OLLAMA_URL, json=payload, timeout=(10, OLLAMA_TIMEOUT))
     resp.raise_for_status()
     raw = resp.json().get("response", "{}")
     return _extract_json(raw)
