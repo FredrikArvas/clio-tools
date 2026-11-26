@@ -3,21 +3,26 @@
 Importerar Larry Hatch U* database (U.RND) → Odoo 19 (uap-databas).
 Använder PDF som primär källa, binary för strangeness/credibility/state.
 """
+import os
 import re
 import sys
 import hashlib
 import psycopg2
 from pathlib import Path
+from dotenv import load_dotenv
 
-BASE = Path('/home/clioadmin/19.0/clio-tools/clio-afu')
+load_dotenv(Path(__file__).parent.parent / '.env')
+load_dotenv(Path(__file__).parent / '.env')
+
+BASE = Path(os.getenv('AFU_BASE', '/home/clioadmin/19.0/clio-tools/clio-afu'))
 PDF_PATH = BASE / 'data/downloads/Databases/Larry Hatch/derivations/Larry Hatch - full text.pdf'
 RND_PATH = BASE / 'data/downloads/Databases/Larry Hatch/original/U.RND'
 
-DB_NAME = 'uap'
-DB_USER = 'odoo'
-DB_HOST = '172.19.0.2'
-DB_PORT = 5432
-DB_PASS = 'odoo19test'
+DB_NAME = os.getenv('DB_NAME', 'uap')
+DB_USER = os.getenv('DB_USER', 'odoo')
+DB_HOST = os.getenv('DB_HOST', '172.19.0.2')
+DB_PORT = int(os.getenv('DB_PORT', '5432'))
+DB_PASS = os.environ['DB_PASS']
 
 HEADER_SIZE = 122
 RECORD_SIZE = 112
