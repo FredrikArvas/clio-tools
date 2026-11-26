@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ── Appkategori ───────────────────────────────────────────────────── -->
+  <record id="module_category_clio_vigil" model="ir.module.category">
+    <field name="name">Clio Vigil</field>
+    <field name="sequence">85</field>
+  </record>
+
+  <!-- ── Prenumerant ───────────────────────────────────────────────────── -->
+  <!-- Ser och redigerar sin egen prenumerantrad, sökord, leveranshistorik
+       och kan begära resend. Ser Klara objekt. -->
+  <record id="group_vigil_subscriber" model="res.groups">
+    <field name="name">Prenumerant</field>
+    <field name="category_id" ref="module_category_clio_vigil"/>
+    <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+  <!-- ── Användare ─────────────────────────────────────────────────────── -->
+  <!-- Allt som Prenumerant + ser Källor, Kö och Alla objekt. -->
+  <record id="group_vigil_user" model="res.groups">
+    <field name="name">Användare</field>
+    <field name="category_id" ref="module_category_clio_vigil"/>
+    <field name="implied_ids" eval="[(4, ref('group_vigil_subscriber'))]"/>
+  </record>
+
+</odoo>
