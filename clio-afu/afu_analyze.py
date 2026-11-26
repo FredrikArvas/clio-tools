@@ -54,7 +54,24 @@ def main():
     print(f"Övriga (donation/nyheter etc.):       {len(non_cases)} / {total}")
 
     if not cases:
-        print("\nInga fallrapporter — kör afu_enrich.py först.")
+        print("\nInga fallrapporter i detta dataset (blogg/nyheter).")
+        print("Notering: 0% fallrapporter är i sig ett signifikant resultat.")
+        out = Path(__file__).parent / "data" / "afu_analysis.json"
+        analysis = {
+            "generated_at": __import__("datetime").datetime.utcnow().isoformat(),
+            "total_posts": total,
+            "case_reports": 0,
+            "case_report_pct": 0.0,
+            "note": "Alla poster klassificerade som arkivnyheter/donationer, inga fallrapporter.",
+            "eth_distribution": {str(k): 0 for k in range(6)},
+            "suppression_count": 0,
+            "suppressed_cases": [],
+            "craft_classes": {},
+            "entity_types": {},
+            "high_eth_cases": [],
+        }
+        out.write_text(json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"Basanalys sparad: {out}")
         return
 
     n_cases = len(cases)

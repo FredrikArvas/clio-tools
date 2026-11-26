@@ -639,6 +639,7 @@ def main():
     parser.add_argument("--summarize",     action="store_true", help="Kör summering (Claude)")
     parser.add_argument("--index",         action="store_true", help="Kör RAG-indexering (Qdrant)")
     parser.add_argument("--digest",        action="store_true", help="Skicka daglig digest-mail")
+    parser.add_argument("--resend",        action="store_true", help="Bearbeta pending skicka-om-begäranden från Odoo")
     parser.add_argument("--full",          action="store_true", help="Kör hela pipeline: run+caption-check+transcribe+summarize+index+digest")
     parser.add_argument("--stats",       action="store_true", help="Visa tillståndsstatistik")
     parser.add_argument("--list-queued",  action="store_true", help="Lista transkriptionskön")
@@ -690,7 +691,7 @@ def main():
 
     any_action = any([
         args.run, args.caption_check, args.download, args.transcribe, args.summarize, args.index,
-        args.digest, args.full, args.stats, args.list_queued,
+        args.digest, args.full, args.resend, args.stats, args.list_queued,
         args.pick, args.clear_queue, args.pick_source, bool(args.import_url),
         args.recompute_priorities, args.refilter, args.classify_uap, args.seed_sources,
         args.extract_journalists, bool(args.pitch),
@@ -919,6 +920,16 @@ def main():
         subs_info = f", {counts['subscribers']} prenumeranter" if "subscribers" in counts else ""
         logger.info(f"Digest: {counts['items']} objekt skickade{subs_info}")
         _odoo_sync("efter digest")
+
+    if args.resend or args.digest or args.full:
+        if _odoo_env is not None and not args.dry_run:
+            from notifier import run_resend
+            r = run_resend(conn, _odoo_env)
+            if r["processed"]:
+                logger.info(
+                    "Resend: %d bearbetade, %d skickade, %d misslyckade",
+                    r["processed"], r["sent"], r["failed"],
+                )
 
     if args.extract_journalists:
         from journalist_extractor import run_extractor

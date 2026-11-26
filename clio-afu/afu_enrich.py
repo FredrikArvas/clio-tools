@@ -6,7 +6,7 @@ Kör från ~/19.0/clio-tools/clio-afu/
 Usage:
     python3 afu_enrich.py [--model qwen2.5:3b] [--max N]
 
-Input:  data/afu_posts.jsonl
+Input:  data/afu_posts_full.jsonl
 Output: data/afu_enriched.jsonl  (resume-safe)
 """
 
@@ -21,7 +21,7 @@ import requests
 # ─── Konfiguration ────────────────────────────────────────────────────────────
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-INPUT_FILE  = Path(__file__).parent / "data" / "afu_posts.jsonl"
+INPUT_FILE  = Path(__file__).parent / "data" / "afu_posts_full.jsonl"
 OUTPUT_FILE = Path(__file__).parent / "data" / "afu_enriched.jsonl"
 
 SYSTEM_PROMPT = """Du är en analytiker för UAP/UFO-forskning. Klassificera texter enligt transmorf-taxonomin.

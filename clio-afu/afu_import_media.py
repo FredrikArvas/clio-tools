@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-afu_import_media.py — Importerar afu_posts.jsonl → clio.media.article i uap-databasen.
+afu_import_media.py — Importerar AFU-poster → clio.media.article i uap-databasen.
 Lägger även till afu.se RSS som clio.vigil.source för framtida bevakning.
+
+Prioriterar afu_posts_full.jsonl (Playwright, med fulltext + fillänkar).
+Faller tillbaka på afu_posts.jsonl om full-filen saknas.
 
 Kör från ~/19.0/clio-tools/clio-afu/
 Usage:
@@ -12,9 +15,9 @@ import argparse
 import json
 import os
 import sys
-import xmlrpc.client
 from datetime import datetime, timezone
 from pathlib import Path
+import xmlrpc.client
 
 from dotenv import load_dotenv
 
@@ -25,7 +28,8 @@ DB   = os.getenv("VIGIL_ODOO_DB", "uap")
 USER = os.getenv("VIGIL_ODOO_USER", "")
 PWD  = os.getenv("VIGIL_ODOO_PASSWORD", "")
 
-INPUT_FILE = Path(__file__).parent / "data" / "afu_posts.jsonl"
+FULL_FILE  = Path(__file__).parent / "data" / "afu_posts_full.jsonl"
+BASIC_FILE = Path(__file__).parent / "data" / "afu_posts.jsonl"
 
 
 def odoo_connect():
@@ -49,9 +53,25 @@ def _now() -> str:
     return datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def load_posts() -> list[dict]:
+def _build_body(post: dict) -> str:
+    """Bygg body-text: brödtext + fillänkar som appendix."""
+    text = post.get("text") or ""
+    file_links = post.get("file_links") or []
+    if not file_links:
+        return text
+    lines = [text, "", "--- Bifogade filer ---"]
+    for fl in file_links:
+        label = fl.get("label") or fl.get("url", "")
+        ext   = fl.get("ext", "").upper()
+        url   = fl.get("url", "")
+        lines.append(f"[{ext}] {label}: {url}")
+    return "\n".join(lines).strip()
+
+
+def load_posts() -> tuple[list[dict], str]:
+    input_file = FULL_FILE if FULL_FILE.exists() else BASIC_FILE
     posts = []
-    with open(INPUT_FILE, encoding="utf-8") as f:
+    with open(input_file, encoding="utf-8") as f:
         for line in f:
             try:
                 p = json.loads(line)
@@ -59,7 +79,7 @@ def load_posts() -> list[dict]:
                     posts.append(p)
             except Exception:
                 pass
-    return posts
+    return posts, input_file.name
 
 
 def ensure_vigil_source(kw):
@@ -92,8 +112,10 @@ def import_posts(kw, posts: list[dict], dry_run: bool = False) -> tuple[int, int
     for i, p in enumerate(posts, 1):
         url   = p["url"]
         title = (p.get("title") or "")[:500]
-        text  = p.get("text", "")
-        vals  = {
+        body  = _build_body(p)
+        has_files = bool(p.get("file_links"))
+
+        vals = {
             "url":          url,
             "title":        title,
             "source":       "afu.se",
@@ -101,12 +123,13 @@ def import_posts(kw, posts: list[dict], dry_run: bool = False) -> tuple[int, int
             "published":    _dt(p.get("date")),
             "first_seen":   _dt(p.get("scraped_at")) or _now(),
             "data_source":  "vigil_ufo",
-            "body":         text,
-            "body_snippet": text[:500] if text else False,
+            "body":         body,
+            "body_snippet": body[:500] if body else False,
         }
 
         if dry_run:
-            print(f"  [DRY] {i}/{len(posts)} {title[:60]}")
+            file_note = f" [{len(p.get('file_links',[]))} filer]" if has_files else ""
+            print(f"  [DRY] {i}/{len(posts)} {title[:55]}{file_note}")
             created += 1
             continue
 
@@ -119,6 +142,8 @@ def import_posts(kw, posts: list[dict], dry_run: bool = False) -> tuple[int, int
             else:
                 kw("clio.media.article", "create", [vals])
                 created += 1
+            if has_files:
+                print(f"  📎 [{i}] {title[:50]} — {len(p['file_links'])} fil(er)")
             if i % 50 == 0:
                 print(f"  [{i}/{len(posts)}] +{created} ny, ~{updated} upd")
         except Exception as e:
@@ -134,20 +159,23 @@ def main():
     parser.add_argument("--max", type=int, default=0)
     args = parser.parse_args()
 
-    if not INPUT_FILE.exists():
-        sys.exit(f"FEL: {INPUT_FILE} saknas — kör afu_scrape.py --group posts först")
+    posts, source = load_posts()
+    if not posts:
+        sys.exit(f"FEL: varken {FULL_FILE.name} eller {BASIC_FILE.name} hittades")
 
-    posts = load_posts()
     if args.max:
         posts = posts[:args.max]
-    print(f"Läser {len(posts)} poster från {INPUT_FILE.name}")
+    print(f"Läser {len(posts)} poster från {source}")
+    has_fulltext = sum(1 for p in posts if p.get("text"))
+    has_files    = sum(1 for p in posts if p.get("file_links"))
+    print(f"  Poster med fulltext: {has_fulltext} | Med fillänkar: {has_files}")
 
     print(f"Ansluter till Odoo: {URL} db={DB} user={USER}")
     kw = odoo_connect()
     print("Ansluten!")
 
-    print("Lägger till vigil.source...")
     if not args.dry_run:
+        print("Lägger till vigil.source...")
         ensure_vigil_source(kw)
 
     print(f"Importerar {'(dry-run) ' if args.dry_run else ''}{len(posts)} artiklar...")

@@ -5,9 +5,9 @@
   <menuitem id="menu_clio_vigil_root"
             name="Clio Vigil"
             sequence="85"
-            groups="base.group_user"/>
+            groups="group_vigil_subscriber"/>
 
-  <!-- ── Undermeny: Pipeline ───────────────────────────────────────────── -->
+  <!-- ── Pipeline (bara admin) ─────────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_pipeline"
             name="Pipeline"
             parent="menu_clio_vigil_root"
@@ -15,39 +15,52 @@
             sequence="1"
             groups="base.group_system"/>
 
-  <!-- ── Undermeny: Prenumeranter ──────────────────────────────────────── -->
+  <!-- ── Prenumeranter — alla (bara admin) ─────────────────────────────── -->
   <menuitem id="menu_clio_vigil_subscribers"
             name="Prenumeranter"
             parent="menu_clio_vigil_root"
             action="action_clio_vigil_subscriber"
-            sequence="5"/>
+            sequence="5"
+            groups="base.group_system"/>
 
-  <!-- ── Undermeny: Källor ──────────────────────────────────────────────── -->
+  <!-- ── Min prenumeration (Prenumerant + Användare) ───────────────────── -->
+  <menuitem id="menu_clio_vigil_my_subscription"
+            name="Min prenumeration"
+            parent="menu_clio_vigil_root"
+            action="action_clio_vigil_my_subscription"
+            sequence="6"
+            groups="group_vigil_subscriber"/>
+
+  <!-- ── Källor (Användare) ────────────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_sources"
             name="Källor"
             parent="menu_clio_vigil_root"
             action="action_clio_vigil_source"
-            sequence="10"/>
+            sequence="10"
+            groups="group_vigil_user"/>
 
-  <!-- ── Undermeny: Kö ──────────────────────────────────────────────────── -->
+  <!-- ── Kö (Användare) ────────────────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_queue"
             name="Kö"
             parent="menu_clio_vigil_root"
             action="action_clio_vigil_item_queue"
-            sequence="20"/>
+            sequence="20"
+            groups="group_vigil_user"/>
 
-  <!-- ── Undermeny: Klara objekt ────────────────────────────────────────── -->
+  <!-- ── Klara objekt (Prenumerant + Användare) ────────────────────────── -->
   <menuitem id="menu_clio_vigil_ready"
             name="Klara objekt"
             parent="menu_clio_vigil_root"
             action="action_clio_vigil_item_ready"
-            sequence="30"/>
+            sequence="30"
+            groups="group_vigil_subscriber"/>
 
-  <!-- ── Undermeny: Alla objekt ─────────────────────────────────────────── -->
+  <!-- ── Alla objekt (Användare) ───────────────────────────────────────── -->
   <menuitem id="menu_clio_vigil_all"
             name="Alla objekt"
             parent="menu_clio_vigil_root"
             action="action_clio_vigil_item_all"
-            sequence="40"/>
+            sequence="40"
+            groups="group_vigil_user"/>
 
 </odoo>

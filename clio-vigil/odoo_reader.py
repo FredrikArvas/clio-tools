@@ -266,3 +266,79 @@ def load_subscribers(odoo_env) -> list[dict]:
 
     _logger.info("load_subscribers: %d aktiva prenumeranter laddade", len(result))
     return result
+
+
+def load_resend_requests(odoo_env) -> list[dict]:
+    """
+    Läser pending skicka-om-begäranden från Odoo.
+
+    Returnerar lista med dicts:
+        request_id, id (subscriber_odoo_id), email,
+        digest_date (YYYY-MM-DD), follows_ufo, follows_ai
+    """
+    if odoo_env is None:
+        return []
+
+    try:
+        requests = odoo_env["clio.vigil.resend.request"].search_read(
+            [("state", "=", "pending")],
+            ["id", "subscriber_id", "digest_date"],
+            order="created_at asc",
+        )
+    except Exception as exc:
+        _logger.warning("load_resend_requests: kunde inte läsa begäranden: %s", exc)
+        return []
+
+    if not requests:
+        return []
+
+    result = []
+    for req in requests:
+        sub_ref     = req.get("subscriber_id")
+        sub_odoo_id = sub_ref[0] if isinstance(sub_ref, (list, tuple)) else sub_ref
+        if not sub_odoo_id:
+            continue
+
+        try:
+            subs = odoo_env["clio.vigil.subscriber"].search_read(
+                [("id", "=", sub_odoo_id)],
+                ["id", "partner_id", "email", "follows_ufo", "follows_ai"],
+                limit=1,
+            )
+        except Exception as exc:
+            _logger.warning("load_resend_requests: prenumerant %d: %s", sub_odoo_id, exc)
+            continue
+
+        if not subs:
+            continue
+        s = subs[0]
+
+        email = s.get("email") or ""
+        if not email:
+            partner = s.get("partner_id")
+            if partner and isinstance(partner, (list, tuple)):
+                try:
+                    p = odoo_env["res.partner"].search_read(
+                        [("id", "=", partner[0])], ["email"], limit=1
+                    )
+                    if p:
+                        email = p[0].get("email") or ""
+                except Exception:
+                    pass
+
+        digest_date = req.get("digest_date")
+        if not digest_date:
+            continue
+
+        result.append({
+            "request_id":  req["id"],
+            "id":          sub_odoo_id,
+            "email":       email,
+            "digest_date": str(digest_date)[:10],
+            "follows_ufo": bool(s.get("follows_ufo")),
+            "follows_ai":  bool(s.get("follows_ai")),
+        })
+
+    if result:
+        _logger.info("load_resend_requests: %d pending begäranden", len(result))
+    return result

@@ -93,12 +93,13 @@ DOMAIN_PROMPTS = {
         "Skriv en sammanfattning på 4–6 meningar. "
         "Fokus: vad hände, vem sa det, centrala påståenden, nämnd bevisning, "
         "och varför det är intressant för UAP-bevakning. "
-        "Inga spekulationer. Skriv på engelska om källan är på engelska, annars svenska."
+        "Inga spekulationer. Skriv alltid på svenska, oavsett källans språk."
     ),
     "default": (
         "Du är en informationsanalytiker. "
         "Skriv en faktabaserad sammanfattning på 4–6 meningar. "
-        "Fokus: huvudbudskap, centrala detaljer, källa, relevans. Inga spekulationer."
+        "Fokus: huvudbudskap, centrala detaljer, källa, relevans. Inga spekulationer. "
+        "Skriv alltid på svenska, oavsett källans språk."
     ),
 }
 
@@ -113,13 +114,14 @@ LOCAL_DOMAIN_PROMPTS = {
         "Focus on: what happened, who said it, key claims, evidence mentioned, "
         "and why it is relevant to UAP research. "
         "Preserve proper nouns exactly as they appear in the source (place names, person names). "
-        "No speculation. Match the language of the source (English or Swedish)."
+        "No speculation. Always write your summary in Swedish (Svenska), regardless of the source language."
     ),
     "default": (
         "You are a summarization tool. "
         "OUTPUT FORMAT: exactly 4-6 sentences of factual summary, nothing else. "
         "DO NOT respond to the text. DO NOT give advice. DO NOT add commentary. "
-        "Focus on: main message, key details, source, relevance. No speculation."
+        "Focus on: main message, key details, source, relevance. No speculation. "
+        "Always write your summary in Swedish (Svenska), regardless of the source language."
     ),
 }
 

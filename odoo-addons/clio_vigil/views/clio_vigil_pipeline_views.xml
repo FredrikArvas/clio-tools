@@ -84,6 +84,12 @@
                       string="&#127758; Importera källor"
                       confirm="Importera YAML-källkonfiguration till Odoo?"/>
             </div>
+            <div class="col-6 col-md-4">
+              <button name="action_resend" type="object"
+                      class="btn btn-secondary w-100"
+                      string="&#128260; Skicka om (köade)"
+                      confirm="Bearbeta alla köade skicka-om-begäranden?"/>
+            </div>
           </div>
 
           <separator string="Snabbkörning"/>

@@ -169,7 +169,12 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
         plain_parts.append("")
 
     plain_parts.append("─" * 50)
-    plain_parts.append("Genererat av clio-vigil · Arvas International AB")
+    plain_parts.append(
+        "Gillar du utskicket, vill ändra urvalet eller avsluta prenumerationen?\n"
+        "Skicka en rad: clio@arvas.international"
+    )
+    plain_parts.append("")
+    plain_parts.append("Genererat av clio-vigil · skickat av Clio, en senior-AI hos Arvas International AB")
     plain = "\n".join(plain_parts)
 
     # HTML
@@ -183,8 +188,13 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
   <p style="color:#888;margin-top:-8px;">{today} &middot; {dom_label} &middot; {len(items)} fynd</p>
   <hr style="border:none;border-top:1px solid #EDE5D0;margin:16px 0;">
   {html_items}
-  <p style="font-size:12px;color:#aaa;margin-top:24px;">
-    Genererat av clio-vigil &middot; Arvas International AB
+  <p style="font-size:13px;color:#555;margin-top:24px;border-top:1px solid #EDE5D0;padding-top:16px;">
+    Gillar du utskicket, vill ändra urvalet eller avsluta?
+    <a href="mailto:clio@arvas.international?subject=Clio-Vigil%20feedback"
+       style="color:#4A6FA5;">Skicka en rad till clio@arvas.international</a>
+  </p>
+  <p style="font-size:11px;color:#aaa;margin-top:4px;">
+    Genererat av clio-vigil &middot; skickat av Clio, en senior-AI hos Arvas International AB
   </p>
 </div>
 </body>
@@ -368,6 +378,114 @@ def _run_digest_odoo(conn, odoo_env, domain: Optional[str] = None,
         "items":       len(notified_ids),
         "subscribers": len(subscribers),
     }
+
+
+# ---------------------------------------------------------------------------
+# Skicka om
+# ---------------------------------------------------------------------------
+
+def run_resend(conn, odoo_env) -> dict:
+    """
+    Bearbetar pending skicka-om-begäranden från Odoo.
+
+    Per begäran:
+      1. Hämtar objekt från SQLite: state=notified på aktuellt datum,
+         filtrerat på prenumerantens domäner.
+      2. Bygger och skickar resend-digest via befintlig send_digest().
+      3. Skapar delivery-poster i Odoo (hoppar dubbletter tack vare write_deliveries).
+      4. Markerar begäran som sent eller failed i Odoo.
+
+    Returnerar räknare: processed, sent, failed.
+    """
+    from odoo_reader import load_resend_requests
+    from odoo_writer import mark_resend_sent, mark_resend_failed, write_deliveries
+
+    requests = load_resend_requests(odoo_env)
+    if not requests:
+        return {"processed": 0, "sent": 0, "failed": 0}
+
+    logger.info("run_resend: %d pending begäranden", len(requests))
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    sent = failed = 0
+
+    for req in requests:
+        req_id      = req["request_id"]
+        sub_odoo_id = req["id"]
+        email       = req["email"]
+        date_str    = req["digest_date"]
+        follows_ufo = req["follows_ufo"]
+        follows_ai  = req["follows_ai"]
+
+        if not email:
+            mark_resend_failed(odoo_env, req_id, "E-postadress saknas")
+            failed += 1
+            continue
+
+        domains = []
+        if follows_ufo:
+            domains.append("ufo")
+        if follows_ai:
+            domains.append("ai")
+
+        if not domains:
+            mark_resend_failed(odoo_env, req_id, "Prenumeranten följer inga domäner")
+            failed += 1
+            continue
+
+        placeholders = ",".join("?" * len(domains))
+        try:
+            items = conn.execute(
+                f"""
+                SELECT id, domain, title, summary, description, url, source_name,
+                       source_maturity, published_at, priority_score
+                FROM vigil_items
+                WHERE state = 'notified'
+                  AND date(notified_at) = ?
+                  AND domain IN ({placeholders})
+                ORDER BY priority_score DESC
+                LIMIT 50
+                """,
+                (date_str, *domains),
+            ).fetchall()
+            items = [dict(r) for r in items]
+        except Exception as exc:
+            mark_resend_failed(odoo_env, req_id, f"SQLite-fel: {exc}")
+            failed += 1
+            continue
+
+        if not items:
+            mark_resend_failed(odoo_env, req_id, f"Inga notifierade objekt {date_str}")
+            failed += 1
+            continue
+
+        domains_in_items = {i["domain"] for i in items}
+        subject_domain   = list(domains_in_items)[0] if len(domains_in_items) == 1 else None
+
+        subject, plain, html = build_digest(items, subject_domain)
+        subject = subject.replace("[Clio-Vigil]", "[Clio-Vigil RESEND]", 1)
+
+        ok = send_digest(subject, plain, html, to_addr=email)
+
+        if ok:
+            deliveries = [
+                {
+                    "subscriber_odoo_id": sub_odoo_id,
+                    "item_url":           item["url"],
+                    "delivered_at":       now_str,
+                    "digest_date":        date_str,
+                }
+                for item in items
+                if item.get("url")
+            ]
+            write_deliveries(odoo_env, deliveries)
+            mark_resend_sent(odoo_env, req_id, f"{len(items)} objekt skickade")
+            sent += 1
+        else:
+            mark_resend_failed(odoo_env, req_id, "Sändning misslyckades (SMTP-fel)")
+            failed += 1
+
+    logger.info("run_resend: %d skickade, %d misslyckade", sent, failed)
+    return {"processed": len(requests), "sent": sent, "failed": failed}
 
 
 # ---------------------------------------------------------------------------

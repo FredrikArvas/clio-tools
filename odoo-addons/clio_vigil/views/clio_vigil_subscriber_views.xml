@@ -3,6 +3,20 @@
 
   <!-- ── Actions (definieras först så att form-vyn kan referera dem) ──────── -->
 
+  <!-- Öppnar prenumerantens egen rad (filtreras av ir.rule till en post) -->
+  <record id="action_clio_vigil_my_subscription" model="ir.actions.act_window">
+    <field name="name">Min prenumeration</field>
+    <field name="res_model">clio.vigil.subscriber</field>
+    <field name="view_mode">form,list</field>
+    <field name="domain">[('partner_id.user_ids', 'in', [uid])]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Ingen prenumeration hittades för ditt konto.
+      </p>
+      <p>Kontakta administratören för att bli tillagd som prenumerant.</p>
+    </field>
+  </record>
+
   <record id="action_clio_vigil_subscriber" model="ir.actions.act_window">
     <field name="name">Prenumeranter</field>
     <field name="res_model">clio.vigil.subscriber</field>
@@ -104,6 +118,12 @@
     <field name="model">clio.vigil.subscriber</field>
     <field name="arch" type="xml">
       <form string="Prenumerant">
+        <header>
+          <button name="action_resend_wizard"
+                  string="Lägg till äldre utskick i kö"
+                  type="object"
+                  icon="fa-refresh"/>
+        </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
             <button name="%(action_clio_vigil_delivery_sub)d"
@@ -112,6 +132,13 @@
                     icon="fa-envelope-o"
                     context="{'search_default_subscriber_id': id}">
               <field name="delivery_count" widget="statinfo" string="Leveranser"/>
+            </button>
+            <button name="%(action_clio_vigil_resend_sub)d"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-refresh"
+                    context="{'search_default_subscriber_id': id}">
+              <field name="resend_pending_count" widget="statinfo" string="Skicka om"/>
             </button>
           </div>
           <field name="active" widget="boolean_toggle" class="float-end"/>
