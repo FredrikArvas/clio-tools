@@ -43,19 +43,24 @@ from contact import contact_email, redact
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 USER_AGENT = "clio-research/2.0 (automatiserad forskningsinsamling)"
 
 OPENALEX_WORKS = "https://api.openalex.org/works"
 UNPAYWALL_API = "https://api.unpaywall.org/v2"
 CORE_SEARCH = "https://api.core.ac.uk/v3/search/works"
+SEMANTIC_SCHOLAR_API = "https://api.semanticscholar.org/graph/v1/paper"
+WAYBACK_API = "https://archive.org/wayback/available"
 
 STEPS_BY_LEVEL: dict[str, tuple[str, ...]] = {
     "snabb": ("openalex",),
     "standard": ("openalex", "unpaywall", "core", "direct"),
-    "delbar": ("openalex", "unpaywall", "core", "direct"),  # steg 5–6 (Wayback, Semantic Scholar) kommer i FT1
+    "delbar": ("openalex", "unpaywall", "core", "semantic_scholar", "direct", "wayback"),
 }
+
+SEMANTIC_SCHOLAR_INTERVAL = 3.0   # 100 req/5 min (antagit, ej verifierat officiellt)
+WAYBACK_INTERVAL = 1.0            # ~1 req/s (antagit från sekundärkällor)
 SECONDS_BY_LEVEL: dict[str, float] = {"snabb": 5.0, "standard": 15.0, "delbar": 60.0}
 
 FULLTEXT_MIN_WORDS = 500      # ≥ 500 ord → fulltext
@@ -271,6 +276,7 @@ class _Context:
     license: str | None = None
     attempted: bool = False
     best: _Result | None = None
+    got_403_urls: list[str] = field(default_factory=list)
 
 
 class _OutOfTime(Exception):
@@ -326,6 +332,8 @@ class FulltextFetcher:
             "unpaywall": self._step_unpaywall,
             "core": self._step_core,
             "direct": self._step_direct,
+            "semantic_scholar": self._step_semantic_scholar,
+            "wayback": self._step_wayback,
         }
         try:
             for name in STEPS_BY_LEVEL[self.level]:
@@ -439,6 +447,42 @@ class FulltextFetcher:
             return []
         return [Candidate("direct_url", url)]
 
+    def _step_semantic_scholar(self, source: dict, ctx: _Context) -> list[Candidate]:
+        doi = source.get("doi")
+        if not doi:
+            ctx.skips.append("semantic_scholar: källan saknar DOI")
+            return []
+        url = f"{SEMANTIC_SCHOLAR_API}/DOI:{quote(doi, safe=':/.')}"
+        data = self._get_json("semantic_scholar", url, ctx,
+                              params={"fields": "openAccessPdf"},
+                              interval=SEMANTIC_SCHOLAR_INTERVAL)
+        if data is None:
+            return []
+        oa_pdf = data.get("openAccessPdf") or {}
+        pdf_url = oa_pdf.get("url")
+        if pdf_url:
+            return [Candidate("semantic_scholar", pdf_url)]
+        ctx.skips.append("semantic_scholar: ingen OA PDF-länk")
+        return []
+
+    def _step_wayback(self, source: dict, ctx: _Context) -> list[Candidate]:
+        if not ctx.got_403_urls:
+            ctx.skips.append("wayback: inga 403-svar att pröva mot arkivet")
+            return []
+        candidates = []
+        for url in ctx.got_403_urls[:MAX_CANDIDATES_PER_STEP]:
+            data = self._get_json("wayback", WAYBACK_API, ctx,
+                                  params={"url": url}, interval=WAYBACK_INTERVAL)
+            if data is None:
+                continue
+            closest = (data.get("archived_snapshots") or {}).get("closest") or {}
+            if closest.get("available") and closest.get("url"):
+                candidates.append(Candidate("wayback", closest["url"]))
+                break
+        if not candidates:
+            ctx.skips.append("wayback: inget arkiverat för de misslyckade URL:erna")
+        return candidates
+
     # ── Hämtning ──────────────────────────────────────────────────────────────
 
     def _done(self, ctx: _Context) -> bool:
@@ -456,7 +500,7 @@ class FulltextFetcher:
         return ctx.deadline - self.clock()
 
     def _get(self, label: str, url: str, ctx: _Context, *, params=None, headers=None,
-             interval: float = MIN_INTERVAL) -> HttpResult | None:
+             interval: float = MIN_INTERVAL, track_403: bool = False) -> HttpResult | None:
         """Ett anrop, utan omförsök. Returnerar None och antecknar felet om det inte gav 200."""
         host = _host(url)
         remaining = self._pace(host, ctx, interval)
@@ -471,7 +515,10 @@ class FulltextFetcher:
             return None
         if result.status != 200:
             # Efter en omdirigering (doi.org → utgivaren) är det slutvärden som vägrade.
-            ctx.failures.append(f"{label}: HTTP {result.status} ({_host(result.final_url or url)})")
+            final = result.final_url or url
+            ctx.failures.append(f"{label}: HTTP {result.status} ({_host(final)})")
+            if track_403 and result.status == 403:
+                ctx.got_403_urls.append(final)
             return None
         return result
 
@@ -507,7 +554,7 @@ class FulltextFetcher:
             ctx.failures.append(f"{cand.route}: {host} hämtas inte automatiskt")
             return
 
-        result = self._get(cand.route, url, ctx)
+        result = self._get(cand.route, url, ctx, track_403=True)
         if result is None:
             return
         host = _host(result.final_url or url)

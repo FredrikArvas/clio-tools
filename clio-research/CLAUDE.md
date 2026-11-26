@@ -129,12 +129,99 @@ python3 clio-research/main.py --resume clio-research-021_20261029_142300
 
 ---
 
+## Fulltextmoduler (FT0–FT1, klar 2026-11-14)
+
+### `contact.py`
+Hanterar kontaktadressen som Unpaywall och Crossref kräver i API-anrop. Läser ur
+`CLIO_CONTACT_EMAIL` i miljön; returnerar `None` om variabeln saknas. `redact(text)`
+ersätter adressen (och URL-kodade varianter) med `<kontaktadress>` i felmeddelanden och
+loggar. Adressen får aldrig hamna i sparade filer, loggfiler eller testdata.
+
+### `source_model.py`
+Definierar källformatet för `01_sources.json` (kontraktet i PLAN_research_pipeline_v2.md
+avsnitt 12). Konverterar rå API-träffar till källobjekt (`from_raw_hit`), validerar hela
+listan mot kontraktet (`validate_sources`), och läser/skriver filen atomiskt. Fältnamnen
+är bindande och får inte ändras; `FETCH_ROUTES` och `READ_LEVELS` speglar planens
+terminologi exakt.
+
+### `fulltext_fetcher.py`
+Fulltextkedjan. Version 1.1.0, sprint FT0 + FT1 (PLAN_fulltext_v1.0.md avsnitt 5).
+
+Nio steg i prioritetsordning, varav sex körs på `delbar`-nivå:
+1. `openalex` – best_oa_location.pdf_url eller landningssida
+2. `unpaywall` – url_for_pdf (kräver CLIO_CONTACT_EMAIL)
+3. `core` – fullText eller downloadUrl
+4. `semantic_scholar` – openAccessPdf.url via DOI-uppslag
+5. `direct` – källans URL eller doi.org-länk
+6. `wayback` – Internet Archive för URL:er som gav HTTP 403
+
+`snabb` kör bara steg 1; `standard` kör 1–4 (utan semantic_scholar och wayback).
+403-svar från innehållsanrop spåras i `_Context.got_403_urls` för Wayback-steget.
+PDF extraheras med PyMuPDF, HTML med trafilatura. Nätverksfel kastas aldrig; de
+skrivs i `fetch.error`. Inga omförsök och ingen förfalskad webbläsaridentitet.
+
+### `connectors/metadata.py`
+Gemensam tolkning av metadata för konnektorerna. `openalex_source_type` sätter
+källtypen baserat på OpenAlex `type` och publaiceringsplatsens typ (journal/conference/
+repository). `openalex_affiliations` och `crossref_affiliations` extraherar
+landskoder och institutionsnamn ur `authorships`/`author`. `country_from_affiliation`
+parsar ett affilieringssträngs sista kommaavgränsade led mot en lista på ~60 landsnamn.
+Kodar inga gissningar: saknas uppgiften i API-svaret returneras `None` eller tom lista.
+
+---
+
+## Rapportsteget S2 (spår 2, 2026-11-15)
+
+### `report_writer.py`
+Analyssteget. Bygger prompten ur protokollet och `01_sources.json`, anropar
+`claude_runner.run_claude` (roll `analyst`, `MODEL_ANALYST_QUICK` på nivå snabb, annars
+`MODEL_ANALYST`) och delar svaret vid `<<<RAPPORT>>>`, `<<<REGISTER>>>` och `<<<SLUT>>>`.
+Modellen skriver titel och avsnitten Kort svar till Luckor; Python skriver Metod,
+Källförteckning (bara citerade källor, med läsnivå), Bilagor och sidfot. Filer:
+`02_response_v<k>.txt`, `02_draft_v<k>.md`, `02_claims_v<k>.json`, `03_lint_v<k>.md`.
+`revise()` tar en kravlista. Word via `clio-docx/md2docx.js --profile aiab` på nivå
+standard och delbar (sökväg kan bytas med `CLIO_MD2DOCX`). Prompter: `config/prompts_v2.yaml`.
+
+### `report_lint.py`
+Deterministisk kontroll, regler R01–R20 (rubriker, tomma och avklippta avsnitt, avbrutet
+svar, `[n]` mot källförteckning och underlag, obligatoriska avsnitt per nivå, tomma värden,
+dubbla citat, negativa slutsatser, emojier, ställningstagande utan hypotes, läsnivå och
+påståenderegistret). Ett MÅSTE ger `REVISE`. Avsnittsordningen per nivå
+(`REQUIRED_SECTIONS`) är den enda källan för både prompt och kontroll.
+
+---
+
+## Flödet v2 (spår 5, 2026-11-15)
+
+`main.py` kör v2 som standard; det äldre åttafasflödet ligger bakom `--legacy` tills v2 är provat.
+
+```bash
+python3 clio-research/main.py --protocol clio-research-NNN [--niva snabb|standard|delbar]
+python3 clio-research/main.py --resume <run_id> [--force]   # efter paused_limit, avbrott (--force efter needs_human)
+python3 clio-research/main.py --list | --status <run_id>
+```
+
+Slutkod: 0 `ready_for_human`, 2 protokollfel, 3 `paused_limit`, 4 `needs_human`.
+
+- `protocol_parser.py` läser mallen (`inbox/<id>.md`, PROMPT_TEMPLATE v2.0) eller JSON. Nya fält:
+  `Nivå` (standard om inget anges) och `Spridning` (intern). Huvudfråga, Del 3 och minst en sökterm krävs;
+  kvarlämnade `{{…}}` ger fel. Det normaliserade protokollet sparas som `protocol.json` i körkatalogen.
+- `collector.py` (S1): connectorer → källformat → grovsållning och kandidattak (40/80/120) → fulltextkedjan
+  → kontrollpunkt `01_candidates.json` → insamlarmodellen (relevans per källa; webbfynd på standard och
+  delbar, prompter i `config/prompts_s1.yaml`) → CrossRef-metadata för webbfynd med DOI (Python, aldrig
+  modellens uppgifter) → nivåns tak (15/40/60) bland de relevanta, direkt före analogi före bakgrund
+  → `01_sources.json`, `01_filtered.json`, `01_sources.md`, `kallor/`.
+- S2: `report_writer.analyse`/`revise` + `check` (report_lint). MÅSTE → revision, högst `Max revisionsvarv`
+  (2), sedan `needs_human`. Kravlistan per utkast sparas i `03_lint_v<k>.json`.
+- S3a, S3b och S4 är platshållare i `run_pipeline` (ref_checker, granskaren, motbevisvarvet, leverans).
+- Tokens och modell per anrop i `run.log`; kontaktadressen maskas.
+
 ## Aktuellt utvecklingsläge: v2, sprint P1
 
 | Sprint | Status | Innehåll |
 |--------|--------|----------|
 | P0 Grund | ✅ Klar 2026-10-28 | `claude_runner.py`, `run_state.py`, 20 tester gröna |
-| P1 Insamling | 🔄 Nästa | Mall-parser (`.md` → protokoll), S1-prompt, sammanslagning connectors + webb → `01_sources.*` |
+| P1 Insamling | ✅ Byggd 2026-11-15 (spår 5) | `protocol_parser.py`, `collector.py`, flödet i `main.py` – ej provkört med modell |
 | P2 Analys | Väntar P1 | S2-prompt, `NEEDS_SEARCH`-varv, versionerade utkast |
 | P3 Granskning | Väntar P2 | `ref_checker.py`, S3b-prompt, revisionsloop, verdiktparser |
 | P4 Leverans | Väntar P3 | `clio-docx` i git och på servern, Dropbox, mail, Qdrant |

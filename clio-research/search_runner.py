@@ -126,6 +126,8 @@ def _run_regional(db_dict: dict, phase_def: dict, protocol: dict, seen_ids: set,
 
 def _build_keywords(protocol: dict, phase_def: dict) -> list[str]:
     """Bygg söktermslista för fasen."""
+    if phase_def.get("keywords"):          # v2: fasen anger själv sina söktermer (protocol_parser)
+        return [str(k) for k in phase_def["keywords"] if str(k).strip()]
     q = protocol["question"]
     label = phase_def.get("label", "")
 
