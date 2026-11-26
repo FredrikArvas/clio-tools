@@ -169,7 +169,12 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
         plain_parts.append("")
 
     plain_parts.append("─" * 50)
-    plain_parts.append("Genererat av clio-vigil · Arvas International AB")
+    plain_parts.append(
+        "Gillar du utskicket, vill ändra urvalet eller avsluta prenumerationen?\n"
+        "Skicka en rad: clio@arvas.international"
+    )
+    plain_parts.append("")
+    plain_parts.append("Genererat av clio-vigil · skickat av Clio, en senior-AI hos Arvas International AB")
     plain = "\n".join(plain_parts)
 
     # HTML
@@ -183,8 +188,13 @@ def build_digest(items: list[dict], domain: Optional[str] = None) -> tuple[str, 
   <p style="color:#888;margin-top:-8px;">{today} &middot; {dom_label} &middot; {len(items)} fynd</p>
   <hr style="border:none;border-top:1px solid #EDE5D0;margin:16px 0;">
   {html_items}
-  <p style="font-size:12px;color:#aaa;margin-top:24px;">
-    Genererat av clio-vigil &middot; Arvas International AB
+  <p style="font-size:13px;color:#555;margin-top:24px;border-top:1px solid #EDE5D0;padding-top:16px;">
+    Gillar du utskicket, vill ändra urvalet eller avsluta?
+    <a href="mailto:clio@arvas.international?subject=Clio-Vigil%20feedback"
+       style="color:#4A6FA5;">Skicka en rad till clio@arvas.international</a>
+  </p>
+  <p style="font-size:11px;color:#aaa;margin-top:4px;">
+    Genererat av clio-vigil &middot; skickat av Clio, en senior-AI hos Arvas International AB
   </p>
 </div>
 </body>
