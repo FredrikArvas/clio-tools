@@ -43,7 +43,9 @@ for i, arg in enumerate(sys.argv[1:], 1):
         JSON_PATH = sys.argv[i + 1]
 
 if JSON_PATH is None:
-    JSON_PATH = Path(__file__).parent / 'bible_encounters.json'
+    # Primär: Dropbox-källmapp; fallback: bredvid skriptet
+    dropbox_path = Path.home() / 'Dropbox/projekt/UAP/Bibliska encounters/bible_encounters.json'
+    JSON_PATH = dropbox_path if dropbox_path.exists() else Path(__file__).parent / 'bible_encounters.json'
 
 SOURCE_TAG = 'BIB'
 

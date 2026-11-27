@@ -25,7 +25,8 @@ if not uid:
     raise SystemExit(f"Autentisering misslyckades för {USER}")
 models = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object')
 
-json_path = Path(__file__).parent / 'bible_encounters.json'
+dropbox_path = Path.home() / 'Dropbox/projekt/UAP/Bibliska encounters/bible_encounters.json'
+json_path = dropbox_path if dropbox_path.exists() else Path(__file__).parent / 'bible_encounters.json'
 entries = json.loads(json_path.read_text(encoding='utf-8'))
 
 # Bygg source_id från bible_url: sista path-delen utan .NIV
