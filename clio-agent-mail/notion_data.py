@@ -454,8 +454,8 @@ def get_project_index_full(db_id: str) -> list:
                 "nr":           _prop_value(props.get("Nr", {})),
                 "sfar":         _prop_value(props.get("Sfär", {})),
                 "ncc_page_id":  _extract_page_id_from_url(ncc_url),
-                "clio_md_path": _prop_value(props.get("CLIO.md", {})),
-                "claude_md_path": _prop_value(props.get("CLAUDE.md", {})),
+                "clio_md_path": _prop_value(props.get("Clio.md", {})),
+                "claude_md_path": _prop_value(props.get("Claude.md", {})),
             })
         _store(cache_key, index)
         return index
