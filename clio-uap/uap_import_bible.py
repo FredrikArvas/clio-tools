@@ -21,10 +21,19 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / '.env')
 load_dotenv(Path(__file__).parent.parent / '.env')
 
-URL = os.environ.get('ODOO_URL', 'http://localhost:8079')
-DB  = os.environ.get('ODOO_DB',  'uap')
-UID = int(os.environ.get('ODOO_UID', '2'))
-PW  = os.environ.get('ODOO_PASSWORD', '')
+# VIGIL_ODOO_* = intern URL för UAP-databasen; autentisering via ROTATE_FREDRIK_*
+URL  = os.environ.get('VIGIL_ODOO_URL') or os.environ.get('ODOO_URL', 'http://localhost:8079')
+DB   = os.environ.get('VIGIL_ODOO_DB')  or os.environ.get('ODOO_DB',  'uap')
+USER = os.environ.get('ROTATE_FREDRIK_LOGIN') or os.environ.get('ODOO_USER', '')
+PW   = os.environ.get('ROTATE_FREDRIK_PASSWORD') or os.environ.get('ODOO_PASSWORD', '')
+
+
+def get_uid():
+    common = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/common')
+    uid = common.authenticate(DB, USER, PW, {})
+    if not uid:
+        raise SystemExit(f"Autentisering misslyckades för {USER} mot {URL}/{DB}")
+    return uid
 
 DRY_RUN   = '--dry-run' in sys.argv
 JSON_PATH = None
@@ -66,17 +75,19 @@ HYNEK_TO_CLASS = {
 
 
 def connect():
-    return xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object')
+    uid    = get_uid()
+    models = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object')
+    return models, uid
 
 
-def lookup_country(models, name):
-    hits = models.execute_kw(DB, UID, PW, 'res.country', 'search_read',
+def lookup_country(models, uid, name):
+    hits = models.execute_kw(DB, uid, PW, 'res.country', 'search_read',
         [[['name', '=', name]]], {'fields': ['id'], 'limit': 1})
     return hits[0]['id'] if hits else False
 
 
-def find_existing(models, encounter_id):
-    hits = models.execute_kw(DB, UID, PW, 'uap.encounter', 'search_read',
+def find_existing(models, uid, encounter_id):
+    hits = models.execute_kw(DB, uid, PW, 'uap.encounter', 'search_read',
         [[['encounter_id', '=', encounter_id]]],
         {'fields': ['id'], 'limit': 1})
     return hits[0] if hits else None
@@ -120,16 +131,17 @@ def build_vals(entry, country_id):
 
 def main():
     print(f"Källfil:  {JSON_PATH}")
-    print(f"Odoo:     {URL} / db={DB} / uid={UID}")
+    print(f"Odoo:     {URL} / db={DB} / user={USER}")
     print(f"Dry-run:  {DRY_RUN}")
     print()
 
     with open(JSON_PATH, encoding='utf-8') as f:
         entries = json.load(f)
 
-    models = connect()
+    models, uid = connect()
+    print()
 
-    country_id = lookup_country(models, ISRAEL_COUNTRY_NAME)
+    country_id = lookup_country(models, uid, ISRAEL_COUNTRY_NAME)
     if not country_id:
         print("VARNING: Hittade inte 'Israel' i res.country — country_id sätts ej")
 
@@ -138,7 +150,7 @@ def main():
     for entry in entries:
         enc_id = entry.get('encounter_id', '?')
 
-        existing = find_existing(models, enc_id)
+        existing = find_existing(models, uid, enc_id)
         if existing:
             print(f"  HOPPAR ÖVER  {enc_id}  (ID={existing['id']})")
             skipped += 1
@@ -153,7 +165,7 @@ def main():
             continue
 
         try:
-            new_id = models.execute_kw(DB, UID, PW, 'uap.encounter', 'create', [vals])
+            new_id = models.execute_kw(DB, uid, PW, 'uap.encounter', 'create', [vals])
             print(f"           → ID={new_id}")
             created += 1
         except Exception as exc:
