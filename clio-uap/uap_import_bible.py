@@ -124,6 +124,7 @@ def build_vals(entry, country_id):
         'is_case_report':        True,
         'status':                'pending',
         'research_notes':        '\n'.join(research_parts),
+        'source_url':            entry.get('bible_url', ''),
         'country_id':            country_id or False,
         'language_original':     'other',
     }

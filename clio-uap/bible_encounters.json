@@ -11,7 +11,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Parallell: Elia (2 Kung 2:11). Hebreerbrevet 11:5 bekräftar. Von Däniken citerar ofta."
+    "research_notes": "Parallell: Elia (2 Kung 2:11). Hebreerbrevet 11:5 bekräftar. Von Däniken citerar ofta.",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.5.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_002",
@@ -25,7 +26,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Teofani eller ängelmöte? En av de tre verkar vara YHWH själv. Fysisk interaktion (måltid). Morfologi: mänsklig."
+    "research_notes": "Teofani eller ängelmöte? En av de tre verkar vara YHWH själv. Fysisk interaktion (måltid). Morfologi: mänsklig.",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.18.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_003",
@@ -39,7 +41,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE2",
-    "research_notes": "Föregås av änglarnas besök (BIB_OT_GEN_002). Von Däniken: kärnvapensprängning. Elden kom uppifrån. Blindning av Sodomiternas angripare (Gen 19:11)."
+    "research_notes": "Föregås av änglarnas besök (BIB_OT_GEN_002). Von Däniken: kärnvapensprängning. Elden kom uppifrån. Blindning av Sodomiternas angripare (Gen 19:11).",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.19.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_004",
@@ -52,7 +55,8 @@
     "person": "Hagar",
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
-    "hynek_preliminary": "CE3"
+    "hynek_preliminary": "CE3",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.16.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_005",
@@ -65,7 +69,8 @@
     "person": "Abraham",
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
-    "hynek_preliminary": "CE1"
+    "hynek_preliminary": "CE1",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.22.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_006",
@@ -79,7 +84,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Hebreiska 'sullam' = ladder/ramp. Används i forntidsteknologisk litteratur som portal eller landningsramp."
+    "research_notes": "Hebreiska 'sullam' = ladder/ramp. Används i forntidsteknologisk litteratur som portal eller landningsramp.",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.28.NIV"
   },
   {
     "encounter_id": "BIB_OT_GEN_007",
@@ -93,7 +99,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Fysisk kontakt, varaktig kroppsskada. Entitetens identitet debatteras: ängel (Hos 12:4) eller teofani. Jämför CE3-fall med fysisk påverkan."
+    "research_notes": "Fysisk kontakt, varaktig kroppsskada. Entitetens identitet debatteras: ängel (Hos 12:4) eller teofani. Jämför CE3-fall med fysisk påverkan.",
+    "bible_url": "https://www.bible.com/sv/bible/111/GEN.32.NIV"
   },
   {
     "encounter_id": "BIB_OT_EXO_001",
@@ -107,7 +114,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Ljusfenomen kombinerat med röst/kommunikation. Anomalt bränningsbeteende."
+    "research_notes": "Ljusfenomen kombinerat med röst/kommunikation. Anomalt bränningsbeteende.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EXO.3.NIV"
   },
   {
     "encounter_id": "BIB_OT_EXO_002",
@@ -121,7 +129,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Navigeringsfunktion. Rör sig. Skyddar Israeliterna mot egyptierna (14:19-20). Persistent fenomen under 40 år."
+    "research_notes": "Navigeringsfunktion. Rör sig. Skyddar Israeliterna mot egyptierna (14:19-20). Persistent fenomen under 40 år.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EXO.13.NIV"
   },
   {
     "encounter_id": "BIB_OT_EXO_003",
@@ -135,7 +144,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE2",
-    "research_notes": "Ljusfenomen (eld), rök, seismisk aktivitet, ljud. Folket förbjuds att komma nära. Von Däniken: landning."
+    "research_notes": "Ljusfenomen (eld), rök, seismisk aktivitet, ljud. Folket förbjuds att komma nära. Von Däniken: landning.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EXO.19.NIV"
   },
   {
     "encounter_id": "BIB_OT_EXO_004",
@@ -149,7 +159,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Radiation-liknande effekt på Moses' ansikte. Jämför 2 Kor 3:7."
+    "research_notes": "Radiation-liknande effekt på Moses' ansikte. Jämför 2 Kor 3:7.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EXO.33.NIV"
   },
   {
     "encounter_id": "BIB_OT_EXO_005",
@@ -163,7 +174,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "74 vittnen. Sapphirliknande yta (jfr Hes 1:26). Fysisk interaktion."
+    "research_notes": "74 vittnen. Sapphirliknande yta (jfr Hes 1:26). Fysisk interaktion.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EXO.24.NIV"
   },
   {
     "encounter_id": "BIB_OT_NUM_001",
@@ -177,7 +189,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Djur reagerar på entitet som vittnet inte kan se. Parallell till UAP-fall med djurreaktion."
+    "research_notes": "Djur reagerar på entitet som vittnet inte kan se. Parallell till UAP-fall med djurreaktion.",
+    "bible_url": "https://www.bible.com/sv/bible/111/NUM.22.NIV"
   },
   {
     "encounter_id": "BIB_OT_JOS_001",
@@ -190,7 +203,8 @@
     "person": "Joshua",
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
-    "hynek_preliminary": "CE3"
+    "hynek_preliminary": "CE3",
+    "bible_url": "https://www.bible.com/sv/bible/111/JOS.5.NIV"
   },
   {
     "encounter_id": "BIB_OT_JDG_001",
@@ -204,7 +218,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Plötslig försvinnande. Energiutsläpp (eld). Kommunikation och uppdrag."
+    "research_notes": "Plötslig försvinnande. Energiutsläpp (eld). Kommunikation och uppdrag.",
+    "bible_url": "https://www.bible.com/sv/bible/111/JDG.6.NIV"
   },
   {
     "encounter_id": "BIB_OT_JDG_002",
@@ -218,7 +233,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Uppstigning i eld/rök. Jmf Elia (2 Kung 2:11). Morfologi: mänsklig ('man of God'), ej vingad omnämnd."
+    "research_notes": "Uppstigning i eld/rök. Jmf Elia (2 Kung 2:11). Morfologi: mänsklig ('man of God'), ej vingad omnämnd.",
+    "bible_url": "https://www.bible.com/sv/bible/111/JDG.13.NIV"
   },
   {
     "encounter_id": "BIB_OT_1KI_001",
@@ -231,7 +247,8 @@
     "person": "Elijah",
     "entity_type": "Angel",
     "uap_relevance": "medium",
-    "hynek_preliminary": "CE3"
+    "hynek_preliminary": "CE3",
+    "bible_url": "https://www.bible.com/sv/bible/111/1KI.19.NIV"
   },
   {
     "encounter_id": "BIB_OT_1KI_002",
@@ -244,7 +261,8 @@
     "person": "Elijah",
     "entity_type": "Unknown",
     "uap_relevance": "medium",
-    "hynek_preliminary": "CE1"
+    "hynek_preliminary": "CE1",
+    "bible_url": "https://www.bible.com/sv/bible/111/1KI.19.NIV"
   },
   {
     "encounter_id": "BIB_OT_2KI_001",
@@ -258,7 +276,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Upptagning i ett farkostliknande fenomen. Brandbeskrivning. Fyra vittnen (Elisha + 50 profeter som sökte Elia). Von Däniken klassiker."
+    "research_notes": "Upptagning i ett farkostliknande fenomen. Brandbeskrivning. Fyra vittnen (Elisha + 50 profeter som sökte Elia). Von Däniken klassiker.",
+    "bible_url": "https://www.bible.com/sv/bible/111/2KI.2.NIV"
   },
   {
     "encounter_id": "BIB_OT_2KI_002",
@@ -272,7 +291,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Synfält öppnat avsiktligt. Stor flotta av lysande farkoster. Vittneskrets utökad via bön."
+    "research_notes": "Synfält öppnat avsiktligt. Stor flotta av lysande farkoster. Vittneskrets utökad via bön.",
+    "bible_url": "https://www.bible.com/sv/bible/111/2KI.6.NIV"
   },
   {
     "encounter_id": "BIB_OT_2KI_003",
@@ -286,7 +306,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE2",
-    "research_notes": "Massiv destruktiv kapacitet. Ingen synlig manifestation beskriven — nattlig handling."
+    "research_notes": "Massiv destruktiv kapacitet. Ingen synlig manifestation beskriven — nattlig handling.",
+    "bible_url": "https://www.bible.com/sv/bible/111/2KI.19.NIV"
   },
   {
     "encounter_id": "BIB_OT_ISA_001",
@@ -300,7 +321,8 @@
     "entity_type": "Seraph",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Serafer = sex-vingade varelser. Rök/dimmafyllt rum. Fysisk kontakt (glödande kol mot läpparna). Entitetstaxonomi: Seraphim."
+    "research_notes": "Serafer = sex-vingade varelser. Rök/dimmafyllt rum. Fysisk kontakt (glödande kol mot läpparna). Entitetstaxonomi: Seraphim.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ISA.6.NIV"
   },
   {
     "encounter_id": "BIB_OT_EZK_001",
@@ -314,7 +336,8 @@
     "entity_type": "Cherub",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Mest citerade 'UFO-passage' i bibeln. Josef Blumrich (NASA-ingenjör) rekonstruerade fordonet 1974. Norrlig ankomstriktning. Rör sig som ett rymdskepp. Hjul med ögon = sensorer? Cherubim är entitetstyperna."
+    "research_notes": "Mest citerade 'UFO-passage' i bibeln. Josef Blumrich (NASA-ingenjör) rekonstruerade fordonet 1974. Norrlig ankomstriktning. Rör sig som ett rymdskepp. Hjul med ögon = sensorer? Cherubim är entitetstyperna.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EZK.1.NIV"
   },
   {
     "encounter_id": "BIB_OT_EZK_002",
@@ -328,7 +351,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Levitation/teleportation. Fysisk kontakt (tas tag i håret). Transport från Babylon till Jerusalem. Jämför CE4-abduktionsfall."
+    "research_notes": "Levitation/teleportation. Fysisk kontakt (tas tag i håret). Transport från Babylon till Jerusalem. Jämför CE4-abduktionsfall.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EZK.8.NIV"
   },
   {
     "encounter_id": "BIB_OT_EZK_003",
@@ -342,7 +366,8 @@
     "entity_type": "Cherub",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Avfärd beskriven steg för steg. Rutt: tempeltröskel → östport → Oljeberget. Preciserade rörelsemönster."
+    "research_notes": "Avfärd beskriven steg för steg. Rutt: tempeltröskel → östport → Oljeberget. Preciserade rörelsemönster.",
+    "bible_url": "https://www.bible.com/sv/bible/111/EZK.10.NIV"
   },
   {
     "encounter_id": "BIB_OT_DAN_001",
@@ -356,7 +381,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Morfologibeskrivning i detalj. Vittnena runt Daniel reagerar utan att se — känsla av närvaro. Parallelltill Uppenbarelsebokens entiteter."
+    "research_notes": "Morfologibeskrivning i detalj. Vittnena runt Daniel reagerar utan att se — känsla av närvaro. Parallelltill Uppenbarelsebokens entiteter.",
+    "bible_url": "https://www.bible.com/sv/bible/111/DAN.10.NIV"
   },
   {
     "encounter_id": "BIB_OT_DAN_002",
@@ -370,7 +396,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Tronen har hjul (ofanim). Molnbaserad transport ('kom på himmelens skyar'). Jmf Hes 1."
+    "research_notes": "Tronen har hjul (ofanim). Molnbaserad transport ('kom på himmelens skyar'). Jmf Hes 1.",
+    "bible_url": "https://www.bible.com/sv/bible/111/DAN.7.NIV"
   },
   {
     "encounter_id": "BIB_OT_DAN_003",
@@ -384,7 +411,8 @@
     "entity_type": "Angel",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Entitet skyddar mot extrem värme. Morfologi: mänsklig men annorlunda."
+    "research_notes": "Entitet skyddar mot extrem värme. Morfologi: mänsklig men annorlunda.",
+    "bible_url": "https://www.bible.com/sv/bible/111/DAN.3.NIV"
   },
   {
     "encounter_id": "BIB_OT_ZEC_001",
@@ -398,7 +426,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Patrullerande enheter som rapporterar tillbaka. Tolkande ängel närvarande."
+    "research_notes": "Patrullerande enheter som rapporterar tillbaka. Tolkande ängel närvarande.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ZEC.1.NIV"
   },
   {
     "encounter_id": "BIB_OT_ZEC_002",
@@ -412,7 +441,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Flygande rektangulärt objekt med angivna dimensioner. Rör sig i luften. Von Däniken-källa."
+    "research_notes": "Flygande rektangulärt objekt med angivna dimensioner. Rör sig i luften. Von Däniken-källa.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ZEC.5.NIV"
   },
   {
     "encounter_id": "BIB_OT_ZEC_003",
@@ -426,7 +456,8 @@
     "entity_type": "Angel",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Transport av person i ett behållar-liknande objekt av bevingade entiteter. Destination: Babylon."
+    "research_notes": "Transport av person i ett behållar-liknande objekt av bevingade entiteter. Destination: Babylon.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ZEC.5.NIV"
   },
   {
     "encounter_id": "BIB_NT_MAT_001",
@@ -440,7 +471,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "NL",
-    "research_notes": "Navigerar Magi (ändrar kurs via varning i dröm). Stannar/hovrar över ett specifikt hus. Rör sig oberoende av stjärnornas normala rörelse."
+    "research_notes": "Navigerar Magi (ändrar kurs via varning i dröm). Stannar/hovrar över ett specifikt hus. Rör sig oberoende av stjärnornas normala rörelse.",
+    "bible_url": "https://www.bible.com/sv/bible/111/MAT.2.NIV"
   },
   {
     "encounter_id": "BIB_NT_MAT_002",
@@ -454,7 +486,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE1",
-    "research_notes": "Öppning i himlavalvet beskriven. Rörlig entitet (duvlik). Publik röst. Parallellberättelser: Mark 1:10, Luk 3:22, Joh 1:32."
+    "research_notes": "Öppning i himlavalvet beskriven. Rörlig entitet (duvlik). Publik röst. Parallellberättelser: Mark 1:10, Luk 3:22, Joh 1:32.",
+    "bible_url": "https://www.bible.com/sv/bible/111/MAT.3.NIV"
   },
   {
     "encounter_id": "BIB_NT_MAT_003",
@@ -468,7 +501,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Luminescens. Molnobjekt med röst. Materialisering av döda personer. Fysisk reaktion hos vittnen (föll mot marken). Parallell: Mark 9:2, Luk 9:28."
+    "research_notes": "Luminescens. Molnobjekt med röst. Materialisering av döda personer. Fysisk reaktion hos vittnen (föll mot marken). Parallell: Mark 9:2, Luk 9:28.",
+    "bible_url": "https://www.bible.com/sv/bible/111/MAT.17.NIV"
   },
   {
     "encounter_id": "BIB_NT_MAT_004",
@@ -482,7 +516,8 @@
     "entity_type": "Angel",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Luminescens. Paralyserande effekt på vittnen. Nedstigning från himlen."
+    "research_notes": "Luminescens. Paralyserande effekt på vittnen. Nedstigning från himlen.",
+    "bible_url": "https://www.bible.com/sv/bible/111/MAT.28.NIV"
   },
   {
     "encounter_id": "BIB_NT_LUK_001",
@@ -496,7 +531,8 @@
     "entity_type": "Angel",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Namngiven entitet (Gabriel). Plötsligt uppträdande inomhus. Fysisk bieffekt (stumhet) vid tvivel."
+    "research_notes": "Namngiven entitet (Gabriel). Plötsligt uppträdande inomhus. Fysisk bieffekt (stumhet) vid tvivel.",
+    "bible_url": "https://www.bible.com/sv/bible/111/LUK.1.NIV"
   },
   {
     "encounter_id": "BIB_NT_LUK_002",
@@ -510,7 +546,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Namngiven entitet. Fysisk biologisk effekt (konception). Jmf jungfrufödelse-mönstret i forntidsteknologisk litteratur."
+    "research_notes": "Namngiven entitet. Fysisk biologisk effekt (konception). Jmf jungfrufödelse-mönstret i forntidsteknologisk litteratur.",
+    "bible_url": "https://www.bible.com/sv/bible/111/LUK.1.NIV"
   },
   {
     "encounter_id": "BIB_NT_LUK_003",
@@ -524,7 +561,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Massuppvisning. Lysande fenomen (glory). Plötslig försvinnande ('went back into heaven'). Flertal vittnen."
+    "research_notes": "Massuppvisning. Lysande fenomen (glory). Plötslig försvinnande ('went back into heaven'). Flertal vittnen.",
+    "bible_url": "https://www.bible.com/sv/bible/111/LUK.2.NIV"
   },
   {
     "encounter_id": "BIB_NT_LUK_004",
@@ -538,7 +576,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Molnobjekt som upptar person. Två entiteter materialiserar. Löfte om återkomst 'på samma sätt'. Publik händelse med 11 vittnen."
+    "research_notes": "Molnobjekt som upptar person. Två entiteter materialiserar. Löfte om återkomst 'på samma sätt'. Publik händelse med 11 vittnen.",
+    "bible_url": "https://www.bible.com/sv/bible/111/LUK.24.NIV"
   },
   {
     "encounter_id": "BIB_NT_JOH_001",
@@ -552,7 +591,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE1",
-    "research_notes": "Vittnen tolkar samma fenomen olika (åska vs. röst). Ambiguitet i perception — parallell till UAP-vittnesberättelser."
+    "research_notes": "Vittnen tolkar samma fenomen olika (åska vs. röst). Ambiguitet i perception — parallell till UAP-vittnesberättelser.",
+    "bible_url": "https://www.bible.com/sv/bible/111/JHN.12.NIV"
   },
   {
     "encounter_id": "BIB_NT_ACT_001",
@@ -566,7 +606,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE2",
-    "research_notes": "Ljusfenomen (eldtungor). Ljudfenomen (sus). Kognitiv effekt (talförmåga). 120 vittnen."
+    "research_notes": "Ljusfenomen (eldtungor). Ljudfenomen (sus). Kognitiv effekt (talförmåga). 120 vittnen.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ACT.2.NIV"
   },
   {
     "encounter_id": "BIB_NT_ACT_002",
@@ -580,7 +621,8 @@
     "entity_type": "Angel",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Ljus i mörkret. Låsupptagning utan nyckel. Plötslig försvinnande."
+    "research_notes": "Ljus i mörkret. Låsupptagning utan nyckel. Plötslig försvinnande.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ACT.12.NIV"
   },
   {
     "encounter_id": "BIB_NT_ACT_003",
@@ -594,7 +636,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Ljus starkare än middag (Apg 26:13). Fallbeteende. Blindning (CE2-liknande fysiologisk effekt). Vittnen med delade upplevelser (höra/se olika). Tre motstridiga redogörelser i Apostlagärningarna."
+    "research_notes": "Ljus starkare än middag (Apg 26:13). Fallbeteende. Blindning (CE2-liknande fysiologisk effekt). Vittnen med delade upplevelser (höra/se olika). Tre motstridiga redogörelser i Apostlagärningarna.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ACT.9.NIV"
   },
   {
     "encounter_id": "BIB_NT_ACT_004",
@@ -608,7 +651,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Plötslig teleportation ~40 km. Ögonvittne (eunucken). Jmf Hes 8:3 (Hesekiel lyfts). Modern UAP-parallell: missing time / spatial dislokation."
+    "research_notes": "Plötslig teleportation ~40 km. Ögonvittne (eunucken). Jmf Hes 8:3 (Hesekiel lyfts). Modern UAP-parallell: missing time / spatial dislokation.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ACT.8.NIV"
   },
   {
     "encounter_id": "BIB_NT_REV_001",
@@ -622,7 +666,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Detaljerad morfologibeskrivning. Luminescens. Paralyserande effekt. Jmf Dan 10:5-9 (nästintill identisk beskrivning)."
+    "research_notes": "Detaljerad morfologibeskrivning. Luminescens. Paralyserande effekt. Jmf Dan 10:5-9 (nästintill identisk beskrivning).",
+    "bible_url": "https://www.bible.com/sv/bible/111/REV.1.NIV"
   },
   {
     "encounter_id": "BIB_NT_REV_002",
@@ -636,7 +681,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Portal/öppning i himlavalvet. Röst med navigeringsuppdrag. Transport 'in the Spirit'. Jmf Hes 8:3; 2 Kor 12:2 (Paulus tredje himlen)."
+    "research_notes": "Portal/öppning i himlavalvet. Röst med navigeringsuppdrag. Transport 'in the Spirit'. Jmf Hes 8:3; 2 Kor 12:2 (Paulus tredje himlen).",
+    "bible_url": "https://www.bible.com/sv/bible/111/REV.4.NIV"
   },
   {
     "encounter_id": "BIB_NT_REV_003",
@@ -650,7 +696,8 @@
     "entity_type": "Cherub",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Morfologi: fyra olika djurliknande ansikten. Sexvingade. Fulla av ögon (sensorer?). Direkt parallell till Hes 1 (cherubim). Transmorf-taxonomi: Cherubim."
+    "research_notes": "Morfologi: fyra olika djurliknande ansikten. Sexvingade. Fulla av ögon (sensorer?). Direkt parallell till Hes 1 (cherubim). Transmorf-taxonomi: Cherubim.",
+    "bible_url": "https://www.bible.com/sv/bible/111/REV.4.NIV"
   },
   {
     "encounter_id": "BIB_NT_REV_004",
@@ -664,7 +711,8 @@
     "entity_type": "Angel",
     "uap_relevance": "high",
     "hynek_preliminary": "CE3",
-    "research_notes": "Molnomslutet objekt. Luminescens (ansikte som solen). Eldpelare (ben). Enorm skala. Sju åskor som kommunicerar."
+    "research_notes": "Molnomslutet objekt. Luminescens (ansikte som solen). Eldpelare (ben). Enorm skala. Sju åskor som kommunicerar.",
+    "bible_url": "https://www.bible.com/sv/bible/111/REV.10.NIV"
   },
   {
     "encounter_id": "BIB_NT_REV_005",
@@ -678,7 +726,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "medium",
     "hynek_preliminary": "NL",
-    "research_notes": "Symbolisk/allegorisk. Rymdbatalj-scenario. Transport på 'örnavingar' = teknisk liknelse?"
+    "research_notes": "Symbolisk/allegorisk. Rymdbatalj-scenario. Transport på 'örnavingar' = teknisk liknelse?",
+    "bible_url": "https://www.bible.com/sv/bible/111/REV.12.NIV"
   },
   {
     "encounter_id": "BIB_NT_2CO_001",
@@ -692,7 +741,8 @@
     "entity_type": "Unknown",
     "uap_relevance": "high",
     "hynek_preliminary": "CE4",
-    "research_notes": "Osäkerhet om kroppen var med (OBE?). Episodisk amnesi ('vet inte'). Efterföljande kroppslig effekt. Jmf modern abduktionsforskning."
+    "research_notes": "Osäkerhet om kroppen var med (OBE?). Episodisk amnesi ('vet inte'). Efterföljande kroppslig effekt. Jmf modern abduktionsforskning.",
+    "bible_url": "https://www.bible.com/sv/bible/111/2CO.12.NIV"
   },
   {
     "encounter_id": "BIB_NT_ACT_005",
@@ -706,7 +756,8 @@
     "entity_type": "AngelOfLord",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Ensidigt synfält (bara Stephen ser). Öppning i himlen observeras. Triggers dödsupplevelse."
+    "research_notes": "Ensidigt synfält (bara Stephen ser). Öppning i himlen observeras. Triggers dödsupplevelse.",
+    "bible_url": "https://www.bible.com/sv/bible/111/ACT.7.NIV"
   },
   {
     "encounter_id": "BIB_NT_MAR_001",
@@ -720,6 +771,7 @@
     "entity_type": "Unknown",
     "uap_relevance": "medium",
     "hynek_preliminary": "CE3",
-    "research_notes": "Multipla entiteter i ett värd. Massivt beteendefenomen hos djur. 'Legion' = latinskt militärt begrepp (6 000 soldater)."
+    "research_notes": "Multipla entiteter i ett värd. Massivt beteendefenomen hos djur. 'Legion' = latinskt militärt begrepp (6 000 soldater).",
+    "bible_url": "https://www.bible.com/sv/bible/111/MRK.5.NIV"
   }
 ]
