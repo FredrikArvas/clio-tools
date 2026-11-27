@@ -18,6 +18,10 @@ UAP Tracking — migration och CLI för Notion → Odoo 18 + Neo4j + Qdrant, sam
 | `pipeline/motion_delta.py` | Pixeldifferens-analys för att hitta anomali-frames |
 | `pipeline/ollama_screen.py` | LLaVA-förfiltrering via Ollama (lokal, kostnadsfri) |
 | `pipeline/main.py` | CE5-pipeline CLI: motion-delta → LLaVA → Claude |
+| `bible_encounters.json` | 52 bibliska encounters (OT+NT), strukturerad JSON med source_ref och bible_url |
+| `uap_import_bible.py` | Importerar bible_encounters.json → Odoo; skapar uap.source-rader per kapitel |
+| `uap_bible_sources.py` | Engångsskript: skapar/länkar Bible.com-källor för befintliga records |
+| `afu_create_encounters.py` | Skapar encounters från AFU-checkpoint-data |
 
 ## Beroenden
 
@@ -102,10 +106,27 @@ Notera: `--no-ollama` skickar alla events direkt till Claude. `--no-claude` stan
 
 ## Odoo-addon
 
-Installeras på elitedeskgpu (aiab-db):
-`Apps → Uppdatera applista → Sök "UAP" → Installera`
+Addon-repo (produktion): `~/clio-odoo-addons/clio_uap/` → monterat som `/mnt/addons/arvas/` i `odoo19-odoo-1`.
+Dev-kopia (för PR/review): `clio-tools/odoo-addons/clio_uap/` — synkas manuellt till servern vid behov.
 
-Addons-sökväg på servern: `~/git/clio-tools/odoo-addons/`
+**Modeller:**
+- `uap.encounter` — huvudmodell, inkl. entity_type (Modern UAP + Transmorf/biblisk taxonomi)
+- `uap.encounter.passage` — passage i källa (position, citat, talare)
+- `uap.source` — källkatalog med URL-fält (tier_1 = primärkälla)
+- `uap.anomaly` + `uap.anomaly.source` — fenomenindex
+- `uap.encounter.classification` — multi-klassificering (skywatcher/hynek/transmorf/eth)
+
+**Entity-typer (entity_type):**
+Modern UAP: Nordic, TallGray, ShortGray, LongGray, Reptilian, Mantid, Hybrid, Energy
+Transmorf/biblisk: Angel (mal'ak), AngelOfLord (teofani), Cherub, Seraph, Nephilim / Giant
+Obestämd: Unknown
+
+**Uppgradering:**
+```bash
+docker restart odoo19-odoo-1 && sleep 20
+docker exec odoo19-odoo-1 odoo --database uap --update clio_uap --stop-after-init --no-http
+```
+⚠️ Alltid `docker restart` FÖRE `--update` — annars laddar Odoo inte om nya fält.
 
 ## Källdata
 
@@ -150,6 +171,8 @@ docker exec odoo19-odoo-1 odoo --database uap --update clio_uap --stop-after-ini
 - **VIGIL_ODOO_URL** i parent .env → uap-db. `ODOO_URL` → aiab (fel).
 - **OLLAMA_VULKAN=1 SKA EJ ANVÄNDAS** — CUDA körs automatiskt. `qwen2.5:14b` för stor (GPU+CPU-split).
 - **Ollama kan kräva restart** efter lång inaktivitet: `systemctl restart ollama`
+- **Moduluppgradering kräver omstart** — nya fält syns inte förrän containern startats om innan `--update`.
+- **Två addon-repos** — redigera alltid `~/clio-odoo-addons/` på servern, inte `clio-tools/odoo-addons/`.
 
 ## Fältdokumentation — uap.encounter
 
