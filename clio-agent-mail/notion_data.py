@@ -449,11 +449,13 @@ def get_project_index_full(db_id: str) -> list:
                 "name":        _prop_value(props.get("Projektnamn", {})),
                 "kodord":      _prop_value(props.get("Kodord", {})).lower().strip(),
                 "status":      _prop_value(props.get("Status", {})),
-                "ncc_url":     ncc_url,
-                "ncc_namn":    _prop_value(props.get("Context Card namn", {})),
-                "nr":          _prop_value(props.get("Nr", {})),
-                "sfar":        _prop_value(props.get("Sfär", {})),
-                "ncc_page_id": _extract_page_id_from_url(ncc_url),
+                "ncc_url":      ncc_url,
+                "ncc_namn":     _prop_value(props.get("Context Card namn", {})),
+                "nr":           _prop_value(props.get("Nr", {})),
+                "sfar":         _prop_value(props.get("Sfär", {})),
+                "ncc_page_id":  _extract_page_id_from_url(ncc_url),
+                "clio_md_path": _prop_value(props.get("CLIO.md", {})),
+                "claude_md_path": _prop_value(props.get("CLAUDE.md", {})),
             })
         _store(cache_key, index)
         return index

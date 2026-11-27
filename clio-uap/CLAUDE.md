@@ -115,3 +115,62 @@ Addons-sökväg på servern: `~/git/clio-tools/odoo-addons/`
 - NHI-disclousreProject.zip — 26 witnesses
 - VerificationLog.zip — 141 verifications (13 kopplade till PPXL-encounters)
 - Notion Export/Incidents 2.zip — 58 encounters (äldre delmängd, ignoreras)
+
+## Server — miljö
+
+```
+SERVER:  clioadmin@100.107.127.104
+Odoo:    https://uap.arvas.international (db=uap), modul clio_uap
+Scripts: ~/19.0/clio-tools/clio-uap/
+.env:    ~/19.0/clio-tools/.env  ← VIGIL_ODOO_URL + VIGIL_ODOO_DB
+GPU:     GTX 1050 Ti 4 GB | qwen2.5:3b (1,79 GB, 100 % GPU)
+```
+
+## Enrichment-kommandon (server)
+
+```bash
+# Ny batch (byt N)
+cd ~/19.0/clio-tools
+nohup python3 -u clio-uap/uap_enrich.py --model qwen2.5:3b --max 10000 > /tmp/uap_enrich_fullN.log 2>&1 &
+
+# Kolla logg
+tail -5 /tmp/uap_enrich_fullN.log
+
+# Pausa vigil-timer under berikning
+sudo systemctl start/stop clio-vigil.timer
+
+# Modul-update
+docker exec odoo19-odoo-1 odoo --database uap --update clio_uap --stop-after-init --no-http
+```
+
+## Gotchas
+
+- **ETH-prompt (2026-08-18):** eth≥3 kräver fysisk evidens/radar/multi-vittnen. eth=5 = officiella bekräftade dokument. Abduktionspåstående ensamt ger EJ eth=5.
+- **description_sv/en/original** skrivs bara om värde finns — undviker `False`-överskrivning.
+- **VIGIL_ODOO_URL** i parent .env → uap-db. `ODOO_URL` → aiab (fel).
+- **OLLAMA_VULKAN=1 SKA EJ ANVÄNDAS** — CUDA körs automatiskt. `qwen2.5:14b` för stor (GPU+CPU-split).
+- **Ollama kan kräva restart** efter lång inaktivitet: `systemctl restart ollama`
+
+## Fältdokumentation — uap.encounter
+
+**Standardklassificering:** `encounter_class` (1–5), `discourse_level` (1–5), `official_response` (A–E)
+
+**ETH-hypotes:** `eth_origin` (0–5), `intelligence_indicator` (0–3)
+
+**Pentagon Five Observables:** `obs_antigravity`, `obs_instant_accel`, `obs_hypersonic`, `obs_low_observability`, `obs_transmedium`, `observables_count` (0–5)
+
+**Multi-klassificering:** `classification_ids` → `uap.encounter.classification` (system: skywatcher/transmorf_entity/hynek/eth/custom)
+
+## Fältdokumentation — uap.anomaly
+
+**Typ:** `anomaly_type` — biological/atmospheric/contact/geographic/military/cosmological/transmorf/vehicle/other
+
+**Bedömning:** `confidence` (0–5), `eth_relevance` (0–5)
+
+**Geografi:** `geo_lat`, `geo_lng`, `radius_km`, `location`
+
+**Tidsperiod:** `date_first`, `date_last`
+
+**Spårbarhet:** `source_ids` → `uap.anomaly.source` (source_type, source_ref, timestamp_in_source, quote)
+
+**Encounters:** `encounter_ids` M2M → `uap.encounter`

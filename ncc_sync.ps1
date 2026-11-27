@@ -42,17 +42,19 @@ $missing = $json.projects | Where-Object { $_.kodord -and -not $_.ncc_page_id }
 # ── Skriv ──────────────────────────────────────────────────────────────────────
 $now = Get-Date -Format "yyyy-MM-dd HH:mm"
 $lines = @(
-    "# NCC-kodord → Context Card (Notion page-ID)",
+    "# NCC-kodord → Context Card",
     "",
     "Genererad $now av clio-tools/ncc_sync.ps1 — redigera inte för hand.",
-    "Hämta med notion-fetch på ID:t. Nytt kodord: lägg rad i Projektmasterlistan (Notion) och kör ncc_sync.ps1.",
+    "Uppslagning: Read CLIO.md-sökväg (lokal) eller notion-fetch på Page-ID. Nytt kodord: lägg rad i Projektmasterlistan (Notion) och kör ncc_sync.ps1.",
     "",
-    "| Kodord | Nr | Projekt | Page-ID |",
-    "|---|---|---|---|"
+    "| Kodord | Nr | Projekt | Page-ID | CLIO.md | CLAUDE.md |",
+    "|---|---|---|---|---|---|"
 )
 foreach ($p in $rows) {
-    $name = ($p.name -replace '\|', '/').Trim()
-    $lines += "| $($p.kodord.Trim().ToLower()) | $($p.nr) | $name | $($p.ncc_page_id -replace '-', '') |"
+    $name      = ($p.name -replace '\|', '/').Trim()
+    $clioMd    = if ($p.PSObject.Properties["clio_md_path"])   { $p.clio_md_path   } else { "" }
+    $claudeMd  = if ($p.PSObject.Properties["claude_md_path"]) { $p.claude_md_path } else { "" }
+    $lines += "| $($p.kodord.Trim().ToLower()) | $($p.nr) | $name | $($p.ncc_page_id -replace '-', '') | $clioMd | $claudeMd |"
 }
 if ($missing) {
     $lines += ""

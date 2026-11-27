@@ -10,12 +10,14 @@
                   default_order="nr"
                   decoration-success="ncc_ok == True"
                   decoration-danger="ncc_ok == False">
-                <field name="nr"         string="Nr"          optional="show"/>
-                <field name="sfar"       string="Sfär"        optional="show"/>
-                <field name="kodord"     string="Kodord"/>
-                <field name="name"       string="Projektnamn"/>
-                <field name="ncc_ok"     string="NCC"         widget="boolean"/>
-                <field name="status_raw" string="Status"      optional="hide"/>
+                <field name="nr"             string="Nr"             optional="show"/>
+                <field name="sfar"           string="Sfär"           optional="show"/>
+                <field name="kodord"         string="Kodord"/>
+                <field name="name"           string="Projektnamn"/>
+                <field name="ncc_ok"         string="NCC"            widget="boolean"/>
+                <field name="status_raw"     string="Status"         optional="hide"/>
+                <field name="clio_md_path"   string="CLIO.md"        optional="hide"/>
+                <field name="claude_md_path" string="CLAUDE.md"      optional="hide"/>
             </list>
         </field>
     </record>
@@ -34,9 +36,17 @@
                             <field name="kodord" string="Kodord"/>
                         </group>
                         <group>
-                            <field name="name"       string="Projektnamn"/>
-                            <field name="ncc_ok"     string="NCC"/>
-                            <field name="status_raw" string="Status"/>
+                            <field name="name"           string="Projektnamn"/>
+                            <field name="ncc_ok"         string="NCC"/>
+                            <field name="status_raw"     string="Status"/>
+                        </group>
+                    </group>
+                    <group string="Lokala sökvägar">
+                        <group>
+                            <field name="clio_md_path"   string="CLIO.md"/>
+                        </group>
+                        <group>
+                            <field name="claude_md_path" string="CLAUDE.md"/>
                         </group>
                     </group>
                 </sheet>
