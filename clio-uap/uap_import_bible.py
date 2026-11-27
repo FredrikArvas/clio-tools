@@ -9,6 +9,7 @@ Användning:
 Standardfil: bible_encounters.json (bredvid detta skript)
 Duplikatskydd: hoppar över encounter_id som redan finns i Odoo.
 """
+import re
 import sys
 import os
 import json
@@ -86,6 +87,37 @@ def lookup_country(models, uid, name):
     return hits[0]['id'] if hits else False
 
 
+def url_to_source_id(url):
+    seg = url.rstrip('/').split('/')[-1]
+    book, chapter, *_ = seg.split('.')
+    return f"BIBLE_{book}_{chapter}"
+
+
+def build_source_name(entry):
+    m = re.match(r'^((?:\d\s+)?[A-Za-z]+)\s+(\d+)', entry['source_ref'].split(';')[0].strip())
+    chapter = m.group(2) if m else '?'
+    return f"Bibeln — {entry['book']} {chapter} (NIV)"
+
+
+def ensure_source(models, uid, entry):
+    burl = entry.get('bible_url', '')
+    if not burl:
+        return None
+    sid = url_to_source_id(burl)
+    hits = models.execute_kw(DB, uid, PW, 'uap.source', 'search_read',
+        [[['source_id', '=', sid]]], {'fields': ['id'], 'limit': 1})
+    if hits:
+        return hits[0]['id']
+    return models.execute_kw(DB, uid, PW, 'uap.source', 'create', [{
+        'source_id':   sid,
+        'name':        build_source_name(entry),
+        'source_type': 'web',
+        'tier':        'tier_1',
+        'url':         burl,
+        'language':    'sv',
+    }])
+
+
 def find_existing(models, uid, encounter_id):
     hits = models.execute_kw(DB, uid, PW, 'uap.encounter', 'search_read',
         [[['encounter_id', '=', encounter_id]]],
@@ -124,7 +156,6 @@ def build_vals(entry, country_id):
         'is_case_report':        True,
         'status':                'pending',
         'research_notes':        '\n'.join(research_parts),
-        'source_url':            entry.get('bible_url', ''),
         'country_id':            country_id or False,
         'language_original':     'other',
     }
@@ -168,6 +199,10 @@ def main():
         try:
             new_id = models.execute_kw(DB, uid, PW, 'uap.encounter', 'create', [vals])
             print(f"           → ID={new_id}")
+            source_id = ensure_source(models, uid, entry)
+            if source_id:
+                models.execute_kw(DB, uid, PW, 'uap.encounter', 'write',
+                    [[new_id], {'source_ids': [(4, source_id)]}])
             created += 1
         except Exception as exc:
             print(f"           FEL: {exc}")
