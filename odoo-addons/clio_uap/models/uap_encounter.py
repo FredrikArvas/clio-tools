@@ -152,15 +152,23 @@ class UapEncounter(models.Model):
     )
     entity_type = fields.Selection(
         selection=[
-            ("Nordic",    "Nordic"),
-            ("TallGray",  "TallGray"),
-            ("ShortGray", "ShortGray"),
-            ("LongGray",  "LongGray"),
-            ("Reptilian", "Reptilian"),
-            ("Mantid",    "Mantid"),
-            ("Hybrid",    "Hybrid"),
-            ("Energy",    "Energy"),
-            ("Unknown",   "Unknown"),
+            # --- Modern UAP-taxonomi ---
+            ("Nordic",      "Nordic"),
+            ("TallGray",    "TallGray"),
+            ("ShortGray",   "ShortGray"),
+            ("LongGray",    "LongGray"),
+            ("Reptilian",   "Reptilian"),
+            ("Mantid",      "Mantid"),
+            ("Hybrid",      "Hybrid"),
+            ("Energy",      "Energy"),
+            # --- Transmorf-taxonomi: bibliska/historiska entiteter ---
+            ("Angel",       "Angel (mal'ak)"),
+            ("AngelOfLord", "Angel of the LORD (teofani)"),
+            ("Cherub",      "Cherubim"),
+            ("Seraph",      "Seraphim"),
+            ("Nephilim",    "Nephilim / Giant"),
+            # --- Obestämd ---
+            ("Unknown",     "Unknown"),
         ],
         string="Entity Type",
     )
