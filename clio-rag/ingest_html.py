@@ -15,7 +15,7 @@ Användning:
     # Indexera ALLT (ej rekommenderat):
     python3 ingest_html.py --folder /path/to/html --collection ssf_skidor_com --no-filter
 
-Kräver: qdrant-client, openai (för embeddings), python-dotenv
+Kräver: qdrant-client, ollama (för embeddings), python-dotenv
 """
 
 from __future__ import annotations
@@ -162,10 +162,8 @@ def _chunk_text(text: str, max_words: int = 500, overlap: int = 50) -> list[str]
 # ── Embeddings ────────────────────────────────────────────────────────────────
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    import openai
-    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    resp = client.embeddings.create(model=EMBEDDING_MODEL, input=texts)
-    return [d.embedding for d in resp.data]
+    from embedder import embed
+    return embed(texts)
 
 
 # ── Collection ────────────────────────────────────────────────────────────────
@@ -239,7 +237,7 @@ def simulate(folder: Path, min_words: int = 50, use_filter: bool = True) -> None
 
 def ingest_folder(folder: Path, collection: str, force: bool = False,
                   min_words: int = 50, use_filter: bool = True) -> None:
-    from config import get_qdrant_client, EMBEDDING_MODEL
+    from config import get_qdrant_client
     from qdrant_client.models import PointStruct
 
     ensure_collection(collection)
@@ -338,7 +336,6 @@ if __name__ == "__main__":
         )
     else:
         sys.path.insert(0, str(_here))
-        from config import EMBEDDING_MODEL
         ingest_folder(
             folder=Path(args.folder),
             collection=args.collection,

@@ -261,5 +261,5 @@ Den gamla 8-fas-pipelinen (`main.py`) körs fortfarande på servern och hanterar
 
 ---
 
-*Notion NCC: `research` → [NCC 2026-05-04](https://app.notion.com/p/35567666d98a81abb906fa728249c209)*
 *Plan v2: `Dropbox/projekt/Clio-projekt/Clio Resarch/PLAN_research_pipeline_v2.md`*
+*Kontext: `Dropbox/projekt/Clio-projekt/Clio Resarch/CLIO.md`*

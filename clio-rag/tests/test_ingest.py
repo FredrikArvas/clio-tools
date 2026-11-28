@@ -109,7 +109,7 @@ def test_ingest_pdf_skips_unchanged_chunks(tmp_path):
         patch("ingest.is_local_available", return_value=False),
         patch("docling.document_converter.DocumentConverter.convert", return_value=mock_result),
         patch("docling.chunking.HybridChunker.chunk", return_value=[mock_chunk]),
-        patch("ingest.OpenAI") as mock_openai,
+        patch("embedder.embed", return_value=[[0.1] * 1024]),
     ):
         from ingest import ingest_pdf
         count = ingest_pdf(pdf, force=False)
@@ -135,11 +135,6 @@ def test_ingest_pdf_reindexes_changed_chunk(tmp_path):
         None,
     )
 
-    mock_embedding = MagicMock()
-    mock_embedding.data = [MagicMock(embedding=[0.1] * 1536)]
-    mock_openai_instance = MagicMock()
-    mock_openai_instance.embeddings.create.return_value = mock_embedding
-
     mock_chunk       = MagicMock()
     mock_chunk.text  = chunk_text
     mock_chunk.meta.doc_items = []
@@ -152,7 +147,7 @@ def test_ingest_pdf_reindexes_changed_chunk(tmp_path):
         patch("ingest.is_local_available", return_value=False),
         patch("docling.document_converter.DocumentConverter.convert", return_value=mock_result),
         patch("docling.chunking.HybridChunker.chunk", return_value=[mock_chunk]),
-        patch("ingest.OpenAI", return_value=mock_openai_instance),
+        patch("embedder.embed", return_value=[[0.1] * 1024]),
     ):
         from ingest import ingest_pdf
         count = ingest_pdf(pdf, force=False)

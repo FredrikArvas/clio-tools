@@ -10,16 +10,16 @@ from __future__ import annotations
 import argparse, hashlib, uuid
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
 _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
 
+from embedder import embed
+from config import EMBEDDING_DIM as EMBED_DIM
+
 COLLECTION    = "cap_ssf_crm"
-EMBED_MODEL   = "text-embedding-3-small"
-EMBED_DIM     = 1536
 CORPUS_DIR    = _here / "corpus_crm_ssf"
 CHUNK_WORDS   = 500
 OVERLAP_WORDS = 60
@@ -142,7 +142,6 @@ def ingest_file(path: Path, force: bool = False) -> int:
 
     chunks    = chunk_text(text)
     known     = set() if force else existing_hashes(path.name)
-    oai       = OpenAI()
     qdrant    = get_client()
     new_count = 0
 
@@ -150,7 +149,7 @@ def ingest_file(path: Path, force: bool = False) -> int:
         h = sha256(chunk)
         if h in known:
             continue
-        vec = oai.embeddings.create(input=[chunk], model=EMBED_MODEL).data[0].embedding
+        vec = embed([chunk])[0]
         qdrant.upsert(
             collection_name=COLLECTION,
             points=[PointStruct(

@@ -6,7 +6,7 @@ Steg:
   2. HybridChunker delar texten i semantiska chunks (~500 ord, 20% överlapp)
   3. SHA-256 beräknas på chunktexten (source_hash)
   4. Omindexeringskontroll: skippa oförändrade chunks
-  5. OpenAI text-embedding-3-small genererar vektor per chunk
+  5. Ollama bge-m3 genererar vektor per chunk (1024 dim)
   6. Vektor + payload upsert:as i Qdrant collection clio_books
   7. Loggutskrift
 
@@ -28,14 +28,14 @@ from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
 from qdrant_client.models import Filter, FieldCondition, MatchValue, PointStruct
 
 import config
 from config import (
-    COLLECTION_NAME, EMBEDDING_MODEL, SCHEMA_VERSION,
+    COLLECTION_NAME, SCHEMA_VERSION,
     BOOK_METADATA, get_qdrant_client, is_local_available,
 )
+from embedder import embed
 from schema.core import (
     AccessOrigin, BookExt, ContentType, CopyrightStatus,
     CorePayload, FullPayload, LocationPayload, Sensitivity, StorageTier,
@@ -281,7 +281,6 @@ def ingest_pdf(
 
     # --- Qdrant ---
     qdrant = get_qdrant_client()
-    openai = OpenAI()
 
     existing_hashes = {} if force else get_existing_hashes(qdrant, source_id)
 
@@ -305,8 +304,7 @@ def ingest_pdf(
             continue  # oförändrad — skippa
 
         # Embedding
-        resp   = openai.embeddings.create(input=[text], model=EMBEDDING_MODEL)
-        vector = resp.data[0].embedding
+        vector = embed([text])[0]
 
         # Payload
         core = CorePayload(

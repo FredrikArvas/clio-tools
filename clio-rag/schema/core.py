@@ -76,7 +76,7 @@ class CorePayload:
     chunk_index:     int         = 0            # 0-baserat
     chunk_total:     int         = 1
     source_hash:     str         = ""           # SHA-256 av chunktexten
-    embedding_model: str         = "text-embedding-3-small:1536"
+    embedding_model: str         = "bge-m3:1024"
     schema_version:  int         = 1
     indexed_at:      str         = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()

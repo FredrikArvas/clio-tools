@@ -29,6 +29,7 @@ QDRANT_HOST      = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT      = int(os.getenv("QDRANT_PORT", "6333"))
 COLLECTION_NAME      = "clio_books"
 NCC_COLLECTION_NAME  = "clio_ncc"
+BIBLE_COLLECTION_NAME = "clio_bible"
 
 # Notion-sida med alla NCC:er som child-pages
 NCC_PARENT_PAGE_ID   = "33467666d98a816db2c0d30cb97206a3"  # Clio Context — Mall & Projektöversikt
@@ -36,8 +37,9 @@ NCC_PARENT_PAGE_ID   = "33467666d98a816db2c0d30cb97206a3"  # Clio Context — Ma
 # ---------------------------------------------------------------------------
 # Modeller
 # ---------------------------------------------------------------------------
-EMBEDDING_MODEL  = "text-embedding-3-small"
-EMBEDDING_DIM    = 1536
+EMBEDDING_MODEL  = "bge-m3"
+EMBEDDING_DIM    = 1024
+OLLAMA_HOST      = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 LLM_MODEL        = "claude-sonnet-4-6"
 
 # ---------------------------------------------------------------------------
@@ -138,6 +140,20 @@ def create_collection() -> None:
         print(f"[config] Skapade collection: {COLLECTION_NAME} ({EMBEDDING_DIM} dim, cosine)")
     else:
         print(f"[config] Collection finns redan: {COLLECTION_NAME}")
+
+
+def create_bible_collection() -> None:
+    """Skapar clio_bible-collection om den inte redan finns."""
+    client = get_qdrant_client()
+    existing = {c.name for c in client.get_collections().collections}
+    if BIBLE_COLLECTION_NAME not in existing:
+        client.create_collection(
+            collection_name=BIBLE_COLLECTION_NAME,
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
+        )
+        print(f"[config] Skapade collection: {BIBLE_COLLECTION_NAME} ({EMBEDDING_DIM} dim, cosine)")
+    else:
+        print(f"[config] Collection finns redan: {BIBLE_COLLECTION_NAME}")
 
 
 def create_ncc_collection() -> None:

@@ -1,13 +1,29 @@
 # clio-rag
 
-Lokalt RAG-system för böcker — subprojekt i clio-tools.  
-Ställ frågor mot PDF-böcker via kommandoraden och få svar med källhänvisning (bok + sida).
+Lokalt RAG-system för Arvas International — ställ frågor mot böcker, bibeln och dokument
+och få svar med exakta källhänvisningar.
+
+**Vektordatabas:** Qdrant på EliteDesk  
+**Embeddings:** Ollama bge-m3 (1024 dim, lokal)  
+**LLM:** Claude Sonnet
+
+---
 
 ## Krav
 
 - Python 3.11+
 - Qdrant i Docker (körs på EliteDesk): `docker run -p 6333:6333 qdrant/qdrant`
-- API-nycklar i `.env`
+- Ollama på EliteDesk med bge-m3 installerad: `ollama pull bge-m3`
+- API-nycklar i `.env` (se nedan)
+
+### Körmodell
+
+Ingest och frågor körs direkt på EliteDesk — inte lokalt på Windows.
+
+**LAN (standard):** `ssh clioadmin@192.168.1.189`  
+**Tailscale (backup):** `ssh clioadmin@100.107.127.104`
+
+På EliteDesk är Qdrant och Ollama nåbara via localhost utan tunnlar.
 
 ## Installation
 
@@ -18,65 +34,104 @@ pip install -r requirements.txt
 ## .env
 
 ```
-OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
-CORPUS_PATH=/mnt/wd4tb1/clio-rag/corpus
-LOCAL_DISK_MOUNT=/mnt/wd4tb1
+NOTION_TOKEN=secret_...
 QDRANT_HOST=localhost
 QDRANT_PORT=6333
+OLLAMA_HOST=http://localhost:11434
+CORPUS_PATH=/mnt/wd4tb1/clio-rag/corpus
+LOCAL_DISK_MOUNT=/mnt/wd4tb1
 ```
 
-## Första körning
+På Windows med SSH-tunnel: `QDRANT_HOST=localhost`, `OLLAMA_HOST=http://localhost:11434`.  
+På EliteDesk direkt: behövs inga tunnlar.
+
+---
+
+## Collections
+
+| Collection   | Innehåll                       | Skript               |
+|--------------|--------------------------------|----------------------|
+| `clio_books` | PDF-böcker och dokument        | `ingest.py`          |
+| `clio_ncc`   | Notion Context Cards           | `ingest_ncc.py`      |
+| `clio_bible` | 1917 års svenska bibeln        | `ingest_bible.py`    |
+| `clio_minne` | Personliga minnen              | `ingest_minne.py`    |
+
+---
+
+## Böcker och dokument (`clio_books`)
 
 ```bash
-# 1. Skapa Qdrant-collection
+# Skapa collection (första gången)
 python -c "from config import create_collection; create_collection()"
 
-# 2. Placera PDF-filerna i CORPUS_PATH:
-#    ovillkorlig.pdf
-#    egenanstallning.pdf
-#    mba_umbrella_companies.pdf
+# Indexera en bok
+python ingest.py --pdf /path/to/book.pdf
 
-# 3. Indexera
-python ingest.py
+# Indexera en mapp
+python ingest.py --folder /path/to/folder/
 
-# 4. Fråga
-python query.py --q "Vad säger Ulrika om ovillkorlig kärlek?"
-
-# 5. Exportera shareable index
-python export_index.py
+# Tvinga om-indexering
+python ingest.py --force
 ```
 
-## Omindexering
+---
+
+## 1917 års bibeln (`clio_bible`)
 
 ```bash
-python ingest.py --force          # tvinga om-indexering av alla böcker
-python ingest.py --pdf book.pdf   # indexera enskild bok
+# Skapa collection (första gången)
+python -c "from config import create_bible_collection; create_bible_collection()"
+
+# Ladda ner bibeltexten från getbible.net (~10 min, ~31 000 verser)
+python ingest_bible.py --fetch
+
+# Indexera i Qdrant
+python ingest_bible.py --index
+
+# Verifiera att API-anslutningen fungerar (hämtar bara 1 Mos 1)
+python ingest_bible.py --test-fetch
+
+# Visa chunks utan att indexera
+python ingest_bible.py --simulate
+
+# Lista alla 66 böcker
+python ingest_bible.py --list-books
 ```
+
+Källfilen sparas i `corpus/bibeln_1917.json` och behöver bara laddas ner en gång.
+
+---
+
+## Frågor
+
+```bash
+# Fråga mot böcker
+python query.py --q "Vad säger Ulrika om ovillkorlig kärlek?"
+
+# Fråga mot bibeln
+python query.py --q "Vad händer när Elia möter ängeln?" --collection clio_bible
+```
+
+---
 
 ## Mappstruktur
 
 ```
 clio-rag/
-  config.py          Inställningar, Qdrant-anslutning
-  ingest.py          Ingestion-pipeline
-  query.py           CLI-frågor
-  export_index.py    Exportera shareable JSON-index
+  config.py           Inställningar, Qdrant-anslutning, collection-definitioner
+  ingest.py           PDF-böcker och dokument
+  ingest_bible.py     1917 års svenska bibeln
+  ingest_ncc.py       Notion Context Cards
+  ingest_html.py      HTML-sidor
+  ingest_minne.py     Personliga minnen
+  query.py            CLI-frågor mot alla collections
+  export_index.py     Exportera shareable JSON-index
   requirements.txt
+  corpus/             Källfiler (PDF, bibeln_1917.json m.m.)
   schema/
-    core.py          Dataklasser: CorePayload, LocationPayload, BookExt, FullPayload
+    core.py           Dataklasser: CorePayload, LocationPayload, BookExt, FullPayload
   tests/
     test_ingest.py
     test_query.py
 ```
-
-## Collections (ADD v1.0 §3.3)
-
-| Collection     | Innehåll          | Status      |
-|----------------|-------------------|-------------|
-| clio_books     | Böcker/dokument   | MVP         |
-| clio_ncc       | Notion Context Cards | Sprint 2 |
-| clio_audio     | Whisper-transkript | Sprint 3   |
-| clio_images    | Fotografier/grafik | Sprint 4   |
-| clio_finance   | Fakturor/rapporter | Sprint 5   |
-| clio_email     | Mailkorrespondens  | Sprint 6   |

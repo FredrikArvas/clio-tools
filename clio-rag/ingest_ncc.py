@@ -6,7 +6,7 @@ Flöde:
   2. Per sida: hämta block-innehåll och konvertera till text
   3. Chunka vid H1/H2-rubriker (~500 ord max per chunk)
   4. Re-indexeringskontroll: hoppa om last_edited_time <= indexed_at
-  5. Embed med text-embedding-3-small
+  5. Embed med Ollama bge-m3 (1024 dim)
   6. Upsert i Qdrant collection clio_ncc
 
 Körning:
@@ -28,15 +28,15 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from notion_client import Client as NotionClient
-from openai import OpenAI
 from qdrant_client.models import Filter, FieldCondition, MatchValue, PointStruct
 
 import config
 from config import (
-    NCC_COLLECTION_NAME, EMBEDDING_MODEL, SCHEMA_VERSION,
+    NCC_COLLECTION_NAME, SCHEMA_VERSION,
     NCC_PARENT_PAGE_ID, NOTION_TOKEN,
     get_qdrant_client, create_ncc_collection,
 )
+from embedder import embed
 from schema.core import (
     ContentType, CorePayload, FullPayload, LocationPayload,
     NccExt, Sensitivity, StorageTier,
@@ -298,7 +298,6 @@ def source_id_for_page(page_id: str) -> str:
 def ingest_ncc_page(
     page: dict,
     qdrant,
-    openai_client,
     force: bool = False,
     dry_run: bool = False,
 ) -> int:
@@ -351,8 +350,7 @@ def ingest_ncc_page(
             continue
 
         # Embedding
-        resp   = openai_client.embeddings.create(input=[chunk_text], model=EMBEDDING_MODEL)
-        vector = resp.data[0].embedding
+        vector = embed([chunk_text])[0]
 
         # Payload
         core = CorePayload(
@@ -414,11 +412,10 @@ def ingest_all(parent_page_id: str, force: bool = False, dry_run: bool = False) 
         create_ncc_collection()
 
     qdrant = get_qdrant_client() if not dry_run else None
-    openai = OpenAI()              if not dry_run else None
 
     total_new = 0
     for page in pages:
-        total_new += ingest_ncc_page(page, qdrant, openai, force=force, dry_run=dry_run)
+        total_new += ingest_ncc_page(page, qdrant, force=force, dry_run=dry_run)
 
     label = "chunk(s) skulle indexerats" if dry_run else "chunks indexerade totalt"
     print(f"\n[ncc] Klart — {total_new} {label}.")
@@ -450,10 +447,9 @@ def main() -> None:
             "url":              f"https://www.notion.so/{args.page.replace('-', '')}",
         }
         qdrant = get_qdrant_client() if not args.dry_run else None
-        openai = OpenAI()              if not args.dry_run else None
         if not args.dry_run:
             create_ncc_collection()
-        ingest_ncc_page(page, qdrant, openai, force=args.force, dry_run=args.dry_run)
+        ingest_ncc_page(page, qdrant, force=args.force, dry_run=args.dry_run)
     else:
         ingest_all(NCC_PARENT_PAGE_ID, force=args.force, dry_run=args.dry_run)
 

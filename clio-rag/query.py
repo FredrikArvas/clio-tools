@@ -2,7 +2,7 @@
 Kommandoradsfrågor mot clio-rag (ADD v1.0 §7).
 
 Flöde:
-  1. Frågetexten embedas med text-embedding-3-small
+  1. Frågetexten embedas med Ollama bge-m3 (1024 dim)
   2. Qdrant returnerar top-5 chunks från vald collection
   3. Chunks + fråga (+ valfri konversationshistorik + bilagor) skickas till Claude Sonnet
   4. Svar skrivs till terminal med källhänvisning
@@ -23,15 +23,15 @@ import sys
 
 import anthropic
 from dotenv import load_dotenv
-from openai import OpenAI
 from pathlib import Path
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 import config
 from config import (
-    COLLECTION_NAME, NCC_COLLECTION_NAME, EMBEDDING_MODEL, LLM_MODEL,
+    COLLECTION_NAME, NCC_COLLECTION_NAME, LLM_MODEL,
     get_qdrant_client, is_local_available,
 )
+from embedder import embed
 
 _here = Path(__file__).parent
 load_dotenv(_here / ".env", override=True) or load_dotenv(_here.parent / ".env", override=True)
@@ -74,9 +74,7 @@ Svara på svenska om inte frågan ställs på annat språk.
 # ---------------------------------------------------------------------------
 
 def embed_query(text: str) -> list[float]:
-    client = OpenAI()
-    resp = client.embeddings.create(input=[text], model=EMBEDDING_MODEL)
-    return resp.data[0].embedding
+    return embed([text])[0]
 
 
 def search_qdrant(

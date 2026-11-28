@@ -118,13 +118,8 @@ def test_ask_claude_passes_question_in_message():
 def test_embed_query_returns_vector():
     from query import embed_query
 
-    mock_resp = MagicMock()
-    mock_resp.data = [MagicMock(embedding=[0.5] * 1536)]
-    mock_client = MagicMock()
-    mock_client.embeddings.create.return_value = mock_resp
-
-    with patch("query.OpenAI", return_value=mock_client):
+    with patch("embedder.embed", return_value=[[0.5] * 1024]):
         vector = embed_query("Testfråga")
 
-    assert len(vector) == 1536
+    assert len(vector) == 1024
     assert vector[0] == 0.5
