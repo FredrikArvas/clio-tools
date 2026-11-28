@@ -441,6 +441,7 @@ def _route_mail_update(data: dict) -> dict:
 # Etiketter för kända Qdrant-collections
 _COLLECTION_LABELS: dict[str, str] = {
     "clio_books":  "Böcker",
+    "clio_bible":  "Bibeln 1917",
     "clio_ncc":    "Context Cards (NCC)",
     "cap_ssf":     "SSF — Protokoll & Årsred.",
     "cap_ssf_pmo": "SSF — PMO",
