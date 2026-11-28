@@ -35,7 +35,7 @@ from qdrant_client.models import Filter, FieldCondition, MatchValue, PointStruct
 
 import config
 from config import (
-    BIBLE_COLLECTION_NAME, SCHEMA_VERSION,
+    BIBLE_COLLECTION_NAME, SCHEMA_VERSION, EMBEDDING_MODEL,
     get_qdrant_client, create_bible_collection,
 )
 from embedder import embed

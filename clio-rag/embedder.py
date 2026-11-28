@@ -24,15 +24,10 @@ def embed(texts: list[str]) -> list[list[float]]:
     from config import EMBEDDING_MODEL, OLLAMA_HOST
 
     client = ollama.Client(host=OLLAMA_HOST)
-    all_vectors: list[list[float]] = []
-
-    for text in texts:
-        try:
-            resp = client.embeddings(model=EMBEDDING_MODEL, prompt=text)
-            all_vectors.append(resp["embedding"])
-        except Exception as e:
-            raise RuntimeError(
-                f"Ollama embedding misslyckades (host={OLLAMA_HOST}, modell={EMBEDDING_MODEL}): {e}"
-            ) from e
-
-    return all_vectors
+    try:
+        resp = client.embed(model=EMBEDDING_MODEL, input=texts)
+        return resp["embeddings"]
+    except Exception as e:
+        raise RuntimeError(
+            f"Ollama embedding misslyckades (host={OLLAMA_HOST}, modell={EMBEDDING_MODEL}): {e}"
+        ) from e
