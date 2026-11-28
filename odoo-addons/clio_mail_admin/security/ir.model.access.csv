@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_clio_mail_admin,clio.mail.admin,model_clio_mail_admin,base.group_system,1,1,1,1
-access_clio_waiting_line,clio.waiting.line,model_clio_waiting_line,base.group_system,1,1,1,1

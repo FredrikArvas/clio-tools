@@ -7,7 +7,7 @@ Kör på servern:
 import re
 
 # --- 1. Modell ---
-MODEL_PATH = '/home/clioadmin/clio-tools/odoo-addons/clio_uap/models/uap_encounter.py'
+MODEL_PATH = '/home/clioadmin/clio-odoo-addons/clio_uap/models/uap_encounter.py'
 with open(MODEL_PATH, encoding='utf-8') as f:
     src = f.read()
 
@@ -43,7 +43,7 @@ with open(MODEL_PATH, 'w', encoding='utf-8') as f:
 print("uap_encounter.py: source_ref tillagd OK")
 
 # --- 2. Vy: lägg till source_ref i Technical-fliken och i sökvy ---
-VIEW_PATH = '/home/clioadmin/clio-tools/odoo-addons/clio_uap/views/uap_encounter_views.xml'
+VIEW_PATH = '/home/clioadmin/clio-odoo-addons/clio_uap/views/uap_encounter_views.xml'
 with open(VIEW_PATH, encoding='utf-8') as f:
     vsrc = f.read()
 

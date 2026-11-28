@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # lint_odoo.sh — Kör pylint-odoo inuti Odoo 19-containern
 # Användning: ./scripts/lint_odoo.sh [modul_eller_fil...]
-# Utan argument: kontrollerar alla moduler i odoo-addons/
+# Utan argument: kontrollerar alla moduler i /mnt/addons/arvas (clio-odoo-addons på servern)
 
 set -e
 

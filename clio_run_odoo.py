@@ -35,7 +35,7 @@ _SETUP_TEXT = """
   ─────────────────────────────────────────────────────
 
   1. Kopiera addon till servern:
-     scp -r odoo-addons/clio_discuss clioadmin@<server>:/opt/odoo/extra-addons/
+     git -C ~/clio-odoo-addons pull  # Modulerna finns i clio-odoo-addons
 
   2. Installera i Odoo (DB: aiab):
      docker exec -it odoo-odoo-1 odoo -d aiab -i clio_discuss --stop-after-init
