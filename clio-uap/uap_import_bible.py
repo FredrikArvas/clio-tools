@@ -55,16 +55,25 @@ ISRAEL_COUNTRY_NAME = 'Israel'
 
 # Mapp: JSON-kategori → encounter_class (1–4)
 CATEGORY_TO_CLASS = {
-    'ANGEL_APPEARANCE':  '3',
-    'THEOPHANY':         '3',
-    'ASCENSION':         '4',
-    'CHARIOT_VISION':    '2',
-    'HEAVENLY_VOICE':    '1',
-    'PILLAR_FIRE_CLOUD': '1',
-    'POSSESSION':        '3',
-    'MIRACLE_NATURE':    '1',
-    'MIRACLE_HEALING':   '1',
-    'RESURRECTION':      '2',
+    'ANGEL_APPEARANCE':     '3',
+    'THEOPHANY':            '3',
+    'ASCENSION':            '4',
+    'CHARIOT_VISION':       '2',
+    'HEAVENLY_VOICE':       '1',
+    'PILLAR_FIRE_CLOUD':    '1',
+    'POSSESSION':           '3',
+    'MIRACLE_NATURE':       '1',
+    'MIRACLE_HEALING':      '1',
+    'RESURRECTION':         '2',
+    # v2 expansion categories
+    'HEALING':              '2',
+    'EXORCISM':             '3',
+    'NATURE_MIRACLE':       '1',
+    'DIVINE_JUDGMENT':      '2',
+    'MIRACULOUS_PROVISION': '1',
+    'SUPERNATURAL_SIGN':    '2',
+    'TELEPORTATION':        '4',
+    'TRANSFIGURATION':      '3',
 }
 
 # Mapp: hynek_preliminary → encounter_class om CATEGORY inte ger nog
